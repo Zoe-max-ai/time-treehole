@@ -1110,21 +1110,18 @@ async function getCardsByGroup(gid) {
         }
         
         // 处理普通分组（包括 default）—— 同时匹配 groupId 和 groupName
-        const result = cards
-            .filter(c => {
-                if (!c || !c.content || c.content === '__GROUP_PLACEHOLDER__') return false;
-                const cardGid = c.groupId || 'default';
-                const cardGname = c.groupName || '';
-                return cardGid === gid || cardGname === gid;
-            })
-            .map(c => ({ id: c.id, content: c.content, isSystem: false, disabled: dids.has(c.id), groupId: c.groupId || 'default' }));
-        
-        return result;
-    } catch (e) {
-        console.error('getCardsByGroup 出错:', e);
-        return [];
-    }
-}
+const result = cards
+    .filter(c => {
+        if (!c || !c.content || c.content === '__GROUP_PLACEHOLDER__') return false;
+        const cardGid = c.groupId || 'default';
+        const cardGname = c.groupName || '';
+        return cardGid === gid || cardGname === gid;
+    })
+    .map(c => {
+        // 如果 c.id 不存在，用 groupId + content 生成一个唯一 ID
+        const id = c.id || c._id || (c.groupId + '_' + c.content).replace(/\s/g, '_');
+        return { id: id, content: c.content, isSystem: false, disabled: dids.has(id), groupId: c.groupId || 'default' };
+    });
 
 async function renderWordCardLibrary() {
     document.getElementById('wordcardContent').innerHTML = 
