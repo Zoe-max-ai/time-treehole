@@ -1109,9 +1109,14 @@ async function getCardsByGroup(gid) {
             return [...sysCards, ...userCards];
         }
         
-        // 处理普通分组（包括 default）
+        // 处理普通分组（包括 default）—— 同时匹配 groupId 和 groupName
         const result = cards
-            .filter(c => c && (c.groupId || 'default') === gid && c.content && c.content !== '__GROUP_PLACEHOLDER__')
+            .filter(c => {
+                if (!c || !c.content || c.content === '__GROUP_PLACEHOLDER__') return false;
+                const cardGid = c.groupId || 'default';
+                const cardGname = c.groupName || '';
+                return cardGid === gid || cardGname === gid;
+            })
             .map(c => ({ id: c.id, content: c.content, isSystem: false, disabled: dids.has(c.id), groupId: c.groupId || 'default' }));
         
         return result;
