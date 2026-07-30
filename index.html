@@ -1992,6 +1992,31 @@ if (ball) {
     updateHome();
     startAutoSendIfNeeded();
     console.log('✅ V16 已启动（localStorage模式）');
+    // ===== 修复分组数据格式 =====
+    const groupsData = localStorage.getItem('wordcardGroups');
+    if (groupsData) {
+        try {
+            const parsed = JSON.parse(groupsData);
+            // 如果分组数据不是数组，强制重建
+            if (!Array.isArray(parsed)) {
+                const allCards = JSON.parse(localStorage.getItem('wordcards') || '[]');
+                const groupsMap = {};
+                allCards.forEach(c => {
+                    const gid = c.groupId || 'default';
+                    const gname = c.groupName || '默认分组';
+                    if (!groupsMap[gid]) {
+                        groupsMap[gid] = { id: gid, name: gname, count: 0 };
+                    }
+                    groupsMap[gid].count++;
+                });
+                const groupsArray = Object.values(groupsMap);
+                localStorage.setItem('wordcardGroups', JSON.stringify(groupsArray));
+                console.log('✅ 分组数据已重建，共', groupsArray.length, '个分组');
+            }
+        } catch(e) {
+            console.log('分组数据格式错误，已跳过');
+        }
+    }
 }
 
 init();
