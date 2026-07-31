@@ -376,7 +376,7 @@ function scrollBottom() {
 function applyBubbleStyle() {
     const preset = BUBBLE_PRESETS.find(p => p.id === S.bubbleStyle) || BUBBLE_PRESETS[0];
     
-    // 更新 CSS 变量（用于未来新消息）
+    // 更新 CSS 变量
     document.documentElement.style.setProperty('--bubble-my-bg', preset.myBg);
     document.documentElement.style.setProperty('--bubble-my-text', preset.myText);
     document.documentElement.style.setProperty('--bubble-other-bg', preset.otherBg);
@@ -429,11 +429,6 @@ async function loadMessages() {
     }
     msgs.forEach(m => renderMsg(m));
     scrollBottom();
-
-// 加载消息后应用气泡样式
-    setTimeout(function() {
-        applyBubbleStyle();
-    }, 100);
 }
 
 function renderMsg(m) {
@@ -459,6 +454,15 @@ function renderMsg(m) {
 
     const b = document.createElement('div');
     b.className = 'bubble';
+
+const preset = BUBBLE_PRESETS.find(p => p.id === S.bubbleStyle) || BUBBLE_PRESETS[0];
+    if (m.sender === 'me') {
+        b.style.background = preset.myBg;
+        b.style.color = preset.myText;
+    } else {
+        b.style.background = preset.otherBg;
+        b.style.color = preset.otherText;
+    }
 
     if (m.type === 'pat') {
         b.classList.add('pat-bubble');
@@ -558,6 +562,18 @@ async function autoReply() {
         if (ti) ti.remove();
         for (let i = 0; i < cnt; i++) {
             let c = Math.random() < 0.5 ? await smartComposeReply() : await getRandomReply();
+// ===== 引用回复（10% 概率随机引用前面某一条用户消息） =====
+if (S.chatSettings.quoteReply && Math.random() < 0.1) {
+    const allMessages = await dbGetAll('messages');
+    const userMessages = allMessages.filter(m => m.sender === 'me');
+    if (userMessages.length > 0) {
+        const randomIndex = Math.floor(Math.random() * userMessages.length);
+        const randomMsg = userMessages[randomIndex];
+        if (randomMsg && randomMsg.content) {
+            c = '“' + randomMsg.content + '”…… ' + c;
+        }
+    }
+}
             const m = { sender: 'other', content: c, type: 'text', timestamp: Date.now() };
             const id = await dbPut('messages', m);
             m.id = id;
@@ -574,7 +590,7 @@ async function autoReply() {
                     scrollBottom();
                 }
             }
-            if (Math.random() < 0.08 && patOptions.length > 0) {
+            if (Math.random() < 0.05 && patOptions.length > 0) {
                 const pat = patOptions[Math.floor(Math.random() * patOptions.length)];
                 const patMsg = { sender: 'other', content: pat, type: 'pat', timestamp: Date.now() };
                 const patId = await dbPut('messages', patMsg);
@@ -583,7 +599,7 @@ async function autoReply() {
                 scrollBottom();
                 triggerPat(S.contactName, pat);
             }
-            if (cs.simCall && Math.random() < 0.05 && callState === 'idle') {
+            if (cs.simCall && Math.random() < 0.01 && callState === 'idle') {
                 setTimeout(function() { startCallFromQinChe(); }, 2000);
             }
             if (i < cnt - 1) await new Promise(r => setTimeout(r, 800 + Math.random() * 3000));
@@ -1078,43 +1094,47 @@ async function getAllGroups() {
     const disabledGroups = JSON.parse(localStorage.getItem('disabledGroups') || '[]');
     const dgids = new Set(disabledGroups.map(d => d.groupId));
     
-    const groupsMap = new Map();
-    
-    // 添加系统分组
+    const groups = [];
     SYSTEM_GROUPS.forEach(g => {
-        if (!groupsMap.has(g.id)) {
-            groupsMap.set(g.id, {
-                id: g.id,
-                name: g.name,
-                isSystem: true,
-                disabled: dgids.has(g.id),
-                cardCount: 0
-            });
-        }
+        groups.push({
+            id: g.id,
+            name: g.name,
+            isSystem: true,
+            disabled: dgids.has(g.id),
+            cardCount: g.words.length
+        });
     });
     
-    // 统计字卡数量
+    const userGroupMap = {};
+    cards.forEach(c => {
+        const gid = c.groupId || 'default';
+        if (gid.startsWith('sys_')) return;
+        if (!userGroupMap[gid]) {
+            userGroupMap[gid] = { name: c.groupName || '默认分组', count: 0 };
+        }
+    });
     cards.forEach(c => {
         if (c.content === '__GROUP_PLACEHOLDER__') return;
         const gid = c.groupId || 'default';
-        if (groupsMap.has(gid)) {
-            const g = groupsMap.get(gid);
-            g.cardCount = (g.cardCount || 0) + 1;
+        if (gid.startsWith('sys_')) {
+            const g = groups.find(x => x.id === gid);
+            if (g) g.cardCount = (g.cardCount || 0) + 1;
         } else {
-            const gname = c.groupName || '默认分组';
-            groupsMap.set(gid, {
-                id: gid,
-                name: gname,
-                isSystem: false,
-                disabled: dgids.has(gid),
-                cardCount: 1
-            });
+            if (userGroupMap[gid]) userGroupMap[gid].count++;
+            else userGroupMap[gid] = { name: '默认分组', count: 1 };
         }
     });
-    
-    // 确保 default 分组存在
-    if (!groupsMap.has('default')) {
-        groupsMap.set('default', {
+    Object.entries(userGroupMap).forEach(([gid, info]) => {
+        groups.push({
+            id: gid,
+            name: info.name,
+            isSystem: false,
+            disabled: dgids.has(gid),
+            cardCount: info.count
+        });
+    });
+    if (!groups.find(g => g.id === 'default')) {
+        groups.push({
             id: 'default',
             name: '默认分组',
             isSystem: false,
@@ -1122,8 +1142,7 @@ async function getAllGroups() {
             cardCount: 0
         });
     }
-    
-    return Array.from(groupsMap.values());
+    return groups;
 }
 
 async function getCardsByGroup(gid) {
@@ -1139,19 +1158,29 @@ async function getCardsByGroup(gid) {
         const disabledCards = JSON.parse(localStorage.getItem('disabledCards') || '[]');
         const dids = new Set(disabledCards.map(d => d.cardId));
         
-// 处理系统分组（只返回预设词，不混入用户字卡）
+       // 处理系统分组（返回预设词 + 用户添加的字卡，去重）
 if (gid && gid.startsWith('sys_')) {
     const sg = SYSTEM_GROUPS.find(g => g.id === gid);
-    if (sg) {
-        return sg.words.map((w, i) => ({
-            id: 'sys_' + gid + '_' + i,
-            content: w,
-            isSystem: true,
-            disabled: dids.has('sys_' + gid + '_' + i),
-            groupId: gid
-        }));
-    }
-    return [];
+    const userCards = cards
+        .filter(c => c && (c.groupId || 'default') === gid && c.content && c.content !== '__GROUP_PLACEHOLDER__')
+        .map(c => ({ id: c.id, content: c.content, isSystem: false, disabled: dids.has(c.id), groupId: gid }));
+    const sysCards = sg ? sg.words.map((w, i) => ({
+        id: 'sys_' + gid + '_' + i,
+        content: w,
+        isSystem: true,
+        disabled: dids.has('sys_' + gid + '_' + i),
+        groupId: gid
+    })) : [];
+    
+    // 合并后按 content 去重
+    const combined = [...sysCards, ...userCards];
+    const seen = new Set();
+    const unique = combined.filter(c => {
+        if (seen.has(c.content)) return false;
+        seen.add(c.content);
+        return true;
+    });
+    return unique;
 }
         
        // 处理普通分组（包括 default）—— 同时匹配 groupId 和 groupName
@@ -2131,11 +2160,10 @@ async function init() {
     updateHome();
     startAutoSendIfNeeded();
     console.log('✅ V16 已启动（localStorage模式）');
-    // ===== 延迟恢复气泡样式 =====
+    // ===== 恢复气泡样式 =====
     setTimeout(function() {
         applyBubbleStyle();
-        console.log('✅ 延迟恢复气泡样式:', S.bubbleStyle);
-    }, 500);
+    }, 300);
 
     // ===== 修复分组数据格式 =====
     const groupsData = localStorage.getItem('wordcardGroups');
