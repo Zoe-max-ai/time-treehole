@@ -375,10 +375,25 @@ function scrollBottom() {
 
 function applyBubbleStyle() {
     const preset = BUBBLE_PRESETS.find(p => p.id === S.bubbleStyle) || BUBBLE_PRESETS[0];
+    
+    // 更新 CSS 变量（用于未来新消息）
     document.documentElement.style.setProperty('--bubble-my-bg', preset.myBg);
     document.documentElement.style.setProperty('--bubble-my-text', preset.myText);
     document.documentElement.style.setProperty('--bubble-other-bg', preset.otherBg);
     document.documentElement.style.setProperty('--bubble-other-text', preset.otherText);
+    
+    // 直接修改已有消息的气泡样式
+    const chatArea = document.getElementById('chatArea');
+    if (chatArea) {
+        chatArea.querySelectorAll('.message-wrapper.right .bubble').forEach(el => {
+            el.style.background = preset.myBg;
+            el.style.color = preset.myText;
+        });
+        chatArea.querySelectorAll('.message-wrapper.left .bubble').forEach(el => {
+            el.style.background = preset.otherBg;
+            el.style.color = preset.otherText;
+        });
+    }
 }
 
 function updateHome() {
@@ -414,6 +429,11 @@ async function loadMessages() {
     }
     msgs.forEach(m => renderMsg(m));
     scrollBottom();
+
+// 加载消息后应用气泡样式
+    setTimeout(function() {
+        applyBubbleStyle();
+    }, 100);
 }
 
 function renderMsg(m) {
@@ -463,6 +483,7 @@ function renderMsg(m) {
     w.appendChild(b);
     w.appendChild(t);
     ca.appendChild(w);
+scrollBottom(); 
 }
 
 async function sendMessage() {
@@ -481,6 +502,7 @@ async function sendMessage() {
         const id = await dbPut('messages', msg);
         msg.id = id;
         renderMsg(msg);
+        scrollBottom();  // 👈 加这一行
         input.value = '';
         document.getElementById('sendBtn').disabled = true;
         autoReply();
@@ -540,6 +562,7 @@ async function autoReply() {
             const id = await dbPut('messages', m);
             m.id = id;
             renderMsg(m);
+            scrollBottom();
             if (cs.emojiMix && Math.random() < 0.15) {
                 const emojis = await dbGetAll('emojis');
                 if (emojis.length > 0) {
@@ -548,6 +571,7 @@ async function autoReply() {
                     const imgId = await dbPut('messages', imgMsg);
                     imgMsg.id = imgId;
                     renderMsg(imgMsg);
+                    scrollBottom();
                 }
             }
             if (Math.random() < 0.08 && patOptions.length > 0) {
@@ -556,6 +580,7 @@ async function autoReply() {
                 const patId = await dbPut('messages', patMsg);
                 patMsg.id = patId;
                 renderMsg(patMsg);
+                scrollBottom();
                 triggerPat(S.contactName, pat);
             }
             if (cs.simCall && Math.random() < 0.05 && callState === 'idle') {
@@ -567,10 +592,28 @@ async function autoReply() {
 }
 
 async function getRandomReply() {
+    // 读取所有字卡
     const cards = await dbGetAll('wordcards');
-    const valid = cards.filter(c => c.content && c.content !== '__GROUP_PLACEHOLDER__' && c.content.length > 1);
-    if (valid.length > 0) return valid[Math.floor(Math.random() * valid.length)].content;
-    return ['嗯嗯', '好的呀', '哈哈', '知道了', '❤️', '想你了'][Math.floor(Math.random() * 6)];
+    // 读取禁用的字卡列表
+    const disabledCards = JSON.parse(localStorage.getItem('disabledCards') || '[]');
+    const disabledIds = new Set(disabledCards.map(d => String(d.cardId)));
+
+    // 过滤：排除被禁用的字卡
+    const valid = cards.filter(c => {
+        if (!c || !c.content) return false;
+        if (c.content === '__GROUP_PLACEHOLDER__') return false;
+        if (c.content.length <= 1) return false;
+        // 检查是否被禁用
+        const idStr = String(c.id);
+        return !disabledIds.has(idStr);
+    });
+
+    if (valid.length > 0) {
+        return valid[Math.floor(Math.random() * valid.length)].content;
+    }
+    // 如果没有可用字卡，返回默认回复
+    const defaults = ['嗯嗯', '好的呀', '哈哈', '知道了', '❤️', '想你了'];
+    return defaults[Math.floor(Math.random() * defaults.length)];
 }
 
 async function addSysMsg(c) {
@@ -667,11 +710,12 @@ function loadPatPanel() {
     l.appendChild(row);
 }
 
-function addPatChat() {
+function addPatChat() {  // 改这里
     const v = document.getElementById('newPatChat').value.trim();
     if (!v) return;
     if (patOptions.includes(v)) { showToast('已存在'); return; }
     patOptions.push(v);
+    localStorage.setItem('patOptions', JSON.stringify(patOptions));
     loadPatPanel();
 }
 
@@ -972,9 +1016,9 @@ function addPat() {
     if (!v) return;
     if (patOptions.includes(v)) { showToast('已存在'); return; }
     patOptions.push(v);
+    localStorage.setItem('patOptions', JSON.stringify(patOptions));  // 👈 加上这行
     renderOurUniverse();
 }
-
 function delPat(i) {
     patOptions.splice(i, 1);
     renderOurUniverse();
@@ -991,8 +1035,13 @@ function editNick(type) {
     const cur = type === 'me' ? S.myName : S.contactName;
     const n = prompt('输入昵称：', cur);
     if (n && n.trim()) {
-        if (type === 'me') S.myName = n.trim();
-        else S.contactName = n.trim();
+        if (type === 'me') {
+            S.myName = n.trim();
+            localStorage.setItem('myName', S.myName);
+        } else {
+            S.contactName = n.trim();
+            localStorage.setItem('contactName', S.contactName);
+        }
         renderOurUniverse();
         updateHome();
     }
@@ -1029,47 +1078,43 @@ async function getAllGroups() {
     const disabledGroups = JSON.parse(localStorage.getItem('disabledGroups') || '[]');
     const dgids = new Set(disabledGroups.map(d => d.groupId));
     
-    const groups = [];
-    SYSTEM_GROUPS.forEach(g => {
-        groups.push({
-            id: g.id,
-            name: g.name,
-            isSystem: true,
-            disabled: dgids.has(g.id),
-            cardCount: g.words.length
-        });
-    });
+    const groupsMap = new Map();
     
-    const userGroupMap = {};
-    cards.forEach(c => {
-        const gid = c.groupId || 'default';
-        if (gid.startsWith('sys_')) return;
-        if (!userGroupMap[gid]) {
-            userGroupMap[gid] = { name: c.groupName || '默认分组', count: 0 };
+    // 添加系统分组
+    SYSTEM_GROUPS.forEach(g => {
+        if (!groupsMap.has(g.id)) {
+            groupsMap.set(g.id, {
+                id: g.id,
+                name: g.name,
+                isSystem: true,
+                disabled: dgids.has(g.id),
+                cardCount: 0
+            });
         }
     });
+    
+    // 统计字卡数量
     cards.forEach(c => {
         if (c.content === '__GROUP_PLACEHOLDER__') return;
         const gid = c.groupId || 'default';
-        if (gid.startsWith('sys_')) {
-            const g = groups.find(x => x.id === gid);
-            if (g) g.cardCount = (g.cardCount || 0) + 1;
+        if (groupsMap.has(gid)) {
+            const g = groupsMap.get(gid);
+            g.cardCount = (g.cardCount || 0) + 1;
         } else {
-            if (userGroupMap[gid]) userGroupMap[gid].count++;
-            else userGroupMap[gid] = { name: '默认分组', count: 1 };
+            const gname = c.groupName || '默认分组';
+            groupsMap.set(gid, {
+                id: gid,
+                name: gname,
+                isSystem: false,
+                disabled: dgids.has(gid),
+                cardCount: 1
+            });
         }
     });
-    Object.entries(userGroupMap).forEach(([gid, info]) => {
-        groups.push({
-            id: gid,
-            name: info.name,
-            isSystem: false,
-            disabled: dgids.has(gid),
-            cardCount: info.count
-        });
-    });
-    if (!groups.find(g => g.id === 'default')) {
-        groups.push({
+    
+    // 确保 default 分组存在
+    if (!groupsMap.has('default')) {
+        groupsMap.set('default', {
             id: 'default',
             name: '默认分组',
             isSystem: false,
@@ -1077,7 +1122,8 @@ async function getAllGroups() {
             cardCount: 0
         });
     }
-    return groups;
+    
+    return Array.from(groupsMap.values());
 }
 
 async function getCardsByGroup(gid) {
@@ -1093,21 +1139,20 @@ async function getCardsByGroup(gid) {
         const disabledCards = JSON.parse(localStorage.getItem('disabledCards') || '[]');
         const dids = new Set(disabledCards.map(d => d.cardId));
         
-        // 处理系统分组
-        if (gid && gid.startsWith('sys_')) {
-            const sg = SYSTEM_GROUPS.find(g => g.id === gid);
-            const userCards = cards
-                .filter(c => c && (c.groupId || 'default') === gid && c.content && c.content !== '__GROUP_PLACEHOLDER__')
-                .map(c => ({ id: c.id, content: c.content, isSystem: false, disabled: dids.has(c.id), groupId: gid }));
-            const sysCards = sg ? sg.words.map((w, i) => ({
-                id: 'sys_' + gid + '_' + i,
-                content: w,
-                isSystem: true,
-                disabled: dids.has('sys_' + gid + '_' + i),
-                groupId: gid
-            })) : [];
-            return [...sysCards, ...userCards];
-        }
+// 处理系统分组（只返回预设词，不混入用户字卡）
+if (gid && gid.startsWith('sys_')) {
+    const sg = SYSTEM_GROUPS.find(g => g.id === gid);
+    if (sg) {
+        return sg.words.map((w, i) => ({
+            id: 'sys_' + gid + '_' + i,
+            content: w,
+            isSystem: true,
+            disabled: dids.has('sys_' + gid + '_' + i),
+            groupId: gid
+        }));
+    }
+    return [];
+}
         
        // 处理普通分组（包括 default）—— 同时匹配 groupId 和 groupName
         const result = cards
@@ -1883,130 +1928,220 @@ async function init() {
         showToast('❌ 存储不可用，请检查浏览器设置');
         return;
     }
-    
-   // 加载设置（使用 localStorage）
-const savedSettings = localStorage.getItem('settings');
-if (savedSettings) {
-    try {
-        const allS = JSON.parse(savedSettings);
-        allS.forEach(x => {
-            if (x.key === 'chatSettings') {
-                try {
-                    S.chatSettings = JSON.parse(x.value);
-                    console.log('✅ 加载 chatSettings:', S.chatSettings);
-                } catch(e) {
-                    console.error('解析 chatSettings 失败:', e);
+
+    // ===== 加载设置（使用 localStorage） =====
+    const savedSettings = localStorage.getItem('settings');
+    if (savedSettings) {
+        try {
+            const allS = JSON.parse(savedSettings);
+            allS.forEach(x => {
+                if (x.key === 'chatSettings') {
+                    try {
+                        S.chatSettings = JSON.parse(x.value);
+                        console.log('✅ 加载 chatSettings:', S.chatSettings);
+                    } catch(e) {
+                        console.error('解析 chatSettings 失败:', e);
+                    }
+                } else if (x.key in S) {
+                    S[x.key] = x.value;
                 }
-            } else if (x.key in S) {
-                S[x.key] = x.value;
-            }
-        });
-    } catch(e) {
-        console.error('加载设置失败:', e);
+            });
+        } catch(e) {
+            console.error('加载设置失败:', e);
+        }
+    } else {
+        console.log('⚠️ 没有找到保存的设置');
     }
-} else {
-    console.log('⚠️ 没有找到保存的设置');
-}
-// 确保 chatSettings 有默认值
-if (!S.chatSettings || typeof S.chatSettings !== 'object') {
-    S.chatSettings = {
-        quoteReply: true,
-        readReceipt: 'text',
-        readNotReply: false,
-        typing: true,
-        autoSend: false,
-        autoSendInterval: '10',
-        emojiMix: true,
-        simCall: true
-    };
-}
+
+    // 确保 chatSettings 有默认值
+    if (!S.chatSettings || typeof S.chatSettings !== 'object') {
+        S.chatSettings = {
+            quoteReply: true,
+            readReceipt: 'text',
+            readNotReply: false,
+            typing: true,
+            autoSend: false,
+            autoSendInterval: '10',
+            emojiMix: true,
+            simCall: true
+        };
+    }
+
+    // ===== 加载头像 =====
+    const savedAvatars = localStorage.getItem('avatars');
+    if (savedAvatars) {
+        try {
+            const allA = JSON.parse(savedAvatars);
+            allA.forEach(x => {
+                if (x.key === 'myAvatar') {
+                    S.myAvatar = x.data;
+                    console.log('✅ 已恢复我的头像');
+                } else if (x.key === 'contactAvatar') {
+                    S.contactAvatar = x.data;
+                    console.log('✅ 已恢复秦彻头像');
+                }
+            });
+        } catch(e) {
+            console.log('头像数据格式错误，已跳过');
+        }
+    }
+
+    // ===== 加载拍一拍 =====
+    const savedPat = localStorage.getItem('patOptions');
+    if (savedPat) {
+        try {
+            const allP = JSON.parse(savedPat);
+            if (Array.isArray(allP) && allP.length > 0) {
+                patOptions = allP.map(x => x.content || x);
+                console.log('✅ 已恢复拍一拍');
+            }
+        } catch(e) {
+            console.log('拍一拍数据格式错误');
+        }
+    }
+
+    // ===== 加载昵称 =====
+    const savedMyName = localStorage.getItem('myName');
+    if (savedMyName) {
+        S.myName = savedMyName;
+        console.log('✅ 已恢复我的昵称');
+    }
+    const savedContactName = localStorage.getItem('contactName');
+    if (savedContactName) {
+        S.contactName = savedContactName;
+        console.log('✅ 已恢复对方昵称');
+    }
+
+    // ===== 加载背景设置 =====
+    const savedBg = localStorage.getItem('bgSettings');
+    if (savedBg) {
+        try {
+            const allBg = JSON.parse(savedBg);
+            allBg.forEach(x => {
+                if (x.key === 'homeBg') S.homeBg = x.value;
+                else if (x.key === 'chatBg') S.chatBg = x.value;
+                else if (x.key === 'homeBgImage') S.homeBgImage = x.value;
+                else if (x.key === 'chatBgImage') S.chatBgImage = x.value;
+            });
+            console.log('✅ 已恢复背景设置');
+        } catch(e) {
+            console.log('背景数据格式错误');
+        }
+    }
+
+    // ===== 加载表情包（仅统计，实际加载在 loadEmojiPanel 中） =====
+    const emojis = JSON.parse(localStorage.getItem('emojis') || '[]');
+    if (emojis.length > 0) {
+        console.log('✅ 已加载', emojis.length, '个表情包');
+    }
+
+    // ===== 应用背景 =====
     // 首页背景
     const homeEl = document.getElementById('homeInner');
     if (S.homeBg && S.homeBg !== 'default') {
         if (S.homeBg === 'custom' && S.homeBgImage) {
-            if (homeEl) { homeEl.style.backgroundImage = 'url(' + S.homeBgImage + ')'; homeEl.style.backgroundSize = 'cover'; homeEl.style.backgroundPosition = 'center'; }
+            if (homeEl) {
+                homeEl.style.backgroundImage = 'url(' + S.homeBgImage + ')';
+                homeEl.style.backgroundSize = 'cover';
+                homeEl.style.backgroundPosition = 'center';
+            }
         } else {
-            const m2 = { sunset:'#ffecd2', ocean:'#e0f7fa', lavender:'#f3e5f5' };
-            if (m2[S.homeBg] && homeEl) { homeEl.style.background = m2[S.homeBg]; homeEl.style.backgroundImage = 'none'; }
+            const m2 = { sunset: '#ffecd2', ocean: '#e0f7fa', lavender: '#f3e5f5' };
+            if (m2[S.homeBg] && homeEl) {
+                homeEl.style.background = m2[S.homeBg];
+                homeEl.style.backgroundImage = 'none';
+            }
         }
     }
-    
+
     // 聊天背景
     const chatEl = document.getElementById('chatArea');
     if (S.chatBg && S.chatBg !== 'default') {
         if (S.chatBg === 'custom' && S.chatBgImage) {
-            if (chatEl) { chatEl.style.backgroundImage = 'url(' + S.chatBgImage + ')'; chatEl.style.backgroundSize = 'cover'; chatEl.style.backgroundPosition = 'center'; }
+            if (chatEl) {
+                chatEl.style.backgroundImage = 'url(' + S.chatBgImage + ')';
+                chatEl.style.backgroundSize = 'cover';
+                chatEl.style.backgroundPosition = 'center';
+            }
         } else {
-            const m = { warm:'#fffdf5', cool:'#f5f8ff', pink:'#fff5f7' };
-            if (m[S.chatBg] && chatEl) { chatEl.style.background = m[S.chatBg]; chatEl.style.backgroundImage = 'none'; }
+            const m = { warm: '#fffdf5', cool: '#f5f8ff', pink: '#fff5f7' };
+            if (m[S.chatBg] && chatEl) {
+                chatEl.style.background = m[S.chatBg];
+                chatEl.style.backgroundImage = 'none';
+            }
         }
     }
-    
-  // 通话悬浮球事件绑定
-const ball = document.getElementById('callFloatBall');
-if (ball) {
-    // 移除旧的事件监听（避免重复绑定导致失效）
-    const newBall = ball.cloneNode(true);
-    ball.parentNode.replaceChild(newBall, ball);
-    const freshBall = document.getElementById('callFloatBall');
-    
-    freshBall.addEventListener('touchstart', function(e) {
-        if (callState !== 'active') return;
-        ballDragging = true;
-        ballMoved = false;
-        const t = e.touches[0];
-        ballStartX = t.clientX;
-        ballStartY = t.clientY;
-        const r = freshBall.getBoundingClientRect();
-        ballLeft = r.left;
-        ballTop = r.top;
-        freshBall.style.right = 'auto';
-        freshBall.style.bottom = 'auto';
-        freshBall.style.left = ballLeft + 'px';
-        freshBall.style.top = ballTop + 'px';
-        e.preventDefault();
-    }, {passive: false});
-    
-    freshBall.addEventListener('touchmove', function(e) {
-        if (!ballDragging) return;
-        ballMoved = true;
-        const t = e.touches[0];
-        let l = ballLeft + (t.clientX - ballStartX);
-        let tp = ballTop + (t.clientY - ballStartY);
-        l = Math.max(4, Math.min(window.innerWidth - 58, l));
-        tp = Math.max(60, Math.min(window.innerHeight - 160, tp));
-        freshBall.style.left = l + 'px';
-        freshBall.style.top = tp + 'px';
-        e.preventDefault();
-    }, {passive: false});
-    
-    freshBall.addEventListener('touchend', function() {
-        if (!ballDragging) return;
-        ballDragging = false;
-        if (!ballMoved && callState === 'active') {
-            restoreCall();
-            return;
-        }
-        const r = freshBall.getBoundingClientRect();
-        if (r.left + r.width / 2 < window.innerWidth / 2) {
-            freshBall.style.left = '4px';
+
+    // ===== 通话悬浮球事件绑定 =====
+    const ball = document.getElementById('callFloatBall');
+    if (ball) {
+        const newBall = ball.cloneNode(true);
+        ball.parentNode.replaceChild(newBall, ball);
+        const freshBall = document.getElementById('callFloatBall');
+
+        freshBall.addEventListener('touchstart', function(e) {
+            if (callState !== 'active') return;
+            ballDragging = true;
+            ballMoved = false;
+            const t = e.touches[0];
+            ballStartX = t.clientX;
+            ballStartY = t.clientY;
+            const r = freshBall.getBoundingClientRect();
+            ballLeft = r.left;
+            ballTop = r.top;
             freshBall.style.right = 'auto';
-        } else {
-            freshBall.style.right = '4px';
-            freshBall.style.left = 'auto';
-        }
-    });
-}
-    
+            freshBall.style.bottom = 'auto';
+            freshBall.style.left = ballLeft + 'px';
+            freshBall.style.top = ballTop + 'px';
+            e.preventDefault();
+        }, { passive: false });
+
+        freshBall.addEventListener('touchmove', function(e) {
+            if (!ballDragging) return;
+            ballMoved = true;
+            const t = e.touches[0];
+            let l = ballLeft + (t.clientX - ballStartX);
+            let tp = ballTop + (t.clientY - ballStartY);
+            l = Math.max(4, Math.min(window.innerWidth - 58, l));
+            tp = Math.max(60, Math.min(window.innerHeight - 160, tp));
+            freshBall.style.left = l + 'px';
+            freshBall.style.top = tp + 'px';
+            e.preventDefault();
+        }, { passive: false });
+
+        freshBall.addEventListener('touchend', function() {
+            if (!ballDragging) return;
+            ballDragging = false;
+            if (!ballMoved && callState === 'active') {
+                restoreCall();
+                return;
+            }
+            const r = freshBall.getBoundingClientRect();
+            if (r.left + r.width / 2 < window.innerWidth / 2) {
+                freshBall.style.left = '4px';
+                freshBall.style.right = 'auto';
+            } else {
+                freshBall.style.right = '4px';
+                freshBall.style.left = 'auto';
+            }
+        });
+    }
+
+    // ===== 收尾 =====
     updateHome();
     startAutoSendIfNeeded();
     console.log('✅ V16 已启动（localStorage模式）');
+    // ===== 延迟恢复气泡样式 =====
+    setTimeout(function() {
+        applyBubbleStyle();
+        console.log('✅ 延迟恢复气泡样式:', S.bubbleStyle);
+    }, 500);
+
     // ===== 修复分组数据格式 =====
     const groupsData = localStorage.getItem('wordcardGroups');
     if (groupsData) {
         try {
             const parsed = JSON.parse(groupsData);
-            // 如果分组数据不是数组，强制重建
             if (!Array.isArray(parsed)) {
                 const allCards = JSON.parse(localStorage.getItem('wordcards') || '[]');
                 const groupsMap = {};
