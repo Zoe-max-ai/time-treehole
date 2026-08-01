@@ -15,7 +15,11 @@
         .navbar .back-btn{position:absolute;left:16px;width:36px;height:36px;border-radius:50%;background:#f5f5f5;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;border:none;color:var(--text);z-index:1;}
         .navbar .title{font-size:17px;font-weight:600;}
         .home-page-inner{background:#fff5f7;display:flex;flex-direction:column;height:100%;}
-        .home-top-area{text-align:center;padding:20px 20px 8px;flex-shrink:0;}
+    .home-top-area {
+    text-align: center;
+    padding: 80px 20px 8px;  /* 从60px加到80px */
+    flex-shrink: 0;
+}
         .home-avatar-group{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px;}
         .home-avatar-img{width:56px;height:56px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,0.1);}
         .home-avatar-name{font-size:11px;font-weight:600;margin-top:4px;}
@@ -23,15 +27,101 @@
         @keyframes heartBeat{0%,100%{transform:scale(1);}25%{transform:scale(1.15);}50%{transform:scale(1);}75%{transform:scale(1.1);}}
         .home-status-tag{display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:18px;font-size:12px;margin-top:4px;background:#f0f9f0;color:#4a8a4a;border:1px solid #d0e8d0;}
         .home-status-dot{width:6px;height:6px;border-radius:50%;background:#4cd964;}
-        .home-mood-preview{font-size:12px;color:var(--text-light);font-style:italic;margin-top:6px;}
-        .home-divider{display:flex;align-items:center;padding:0 20px;margin:6px 0;flex-shrink:0;}
-        .home-divider .line{flex:1;height:1px;background:#e8e8e8;}.home-divider .label{padding:0 12px;font-size:11px;color:var(--text-lighter);}
-        .home-grid-scroll{flex:1;overflow-y:auto;padding:6px 14px 14px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;align-content:start;}
-        .home-card{background:rgba(255,255,255,0.9);border-radius:14px;padding:16px 12px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;border:1px solid rgba(255,255,255,0.6);}
-        .home-card:active{transform:scale(.96);}
-        .home-card .card-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
-        .home-card .card-title{font-size:12px;font-weight:600;}
-        .home-footer{text-align:center;padding:8px;flex-shrink:0;font-size:9px;color:#ccc;}
+   
+  .home-mood-preview {
+    font-size: 12px;
+    color: var(--text-light);
+    font-style: italic;
+    margin-top: 6px;
+}
+
+.home-divider {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    flex-shrink: 0;
+    width: 100%;
+}
+
+.home-divider .line {
+    flex: 1;
+    height: 1px;
+    background: #ccc;  /* 或 #ddd */
+}
+
+.home-divider .label {
+    padding: 0 12px;
+    font-size: 11px;
+    color: #333;
+}
+
+.home-grid-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 14px 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 16px;
+    align-content: start;
+}
+
+.home-card {
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    border: none;
+    box-shadow: none;
+}
+
+.home-card:active {
+    transform: scale(0.95);
+}
+
+.home-card .card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(2px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.home-card .card-icon svg {
+    width: 26px;
+    height: 26px;
+}
+
+.home-card .card-title {
+    font-size: 11px;
+    font-weight: 400;
+    color: #333;
+    margin-top: 4px;
+}
+
+.home-card .card-desc {
+    display: none;
+}
+
+.home-footer {
+    text-align: center;
+    padding: 8px;
+    flex-shrink: 0;
+    font-size: 9px;
+    color: #ccc;
+}
         .chat-topbar{background:#fff;padding:8px 12px;display:flex;align-items:center;border-bottom:1px solid var(--border);flex-shrink:0;min-height:42px;gap:8px;}
         .chat-topbar .back-arrow{width:30px;height:30px;border-radius:50%;background:#f5f5f5;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;border:none;color:var(--text);flex-shrink:0;}
         .chat-topbar .romantic-quote{flex:1;text-align:center;font-size:12px;color:#c0a0c0;font-style:italic;cursor:pointer;}
@@ -163,20 +253,150 @@
 <div class="page active" id="homePage"><div class="home-page-inner" id="homeInner">
     <div class="home-top-area"><div class="home-avatar-group"><div><img class="home-avatar-img" id="homeContactAvatar" src=""><div class="home-avatar-name" id="homeContactName">秦彻</div></div><div class="home-heart">💕</div><div><img class="home-avatar-img me" id="homeMyAvatar" src=""><div class="home-avatar-name" id="homeMyName">笑笑</div></div></div><div class="home-status-tag"><span class="home-status-dot"></span><span id="homeStatusText">在线</span></div><div class="home-mood-preview" id="homeMoodPreview"></div></div>
     <div class="home-divider"><span class="line"></span><span class="label">我们的时光</span><span class="line"></span></div>
-    <div class="home-grid-scroll">
-        <div class="home-card" onclick="openChatPage()"><div class="card-icon" style="background:#e3f2fd;">💬</div><div class="card-title">聊天</div></div>
-        <div class="home-card" onclick="openOurUniverse()"><div class="card-icon" style="background:linear-gradient(135deg,#e8d5f5,#d5e8f5);">💫</div><div class="card-title">我们的宇宙</div></div>
-        <div class="home-card" onclick="openWordCardLibrary()"><div class="card-icon" style="background:#fff3e0;">📝</div><div class="card-title">字卡库</div></div>
-        <div class="home-card" onclick="openEmojiManage()"><div class="card-icon" style="background:#fce4ec;">😊</div><div class="card-title">表情包管理</div></div>
-        <div class="home-card" onclick="openWishPage()"><div class="card-icon" style="background:#fce4ec;">✨</div><div class="card-title">许愿便利贴</div></div>
-        <div class="home-card" onclick="openAnniversaryPage()"><div class="card-icon" style="background:#e8f5e9;">📅</div><div class="card-title">纪念日</div></div>
-        <div class="home-card" onclick="openAnswerBookPage()"><div class="card-icon" style="background:#f3e5f5;">📖</div><div class="card-title">答案之书</div></div>
-        <div class="home-card" onclick="openTarotPage()"><div class="card-icon" style="background:#f3e5f5;">🔮</div><div class="card-title">塔罗占卜</div></div>
-        <div class="home-card" onclick="openChoicePage()"><div class="card-icon" style="background:#fce4ec;">💗</div><div class="card-title">倾听我心</div></div>
-        <div class="home-card" onclick="openCallLogPage()"><div class="card-icon" style="background:#e8f5e9;">📞</div><div class="card-title">通话记录</div></div>
-<div class="home-card" onclick="openModuleSettings()"><div class="card-icon" style="background:#e8e8e8;">⚙️</div><div class="card-title">模块设置</div></div>        
-<div class="home-card" onclick="openDataManage()"><div class="card-icon" style="background:#f5f5f5;">💾</div><div class="card-title">数据管理</div></div>
+   <div class="home-grid-scroll">
+    <!-- 1. 聊天 -->
+    <div class="home-card" onclick="openChatPage()">
+        <div class="card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+        </div>
+        <div class="card-title">聊天</div>
     </div>
+
+    <!-- 2. 我们的宇宙 -->
+    <div class="home-card" onclick="openOurUniverse()">
+        <div class="card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+        </div>
+        <div class="card-title">我们的宇宙</div>
+    </div>
+
+    <!-- 3. 字卡库 -->
+    <div class="home-card" onclick="openWordCardLibrary()">
+        <div class="card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4a2 2 0 0 1 2-2h10l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/>
+                <polyline points="16 2 16 8 22 8"/>
+                <line x1="8" y1="12" x2="16" y2="12"/>
+                <line x1="8" y1="16" x2="14" y2="16"/>
+            </svg>
+        </div>
+        <div class="card-title">字卡库</div>
+    </div>
+
+    <!-- 4. 表情包管理 -->
+    <div class="home-card" onclick="openEmojiManage()">
+        <div class="card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                <line x1="9" y1="9" x2="9.01" y2="9"/>
+                <line x1="15" y1="9" x2="15.01" y2="9"/>
+            </svg>
+        </div>
+        <div class="card-title">表情包管理</div>
+    </div>
+
+    <!-- 5. 塔罗占卜 -->
+    <div class="home-card" onclick="openTarotPage()">
+        <div class="card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="8"/>
+                <line x1="12" y1="2" x2="12" y2="4"/>
+                <line x1="12" y1="20" x2="12" y2="22"/>
+                <line x1="4" y1="4" x2="5.5" y2="5.5"/>
+                <line x1="18.5" y1="18.5" x2="20" y2="20"/>
+                <line x1="20" y1="4" x2="18.5" y2="5.5"/>
+                <line x1="5.5" y1="18.5" x2="4" y2="20"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+        </div>
+        <div class="card-title">塔罗占卜</div>
+    </div>
+
+    <!-- 6. 通话记录 -->
+    <div class="home-card" onclick="openCallLogPage()">
+        <div class="card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+        </div>
+        <div class="card-title">通话记录</div>
+    </div>
+
+    <!-- 7. 许愿便利贴 -->
+    <div class="home-card" onclick="openWishPage()">
+        <div class="card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4a2 2 0 0 1 2-2h10l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/>
+                <polyline points="16 2 16 8 22 8"/>
+                <line x1="8" y1="12" x2="16" y2="12"/>
+                <line x1="8" y1="16" x2="14" y2="16"/>
+            </svg>
+        </div>
+        <div class="card-title">许愿便利贴</div>
+    </div>
+
+    <!-- 8. 纪念日 -->
+    <div class="home-card" onclick="openAnniversaryPage()">
+        <div class="card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+        </div>
+        <div class="card-title">纪念日</div>
+    </div>
+
+    <!-- 9. 答案之书 -->
+    <div class="home-card" onclick="openAnswerBookPage()">
+        <div class="card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z"/>
+                <line x1="6" y1="12" x2="18" y2="12"/>
+                <line x1="6" y1="8" x2="18" y2="8"/>
+                <line x1="6" y1="16" x2="12" y2="16"/>
+            </svg>
+        </div>
+        <div class="card-title">答案之书</div>
+    </div>
+
+    <!-- 10. 倾听我心 -->
+    <div class="home-card" onclick="openChoicePage()">
+        <div class="card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        </div>
+        <div class="card-title">倾听我心</div>
+    </div>
+
+    <!-- 11. 模块设置 -->
+    <div class="home-card" onclick="openModuleSettings()">
+        <div class="card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+        </div>
+        <div class="card-title">模块设置</div>
+    </div>
+
+    <!-- 12. 数据管理 -->
+    <div class="home-card" onclick="openDataManage()">
+        <div class="card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/>
+            </svg>
+        </div>
+        <div class="card-title">数据管理</div>
+    </div>
+</div>    </div>
     <div class="home-footer">🌳 秦彻和笑笑的时光树洞</div>
 </div></div>
 
@@ -222,15 +442,10 @@
     <div id="boardTabContent" style="flex:1;overflow-y:auto;padding:12px;background:#f8f5f0;display:none;"></div>
 </div><div class="page" id="anniversaryPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📅 纪念日</span></div><div class="generic-content" id="anniversaryContent"></div></div>
 <div class="page" id="answerBookPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📖 答案之书</span></div><div class="generic-content" id="answerBookContent"></div></div>
-<div class="page" id="choicePage" style="background:linear-gradient(180deg,#fff5f7,#fce4ec);color:#333;min-height:100vh;">
-    <div class="navbar" style="background:transparent;border:none;">
-        <button class="back-btn" style="background:rgba(0,0,0,0.06);color:#333;" onclick="goHome()">←</button>
-        <span class="title" style="color:#333;">💗 倾听我心</span>
-    </div>
-    <div class="generic-content" id="choiceContent" style="padding:16px;background:transparent;"></div>
+<div class="page" id="choicePage" style="color:#333;min-height:100vh;">
+    <div class="generic-content" id="choiceContent" style="padding:0;background:transparent;height:100vh;"></div>
 </div>
-<div class="page" id="tarotPage"><div class="navbar" style="background:transparent;border:none;"><button class="back-btn" style="background:rgba(255,255,255,0.12);color:#fff;" onclick="goHome()">←</button><span class="title" style="color:#e0d0f0;">🔮 塔罗占卜</span></div><div id="tarotContent" style="flex:1;overflow-y:auto;"></div></div>
-<div class="page" id="callLogPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📞 通话记录</span></div><div class="call-log-list" id="callLogContent" style="flex:1;overflow-y:auto;padding:12px;"></div></div>
+<div class="page" id="tarotPage"><div class="navbar" style="background:#fff;border-bottom:1px solid #f0ece8;"><button class="back-btn" style="background:#f5f5f5;color:#333;" onclick="goHome()">←</button><span class="title" style="color:#333;">🔮 塔罗占卜</span></div><div id="tarotContent" style="flex:1;overflow-y:auto;"></div></div><div class="page" id="callLogPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📞 通话记录</span></div><div class="call-log-list" id="callLogContent" style="flex:1;overflow-y:auto;padding:12px;"></div></div>
 <div class="page" id="moduleSettingsPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">⚙️ 模块设置</span></div><div class="generic-content" id="moduleSettingsContent"></div></div>
 <div class="page" id="dataManagePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">💾 数据管理</span></div><div class="generic-content" id="dataManageContent"></div></div>
 <div class="page" id="backgroundPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🎨 更换背景</span></div><div class="generic-content" id="backgroundContent"></div></div>
@@ -1057,34 +1272,61 @@ async function renderCallLogs() {
     const logs = await dbGetAll('callLogs');
     logs.sort((a, b) => b.timestamp - a.timestamp);
     const c = document.getElementById('callLogContent');
-    c.innerHTML = '';
+    
+    let html = `
+        <div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">
+            <div style="width:100%;max-width:400px;">
+    `;
+    
     if (logs.length === 0) {
-        c.innerHTML = '<div style="text-align:center;padding:60px;color:#ccc;"><div style="font-size:48px;">📞</div><div>暂无通话记录</div></div>';
-        return;
-    }
-    const g = {};
-    logs.forEach(l => {
-        const d = new Date(l.timestamp).toLocaleDateString('zh-CN');
-        if (!g[d]) g[d] = [];
-        g[d].push(l);
-    });
-    for (let [d, ls] of Object.entries(g)) {
-        const grp = document.createElement('div');
-        grp.style.marginBottom = '16px';
-        grp.innerHTML = '<div style="font-size:12px;color:var(--text-light);margin-bottom:6px;">' + d + '</div>';
-        ls.forEach(l => {
-            const h = Math.floor(l.duration / 3600), m = Math.floor((l.duration % 3600) / 60), s = l.duration % 60;
-            let ds = '';
-            if (h > 0) ds += h + '时';
-            if (m > 0) ds += m + '分';
-            ds += s + '秒';
-            const it = document.createElement('div');
-            it.style.cssText = 'background:#fff;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:4px;';
-            it.innerHTML = '<div style="width:36px;height:36px;border-radius:50%;background:#e3f2fd;display:flex;align-items:center;justify-content:center;font-size:16px;">📞</div><div style="flex:1;"><div style="font-size:14px;font-weight:500;">' + l.contactName + '</div><div style="font-size:11px;color:var(--text-light);">' + (l.type === 'incoming' ? '来电' : '呼出') + '</div></div><div style="text-align:right;"><div style="font-size:12px;color:var(--text-light);">' + ds + '</div><div style="font-size:11px;color:var(--text-lighter);">' + new Date(l.timestamp).toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'}) + '</div></div>';
-            grp.appendChild(it);
+        html += `
+            <div style="background:#fff;border-radius:16px;padding:40px 20px;border:1px solid #f0ece8;text-align:center;">
+                <div style="font-size:48px;margin-bottom:12px;">📞</div>
+                <div style="font-size:14px;color:#ccc;">暂无通话记录</div>
+            </div>
+        `;
+    } else {
+        const g = {};
+        logs.forEach(l => {
+            const d = new Date(l.timestamp).toLocaleDateString('zh-CN');
+            if (!g[d]) g[d] = [];
+            g[d].push(l);
         });
-        c.appendChild(grp);
+        
+        for (let [d, ls] of Object.entries(g)) {
+            html += `
+                <div style="margin-bottom:14px;">
+                    <div style="font-size:12px;color:#aaa;margin-bottom:8px;padding-left:4px;">${d}</div>
+            `;
+            ls.forEach(l => {
+                const h = Math.floor(l.duration / 3600);
+                const m = Math.floor((l.duration % 3600) / 60);
+                const s = l.duration % 60;
+                let ds = '';
+                if (h > 0) ds += h + '时';
+                if (m > 0) ds += m + '分';
+                ds += s + '秒';
+                
+                html += `
+                    <div style="background:#fff;border-radius:16px;padding:12px 16px;border:1px solid #f0ece8;display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                        <div style="width:36px;height:36px;border-radius:50%;background:#f5f0eb;display:flex;align-items:center;justify-content:center;font-size:16px;">📞</div>
+                        <div style="flex:1;">
+                            <div style="font-size:14px;font-weight:500;color:#333;">${l.contactName}</div>
+                            <div style="font-size:11px;color:#aaa;">${l.type === 'incoming' ? '来电' : '呼出'}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:13px;color:#333;font-weight:500;">${ds}</div>
+                            <div style="font-size:10px;color:#ccc;">${new Date(l.timestamp).toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'})}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
     }
+    
+    html += '</div></div>';
+    c.innerHTML = html;
 }
 
 function openCallLogPage() {
@@ -1101,15 +1343,113 @@ function openOurUniverse() {
 async function renderOurUniverse() {
     const mood = S.contactMood || await getRandomMood2();
     S.contactMood = mood;
-    document.getElementById('ourUniverseContent').innerHTML =
-        '<div class="settings-section"><h4>📷 我的头像</h4><div class="avatar-row" onclick="document.getElementById(\'myAvatarInput\').click()"><img class="small-avatar" id="myAvatarSmall" src="' + getAvatar('me') + '"><div style="flex:1;"><div style="font-size:14px;font-weight:500;">' + S.myName + '</div><div style="font-size:11px;color:var(--text-light);">点击更换</div></div></div><div id="myAvatarHistory" class="avatar-history-grid"></div></div>' +
-        '<div class="settings-section"><h4>📷 秦彻头像</h4><div class="avatar-row" onclick="document.getElementById(\'contactAvatarInput\').click()"><img class="small-avatar" id="contactAvatarSmall" src="' + getAvatar('contact') + '"><div style="flex:1;"><div style="font-size:14px;font-weight:500;">' + S.contactName + '</div><div style="font-size:11px;color:var(--text-light);">点击更换</div></div></div><div id="contactAvatarHistory" class="avatar-history-grid"></div></div>' +
-        '<div class="settings-section"><h4>✏️ 昵称</h4><div class="settings-row"><span class="row-label">我的昵称</span><span style="color:var(--text-light);cursor:pointer;" onclick="editNick(\'me\')">' + S.myName + ' ▸</span></div><div class="settings-row"><span class="row-label">对方昵称</span><span style="color:var(--text-light);cursor:pointer;" onclick="editNick(\'contact\')">' + S.contactName + ' ▸</span></div></div>' +
-        '<div class="settings-section"><h4>👋 拍一拍</h4><div style="display:flex;flex-direction:column;gap:4px;">' + patOptions.map((p, i) => '<div style="padding:7px 10px;border-radius:8px;background:#fafafa;font-size:12px;display:flex;justify-content:space-between;"><span>👋 ' + p + '</span><span style="color:#ccc;cursor:pointer;" onclick="delPat(' + i + ')">×</span></div>').join('') + '</div><div class="pat-setting-row" style="margin-top:6px;"><input type="text" id="patTextInput" placeholder="添加..." style="flex:1;padding:7px 10px;border-radius:12px;border:1.5px solid #eee;font-size:12px;outline:none;"><button onclick="addPat()" style="padding:7px 12px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:12px;cursor:pointer;">添加</button></div></div>' +
-        '<div class="settings-section"><h4>💬 秦彻状态</h4><div id="statusTagsInline" style="display:flex;flex-wrap:wrap;gap:5px;"></div><div class="pat-setting-row" style="margin-top:6px;"><input type="text" id="newStatusInput" placeholder="添加状态..." style="flex:1;padding:7px 10px;border-radius:12px;border:1.5px solid #eee;font-size:12px;outline:none;"><button onclick="addStatusOpt()" style="padding:7px 12px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:12px;cursor:pointer;">添加</button></div></div>' +
-        '<div class="settings-section"><h4>💭 秦彻想说</h4><div style="background:#fdf8ff;border-radius:10px;padding:12px;margin-bottom:8px;font-size:14px;color:#5a4a6a;font-style:italic;text-align:center;">' + (mood || '今天天气真好') + '</div><button onclick="refreshMood()" style="width:100%;padding:8px;border-radius:16px;background:#f0e0ff;color:#7b5ea7;border:none;cursor:pointer;">🔄 换一句</button></div>' +
-        '<div class="settings-section"><h4>💬 聊天气泡样式</h4><div class="bubble-preset-grid">' + BUBBLE_PRESETS.map(p => '<div class="bubble-preset-item ' + (S.bubbleStyle === p.id ? 'selected' : '') + '" onclick="selectBubblePreset(\'' + p.id + '\')"><div style="display:flex;flex-direction:column;gap:3px;margin-bottom:4px;"><div class="mini-bubble other" style="background:' + p.otherBg + ';color:' + p.otherText + ';">你好呀</div><div class="mini-bubble me" style="background:' + p.myBg + ';color:' + p.myText + ';">想你了</div></div><div>' + p.name + '</div></div>').join('') + '</div></div>' +
-        '<div class="settings-section"><h4>🎨 更换背景</h4><div class="bg-preset-grid">' + [{id:'default',icon:'🌸',color:'#fff5f7'},{id:'sunset',icon:'🌅',color:'#ffecd2'},{id:'ocean',icon:'🌊',color:'#e0f7fa'},{id:'lavender',icon:'💜',color:'#f3e5f5'}].map(p => '<div class="bg-preset-item ' + (S.homeBg === p.id ? 'selected' : '') + '" style="background:' + p.color + ';" onclick="setHomeBg(\'' + p.id + '\')">' + p.icon + '</div>').join('') + '</div><button style="width:100%;margin-top:8px;padding:10px;border-radius:16px;background:#f5f5f5;border:none;cursor:pointer;font-size:13px;" onclick="document.getElementById(\'homeBgInput\').click()">🖼️ 从相册选择首页背景</button><div style="margin-top:10px;"><h4>💬 聊天背景</h4><div class="bg-preset-grid">' + [{id:'default',icon:'⬜',color:'#f8f8f8'},{id:'warm',icon:'💛',color:'#fffdf5'},{id:'cool',icon:'💙',color:'#f5f8ff'},{id:'pink',icon:'💗',color:'#fff5f7'}].map(p => '<div class="bg-preset-item ' + (S.chatBg === p.id ? 'selected' : '') + '" style="background:' + p.color + ';" onclick="setChatBg(\'' + p.id + '\')">' + p.icon + '</div>').join('') + '</div><button style="width:100%;margin-top:8px;padding:10px;border-radius:16px;background:#f5f5f5;border:none;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="document.getElementById(\'chatBgInput\').click()"><span>🖼️</span> 从相册选择聊天背景</button></div>';
+    
+    let html = `
+        <div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">
+            <div style="width:100%;max-width:400px;">
+                <div class="settings-section" style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:12px;">
+                    <h4 style="font-size:13px;color:#999;margin-bottom:8px;">📷 我的头像</h4>
+                    <div class="avatar-row" onclick="document.getElementById('myAvatarInput').click()" style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 0;">
+                        <img class="small-avatar" id="myAvatarSmall" src="${getAvatar('me')}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #f0ece8;">
+                        <div style="flex:1;">
+                            <div style="font-size:14px;font-weight:500;color:#333;">${S.myName}</div>
+                            <div style="font-size:11px;color:#aaa;">点击更换</div>
+                        </div>
+                    </div>
+                    <div id="myAvatarHistory" class="avatar-history-grid" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;"></div>
+                </div>
+                
+                <div class="settings-section" style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:12px;">
+                    <h4 style="font-size:13px;color:#999;margin-bottom:8px;">📷 秦彻头像</h4>
+                    <div class="avatar-row" onclick="document.getElementById('contactAvatarInput').click()" style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 0;">
+                        <img class="small-avatar" id="contactAvatarSmall" src="${getAvatar('contact')}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #f0ece8;">
+                        <div style="flex:1;">
+                            <div style="font-size:14px;font-weight:500;color:#333;">${S.contactName}</div>
+                            <div style="font-size:11px;color:#aaa;">点击更换</div>
+                        </div>
+                    </div>
+                    <div id="contactAvatarHistory" class="avatar-history-grid" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;"></div>
+                </div>
+                
+                <div class="settings-section" style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:12px;">
+                    <h4 style="font-size:13px;color:#999;margin-bottom:8px;">✏️ 昵称</h4>
+                    <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f5f0eb;">
+                        <span style="color:#555;font-size:14px;">我的昵称</span>
+                        <span style="color:#d4a8b8;cursor:pointer;font-size:14px;" onclick="editNick('me')">${S.myName} ▸</span>
+                    </div>
+                    <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;">
+                        <span style="color:#555;font-size:14px;">对方昵称</span>
+                        <span style="color:#d4a8b8;cursor:pointer;font-size:14px;" onclick="editNick('contact')">${S.contactName} ▸</span>
+                    </div>
+                </div>
+                
+               <div class="settings-section" style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:12px;">
+    <h4 style="font-size:13px;color:#999;margin-bottom:8px;">👋 拍一拍</h4>
+    <div style="display:flex;flex-direction:column;gap:4px;">
+        ${patOptions.map((p, i) => `
+            <div style="padding:6px 10px;border-radius:8px;background:#d4a8b8;font-size:12px;display:flex;justify-content:space-between;color:#fff;">
+                <span>👋 ${p}</span>
+                <span style="color:#fff;cursor:pointer;opacity:0.7;" onclick="delPat(${i})">×</span>
+            </div>
+        `).join('')}
+    </div>
+    <div class="pat-setting-row" style="display:flex;gap:6px;margin-top:8px;">
+        <input type="text" id="patTextInput" placeholder="添加..." style="flex:1;padding:8px 12px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:12px;outline:none;">
+        <button onclick="addPat()" style="padding:6px 14px;border-radius:12px;background:#d4a8b8;border:1.5px solid #d4a8b8;color:#fff;font-size:12px;cursor:pointer;">添加</button>
+    </div>
+</div>
+                
+                <div class="settings-section" style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:12px;">
+                    <h4 style="font-size:13px;color:#999;margin-bottom:8px;">💬 秦彻状态</h4>
+                    <div id="statusTagsInline" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;"></div>
+                    <div class="pat-setting-row" style="display:flex;gap:6px;">
+                        <input type="text" id="newStatusInput" placeholder="添加状态..." style="flex:1;padding:8px 12px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:12px;outline:none;">
+                        <button onclick="addStatusOpt()" style="padding:6px 14px;border-radius:12px;background:#d4a8b8;border:1.5px solid #d4a8b8;color:#fff;font-size:12px;cursor:pointer;">添加</button>                    </div>
+                </div>
+                
+                <div class="settings-section" style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:12px;">
+                    <h4 style="font-size:13px;color:#999;margin-bottom:8px;">💭 秦彻想说</h4>
+                   <div style="background:#fff;border-radius:10px;padding:12px;margin-bottom:8px;font-size:14px;color:#555;font-style:italic;text-align:center;border:1px solid #e8e0d8;">${mood || '今天天气真好'}</div>
+                    <button onclick="refreshMood()" style="width:100%;padding:8px;border-radius:12px;background:#d4a8b8;border:1.5px solid #d4a8b8;color:#fff;font-size:12px;cursor:pointer;">🔄 换一句</button>
+                </div>
+                
+                <div class="settings-section" style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:12px;">
+                    <h4 style="font-size:13px;color:#999;margin-bottom:8px;">💬 聊天气泡样式</h4>
+                    <div class="bubble-preset-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px;">
+    ${BUBBLE_PRESETS.map(p => `
+        <div class="bubble-preset-item ${S.bubbleStyle === p.id ? 'selected' : ''}" onclick="selectBubblePreset('${p.id}')" style="padding:8px 4px;border-radius:12px;text-align:center;cursor:pointer;border:2px solid ${S.bubbleStyle === p.id ? '#d4a8b8' : '#e8e0d8'};background:#fff;transition:all 0.2s;">
+            <div style="display:flex;flex-direction:column;gap:2px;margin-bottom:2px;align-items:center;">
+                <div class="mini-bubble other" style="padding:4px 8px;border-radius:10px;font-size:9px;background:${p.otherBg};color:${p.otherText};max-width:80%;">你好呀</div>
+                <div class="mini-bubble me" style="padding:4px 8px;border-radius:10px;font-size:9px;background:${p.myBg};color:${p.myText};max-width:80%;">想你了</div>
+            </div>
+            <div style="font-size:10px;color:#555;">${p.name}</div>
+        </div>
+    `).join('')}
+</div>
+                
+                <div class="settings-section" style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:12px;">
+                    <h4 style="font-size:13px;color:#999;margin-bottom:8px;">🎨 更换背景</h4>
+                    <div class="bg-preset-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+                        ${[{id:'default',icon:'🌸',color:'#fff5f7'},{id:'sunset',icon:'🌅',color:'#ffecd2'},{id:'ocean',icon:'🌊',color:'#e0f7fa'},{id:'lavender',icon:'💜',color:'#f3e5f5'}].map(p => `
+                            <div class="bg-preset-item ${S.homeBg === p.id ? 'selected' : ''}" style="aspect-ratio:1;border-radius:12px;cursor:pointer;border:2px solid ${S.homeBg === p.id ? '#d4a8b8' : 'transparent'};display:flex;align-items:center;justify-content:center;font-size:18px;background:${p.color};" onclick="setHomeBg('${p.id}')">${p.icon}</div>
+                        `).join('')}
+                    </div>
+                    <button style="width:100%;margin-top:8px;padding:8px;border-radius:12px;background:#d4a8b8;border:1.5px solid #d4a8b8;color:#fff;font-size:12px;cursor:pointer;" onclick="document.getElementById('homeBgInput').click()">🖼️ 从相册选择首页背景</button>
+                    <div style="margin-top:10px;">
+                        <h4 style="font-size:12px;color:#999;margin-bottom:6px;">💬 聊天背景</h4>
+                        <div class="bg-preset-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+                            ${[{id:'default',icon:'⬜',color:'#f8f8f8'},{id:'warm',icon:'💛',color:'#fffdf5'},{id:'cool',icon:'💙',color:'#f5f8ff'},{id:'pink',icon:'💗',color:'#fff5f7'}].map(p => `
+                                <div class="bg-preset-item ${S.chatBg === p.id ? 'selected' : ''}" style="aspect-ratio:1;border-radius:12px;cursor:pointer;border:2px solid ${S.chatBg === p.id ? '#d4a8b8' : 'transparent'};display:flex;align-items:center;justify-content:center;font-size:18px;background:${p.color};" onclick="setChatBg('${p.id}')">${p.icon}</div>
+                            `).join('')}
+                        </div>
+                        <button style="width:100%;margin-top:8px;padding:8px;border-radius:12px;background:#d4a8b8;border:1.5px solid #d4a8b8;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="document.getElementById('chatBgInput').click()"><span>🖼️</span> 从相册选择聊天背景</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('ourUniverseContent').innerHTML = html;
     loadStatusTags2();
     loadAvatarHistory('me');
     loadAvatarHistory('contact');
@@ -1223,6 +1563,7 @@ function editNick(type) {
 
 async function refreshMood() {
     S.contactMood = await getRandomMood2();
+localStorage.setItem('contactMood', S.contactMood);
     renderOurUniverse(); updateHome(); showToast('已更换');
 }
 
@@ -1300,13 +1641,30 @@ async function getCardsByGroup(gid) {
 }
 
 async function renderWordCardLibrary() {
-    document.getElementById('wordcardContent').innerHTML =
-        '<div class="wordcard-top-bar"><button style="background:#fff0e6;color:#ff9800;" onclick="openBatchAdd()">📝 批量添加</button><button style="background:#e3f2fd;color:#1565c0;" onclick="document.getElementById(\'importCardsInput\').click()">📥 导入</button><button style="background:#e8f5e9;color:#2e7d32;" onclick="exportCardsJSON()">📤 导出</button></div>' +
-        '<input type="text" class="wordcard-global-search" id="wordcardGlobalSearch" placeholder="🔍 搜索全部字卡..." oninput="searchAllCardsAndDisplay()">' +
-        '<input type="text" class="wordcard-search" id="wordcardSearch" placeholder="🔍 搜索分组名称..." oninput="filterWordCards()">' +
-        '<div id="globalSearchResults" style="display:none;margin-bottom:8px;"></div>' +
-        '<div class="wordcard-groups-section"><div style="font-weight:600;font-size:13px;margin-bottom:6px;">📁 字卡分组管理</div><div id="groupList"></div><div class="add-group-row"><input type="text" id="newGroupInput" placeholder="新建分组..."><button onclick="createGroup()">+ 新建</button></div></div>' +
-        '<div id="wordcardDetailArea"></div>';
+    document.getElementById('wordcardContent').innerHTML = `
+        <div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">
+            <div style="width:100%;max-width:400px;">
+                <!-- 顶部按钮 -->
+              <div class="wordcard-top-bar" style="display:flex;gap:6px;margin-bottom:10px;">
+    <button style="flex:1;padding:8px 6px;border-radius:14px;border:1px solid #f0ece8;cursor:pointer;font-size:10px;font-weight:500;background:#fff;color:#666;" onclick="openBatchAdd()">📝 批量添加</button>
+    <button style="flex:1;padding:8px 6px;border-radius:14px;border:1px solid #f0ece8;cursor:pointer;font-size:10px;font-weight:500;background:#fff;color:#666;" onclick="document.getElementById('importCardsInput').click()">📥 导入</button>
+    <button style="flex:1;padding:8px 6px;border-radius:14px;border:1px solid #f0ece8;cursor:pointer;font-size:10px;font-weight:500;background:#fff;color:#666;" onclick="exportCardsJSON()">📤 导出</button>
+</div>
+                <input type="text" class="wordcard-global-search" id="wordcardGlobalSearch" placeholder="🔍 搜索全部字卡..." oninput="searchAllCardsAndDisplay()" style="width:100%;padding:10px 12px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:13px;outline:none;margin-bottom:8px;color:#333;">
+                <input type="text" class="wordcard-search" id="wordcardSearch" placeholder="🔍 搜索分组名称..." oninput="filterWordCards()" style="width:100%;padding:10px 12px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:13px;outline:none;margin-bottom:8px;color:#333;">
+                <div id="globalSearchResults" style="display:none;margin-bottom:8px;"></div>
+                <div class="wordcard-groups-section" style="background:#fff;border-radius:16px;padding:14px 16px;border:1px solid #f0ece8;margin:10px 0;">
+                    <div style="font-weight:600;font-size:13px;color:#333;margin-bottom:8px;">📁 字卡分组管理</div>
+                    <div id="groupList"></div>
+                    <div class="add-group-row" style="display:flex;gap:6px;margin-top:10px;">
+                        <input type="text" id="newGroupInput" placeholder="新建分组..." style="flex:1;padding:8px 12px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:12px;outline:none;">
+                        <button onclick="createGroup()" style="padding:8px 14px;border-radius:12px;background:#f5f0eb;border:1.5px solid #e8e0d8;color:#666;font-size:12px;cursor:pointer;">+ 新建</button>
+                    </div>
+                </div>
+                <div id="wordcardDetailArea"></div>
+            </div>
+        </div>
+    `;
     renderGroupList();
 }
 
@@ -1651,29 +2009,49 @@ async function renderEmojiManage() {
     const groups = JSON.parse(localStorage.getItem('emojiGroups') || '["全部"]');
     const currentGroup = localStorage.getItem('manageEmojiGroup') || '全部';
     
-    // 构建分组标签（带删除按钮）
-    let groupHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;padding:8px;background:#f5f5f5;border-radius:12px;align-items:center;">';
-    groups.forEach(g => {
-        groupHtml += '<span style="display:inline-flex;align-items:center;gap:2px;">';
-        groupHtml += '<button class="emoji-group-tab ' + (g === currentGroup ? 'active' : '') + '" onclick="switchManageGroup(\'' + g + '\')" style="padding:4px 12px;border-radius:12px;font-size:12px;cursor:pointer;border:none;background:' + (g === currentGroup ? 'var(--primary)' : 'transparent') + ';color:' + (g === currentGroup ? '#fff' : '#999') + ';">' + g + '</button>';
-        if (g !== '全部') {
-            groupHtml += '<span onclick="deleteEmojiGroup(\'' + g + '\')" style="cursor:pointer;color:#ff4757;font-size:12px;margin-left:-2px;">✕</span>';
-        }
-        groupHtml += '</span>';
-    });
-    groupHtml += '<button onclick="addEmojiGroupFromManage()" style="padding:4px 10px;border-radius:12px;font-size:14px;cursor:pointer;border:none;background:#f0f0f0;color:#666;">➕</button></div>';
+    let html = `
+        <div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">
+            <div style="width:100%;max-width:400px;">
+                <div style="background:#fff;border-radius:16px;padding:12px 16px;border:1px solid #f0ece8;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+    `;
     
-    let html = groupHtml + '<div class="emoji-manage-grid">';
+    groups.forEach(g => {
+        const isActive = g === currentGroup;
+        html += `
+            <span style="display:inline-flex;align-items:center;gap:2px;">
+                <button class="emoji-group-tab ${isActive ? 'active' : ''}" onclick="switchManageGroup('${g}')" style="padding:6px 14px;border-radius:14px;font-size:12px;cursor:pointer;border:none;background:${isActive ? '#d4a8b8' : 'transparent'};color:${isActive ? '#fff' : '#999'};transition:all 0.2s;">
+                    ${g}
+                </button>
+                ${g !== '全部' ? `<span onclick="deleteEmojiGroup('${g}')" style="cursor:pointer;color:#d4a8b8;font-size:12px;padding:0 4px;">✕</span>` : ''}
+            </span>
+        `;
+    });
+    
+    html += `
+            <button onclick="addEmojiGroupFromManage()" style="padding:4px 10px;border-radius:14px;font-size:12px;cursor:pointer;border:none;background:#f5f0eb;color:#666;">➕</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+    `;
     
     const filtered = currentGroup === '全部' ? realEmojis : realEmojis.filter(e => (e.group || '全部') === currentGroup);
     if (filtered.length === 0) {
-        html += '<div style="color:#ccc;text-align:center;padding:40px;grid-column:1/-1;">这个分组还没有表情包</div>';
+        html += '<div style="color:#ccc;text-align:center;padding:40px;grid-column:1/-1;font-size:14px;">这个分组还没有表情包</div>';
     } else {
         filtered.forEach(e => {
-            html += '<div class="emoji-manage-item" onclick="if(confirm(\'删除？\')){deleteEmoji(' + e.id + ')}"><img src="' + e.data + '" style="width:100%;height:100%;object-fit:cover;padding:4px;border-radius:8px;"><div class="del-overlay">×</div><div style="position:absolute;bottom:2px;left:4px;right:4px;font-size:8px;color:#999;background:rgba(255,255,255,0.8);text-align:center;border-radius:4px;padding:1px;">' + (e.group || '全部') + '</div></div>';
+            html += `
+                <div class="emoji-manage-item" onclick="if(confirm('删除？')){deleteEmoji(${e.id})}" style="aspect-ratio:1;border-radius:12px;overflow:hidden;position:relative;cursor:pointer;background:#faf8f6;border:1px solid #f0ece8;">
+                    <img src="${e.data}" style="width:100%;height:100%;object-fit:cover;padding:4px;border-radius:8px;">
+                    <div class="del-overlay" style="position:absolute;top:4px;right:4px;width:18px;height:18px;background:rgba(255,255,255,0.8);border-radius:50%;color:#d4a8b8;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;">×</div>
+                    <div style="position:absolute;bottom:4px;left:4px;right:4px;font-size:8px;color:#aaa;background:rgba(255,255,255,0.7);text-align:center;border-radius:6px;padding:2px;backdrop-filter:blur(2px);">${e.group || '全部'}</div>
+                </div>
+            `;
         });
     }
-    html += '<div class="add-emoji-area" onclick="document.getElementById(\'emojiManageInput\').click()">+</div></div><div style="text-align:center;margin-top:10px;font-size:11px;color:var(--text-light);">点击表情删除，点击+添加</div>';
+    
+    html += `
+        </div>
+        <div onclick="document.getElementById('emojiManageInput').click()" style="width:72px;height:72px;border-radius:12px;border:2px dashed #e8e0d8;display:flex;align-items:center;justify-content:center;font-size:28px;color:#ccc;cursor:pointer;background:transparent;margin:0 auto;">+</div>    `;
+    
     document.getElementById('emojiManageContent').innerHTML = html;
 }
 async function deleteEmoji(id) { await dbDelete('emojis', id); renderEmojiManage(); showToast('已删除'); }
@@ -1698,15 +2076,45 @@ function openTarotPage() {
 let selectedSpread = 1;
 
 function renderTarotPage() {
-    document.getElementById('tarotContent').innerHTML =
-        '<div style="background:linear-gradient(180deg,#0d0015,#1a0030,#0d0020);color:#e0d0f0;padding:16px;min-height:100%;"><div style="text-align:center;margin-bottom:20px;"><div style="font-size:44px;">🔮</div><div style="font-size:20px;font-weight:700;color:#f0d0ff;">命运之轮的指引</div></div>' +
-'<div style="text-align:center;margin-bottom:16px;"><button onclick="openTarotChat()" style="padding:12px 24px;border-radius:24px;background:linear-gradient(135deg,#6b20d4,#9b40f0);color:#fff;border:none;font-size:16px;cursor:pointer;box-shadow:0 4px 16px rgba(107,32,212,0.3);">🔮 进入塔罗对话</button></div>' +
-        '<div style="background:rgba(255,255,255,0.06);border-radius:14px;padding:14px;margin-bottom:14px;"><div style="font-size:12px;color:#c0a0e0;">✨ 选择牌阵</div><div style="display:flex;gap:8px;" id="spreadOptions">' +
-        '<div onclick="selectSpread(1,this)" style="flex:1;padding:12px;border-radius:10px;text-align:center;cursor:pointer;border:2px solid #d0a0ff;background:rgba(180,130,255,0.15);"><div style="font-size:24px;">🃏</div><div>单张指引</div></div>' +
-        '<div onclick="selectSpread(3,this)" style="flex:1;padding:12px;border-radius:10px;text-align:center;cursor:pointer;border:2px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);"><div style="font-size:24px;">🃏🃏🃏</div><div>三张牌阵</div></div></div></div>' +
-        '<textarea id="tarotQuestion" placeholder="默念你的问题..." style="width:100%;padding:10px;border-radius:10px;border:1.5px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:#e0d0f0;font-size:13px;resize:none;outline:none;min-height:70px;"></textarea>' +
-        '<button id="drawBtn" onclick="drawTarot()" style="width:100%;padding:14px;border-radius:24px;border:none;background:linear-gradient(135deg,#6b20d4,#9b40f0);color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;">🌟 开始塔罗占卜</button>' +
-        '<div id="tarotResult" style="display:none;text-align:center;padding:16px 0;"><div id="tarotCardsRow" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:20px;"></div><div id="tarotReading" style="background:rgba(255,255,255,0.06);border-radius:12px;padding:14px;font-size:13px;line-height:1.7;text-align:left;"></div></div></div>';
+    document.getElementById('tarotContent').innerHTML = `
+        <div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">
+            <div style="width:100%;max-width:400px;text-align:center;">
+                <div style="font-size:44px;margin-bottom:8px;">🔮</div>
+                <div style="font-size:20px;font-weight:600;color:#333;margin-bottom:4px;">命运之轮的指引</div>
+                <div style="font-size:13px;color:#aaa;margin-bottom:16px;">轻轻闭上眼，问一个问题</div>
+                
+                <div style="background:#fff;border-radius:16px;padding:14px;margin-bottom:14px;border:1px solid #f0ece8;">
+                    <button onclick="openTarotChat()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;box-shadow:0 2px 8px rgba(212,168,184,0.2);">🔮 进入塔罗对话</button>
+                </div>
+                
+                <div style="background:#fff;border-radius:16px;padding:14px;margin-bottom:14px;border:1px solid #f0ece8;">
+                    <div style="font-size:12px;color:#999;margin-bottom:6px;">✨ 选择牌阵</div>
+                    <div style="display:flex;gap:8px;" id="spreadOptions">
+                        <div onclick="selectSpread(1,this)" style="flex:1;padding:10px;border-radius:10px;text-align:center;cursor:pointer;border:2px solid #d4a8b8;background:rgba(212,168,184,0.15);">
+                            <div style="font-size:20px;">🃏</div>
+                            <div style="font-size:11px;color:#555;">单张指引</div>
+                        </div>
+                        <div onclick="selectSpread(3,this)" style="flex:1;padding:10px;border-radius:10px;text-align:center;cursor:pointer;border:2px solid #e8e0d8;background:#fff;">
+                            <div style="font-size:20px;">🃏🃏🃏</div>
+                            <div style="font-size:11px;color:#555;">三张牌阵</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background:#fff;border-radius:16px;padding:14px;border:1px solid #f0ece8;margin-bottom:14px;">
+                    <textarea id="tarotQuestion" placeholder="默念你的问题..." style="width:100%;padding:10px;border-radius:10px;border:1.5px solid #e8e0d8;background:#fff;color:#333;font-size:13px;resize:none;outline:none;min-height:70px;"></textarea>
+                    <button id="drawBtn" onclick="drawTarot()" style="width:100%;padding:12px;border-radius:12px;border:none;background:#d4a8b8;color:#fff;font-size:15px;font-weight:500;cursor:pointer;margin-top:8px;">🌟 开始塔罗占卜</button>
+                </div>
+                
+                <div id="tarotResult" style="display:none;text-align:center;padding:12px 0;background:#fff;border-radius:16px;border:1px solid #f0ece8;margin-bottom:14px;">
+                    <div id="tarotCardsRow" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;"></div>
+                    <div id="tarotReading" style="font-size:13px;line-height:1.7;text-align:left;padding:0 8px;color:#555;"></div>
+                </div>
+                
+                <div style="font-size:10px;color:#ccc;margin-top:4px;">🔮 塔罗是镜子，真正的力量在你手里</div>
+            </div>
+        </div>
+    `;
     selectedSpread = 1;
 }
 
@@ -1960,92 +2368,71 @@ function openModuleSettings() {
 }
 
 async function renderModuleSettings() {
-    // 获取所有分组
     const groups = await getAllGroups();
     const groupOptions = groups.map(g => g.name);
     
-    // 读取已保存的配置
     const chatGroups = JSON.parse(localStorage.getItem('chatGroups') || '[]');
     const mailboxGroups = JSON.parse(localStorage.getItem('mailboxGroups') || '[]');
     const tarotGroup = localStorage.getItem('tarotGroup') || '';
     const answerBookGroup = localStorage.getItem('answerBookGroup') || '';
     
     let html = `
-        <div style="margin-bottom:16px;font-size:13px;color:#999;">选择各模块使用的字卡分组</div>
-        
-        <div class="settings-section">
-            <h4>💬 聊天混用</h4>
-            <div style="font-size:12px;color:#999;margin-bottom:6px;">多选：秦彻聊天时从这些分组取字卡</div>
-            ${groupOptions.map(g => `
-                <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:14px;">
-                    <input type="checkbox" class="chat-group-checkbox" value="${g}" ${chatGroups.includes(g) ? 'checked' : ''}>
-                    ${g}
-                </label>
-            `).join('')}
-            <button onclick="saveChatGroups()" style="margin-top:8px;padding:6px 16px;border-radius:12px;background:var(--primary);color:#fff;border:none;cursor:pointer;font-size:12px;">保存聊天分组</button>
-        </div>
-        
-        <div class="settings-section">
-            <h4>📮 留言板</h4>
-            <div style="font-size:12px;color:#999;margin-bottom:6px;">多选：秦彻留言时从这些分组取字卡</div>
-            ${groupOptions.map(g => `
-                <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:14px;">
-                    <input type="checkbox" class="mailbox-group-checkbox" value="${g}" ${mailboxGroups.includes(g) ? 'checked' : ''}>
-                    ${g}
-                </label>
-            `).join('')}
-            <button onclick="saveMailboxGroups()" style="margin-top:8px;padding:6px 16px;border-radius:12px;background:var(--primary);color:#fff;border:none;cursor:pointer;font-size:12px;">保存留言板分组</button>
-        </div>
-        
-        <div class="settings-section">
-            <h4>🔮 塔罗传讯</h4>
-            <div style="font-size:12px;color:#999;margin-bottom:6px;">单选：塔罗占卜使用这个分组</div>
-            <select id="tarotGroupSelect" style="width:100%;padding:8px 12px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;">
-                <option value="">-- 请选择 --</option>
-                ${groupOptions.map(g => `<option value="${g}" ${g === tarotGroup ? 'selected' : ''}>${g}</option>`).join('')}
-            </select>
-            <button onclick="saveTarotGroup()" style="margin-top:8px;padding:6px 16px;border-radius:12px;background:var(--primary);color:#fff;border:none;cursor:pointer;font-size:12px;">保存塔罗分组</button>
-        </div>
-        
-        <div class="settings-section">
-            <h4>📖 答案之书</h4>
-            <div style="font-size:12px;color:#999;margin-bottom:6px;">单选：答案之书使用这个分组</div>
-            <select id="answerBookGroupSelect" style="width:100%;padding:8px 12px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;">
-                <option value="">-- 请选择 --</option>
-                ${groupOptions.map(g => `<option value="${g}" ${g === answerBookGroup ? 'selected' : ''}>${g}</option>`).join('')}
-            </select>
-            <button onclick="saveAnswerBookGroupFromSettings()" style="margin-top:8px;padding:6px 16px;border-radius:12px;background:var(--primary);color:#fff;border:none;cursor:pointer;font-size:12px;">保存答案之书分组</button>
+        <div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">
+            <div style="width:100%;max-width:400px;">
+                <div style="font-size:13px;color:#999;margin-bottom:16px;text-align:center;">选择各模块使用的字卡分组</div>
+                
+                <!-- 聊天混用 -->
+                <div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:14px;">
+                    <div style="font-size:15px;font-weight:500;color:#333;margin-bottom:4px;">💬 聊天混用</div>
+                    <div style="font-size:12px;color:#999;margin-bottom:10px;">多选：秦彻聊天时从这些分组取字卡</div>
+                    ${groupOptions.map(g => `
+                        <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:14px;color:#333;cursor:pointer;">
+                            <input type="checkbox" class="chat-group-checkbox" value="${g}" ${chatGroups.includes(g) ? 'checked' : ''} style="width:16px;height:16px;accent-color:#d4a8b8;">
+                            ${g}
+                        </label>
+                    `).join('')}
+                    <button onclick="saveChatGroups()" style="margin-top:10px;padding:6px 16px;border-radius:12px;background:#f5f0eb;border:1.5px solid #e8e0d8;color:#666;font-size:12px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#e8e0d8'" onmouseout="this.style.background='#f5f0eb'">保存聊天分组</button>
+                </div>
+                
+                <!-- 留言板 -->
+                <div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:14px;">
+                    <div style="font-size:15px;font-weight:500;color:#333;margin-bottom:4px;">📮 留言板</div>
+                    <div style="font-size:12px;color:#999;margin-bottom:10px;">多选：秦彻留言时从这些分组取字卡</div>
+                    ${groupOptions.map(g => `
+                        <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:14px;color:#333;cursor:pointer;">
+                            <input type="checkbox" class="mailbox-group-checkbox" value="${g}" ${mailboxGroups.includes(g) ? 'checked' : ''} style="width:16px;height:16px;accent-color:#d4a8b8;">
+                            ${g}
+                        </label>
+                    `).join('')}
+                    <button onclick="saveMailboxGroups()" style="margin-top:10px;padding:6px 16px;border-radius:12px;background:#f5f0eb;border:1.5px solid #e8e0d8;color:#666;font-size:12px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#e8e0d8'" onmouseout="this.style.background='#f5f0eb'">保存留言板分组</button>
+                </div>
+                
+                <!-- 塔罗传讯 -->
+                <div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:14px;">
+                    <div style="font-size:15px;font-weight:500;color:#333;margin-bottom:4px;">🔮 塔罗传讯</div>
+                    <div style="font-size:12px;color:#999;margin-bottom:10px;">单选：塔罗占卜使用这个分组</div>
+                    <select id="tarotGroupSelect" style="width:100%;padding:10px 12px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;">
+                        <option value="">-- 请选择 --</option>
+                        ${groupOptions.map(g => `<option value="${g}" ${g === tarotGroup ? 'selected' : ''}>${g}</option>`).join('')}
+                    </select>
+                    <button onclick="saveTarotGroup()" style="margin-top:10px;padding:6px 16px;border-radius:12px;background:#f5f0eb;border:1.5px solid #e8e0d8;color:#666;font-size:12px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#e8e0d8'" onmouseout="this.style.background='#f5f0eb'">保存塔罗分组</button>
+                </div>
+                
+                <!-- 答案之书 -->
+                <div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:14px;">
+                    <div style="font-size:15px;font-weight:500;color:#333;margin-bottom:4px;">📖 答案之书</div>
+                    <div style="font-size:12px;color:#999;margin-bottom:10px;">单选：答案之书使用这个分组</div>
+                    <select id="answerBookGroupSelect" style="width:100%;padding:10px 12px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;">
+                        <option value="">-- 请选择 --</option>
+                        ${groupOptions.map(g => `<option value="${g}" ${g === answerBookGroup ? 'selected' : ''}>${g}</option>`).join('')}
+                    </select>
+                    <button onclick="saveAnswerBookGroupFromSettings()" style="margin-top:10px;padding:6px 16px;border-radius:12px;background:#f5f0eb;border:1.5px solid #e8e0d8;color:#666;font-size:12px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#e8e0d8'" onmouseout="this.style.background='#f5f0eb'">保存答案之书分组</button>
+                </div>
+            </div>
         </div>
     `;
     
     document.getElementById('moduleSettingsContent').innerHTML = html;
-}
-
-// 保存函数
-function saveChatGroups() {
-    const checks = document.querySelectorAll('.chat-group-checkbox:checked');
-    const groups = Array.from(checks).map(el => el.value);
-    localStorage.setItem('chatGroups', JSON.stringify(groups));
-    showToast('✅ 聊天分组已保存');
-}
-
-function saveMailboxGroups() {
-    const checks = document.querySelectorAll('.mailbox-group-checkbox:checked');
-    const groups = Array.from(checks).map(el => el.value);
-    localStorage.setItem('mailboxGroups', JSON.stringify(groups));
-    showToast('✅ 留言板分组已保存');
-}
-
-function saveTarotGroup() {
-    const select = document.getElementById('tarotGroupSelect');
-    localStorage.setItem('tarotGroup', select.value);
-    showToast('✅ 塔罗分组已保存');
-}
-
-function saveAnswerBookGroupFromSettings() {
-    const select = document.getElementById('answerBookGroupSelect');
-    localStorage.setItem('answerBookGroup', select.value);
-    showToast('✅ 答案之书分组已保存');
 }
 // ============ 数据管理 ============
 function downloadBlob(content, filename) {
@@ -2073,17 +2460,34 @@ async function renderDataManage() {
     const logs = await dbGetAll('callLogs');
     const total = JSON.stringify({ msgs, cards, emojis, logs });
     const kb = (new Blob([total]).size / 1024).toFixed(1);
-    document.getElementById('dataManageContent').innerHTML =
-        '<div class="stat-card"><h4 style="font-size:13px;color:var(--text-light);margin-bottom:8px;">📊 存储用量</h4>' +
-        '<div class="stat-row"><span>聊天消息</span><span class="stat-value">' + msgs.length + ' 条</span></div>' +
-        '<div class="stat-row"><span>字卡数量</span><span class="stat-value">' + cards.filter(c => c.content !== '__GROUP_PLACEHOLDER__').length + ' 条</span></div>' +
-        '<div class="stat-row"><span>表情包</span><span class="stat-value">' + emojis.length + ' 个</span></div>' +
-        '<div class="stat-row"><span>通话记录</span><span class="stat-value">' + logs.length + ' 条</span></div>' +
-        '<div class="stat-row"><span>总用量</span><span class="stat-value">' + kb + ' KB</span></div></div>' +
-        '<button class="action-btn" style="background:#e8f5e9;color:#2e7d32;" onclick="exportChat()">📤 导出聊天记录</button>' +
-        '<button class="action-btn" style="background:#e3f2fd;color:#1565c0;" onclick="document.getElementById(\'importFileInput\').click()">📥 导入数据</button>' +
-        '<button class="action-btn" style="background:#fff3e0;color:#e65100;" onclick="exportAll()">💾 全量备份</button>' +
-        '<button class="action-btn" style="background:#ffebee;color:#c62828;" onclick="if(confirm(\'确定清除聊天记录？\'))clearChat()">🗑 清空聊天记录</button>';
+    
+    let html = `
+        <div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">
+            <div style="width:100%;max-width:400px;">
+                <!-- 统计卡片 -->
+                <div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:14px;">
+                    <div style="font-size:15px;font-weight:500;color:#333;margin-bottom:10px;">📊 存储用量</div>
+                    <div style="display:flex;flex-direction:column;gap:4px;">
+                        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;color:#555;"><span>聊天消息</span><span style="color:#333;font-weight:500;">${msgs.length} 条</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;color:#555;"><span>字卡数量</span><span style="color:#333;font-weight:500;">${cards.filter(c => c.content !== '__GROUP_PLACEHOLDER__').length} 条</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;color:#555;"><span>表情包</span><span style="color:#333;font-weight:500;">${emojis.length} 个</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;color:#555;"><span>通话记录</span><span style="color:#333;font-weight:500;">${logs.length} 条</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;color:#555;border-top:1px solid #f0ece8;padding-top:8px;margin-top:4px;"><span>总用量</span><span style="color:#333;font-weight:600;">${kb} KB</span></div>
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    <button onclick="exportChat()" style="padding:12px 16px;border-radius:12px;background:#fff;border:1px solid #f0ece8;color:#333;font-size:14px;cursor:pointer;transition:all 0.2s;text-align:center;" onmouseover="this.style.background='#f8f5f0'" onmouseout="this.style.background='#fff'">📤 导出聊天记录</button>
+                    <button onclick="document.getElementById('importFileInput').click()" style="padding:12px 16px;border-radius:12px;background:#fff;border:1px solid #f0ece8;color:#333;font-size:14px;cursor:pointer;transition:all 0.2s;text-align:center;" onmouseover="this.style.background='#f8f5f0'" onmouseout="this.style.background='#fff'">📥 导入数据</button>
+                    <button onclick="exportAll()" style="padding:12px 16px;border-radius:12px;background:#fff;border:1px solid #f0ece8;color:#333;font-size:14px;cursor:pointer;transition:all 0.2s;text-align:center;" onmouseover="this.style.background='#f8f5f0'" onmouseout="this.style.background='#fff'">💾 全量备份</button>
+                    <button onclick="if(confirm('确定清除聊天记录？'))clearChat()" style="padding:12px 16px;border-radius:12px;background:#fff;border:1px solid #f0ece8;color:#d4a8b8;font-size:14px;cursor:pointer;transition:all 0.2s;text-align:center;" onmouseover="this.style.background='#f8f5f0'" onmouseout="this.style.background='#fff'">🗑 清空聊天记录</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('dataManageContent').innerHTML = html;
 }
 
 async function exportChat() {
@@ -2210,27 +2614,32 @@ function switchWishTab(tab) {
 function renderWishPage() {
     const wishes = JSON.parse(localStorage.getItem('wishes') || '[]');
     let html = `
-        <div style="margin-bottom:16px;display:flex;gap:8px;">
-            <input type="text" id="wishInput" placeholder="写下你的愿望..." style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;background:#fff;">
-            <button onclick="addWish()" style="padding:10px 20px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;">许愿</button>
-        </div>
-        <div id="wishList">
+        <div style="padding:16px;display:flex;flex-direction:column;align-items:center;">
+            <div style="width:100%;max-width:400px;margin-bottom:20px;display:flex;gap:8px;">
+                <input type="text" id="wishInput" placeholder="写下你的愿望..." style="flex:1;padding:12px 16px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;">
+                <button onclick="addWish()" style="padding:12px 20px;border-radius:12px;background:#f5f0eb;border:1.5px solid #e8e0d8;color:#666;font-size:14px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#e8e0d8'" onmouseout="this.style.background='#f5f0eb'">📝</button>
+            </div>
+            <div id="wishList" style="width:100%;max-width:400px;display:flex;flex-direction:column;gap:10px;">
     `;
     if (wishes.length === 0) {
-        html += '<p style="color:#ccc;text-align:center;padding:40px;">✨ 还没有愿望，许个愿吧～</p>';
+        html += '<p style="color:#ccc;text-align:center;padding:40px;font-size:14px;">✨ 还没有愿望，写一个吧</p>';
     } else {
         wishes.forEach((w, i) => {
             html += `
-                <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;background:#fff;border-radius:8px;margin-bottom:4px;padding:8px 12px;">
-                    <span onclick="toggleWish(${i})" style="cursor:pointer;font-size:20px;">${w.done ? '✅' : '⬜'}</span>
-                    <span style="flex:1;font-size:14px;text-decoration:${w.done ? 'line-through' : 'none'};color:${w.done ? '#ccc' : '#333'};">${w.content}</span>
-                    <span style="font-size:11px;color:#999;">${w.time}</span>
-                    <span onclick="deleteWish(${i})" style="cursor:pointer;color:#ff4757;font-size:14px;">✕</span>
+                <div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;box-shadow:0 1px 4px rgba(0,0,0,0.02);position:relative;">
+                    <div style="display:flex;align-items:flex-start;gap:10px;">
+                        <span onclick="toggleWish(${i})" style="cursor:pointer;font-size:18px;margin-top:1px;flex-shrink:0;">${w.done ? '✅' : '○'}</span>
+                        <div style="flex:1;">
+                            <div style="font-size:15px;color:${w.done ? '#ccc' : '#333'};text-decoration:${w.done ? 'line-through' : 'none'};word-break:break-word;">${w.content}</div>
+                            <div style="font-size:10px;color:#ccc;margin-top:4px;">${w.time}</div>
+                        </div>
+                        <span onclick="deleteWish(${i})" style="cursor:pointer;color:#d4a8b8;font-size:14px;padding:2px 4px;flex-shrink:0;">✕</span>
+                    </div>
                 </div>
             `;
         });
     }
-    html += '</div>';
+    html += '</div></div>';
     document.getElementById('wishTabContent').innerHTML = html;
 }
 
@@ -2262,59 +2671,54 @@ function deleteWish(index) {
 // ----- 留言板 -----
 async function renderBoardPage() {
     const messages = JSON.parse(localStorage.getItem('boardMessages') || '[]');
-    const delay = parseInt(localStorage.getItem('boardReplyDelay') || '12');
-    
-    // 检查秦彻是否需要自动留言
     await checkBoardAutoReply();
-    
-    // 重新读取最新数据
     const updated = JSON.parse(localStorage.getItem('boardMessages') || '[]');
     
     let html = `
-        <div style="margin-bottom:12px;font-size:12px;color:#999;">💬 秦彻会随机在 6~24 小时内回复你</div>
-        <div style="margin-bottom:16px;display:flex;gap:8px;">
-            <input type="text" id="boardInput" placeholder="写一条留言..." style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;background:#fff;">
-            <button onclick="addBoardMessage()" style="padding:10px 20px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;">留言</button>
-        </div>
-        <div id="boardList">
+        <div style="padding:16px;display:flex;flex-direction:column;align-items:center;">
+            <div style="width:100%;max-width:400px;margin-bottom:16px;">
+                <div style="font-size:12px;color:#aaa;text-align:center;margin-bottom:12px;">💬 秦彻会随机在 6~24 小时内回复你</div>
+                <div style="display:flex;gap:8px;">
+                    <input type="text" id="boardInput" placeholder="写一条留言..." style="flex:1;padding:12px 16px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;">
+                    <button onclick="addBoardMessage()" style="padding:12px 20px;border-radius:12px;background:#f5f0eb;border:1.5px solid #e8e0d8;color:#666;font-size:14px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#e8e0d8'" onmouseout="this.style.background='#f5f0eb'">留言</button>
+                </div>
+            </div>
+            <div id="boardList" style="width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;">
     `;
     
     if (updated.length === 0) {
-        html += '<p style="color:#ccc;text-align:center;padding:40px;">💬 还没有留言，写一条吧～</p>';
+        html += '<p style="color:#ccc;text-align:center;padding:40px;font-size:14px;">💬 还没有留言，写一条吧～</p>';
     } else {
         updated.slice().reverse().forEach(item => {
             const isUser = item.sender === 'user';
             const name = isUser ? S.myName : S.contactName;
             const avatar = isUser ? getAvatar('me') : getAvatar('contact');
             const isReplied = item.replied || false;
-            const isQinReply = item.sender === 'qin' && item.replyTo;
             
             html += `
-                <div style="background:#fff;border-radius:12px;padding:12px 16px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,0.04);border-left:3px solid ${isUser ? '#ff6b81' : '#6b20d4'};">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-                        <img src="${avatar}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;">
-                        <span style="font-size:13px;font-weight:600;">${name}</span>
+                <div style="background:#fff;border-radius:4px 16px 16px 16px;padding:16px 18px;border:1px solid #f0e8e0;box-shadow:0 2px 6px rgba(0,0,0,0.02);position:relative;">
+                    <div style="position:absolute;top:-6px;left:12px;font-size:14px;color:#ccc;">📌</div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding-top:4px;">
+                        <img src="${avatar}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">
+                        <span style="font-size:14px;font-weight:500;color:#333;">${name}</span>
                         <span style="font-size:10px;color:#ccc;margin-left:auto;">${item.time}</span>
                     </div>
-                    <div style="font-size:14px;color:#333;margin-bottom:4px;">${item.content}</div>
-                    ${item.replyTo ? `<div style="font-size:11px;color:#999;background:#f5f5f5;padding:4px 8px;border-radius:6px;margin-bottom:4px;">↳ 回复：${item.replyTo}</div>` : ''}
-                    <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:4px;">
-                        ${!isUser && !isReplied ? `<span style="font-size:10px;color:#ff9800;">⏳ 待回复</span>` : ''}
-                        ${isUser && !isReplied ? `<span style="font-size:10px;color:#4caf50;">✅ 等待秦彻回复...</span>` : ''}
-                        ${isUser && isReplied ? `<span style="font-size:10px;color:#999;">✅ 已回复</span>` : ''}
-                        ${isUser && !isReplied ? `<button onclick="replyBoardMessage(${item.id})" style="padding:2px 10px;border-radius:12px;border:1px solid var(--primary);background:transparent;color:var(--primary);cursor:pointer;font-size:11px;">回复</button>` : ''}
-                        ${!isUser && !isReplied ? `<button onclick="replyBoardMessage(${item.id})" style="padding:2px 10px;border-radius:12px;border:1px solid var(--primary);background:transparent;color:var(--primary);cursor:pointer;font-size:11px;">回复</button>` : ''}
-                        ${isUser && isReplied ? `<span style="font-size:10px;color:#999;">已结束</span>` : ''}
-                        ${!isUser && isReplied ? `<span style="font-size:10px;color:#999;">已结束</span>` : ''}
+                    <div style="font-size:14px;color:#444;margin-bottom:6px;word-break:break-word;padding-left:4px;">${item.content}</div>
+                    ${item.replyTo ? `<div style="font-size:11px;color:#bbb;background:#f8f5f2;padding:4px 10px;border-radius:8px;margin-bottom:6px;">↳ 回复：${item.replyTo}</div>` : ''}
+                    <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:2px;">
+                        ${!isUser && !isReplied ? `<span style="font-size:10px;color:#d4a8b8;">⏳ 待回复</span>` : ''}
+                        ${isUser && !isReplied ? `<span style="font-size:10px;color:#aaa;">等待秦彻回复...</span>` : ''}
+                        ${isUser && isReplied ? `<span style="font-size:10px;color:#ccc;">已回复</span>` : ''}
+                        ${!isUser && isReplied ? `<span style="font-size:10px;color:#ccc;">已结束</span>` : ''}
+                        ${!isReplied ? `<button onclick="replyBoardMessage(${item.id})" style="padding:4px 14px;border-radius:14px;border:1px solid #d4a8b8;background:transparent;color:#d4a8b8;font-size:11px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#d4a8b8';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#d4a8b8'">回复</button>` : ''}
                     </div>
                 </div>
             `;
         });
     }
-    html += '</div>';
+    html += '</div></div>';
     document.getElementById('boardTabContent').innerHTML = html;
 }
-
 function addBoardMessage() {
     const input = document.getElementById('boardInput');
     const content = input.value.trim();
@@ -2430,18 +2834,105 @@ function openAnniversaryPage() {
 
 function renderAnniversaryPage() {
     const anniversaries = JSON.parse(localStorage.getItem('anniversaries') || '[]');
-    let html = '<div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;"><input type="date" id="anniversaryDate" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;min-width:150px;"><input type="text" id="anniversaryName" placeholder="纪念日名称..." style="flex:2;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;min-width:120px;"><button onclick="addAnniversary()" style="padding:10px 20px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;">添加</button></div><div id="anniversaryList">';
+    const now = new Date();
+    const currentYear = localStorage.getItem('calendarYear') ? parseInt(localStorage.getItem('calendarYear')) : now.getFullYear();
+    const currentMonth = localStorage.getItem('calendarMonth') ? parseInt(localStorage.getItem('calendarMonth')) : now.getMonth();
+    
+    let html = `
+        <div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">
+            <div style="width:100%;max-width:400px;">
+                <div style="margin-bottom:20px;display:flex;gap:8px;flex-wrap:wrap;background:#fff;padding:16px;border-radius:16px;border:1px solid #f0ece8;">
+                    <input type="date" id="anniversaryDate" style="flex:1;padding:12px 16px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;min-width:150px;">
+                    <input type="text" id="anniversaryName" placeholder="纪念日名称..." style="flex:2;padding:12px 16px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;min-width:120px;">
+                    <button onclick="addAnniversary()" style="padding:12px 20px;border-radius:12px;background:#f5f0eb;border:1.5px solid #e8e0d8;color:#666;font-size:14px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#e8e0d8'" onmouseout="this.style.background='#f5f0eb'">添加</button>
+                </div>
+                <div id="anniversaryList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+    `;
     if (anniversaries.length === 0) {
-        html += '<p style="color:#ccc;text-align:center;padding:40px;">📅 还没有纪念日，添加一个吧～</p>';
+        html += '<p style="color:#ccc;text-align:center;padding:20px;font-size:14px;">📅 还没有纪念日</p>';
     } else {
         anniversaries.sort((a, b) => new Date(b.date) - new Date(a.date));
         anniversaries.forEach((item, i) => {
             const days = Math.floor((Date.now() - new Date(item.date)) / (1000 * 60 * 60 * 24));
-            html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;"><span style="font-size:16px;">📅</span><span style="flex:1;font-size:14px;">' + item.name + '</span><span style="font-size:12px;color:#999;">' + item.date + '</span><span style="font-size:12px;color:var(--primary);font-weight:600;">' + (days >= 0 ? '已过 ' + days + ' 天' : '还有 ' + Math.abs(days) + ' 天') + '</span><span onclick="deleteAnniversary(' + i + ')" style="cursor:pointer;color:#ff4757;font-size:14px;">✕</span></div>';
+            html += `
+                <div style="background:#fff;border-radius:16px;padding:14px 18px;border:1px solid #f0ece8;display:flex;align-items:center;gap:12px;">
+                    <span style="font-size:16px;">📅</span>
+                    <div style="flex:1;">
+                        <div style="font-size:14px;color:#333;">${item.name}</div>
+                        <div style="font-size:11px;color:#ccc;">${item.date}</div>
+                    </div>
+                    <span style="font-size:12px;color:#d4a8b8;font-weight:500;">${days >= 0 ? '已过 ' + days + ' 天' : '还有 ' + Math.abs(days) + ' 天'}</span>
+                    <span onclick="deleteAnniversary(${i})" style="cursor:pointer;color:#d4a8b8;font-size:14px;">✕</span>
+                </div>
+            `;
         });
     }
     html += '</div>';
+    
+    // 日历
+    html += `
+        <div style="background:#fff;border-radius:16px;padding:20px;border:1px solid #f0ece8;width:100%;max-width:400px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                <button onclick="changeMonth(-1)" style="padding:4px 12px;border-radius:8px;border:1px solid #e8e0d8;background:transparent;color:#666;cursor:pointer;font-size:14px;">‹</button>
+                <span style="font-size:16px;font-weight:500;color:#333;">${currentYear}年 ${currentMonth + 1}月</span>
+                <button onclick="changeMonth(1)" style="padding:4px 12px;border-radius:8px;border:1px solid #e8e0d8;background:transparent;color:#666;cursor:pointer;font-size:14px;">›</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;">
+                ${['一','二','三','四','五','六','日'].map(d => `<div style="font-size:11px;color:#bbb;padding:4px 0;">${d}</div>`).join('')}
+    `;
+    
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const today = new Date();
+    const todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+    
+    const anniversaryDates = new Set();
+    anniversaries.forEach(item => {
+        const d = new Date(item.date);
+        if (d.getFullYear() === currentYear && d.getMonth() === currentMonth) {
+            anniversaryDates.add(d.getDate());
+        }
+    });
+    
+    const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+    for (let i = 0; i < startOffset; i++) {
+        html += '<div style="padding:4px 0;"></div>';
+    }
+    
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = currentYear + '-' + String(currentMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+        const isToday = dateStr === todayStr;
+        const hasAnniversary = anniversaryDates.has(d);
+        html += `
+            <div style="padding:4px 0;display:flex;justify-content:center;">
+                <div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:14px;color:${isToday ? '#d4a8b8' : '#333'};font-weight:${isToday ? '600' : '400'};${hasAnniversary ? 'border:2px solid #d4a8b8;' : ''}">
+                    ${d}
+                </div>
+            </div>
+        `;
+    }
+    
+    html += `
+            </div>
+            <div style="display:flex;justify-content:center;gap:16px;margin-top:12px;font-size:11px;color:#ccc;">
+                <span>● 有纪念日</span>
+            </div>
+        </div>
+    `;
+    
+    html += '</div></div>';
     document.getElementById('anniversaryContent').innerHTML = html;
+}
+function changeMonth(delta) {
+    const currentYear = localStorage.getItem('calendarYear') ? parseInt(localStorage.getItem('calendarYear')) : new Date().getFullYear();
+    const currentMonth = localStorage.getItem('calendarMonth') ? parseInt(localStorage.getItem('calendarMonth')) : new Date().getMonth();
+    let newMonth = currentMonth + delta;
+    let newYear = currentYear;
+    if (newMonth > 11) { newMonth = 0; newYear++; }
+    if (newMonth < 0) { newMonth = 11; newYear--; }
+    localStorage.setItem('calendarYear', String(newYear));
+    localStorage.setItem('calendarMonth', String(newMonth));
+    renderAnniversaryPage();
 }
 
 function addAnniversary() {
@@ -2492,38 +2983,45 @@ async function renderAnswerBookPage() {
     const history = JSON.parse(localStorage.getItem('answerBookHistory') || '[]');
     
     let html = `
-        <div style="margin-bottom:12px;font-size:13px;color:#999;">📂 当前分组：${selectedGroup}</div>
-        <div style="margin-bottom:16px;display:flex;gap:8px;">
-            <input type="text" id="answerBookInput" placeholder="写下你的问题..." style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;" onkeydown="if(event.key==='Enter')askAnswerBook()">
-            <button onclick="askAnswerBook()" style="padding:10px 20px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;">提问</button>
-        </div>
-        <div id="answerBookResult" style="background:#f8f0ff;border-radius:12px;padding:20px;text-align:center;margin-bottom:16px;display:none;">
-            <div style="font-size:13px;color:#999;margin-bottom:4px;">📖 秦彻正在翻阅答案之书...</div>
-            <div id="answerBookText" style="font-size:18px;font-weight:600;color:#6b20d4;margin-top:8px;"></div>
-        </div>
-        <div id="answerBookHistory">
-            <div style="font-size:13px;color:#999;margin-bottom:8px;">📝 对话记录</div>
+        <div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">
+            <div style="width:100%;max-width:400px;">
+                <div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:16px;">
+                    <div style="font-size:13px;color:#999;margin-bottom:4px;">📂 当前分组</div>
+                    <div style="font-size:15px;color:#333;font-weight:500;">${selectedGroup}</div>
+                </div>
+                <div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:16px;">
+                    <div style="display:flex;gap:8px;">
+                        <input type="text" id="answerBookInput" placeholder="写下你的问题..." style="flex:1;padding:12px 16px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;" onkeydown="if(event.key==='Enter')askAnswerBook()">
+                        <button onclick="askAnswerBook()" style="padding:12px 20px;border-radius:12px;background:#f5f0eb;border:1.5px solid #e8e0d8;color:#666;font-size:14px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#e8e0d8'" onmouseout="this.style.background='#f5f0eb'">提问</button>
+                    </div>
+                </div>
+                <div id="answerBookResult" style="background:#fff;border-radius:16px;padding:20px;text-align:center;margin-bottom:16px;border:1px solid #f0ece8;display:none;">
+                    <div style="font-size:13px;color:#999;margin-bottom:4px;">📖 秦彻正在翻阅答案之书...</div>
+                    <div id="answerBookText" style="font-size:18px;font-weight:500;color:#d4a8b8;margin-top:8px;"></div>
+                </div>
+                <div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;">
+                    <div style="font-size:13px;color:#999;margin-bottom:8px;">📝 对话记录</div>
     `;
     if (history.length === 0) {
-        html += '<p style="color:#ccc;text-align:center;padding:20px;">还没有提问记录</p>';
+        html += '<p style="color:#ccc;text-align:center;padding:20px;font-size:14px;">还没有提问记录</p>';
     } else {
         history.slice().reverse().forEach(item => {
             html += `
-                <div style="display:flex;flex-direction:column;padding:10px 0;border-bottom:1px solid #f0f0f0;">
+                <div style="padding:10px 0;border-bottom:1px solid #f5f0eb;">
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
                         <span style="font-size:12px;color:#999;">你：</span>
                         <span style="font-size:14px;color:#333;">${item.question}</span>
                     </div>
                     <div style="display:flex;align-items:center;gap:8px;">
-                        <img src="${getAvatar('contact')}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">
-                        <span style="font-size:14px;color:#6b20d4;font-weight:500;">${item.answer}</span>
+                        <img src="${getAvatar('contact')}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;">
+                        <span style="font-size:14px;color:#d4a8b8;font-weight:500;">${item.answer}</span>
                     </div>
                     <div style="font-size:10px;color:#ccc;margin-top:2px;">${item.time}</div>
                 </div>
             `;
         });
     }
-    html += '</div>';
+    html += '</div></div></div>';
     document.getElementById('answerBookContent').innerHTML = html;
 }
 
@@ -2573,30 +3071,144 @@ function openChoicePage() {
 }
 
 function renderChoicePage() {
-    const question = localStorage.getItem('choiceQuestion') || '';
-    const options = JSON.parse(localStorage.getItem('choiceOptions') || '[]');
     const history = JSON.parse(localStorage.getItem('choiceHistory') || '[]');
-    const result = localStorage.getItem('choiceResult') || '';
-    let html = '<div style="text-align:center;margin-bottom:20px;"><div style="font-size:14px;color:#666;font-style:italic;margin-bottom:12px;">💭 秦彻，请告诉我你的选择</div><div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;"><input type="text" id="choiceQuestionInput" placeholder="你在纠结什么？" value="' + question + '" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #f0dce0;background:#fff;color:#000;font-size:14px;outline:none;min-width:150px;"><button onclick="saveQuestion()" style="padding:10px 16px;border-radius:12px;background:#e8b4c8;color:#fff;border:none;cursor:pointer;font-weight:500;">确定</button></div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"><input type="text" id="choiceOptionInput" placeholder="输入选项..." style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #f0dce0;background:#fff;color:#000;font-size:14px;outline:none;min-width:120px;" onkeydown="if(event.key===\'Enter\')addOption()"><button onclick="addOption()" style="padding:10px 16px;border-radius:12px;background:#e8b4c8;color:#fff;border:none;cursor:pointer;font-weight:500;">+ 添加选项</button>' + (options.length >= 2 ? '<button onclick="makeChoice()" style="padding:10px 16px;border-radius:12px;background:#d4a0b8;color:#fff;border:none;cursor:pointer;font-weight:500;">💗 请秦彻选择</button>' : '') + '</div><div id="optionList" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;">';
-    if (options.length === 0) {
-        html += '<div style="color:#bbb;font-size:13px;">还没有选项，添加一些吧～</div>';
-    } else {
-        options.forEach((opt, i) => {
-            html += '<div style="padding:12px 20px;border-radius:20px;background:#fdf5f7;border:1.5px solid #f0dce0;font-size:14px;color:#000;display:flex;align-items:center;gap:8px;"><span style="color:#999;">' + (i+1) + '.</span><span style="color:#000;font-weight:500;">' + opt + '</span><span onclick="removeOption(' + i + ')" style="color:#d4a0b8;cursor:pointer;font-size:14px;">✕</span></div>';
-        });
+    const myAvatar = getAvatar('me');
+    const contactAvatar = getAvatar('contact');
+    const preset = BUBBLE_PRESETS.find(p => p.id === S.bubbleStyle) || BUBBLE_PRESETS[0];
+    
+    // 聊天背景
+    let bgStyle = 'background:#f8f5f0;';
+    if (S.chatBg === 'custom' && S.chatBgImage) {
+        bgStyle = `background-image:url('${S.chatBgImage}');background-size:cover;background-position:center;`;
+    } else if (S.chatBg && S.chatBg !== 'default') {
+        const bgMap = { warm: '#fffdf5', cool: '#f5f8ff', pink: '#fff5f7' };
+        bgStyle = `background:${bgMap[S.chatBg] || '#f8f5f0'};`;
     }
-    html += '</div><div id="choiceResult" style="background:rgba(255,255,255,0.8);border-radius:16px;padding:20px;margin-bottom:16px;border:1.5px solid #f0dce0;' + (!result ? 'display:none;' : '') + '"><div style="font-size:14px;color:#666;margin-bottom:4px;">💗 秦彻的建议</div><div id="choiceResultText" style="font-size:22px;color:#000;font-weight:500;">' + result + '</div></div><div id="choiceHistory" style="text-align:left;margin-top:8px;max-height:300px;overflow-y:auto;"><div style="font-size:12px;color:#bbb;margin-bottom:8px;">📜 历史记录</div>';
+    
+    let chatHtml = '';
+    
     if (history.length === 0) {
-        html += '<div style="color:#ddd;font-size:13px;text-align:center;padding:12px;">还没有记录</div>';
+        chatHtml = `<div style="text-align:center;color:#ccc;padding:40px;font-size:14px;">💬 开始你的选择吧</div>`;
     } else {
-        history.slice().reverse().forEach(item => {
-            html += '<div style="padding:8px 0;border-bottom:1px solid #f5e8ec;font-size:13px;"><div style="color:#333;">💭 ' + item.question + '</div><div style="color:#000;font-weight:500;">💗 ' + item.choice + '</div><div style="color:#bbb;font-size:10px;">' + item.time + '</div></div>';
+        history.forEach(item => {
+            let displayQuestion = item.question;
+            if (!displayQuestion.startsWith('秦彻，请告诉我你的选择：')) {
+                displayQuestion = '秦彻，请告诉我你的选择：' + (item.rawQuestion || item.question);
+            }
+            chatHtml += `
+                <div style="margin-bottom:14px;">
+                    <!-- 用户消息（右侧） -->
+                    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:4px;">
+                        <div style="max-width:78%;background:${preset.myBg};color:${preset.myText};padding:9px 14px;border-radius:16px 4px 16px 16px;font-size:14px;line-height:1.5;word-break:break-word;text-align:left;">
+                            ${displayQuestion}
+                        </div>
+                        <img src="${myAvatar}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;margin-top:2px;border:2px solid #f0ece8;">
+                    </div>
+                    <!-- 秦彻回复（左侧） -->
+                    <div style="display:flex;justify-content:flex-start;gap:8px;">
+                        <img src="${contactAvatar}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;margin-top:2px;border:2px solid #f0ece8;cursor:pointer;" onclick="openProfile()">
+                        <div style="max-width:78%;background:${preset.otherBg};color:${preset.otherText};padding:9px 14px;border-radius:4px 16px 16px 16px;font-size:14px;line-height:1.5;word-break:break-word;text-align:left;border:1px solid #eee4dc;">
+                            笑笑，我的建议是：${item.choice}
+                        </div>
+                    </div>
+                </div>
+            `;
         });
     }
-    html += '</div></div>';
+    
+    const html = `
+        <div style="height:100%;display:flex;flex-direction:column;background:#f8f5f0;">
+            <!-- 顶部导航（和塔罗对话风格一致） -->
+            <div class="chat-topbar" style="background:#fff;padding:8px 12px;display:flex;align-items:center;border-bottom:1px solid #f0ece8;flex-shrink:0;min-height:42px;gap:8px;">
+                <button class="back-arrow" onclick="goHome()" style="width:30px;height:30px;border-radius:50%;background:#f5f5f5;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;border:none;color:#333;flex-shrink:0;">←</button>
+                <div style="flex:1;text-align:center;font-size:14px;color:#d4a8b8;font-style:italic;">💭 倾听我心 · 选择即答案</div>
+                <span style="font-size:18px;cursor:pointer;flex-shrink:0;padding:2px 4px;opacity:0;">⚙️</span>
+            </div>
+            
+            <!-- 聊天区域（和聊天/塔罗一样的背景） -->
+            <div id="choiceChatArea" style="flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:12px;${bgStyle}">
+                ${chatHtml}
+            </div>
+            
+            <!-- 底部输入区域（和塔罗对话风格一致） -->
+            <div style="background:rgba(255,255,255,0.98);padding:8px 10px;display:flex;align-items:center;gap:5px;border-top:1px solid #f0ece8;flex-shrink:0;min-height:48px;">
+                <div id="choiceInputTrigger" onclick="toggleChoiceInput()" style="flex:1;border:1.5px solid #e8e0d8;border-radius:18px;padding:8px 14px;font-size:14px;outline:none;background:#f5f5f5;min-width:0;cursor:pointer;color:#999;display:flex;align-items:center;justify-content:space-between;">
+                    <span id="choiceInputPlaceholder">💬 点击输入你的问题...</span>
+                    <span style="font-size:12px;color:#ccc;">✏️</span>
+                </div>
+                <div style="width:36px;height:36px;border-radius:50%;background:#d4a8b8;color:#fff;border:none;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0.3;">➤</div>
+            </div>
+            
+            <!-- 输入面板（弹出层） -->
+            <div id="choiceInputPanel" style="display:none;background:#fff;border-radius:16px 16px 0 0;padding:16px 18px 20px;border-top:1px solid #f0ece8;flex-shrink:0;box-shadow:0 -4px 20px rgba(0,0,0,0.06);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <span style="font-size:13px;color:#999;">✏️ 写下你的问题</span>
+                    <span onclick="toggleChoiceInput()" style="cursor:pointer;color:#ccc;font-size:18px;">✕</span>
+                </div>
+                <div style="margin-bottom:10px;">
+                    <input type="text" id="choiceQuestionInput" placeholder="输入你的问题..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;">
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+                    <input type="text" id="choiceOptionAInput" placeholder="选项A..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;">
+                    <input type="text" id="choiceOptionBInput" placeholder="选项B..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;">
+                </div>
+                <button onclick="sendChoice()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;border:1.5px solid #d4a8b8;color:#fff;font-size:15px;cursor:pointer;transition:all 0.2s;box-sizing:border-box;font-weight:500;" onmouseover="this.style.background='#c498a8'" onmouseout="this.style.background='#d4a8b8'">💗 发送</button>
+            </div>
+        </div>
+    `;
+    
     document.getElementById('choiceContent').innerHTML = html;
+    
+    const chatArea = document.getElementById('choiceChatArea');
+    if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
+}
+function toggleChoiceInput() {
+    const panel = document.getElementById('choiceInputPanel');
+    const placeholder = document.getElementById('choiceInputPlaceholder');
+    if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        placeholder.textContent = '✏️ 正在输入...';
+        setTimeout(() => {
+            document.getElementById('choiceQuestionInput').focus();
+        }, 200);
+        panel.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        panel.style.display = 'none';
+        placeholder.textContent = '💬 点击输入你的问题...';
+    }
 }
 
+function sendChoice() {
+    const question = document.getElementById('choiceQuestionInput').value.trim();
+    const optionA = document.getElementById('choiceOptionAInput').value.trim();
+    const optionB = document.getElementById('choiceOptionBInput').value.trim();
+    
+    if (!question || !optionA || !optionB) {
+        showToast('请完整填写问题、选项A和选项B');
+        return;
+    }
+    
+    const displayQuestion = '秦彻，请告诉我你的选择：' + question;
+    const choice = Math.random() < 0.5 ? optionA : optionB;
+    
+    const history = JSON.parse(localStorage.getItem('choiceHistory') || '[]');
+    history.push({
+        question: displayQuestion,
+        rawQuestion: question,
+        choice: choice,
+        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+    });
+    localStorage.setItem('choiceHistory', JSON.stringify(history));
+    
+    document.getElementById('choiceQuestionInput').value = '';
+    document.getElementById('choiceOptionAInput').value = '';
+    document.getElementById('choiceOptionBInput').value = '';
+    
+    document.getElementById('choiceInputPanel').style.display = 'none';
+    document.getElementById('choiceInputPlaceholder').textContent = '💬 点击输入你的问题...';
+    
+    renderChoicePage();
+}
 function saveQuestion() {
     const input = document.getElementById('choiceQuestionInput');
     const question = input.value.trim();
@@ -2838,6 +3450,12 @@ async function init() {
             if (Array.isArray(allP) && allP.length > 0) { patOptions = allP.map(x => x.content || x); console.log('✅ 已恢复拍一拍'); }
         } catch(e) { console.log('拍一拍数据格式错误'); }
     }
+// 加载秦彻想说
+const savedMood = localStorage.getItem('contactMood');
+if (savedMood) {
+    S.contactMood = savedMood;
+    console.log('✅ 已恢复秦彻想说');
+}
     const savedMyName = localStorage.getItem('myName');
     if (savedMyName) { S.myName = savedMyName; console.log('✅ 已恢复我的昵称'); }
     const savedContactName = localStorage.getItem('contactName');
