@@ -26,11 +26,11 @@
         .home-mood-preview{font-size:12px;color:var(--text-light);font-style:italic;margin-top:6px;}
         .home-divider{display:flex;align-items:center;padding:0 20px;margin:6px 0;flex-shrink:0;}
         .home-divider .line{flex:1;height:1px;background:#e8e8e8;}.home-divider .label{padding:0 12px;font-size:11px;color:var(--text-lighter);}
-       .home-grid-scroll{flex:1;overflow-y:auto;padding:6px 14px 14px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;align-content:start;}
+        .home-grid-scroll{flex:1;overflow-y:auto;padding:6px 14px 14px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;align-content:start;}
         .home-card{background:rgba(255,255,255,0.9);border-radius:14px;padding:16px 12px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;border:1px solid rgba(255,255,255,0.6);}
         .home-card:active{transform:scale(.96);}
         .home-card .card-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
-        .home-card .card-title{font-size:12px;font-weight:600;}.home-card .card-desc{font-size:10px;color:var(--text-lighter);}
+        .home-card .card-title{font-size:12px;font-weight:600;}
         .home-footer{text-align:center;padding:8px;flex-shrink:0;font-size:9px;color:#ccc;}
         .chat-topbar{background:#fff;padding:8px 12px;display:flex;align-items:center;border-bottom:1px solid var(--border);flex-shrink:0;min-height:42px;gap:8px;}
         .chat-topbar .back-arrow{width:30px;height:30px;border-radius:50%;background:#f5f5f5;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;border:none;color:var(--text);flex-shrink:0;}
@@ -129,26 +129,54 @@
         .bg-preset-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
         .bg-preset-item{aspect-ratio:1;border-radius:10px;cursor:pointer;border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-size:18px;}
         .bg-preset-item.selected{border-color:var(--primary);box-shadow:0 0 0 3px rgba(255,107,129,0.2);}
+        .emoji-group-tabs {
+            display: flex;
+            gap: 6px;
+            padding: 6px 10px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #f0f0f0;
+            background: #fafafa;
+        }
+        .emoji-group-tab {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: #999;
+            transition: all 0.2s;
+        }
+        .emoji-group-tab.active {
+            background: var(--primary);
+            color: #fff;
+        }
+        .emoji-group-tab.add {
+            background: #f0f0f0;
+            color: #666;
+            font-size: 14px;
+            padding: 4px 10px;
+        }
     </style>
 </head>
 <body>
 <div class="page active" id="homePage"><div class="home-page-inner" id="homeInner">
     <div class="home-top-area"><div class="home-avatar-group"><div><img class="home-avatar-img" id="homeContactAvatar" src=""><div class="home-avatar-name" id="homeContactName">秦彻</div></div><div class="home-heart">💕</div><div><img class="home-avatar-img me" id="homeMyAvatar" src=""><div class="home-avatar-name" id="homeMyName">笑笑</div></div></div><div class="home-status-tag"><span class="home-status-dot"></span><span id="homeStatusText">在线</span></div><div class="home-mood-preview" id="homeMoodPreview"></div></div>
     <div class="home-divider"><span class="line"></span><span class="label">我们的时光</span><span class="line"></span></div>
-   <div class="home-grid-scroll">
-    <div class="home-card" onclick="openChatPage()"><div class="card-icon" style="background:#e3f2fd;">💬</div><div class="card-title">聊天</div></div>
-    <div class="home-card" onclick="openOurUniverse()"><div class="card-icon" style="background:linear-gradient(135deg,#e8d5f5,#d5e8f5);">💫</div><div class="card-title">我们的宇宙</div></div>
-    <div class="home-card" onclick="openWordCardLibrary()"><div class="card-icon" style="background:#fff3e0;">📝</div><div class="card-title">字卡库</div></div>
-    <div class="home-card" onclick="openEmojiManage()"><div class="card-icon" style="background:#fce4ec;">😊</div><div class="card-title">表情包管理</div></div>
-<div class="home-card" onclick="openWishPage()"><div class="card-icon" style="background:#fce4ec;">✨</div><div class="card-title">许愿便利贴</div></div>
-<div class="home-card" onclick="openAnniversaryPage()"><div class="card-icon" style="background:#e8f5e9;">📅</div><div class="card-title">纪念日</div></div>   
-<div class="home-card" onclick="openAnswerBookPage()"><div class="card-icon" style="background:#f3e5f5;">📖</div><div class="card-title">答案之书</div></div>
- <div class="home-card" onclick="openTarotPage()"><div class="card-icon" style="background:#f3e5f5;">🔮</div><div class="card-title">塔罗占卜</div></div>   
-<div class="home-card" onclick="openChoicePage()"><div class="card-icon" style="background:#fce4ec;">💗</div><div class="card-title">倾听我心</div></div>
- <div class="home-card" onclick="openCallLogPage()"><div class="card-icon" style="background:#e8f5e9;">📞</div><div class="card-title">通话记录</div></div>
-    <div class="home-card" onclick="openDataManage()"><div class="card-icon" style="background:#f5f5f5;">💾</div><div class="card-title">数据管理</div></div>
-</div>
-<div class="home-footer">🌳 秦彻和笑笑的时光树洞</div>
+    <div class="home-grid-scroll">
+        <div class="home-card" onclick="openChatPage()"><div class="card-icon" style="background:#e3f2fd;">💬</div><div class="card-title">聊天</div></div>
+        <div class="home-card" onclick="openOurUniverse()"><div class="card-icon" style="background:linear-gradient(135deg,#e8d5f5,#d5e8f5);">💫</div><div class="card-title">我们的宇宙</div></div>
+        <div class="home-card" onclick="openWordCardLibrary()"><div class="card-icon" style="background:#fff3e0;">📝</div><div class="card-title">字卡库</div></div>
+        <div class="home-card" onclick="openEmojiManage()"><div class="card-icon" style="background:#fce4ec;">😊</div><div class="card-title">表情包管理</div></div>
+        <div class="home-card" onclick="openWishPage()"><div class="card-icon" style="background:#fce4ec;">✨</div><div class="card-title">许愿便利贴</div></div>
+        <div class="home-card" onclick="openAnniversaryPage()"><div class="card-icon" style="background:#e8f5e9;">📅</div><div class="card-title">纪念日</div></div>
+        <div class="home-card" onclick="openAnswerBookPage()"><div class="card-icon" style="background:#f3e5f5;">📖</div><div class="card-title">答案之书</div></div>
+        <div class="home-card" onclick="openTarotPage()"><div class="card-icon" style="background:#f3e5f5;">🔮</div><div class="card-title">塔罗占卜</div></div>
+        <div class="home-card" onclick="openChoicePage()"><div class="card-icon" style="background:#fce4ec;">💗</div><div class="card-title">倾听我心</div></div>
+        <div class="home-card" onclick="openCallLogPage()"><div class="card-icon" style="background:#e8f5e9;">📞</div><div class="card-title">通话记录</div></div>
+        <div class="home-card" onclick="openDataManage()"><div class="card-icon" style="background:#f5f5f5;">💾</div><div class="card-title">数据管理</div></div>
+    </div>
+    <div class="home-footer">🌳 秦彻和笑笑的时光树洞</div>
 </div></div>
 
 <div class="page" id="chatPage"><div style="height:100%;display:flex;flex-direction:column;">
@@ -170,8 +198,8 @@
     <div id="callStatusLg" style="font-size:14px;color:rgba(255,255,255,0.7);margin-bottom:30px;">正在呼叫...</div>
     <div id="callTimerLg" style="font-size:40px;font-weight:300;font-family:monospace;letter-spacing:4px;margin-bottom:40px;">00:00:00</div>
     <div style="display:flex;gap:30px;">
-        <button id="answerBtn" onclick="answerCall()" style="display:none;width:60px;height:60px;border-radius:50%;border:none;cursor:pointer;font-size:24px;background:#4cd964;color:#fff;">📞</button>
-        <button onclick="endCall()" style="width:70px;height:70px;border-radius:50%;border:none;cursor:pointer;font-size:24px;background:#ff4757;color:#fff;">📞</button>
+        <button id="answerBtn" onclick="answerCall()" style="display:none;width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;font-size:24px;background:#4cd964;color:#fff;">📞</button>
+        <button onclick="endCall()" style="width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;font-size:24px;background:#ff4757;color:#fff;">📞</button>
     </div>
 </div>
 <div class="call-float-ball" id="callFloatBall"><img id="ballAvatar" src="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;"><div id="ballTimer" style="position:absolute;bottom:-8px;background:#4cd964;color:#fff;font-size:9px;padding:2px 8px;border-radius:10px;">00:00</div><div class="ball-end" onclick="event.stopPropagation();endCall()">✕</div></div>
@@ -200,7 +228,7 @@
 
 <input type="file" id="imageMsgInput" accept="image/*" onchange="handleImageMessage(event)">
 <input type="file" id="emojiInput" accept="image/*" onchange="handleEmojiUpload(event)" multiple>
-<input type="file" id="emojiManageInput" accept="image/*" onchange="handleEmojiManageUpload(event)" multiple>
+<input type="file" id="emojiManageInput" accept="image/*" onchange="handleEmojiUpload(event)" multiple>
 <input type="file" id="myAvatarInput" accept="image/*" onchange="handleMyAvatarUpload(event)">
 <input type="file" id="contactAvatarInput" accept="image/*" onchange="handleContactAvatarUpload(event)">
 <input type="file" id="chatBgInput" accept="image/*" onchange="handleChatBgUpload(event)">
@@ -209,7 +237,7 @@
 <input type="file" id="importCardsInput" accept=".json,.txt" onchange="importCardsFile(event)">
 
 <script>
-// ============ localStorage 数据管理（来自版本B） ============
+// ============ localStorage 数据管理 ============
 function lsGet(key) {
     try {
         const data = localStorage.getItem(key);
@@ -231,9 +259,7 @@ function lsSet(key, data) {
 function lsAdd(key, item) {
     try {
         const data = lsGet(key);
-        if (!item.id) {
-            item.id = Date.now() + Math.random() * 1000;
-        }
+        if (!item.id) item.id = Date.now() + Math.random() * 1000;
         data.push(item);
         lsSet(key, data);
         return item.id;
@@ -261,11 +287,8 @@ async function dbPut(store, data) {
     if (store === 'settings' || store === 'bgSettings') {
         const existing = lsGet(store);
         const idx = existing.findIndex(x => x.key === data.key);
-        if (idx >= 0) {
-            existing[idx] = data;
-        } else {
-            existing.push(data);
-        }
+        if (idx >= 0) existing[idx] = data;
+        else existing.push(data);
         lsSet(store, existing);
         return data.key;
     }
@@ -288,7 +311,7 @@ async function openDB() {
     return true;
 }
 
-// ============ 全局状态（来自版本A） ============
+// ============ 全局状态 ============
 let S = {
     contactName: '秦彻',
     contactStatus: '在线',
@@ -333,7 +356,7 @@ const BUBBLE_PRESETS = [
     {id:'dark',name:'暗夜模式',myBg:'#3d3d3d',myText:'#e0e0e0',otherBg:'#2a2a2a',otherText:'#d0d0d0'}
 ];
 
-// ============ 工具函数（来自版本A） ============
+// ============ 工具函数 ============
 function getAvatar(t) {
     const d = t === 'contact' ? S.contactAvatar : S.myAvatar;
     return d || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23' + (t === 'contact' ? 'ffecd2' : 'a8edea') + '"/%3E%3C/svg%3E';
@@ -379,14 +402,10 @@ function scrollBottom() {
 
 function applyBubbleStyle() {
     const preset = BUBBLE_PRESETS.find(p => p.id === S.bubbleStyle) || BUBBLE_PRESETS[0];
-    
-    // 更新 CSS 变量
     document.documentElement.style.setProperty('--bubble-my-bg', preset.myBg);
     document.documentElement.style.setProperty('--bubble-my-text', preset.myText);
     document.documentElement.style.setProperty('--bubble-other-bg', preset.otherBg);
     document.documentElement.style.setProperty('--bubble-other-text', preset.otherText);
-    
-    // 直接修改已有消息的气泡样式
     const chatArea = document.getElementById('chatArea');
     if (chatArea) {
         chatArea.querySelectorAll('.message-wrapper.right .bubble').forEach(el => {
@@ -409,7 +428,7 @@ function updateHome() {
     document.getElementById('homeMoodPreview').textContent = S.contactMood || '';
 }
 
-// ============ 聊天功能（来自版本A） ============
+// ============ 聊天功能 ============
 function openChatPage() {
     showPage('chatPage');
     document.getElementById('chatTopQuote').textContent = S.topQuote;
@@ -417,10 +436,9 @@ function openChatPage() {
     loadEmojiPanel();
     applyBubbleStyle();
     startAutoSendIfNeeded();
-    // 确保发送按钮始终绑定 sendMessage 函数
-   const btn = document.getElementById('sendBtn');
-btn.removeEventListener('click', sendMessage);
-btn.addEventListener('click', sendMessage);
+    const btn = document.getElementById('sendBtn');
+    btn.removeEventListener('click', sendMessage);
+    btn.addEventListener('click', sendMessage);
 }
 
 async function loadMessages() {
@@ -433,13 +451,13 @@ async function loadMessages() {
     }
     msgs.forEach(m => renderMsg(m));
     scrollBottom();
+    setTimeout(() => applyBubbleStyle(), 100);
 }
 
 function renderMsg(m) {
     const ca = document.getElementById('chatArea');
     const empty = ca.querySelector('#emptyChat');
     if (empty) empty.remove();
-
     if (m.type === 'system') {
         const s = document.createElement('div');
         s.className = 'system-msg';
@@ -447,19 +465,15 @@ function renderMsg(m) {
         ca.appendChild(s);
         return;
     }
-
     const w = document.createElement('div');
     w.className = 'message-wrapper ' + (m.sender === 'me' ? 'right' : 'left');
-
     const av = document.createElement('img');
     av.className = 'message-avatar';
     av.src = m.sender === 'me' ? getAvatar('me') : getAvatar('contact');
     if (m.sender === 'other') av.onclick = function() { openProfile(); };
-
     const b = document.createElement('div');
     b.className = 'bubble';
-
-const preset = BUBBLE_PRESETS.find(p => p.id === S.bubbleStyle) || BUBBLE_PRESETS[0];
+    const preset = BUBBLE_PRESETS.find(p => p.id === S.bubbleStyle) || BUBBLE_PRESETS[0];
     if (m.sender === 'me') {
         b.style.background = preset.myBg;
         b.style.color = preset.myText;
@@ -467,7 +481,6 @@ const preset = BUBBLE_PRESETS.find(p => p.id === S.bubbleStyle) || BUBBLE_PRESET
         b.style.background = preset.otherBg;
         b.style.color = preset.otherText;
     }
-
     if (m.type === 'pat') {
         b.classList.add('pat-bubble');
         b.innerHTML = '<span>👋 <b>' + (m.sender === 'me' ? S.myName : S.contactName) + '</b> ' + m.content + '</span>';
@@ -482,42 +495,30 @@ const preset = BUBBLE_PRESETS.find(p => p.id === S.bubbleStyle) || BUBBLE_PRESET
     } else {
         b.textContent = m.content;
     }
-
     const t = document.createElement('div');
     t.className = 'message-time';
     t.textContent = fmtTime(m.timestamp);
-
     w.appendChild(av);
     w.appendChild(b);
     w.appendChild(t);
     ca.appendChild(w);
-scrollBottom(); 
+    scrollBottom();
 }
 
 async function sendMessage() {
     const input = document.getElementById('messageInput');
     const c = input.value.trim();
     if (!c) return;
-    
-    const msg = {
-        sender: 'me',
-        content: c,
-        type: 'text',
-        timestamp: Date.now()
-    };
-    
+    const msg = { sender: 'me', content: c, type: 'text', timestamp: Date.now() };
     try {
         const id = await dbPut('messages', msg);
         msg.id = id;
         renderMsg(msg);
-        scrollBottom();  // 👈 加这一行
+        scrollBottom();
         input.value = '';
         document.getElementById('sendBtn').disabled = true;
         autoReply();
-        // 延迟恢复按钮，确保可以继续发送
-        setTimeout(() => {
-            document.getElementById('sendBtn').disabled = false;
-        }, 800);
+        setTimeout(() => { document.getElementById('sendBtn').disabled = false; }, 800);
     } catch (e) {
         console.error('❌ 发送消息失败:', e);
         showToast('❌ 发送失败，请重试');
@@ -566,27 +567,26 @@ async function autoReply() {
         if (ti) ti.remove();
         for (let i = 0; i < cnt; i++) {
             let c = Math.random() < 0.5 ? await smartComposeReply() : await getRandomReply();
-// ===== 引用回复（10% 概率随机引用前面某一条用户消息） =====
-if (S.chatSettings.quoteReply && Math.random() < 0.1) {
-    const allMessages = await dbGetAll('messages');
-    const userMessages = allMessages.filter(m => m.sender === 'me');
-    if (userMessages.length > 0) {
-        const randomIndex = Math.floor(Math.random() * userMessages.length);
-        const randomMsg = userMessages[randomIndex];
-        if (randomMsg && randomMsg.content) {
-            c = '“' + randomMsg.content + '”…… ' + c;
-        }
-    }
-}
+            if (S.chatSettings.quoteReply && Math.random() < 0.1) {
+                const allMessages = await dbGetAll('messages');
+                const userMessages = allMessages.filter(m => m.sender === 'me');
+                if (userMessages.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * userMessages.length);
+                    const randomMsg = userMessages[randomIndex];
+                    if (randomMsg && randomMsg.content) {
+                        c = '“' + randomMsg.content + '”…… ' + c;
+                    }
+                }
+            }
             const m = { sender: 'other', content: c, type: 'text', timestamp: Date.now() };
             const id = await dbPut('messages', m);
             m.id = id;
             renderMsg(m);
             scrollBottom();
             if (cs.emojiMix && Math.random() < 0.15) {
-                const emojis = await dbGetAll('emojis');
-                if (emojis.length > 0) {
-                    const img = emojis[Math.floor(Math.random() * emojis.length)];
+                const emojiList = await dbGetAll('emojis');
+                if (emojiList.length > 0) {
+                    const img = emojiList[Math.floor(Math.random() * emojiList.length)];
                     const imgMsg = { sender: 'other', content: img.data, type: 'image', timestamp: Date.now() };
                     const imgId = await dbPut('messages', imgMsg);
                     imgMsg.id = imgId;
@@ -615,20 +615,16 @@ async function getRandomReply() {
     const cards = await dbGetAll('wordcards');
     const disabledCards = JSON.parse(localStorage.getItem('disabledCards') || '[]');
     const disabledIds = new Set(disabledCards.map(d => String(d.cardId)));
-
     const valid = cards.filter(c => {
         if (!c || !c.content) return false;
         if (c.content === '__GROUP_PLACEHOLDER__') return false;
         if (c.content.length <= 1) return false;
         return !disabledIds.has(String(c.id));
     });
-
-    if (valid.length === 0) {
-        return '😅 字卡库还是空的，先给我加点字卡吧～';
-    }
-
+    if (valid.length === 0) return '😅 字卡库还是空的，先给我加点字卡吧～';
     return valid[Math.floor(Math.random() * valid.length)].content;
 }
+
 async function addSysMsg(c) {
     const m = { type: 'system', content: c, timestamp: Date.now() };
     await dbPut('messages', m);
@@ -639,28 +635,21 @@ async function smartComposeReply() {
     const allCards = await dbGetAll('wordcards');
     const disabledCards = JSON.parse(localStorage.getItem('disabledCards') || '[]');
     const disabledIds = new Set(disabledCards.map(d => String(d.cardId)));
-
     const validCards = allCards.filter(c => {
         if (!c || !c.content) return false;
         if (c.content === '__GROUP_PLACEHOLDER__') return false;
         if (c.content.length <= 1) return false;
         return !disabledIds.has(String(c.id));
     });
-
-    if (validCards.length === 0) {
-        return '😅 字卡库还是空的，先给我加点字卡吧～';
-    }
-
+    if (validCards.length === 0) return '😅 字卡库还是空的，先给我加点字卡吧～';
     const count = Math.min(Math.floor(Math.random() * 5) + 2, validCards.length);
     const shuffled = validCards.sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, count);
     let sentence = selected.map(c => c.content).join('');
-
     if (!/[，。！？…～~]$/.test(sentence)) {
         const punctuations = ['。', '！', '？', '…', '～'];
         sentence += punctuations[Math.floor(Math.random() * punctuations.length)];
     }
-
     return sentence;
 }
 
@@ -684,30 +673,108 @@ function fileToDataUrl(f) {
     });
 }
 
-// ============ 表情面板（来自版本A） ============
-async function loadEmojiPanel() {
-    const emojis = await dbGetAll('emojis');
-    const ct = document.getElementById('emojiTabContent');
-    ct.innerHTML = '<div id="emojiGridArea" style="display:flex;flex-wrap:wrap;gap:8px;"></div>';
-    const g = document.getElementById('emojiGridArea');
+// ============ 表情面板 ============
+function getEmojiGroups() {
+    let groups = JSON.parse(localStorage.getItem('emojiGroups') || '["全部"]');
+    // 从表情包中收集分组，确保没有遗漏
+    const emojis = JSON.parse(localStorage.getItem('emojis') || '[]');
+    const groupSet = new Set(groups);
     emojis.forEach(e => {
-        const img = document.createElement('img');
-        img.src = e.data;
-        img.style.cssText = 'width:48px;height:48px;object-fit:cover;cursor:pointer;border-radius:6px;';
-        img.onclick = async function() {
-            const m = { sender: 'me', content: e.data, type: 'emoji', timestamp: Date.now() };
-            const id = await dbPut('messages', m);
-            m.id = id;
-            renderMsg(m);
-            autoReply();
-        };
-        g.appendChild(img);
+        if (e.group && e.group !== '') groupSet.add(e.group);
     });
-    const add = document.createElement('div');
-    add.textContent = '+';
-    add.style.cssText = 'width:48px;height:48px;border:2px dashed #ddd;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#ccc;cursor:pointer;';
-    add.onclick = function() { document.getElementById('emojiInput').click(); };
-    g.appendChild(add);
+    const result = Array.from(groupSet).filter(g => g !== '');
+    if (result.length === 0) result.push('全部');
+    localStorage.setItem('emojiGroups', JSON.stringify(result));
+    return result;
+}
+
+
+function switchEmojiGroup(group) {
+    localStorage.setItem('currentEmojiGroup', group);
+    loadEmojiPanel();
+}
+
+function sendEmoji(id) {
+    dbGetAll('emojis').then(emojis => {
+        const e = emojis.find(item => item.id === id);
+        if (e) {
+            const m = { sender: 'me', content: e.data, type: 'emoji', timestamp: Date.now() };
+            dbPut('messages', m).then(id => {
+                m.id = id;
+                renderMsg(m);
+                autoReply();
+            });
+        }
+    });
+}
+
+async function addEmojiGroup() {
+    const name = prompt('输入新分组名称：');
+    if (!name || name.trim() === '') return;
+    const groups = JSON.parse(localStorage.getItem('emojiGroups') || '["全部"]');
+    if (groups.includes(name.trim())) {
+        showToast('分组已存在');
+        return;
+    }
+    groups.push(name.trim());
+    localStorage.setItem('emojiGroups', JSON.stringify(groups));
+    showToast('✅ 分组 "' + name.trim() + '" 已创建');
+    loadEmojiPanel();
+}
+
+async function addEmojiGroupFromManage() {
+    const name = prompt('输入新分组名称：');
+    if (!name || name.trim() === '') return;
+    const groups = JSON.parse(localStorage.getItem('emojiGroups') || '["全部"]');
+    if (groups.includes(name.trim())) {
+        showToast('分组已存在');
+        return;
+    }
+    groups.push(name.trim());
+    localStorage.setItem('emojiGroups', JSON.stringify(groups));
+    showToast('✅ 分组 "' + name.trim() + '" 已创建');
+    renderEmojiManage();
+    loadEmojiPanel();
+}
+function deleteEmojiGroup(groupName) {
+    if (groupName === '全部') {
+        showToast('不能删除默认分组');
+        return;
+    }
+    if (!confirm('确定删除分组「' + groupName + '」吗？该分组下的表情包将移到「全部」')) return;
+    
+    let groups = JSON.parse(localStorage.getItem('emojiGroups') || '["全部"]');
+    groups = groups.filter(g => g !== groupName);
+    localStorage.setItem('emojiGroups', JSON.stringify(groups));
+    
+    let emojis = JSON.parse(localStorage.getItem('emojis') || '[]');
+    emojis = emojis.map(e => {
+        if (e.group === groupName) {
+            e.group = '全部';
+        }
+        return e;
+    });
+    localStorage.setItem('emojis', JSON.stringify(emojis));
+    
+    showToast('✅ 已删除分组「' + groupName + '」');
+    renderEmojiManage();
+    loadEmojiPanel();
+}
+async function loadEmojiPanel() {
+    const emojiList = await dbGetAll('emojis');
+    const groups = JSON.parse(localStorage.getItem('emojiGroups') || '["全部"]');
+    const currentGroup = localStorage.getItem('currentEmojiGroup') || '全部';
+    let html = '<div class="emoji-group-tabs">' + groups.map(g => '<button class="emoji-group-tab ' + (g === currentGroup ? 'active' : '') + '" onclick="switchEmojiGroup(\'' + g + '\')">' + g + '</button>').join('') + '<button class="emoji-group-tab add" onclick="addEmojiGroup()">➕</button></div><div id="emojiGridArea" style="display:flex;flex-wrap:wrap;gap:8px;padding:8px;">';
+    const filtered = currentGroup === '全部' ? emojiList : emojiList.filter(e => (e.group || '全部') === currentGroup);
+    if (filtered.length === 0) {
+        html += '<div style="color:#ccc;padding:20px;text-align:center;width:100%;">这个分组还没有表情包～</div>';
+    } else {
+        filtered.forEach(e => {
+            html += '<img src="' + e.data + '" style="width:48px;height:48px;object-fit:cover;cursor:pointer;border-radius:6px;" onclick="sendEmoji(\'' + e.id + '\')">';
+        });
+    }
+    html += '</div>';
+    document.getElementById('emojiTabContent').innerHTML = html;
 }
 
 function loadPatPanel() {
@@ -734,7 +801,7 @@ function loadPatPanel() {
     l.appendChild(row);
 }
 
-function addPatChat() {  // 改这里
+function addPatChat() {
     const v = document.getElementById('newPatChat').value.trim();
     if (!v) return;
     if (patOptions.includes(v)) { showToast('已存在'); return; }
@@ -764,23 +831,87 @@ function toggleEmojiPanel() {
     const b = document.getElementById('emojiToggleBtn');
     p.classList.toggle('show');
     b.classList.toggle('active', p.classList.contains('show'));
-    if (p.classList.contains('show')) {
-        switchEmojiTab('emoji');
-    }
+    if (p.classList.contains('show')) switchEmojiTab('emoji');
 }
 
 async function handleEmojiUpload(event) {
     const files = event.target.files;
+    if (!files || files.length === 0) return;
+    
+    // 获取当前所有分组
+    const groups = JSON.parse(localStorage.getItem('emojiGroups') || '["全部"]');
+    
+    // 构建下拉选择对话框
+    const group = await new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:999;display:flex;align-items:center;justify-content:center;';
+        overlay.onclick = function(e) { if (e.target === this) { this.remove(); resolve('全部'); } };
+        
+        const panel = document.createElement('div');
+        panel.style.cssText = 'background:#fff;border-radius:16px;padding:20px;width:300px;max-width:90%;box-shadow:0 4px 20px rgba(0,0,0,0.3);';
+        panel.innerHTML = `
+            <h4 style="margin-bottom:12px;text-align:center;">选择分组</h4>
+            <select id="emojiGroupSelect" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-bottom:12px;font-size:14px;">
+                <option value="">新建分组...</option>
+                ${groups.map(g => `<option value="${g}">${g}</option>`).join('')}
+            </select>
+            <input type="text" id="emojiNewGroupInput" placeholder="新分组名称..." style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-bottom:12px;font-size:14px;display:none;">
+            <div style="display:flex;gap:8px;">
+                <button onclick="this.closest('div[style]').parentElement.remove(); resolve('全部');" style="flex:1;padding:10px;border-radius:8px;border:none;background:#f0f0f0;cursor:pointer;font-size:14px;">取消</button>
+                <button id="confirmEmojiUploadBtn" style="flex:1;padding:10px;border-radius:8px;border:none;background:var(--primary);color:#fff;cursor:pointer;font-size:14px;">确定</button>
+            </div>
+        `;
+        overlay.appendChild(panel);
+        document.body.appendChild(overlay);
+        
+        const select = document.getElementById('emojiGroupSelect');
+        const newInput = document.getElementById('emojiNewGroupInput');
+        select.addEventListener('change', function() {
+            newInput.style.display = this.value === '' ? 'block' : 'none';
+        });
+        
+        document.getElementById('confirmEmojiUploadBtn').addEventListener('click', function() {
+            let selectedGroup = select.value;
+            if (selectedGroup === '') {
+                const newName = newInput.value.trim();
+                if (newName) {
+                    selectedGroup = newName;
+                } else {
+                    alert('请输入分组名称');
+                    return;
+                }
+            }
+            overlay.remove();
+            resolve(selectedGroup);
+        });
+    });
+    
+    const finalGroup = group || '全部';
+    console.log('📌 最终分组:', finalGroup);
+    
     for (let f of files) {
         const d = await fileToDataUrl(f);
-        await dbPut('emojis', { data: d, timestamp: Date.now() });
+        await dbPut('emojis', { data: d, group: finalGroup, timestamp: Date.now() });
     }
+    
+    // 如果新增了分组，保存到分组列表
+    if (finalGroup !== '全部' && !groups.includes(finalGroup)) {
+        groups.push(finalGroup);
+        localStorage.setItem('emojiGroups', JSON.stringify(groups));
+    }
+    
     loadEmojiPanel();
-    showToast('已添加' + files.length + '个表情');
+    renderEmojiManage();
+    showToast('✅ 已添加 ' + files.length + ' 个表情到「' + finalGroup + '」分组');
     event.target.value = '';
 }
 
-// ============ 通话功能（来自版本A） ============
+function switchManageGroup(group) {
+    localStorage.setItem('manageEmojiGroup', group);
+    renderEmojiManage();
+}
+
+// ============ 通话功能 ============
 function startCall() {
     if (callState !== 'idle') return;
     callState = 'ringing';
@@ -827,11 +958,7 @@ function answerCall() {
     document.getElementById('answerBtn').style.display = 'none';
     addSysMsg('📞 通话已接通');
     if (callInterval) clearInterval(callInterval);
-    callInterval = setInterval(() => {
-        callSeconds++;
-        updateCallTimer();
-        updateBallTimer();
-    }, 1000);
+    callInterval = setInterval(() => { callSeconds++; updateCallTimer(); updateBallTimer(); }, 1000);
 }
 
 function updateCallTimer() {
@@ -884,7 +1011,7 @@ async function endCall() {
     }
 }
 
-// ============ 通话记录（来自版本A） ============
+// ============ 通话记录 ============
 async function renderCallLogs() {
     const logs = await dbGetAll('callLogs');
     logs.sort((a, b) => b.timestamp - a.timestamp);
@@ -924,7 +1051,7 @@ function openCallLogPage() {
     renderCallLogs();
 }
 
-// ============ 我们的宇宙（来自版本A） ============
+// ============ 我们的宇宙 ============
 function openOurUniverse() {
     showPage('ourUniversePage');
     renderOurUniverse();
@@ -933,7 +1060,7 @@ function openOurUniverse() {
 async function renderOurUniverse() {
     const mood = S.contactMood || await getRandomMood2();
     S.contactMood = mood;
-    document.getElementById('ourUniverseContent').innerHTML = 
+    document.getElementById('ourUniverseContent').innerHTML =
         '<div class="settings-section"><h4>📷 我的头像</h4><div class="avatar-row" onclick="document.getElementById(\'myAvatarInput\').click()"><img class="small-avatar" id="myAvatarSmall" src="' + getAvatar('me') + '"><div style="flex:1;"><div style="font-size:14px;font-weight:500;">' + S.myName + '</div><div style="font-size:11px;color:var(--text-light);">点击更换</div></div></div><div id="myAvatarHistory" class="avatar-history-grid"></div></div>' +
         '<div class="settings-section"><h4>📷 秦彻头像</h4><div class="avatar-row" onclick="document.getElementById(\'contactAvatarInput\').click()"><img class="small-avatar" id="contactAvatarSmall" src="' + getAvatar('contact') + '"><div style="flex:1;"><div style="font-size:14px;font-weight:500;">' + S.contactName + '</div><div style="font-size:11px;color:var(--text-light);">点击更换</div></div></div><div id="contactAvatarHistory" class="avatar-history-grid"></div></div>' +
         '<div class="settings-section"><h4>✏️ 昵称</h4><div class="settings-row"><span class="row-label">我的昵称</span><span style="color:var(--text-light);cursor:pointer;" onclick="editNick(\'me\')">' + S.myName + ' ▸</span></div><div class="settings-row"><span class="row-label">对方昵称</span><span style="color:var(--text-light);cursor:pointer;" onclick="editNick(\'contact\')">' + S.contactName + ' ▸</span></div></div>' +
@@ -941,34 +1068,17 @@ async function renderOurUniverse() {
         '<div class="settings-section"><h4>💬 秦彻状态</h4><div id="statusTagsInline" style="display:flex;flex-wrap:wrap;gap:5px;"></div><div class="pat-setting-row" style="margin-top:6px;"><input type="text" id="newStatusInput" placeholder="添加状态..." style="flex:1;padding:7px 10px;border-radius:12px;border:1.5px solid #eee;font-size:12px;outline:none;"><button onclick="addStatusOpt()" style="padding:7px 12px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:12px;cursor:pointer;">添加</button></div></div>' +
         '<div class="settings-section"><h4>💭 秦彻想说</h4><div style="background:#fdf8ff;border-radius:10px;padding:12px;margin-bottom:8px;font-size:14px;color:#5a4a6a;font-style:italic;text-align:center;">' + (mood || '今天天气真好') + '</div><button onclick="refreshMood()" style="width:100%;padding:8px;border-radius:16px;background:#f0e0ff;color:#7b5ea7;border:none;cursor:pointer;">🔄 换一句</button></div>' +
         '<div class="settings-section"><h4>💬 聊天气泡样式</h4><div class="bubble-preset-grid">' + BUBBLE_PRESETS.map(p => '<div class="bubble-preset-item ' + (S.bubbleStyle === p.id ? 'selected' : '') + '" onclick="selectBubblePreset(\'' + p.id + '\')"><div style="display:flex;flex-direction:column;gap:3px;margin-bottom:4px;"><div class="mini-bubble other" style="background:' + p.otherBg + ';color:' + p.otherText + ';">你好呀</div><div class="mini-bubble me" style="background:' + p.myBg + ';color:' + p.myText + ';">想你了</div></div><div>' + p.name + '</div></div>').join('') + '</div></div>' +
-        '<div class="settings-section"><h4>🎨 更换背景</h4>' +
-        '<div class="bg-preset-grid">' +
-        [{id:'default',icon:'🌸',color:'#fff5f7'},{id:'sunset',icon:'🌅',color:'#ffecd2'},{id:'ocean',icon:'🌊',color:'#e0f7fa'},{id:'lavender',icon:'💜',color:'#f3e5f5'}].map(p => 
-            '<div class="bg-preset-item ' + (S.homeBg === p.id ? 'selected' : '') + '" style="background:' + p.color + ';" onclick="setHomeBg(\'' + p.id + '\')">' + p.icon + '</div>'
-        ).join('') +
-        '</div>' +
-        '<button style="width:100%;margin-top:8px;padding:10px;border-radius:16px;background:#f5f5f5;border:none;cursor:pointer;font-size:13px;" onclick="document.getElementById(\'homeBgInput\').click()">🖼️ 从相册选择首页背景</button>' +
-        '<div style="margin-top:10px;"><h4>💬 聊天背景</h4><div class="bg-preset-grid">' +
-        [{id:'default',icon:'⬜',color:'#f8f8f8'},{id:'warm',icon:'💛',color:'#fffdf5'},{id:'cool',icon:'💙',color:'#f5f8ff'},{id:'pink',icon:'💗',color:'#fff5f7'}].map(p => 
-            '<div class="bg-preset-item ' + (S.chatBg === p.id ? 'selected' : '') + '" style="background:' + p.color + ';" onclick="setChatBg(\'' + p.id + '\')">' + p.icon + '</div>'
-        ).join('') +
-        '</div>' +
-        '<button style="width:100%;margin-top:8px;padding:10px;border-radius:16px;background:#f5f5f5;border:none;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="document.getElementById(\'chatBgInput\').click()"><span>🖼️</span> 从相册选择聊天背景</button></div>';
+        '<div class="settings-section"><h4>🎨 更换背景</h4><div class="bg-preset-grid">' + [{id:'default',icon:'🌸',color:'#fff5f7'},{id:'sunset',icon:'🌅',color:'#ffecd2'},{id:'ocean',icon:'🌊',color:'#e0f7fa'},{id:'lavender',icon:'💜',color:'#f3e5f5'}].map(p => '<div class="bg-preset-item ' + (S.homeBg === p.id ? 'selected' : '') + '" style="background:' + p.color + ';" onclick="setHomeBg(\'' + p.id + '\')">' + p.icon + '</div>').join('') + '</div><button style="width:100%;margin-top:8px;padding:10px;border-radius:16px;background:#f5f5f5;border:none;cursor:pointer;font-size:13px;" onclick="document.getElementById(\'homeBgInput\').click()">🖼️ 从相册选择首页背景</button><div style="margin-top:10px;"><h4>💬 聊天背景</h4><div class="bg-preset-grid">' + [{id:'default',icon:'⬜',color:'#f8f8f8'},{id:'warm',icon:'💛',color:'#fffdf5'},{id:'cool',icon:'💙',color:'#f5f8ff'},{id:'pink',icon:'💗',color:'#fff5f7'}].map(p => '<div class="bg-preset-item ' + (S.chatBg === p.id ? 'selected' : '') + '" style="background:' + p.color + ';" onclick="setChatBg(\'' + p.id + '\')">' + p.icon + '</div>').join('') + '</div><button style="width:100%;margin-top:8px;padding:10px;border-radius:16px;background:#f5f5f5;border:none;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="document.getElementById(\'chatBgInput\').click()"><span>🖼️</span> 从相册选择聊天背景</button></div>';
     loadStatusTags2();
     loadAvatarHistory('me');
     loadAvatarHistory('contact');
 }
+
 function selectBubblePreset(id) {
     S.bubbleStyle = id;
     applyBubbleStyle();
-    // 刷新“我们的宇宙”页面
-    if (document.getElementById('ourUniversePage').classList.contains('active')) {
-        renderOurUniverse();
-    }
-    // 如果当前在聊天页面，重新加载消息让气泡样式生效
-    if (document.getElementById('chatPage').classList.contains('active')) {
-        loadMessages();
-    }
+    if (document.getElementById('ourUniversePage').classList.contains('active')) renderOurUniverse();
+    if (document.getElementById('chatPage').classList.contains('active')) loadMessages();
     dbPut('settings', { key: 'bubbleStyle', value: id });
     showToast('气泡样式已更新');
 }
@@ -979,9 +1089,7 @@ async function loadAvatarHistory(type) {
     const c = document.getElementById((type === 'me' ? 'my' : 'contact') + 'AvatarHistory');
     if (!c) return;
     const cur = type === 'me' ? S.myAvatar : S.contactAvatar;
-    c.innerHTML = f.slice(0, 8).map(x => 
-        '<div class="avatar-history-item' + (x.data === cur ? ' selected' : '') + '" onclick="selectHistoryAvatar(\'' + type + '\',' + x.id + ')"><img src="' + x.data + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"><span class="ah-del" onclick="event.stopPropagation();deleteHistoryAvatar(' + x.id + ',\'' + type + '\')">×</span></div>'
-    ).join('');
+    c.innerHTML = f.slice(0, 8).map(x => '<div class="avatar-history-item' + (x.data === cur ? ' selected' : '') + '" onclick="selectHistoryAvatar(\'' + type + '\',' + x.id + ')"><img src="' + x.data + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"><span class="ah-del" onclick="event.stopPropagation();deleteHistoryAvatar(' + x.id + ',\'' + type + '\')">×</span></div>').join('');
 }
 
 async function selectHistoryAvatar(type, hid) {
@@ -990,9 +1098,7 @@ async function selectHistoryAvatar(type, hid) {
     if (!item) return;
     if (type === 'me') { S.myAvatar = item.data; await dbPut('avatars', { key: 'myAvatar', data: item.data }); }
     else { S.contactAvatar = item.data; await dbPut('avatars', { key: 'contactAvatar', data: item.data }); }
-    updateHome();
-    renderOurUniverse();
-    showToast('头像已切换');
+    updateHome(); renderOurUniverse(); showToast('头像已切换');
 }
 
 async function deleteHistoryAvatar(hid, type) {
@@ -1014,9 +1120,7 @@ async function handleMyAvatarUpload(event) {
     S.myAvatar = d;
     await dbPut('avatars', { key: 'myAvatar', data: d });
     await saveAvatarToHistory('me', d);
-    renderOurUniverse();
-    updateHome();
-    showToast('头像已更新');
+    renderOurUniverse(); updateHome(); showToast('头像已更新');
     event.target.value = '';
 }
 
@@ -1027,9 +1131,7 @@ async function handleContactAvatarUpload(event) {
     S.contactAvatar = d;
     await dbPut('avatars', { key: 'contactAvatar', data: d });
     await saveAvatarToHistory('contact', d);
-    renderOurUniverse();
-    updateHome();
-    showToast('头像已更新');
+    renderOurUniverse(); updateHome(); showToast('头像已更新');
     event.target.value = '';
 }
 
@@ -1052,9 +1154,10 @@ function addPat() {
     if (!v) return;
     if (patOptions.includes(v)) { showToast('已存在'); return; }
     patOptions.push(v);
-    localStorage.setItem('patOptions', JSON.stringify(patOptions));  // 👈 加上这行
+    localStorage.setItem('patOptions', JSON.stringify(patOptions));
     renderOurUniverse();
 }
+
 function delPat(i) {
     patOptions.splice(i, 1);
     renderOurUniverse();
@@ -1071,23 +1174,15 @@ function editNick(type) {
     const cur = type === 'me' ? S.myName : S.contactName;
     const n = prompt('输入昵称：', cur);
     if (n && n.trim()) {
-        if (type === 'me') {
-            S.myName = n.trim();
-            localStorage.setItem('myName', S.myName);
-        } else {
-            S.contactName = n.trim();
-            localStorage.setItem('contactName', S.contactName);
-        }
-        renderOurUniverse();
-        updateHome();
+        if (type === 'me') { S.myName = n.trim(); localStorage.setItem('myName', S.myName); }
+        else { S.contactName = n.trim(); localStorage.setItem('contactName', S.contactName); }
+        renderOurUniverse(); updateHome();
     }
 }
 
 async function refreshMood() {
     S.contactMood = await getRandomMood2();
-    renderOurUniverse();
-    updateHome();
-    showToast('已更换');
+    renderOurUniverse(); updateHome(); showToast('已更换');
 }
 
 function openProfile() {
@@ -1102,8 +1197,7 @@ function closeProfile() {
     document.getElementById('profileOverlay').classList.remove('show');
 }
 
-// ============ 字卡库（使用 localStorage） ============
-
+// ============ 字卡库 ============
 function openWordCardLibrary() {
     showPage('wordcardLibraryPage');
     renderWordCardLibrary();
@@ -1113,99 +1207,54 @@ async function getAllGroups() {
     const cards = JSON.parse(localStorage.getItem('wordcards') || '[]');
     const disabledGroups = JSON.parse(localStorage.getItem('disabledGroups') || '[]');
     const dgids = new Set(disabledGroups.map(d => d.groupId));
-    
     const groupsMap = new Map();
-    
-    // 先收集所有分组（包括只有占位符的）
     cards.forEach(c => {
         const gid = c.groupId || 'default';
         const gname = c.groupName || '默认分组';
         if (!groupsMap.has(gid)) {
-            groupsMap.set(gid, {
-                id: gid,
-                name: gname,
-                isSystem: false,
-                disabled: dgids.has(gid),
-                cardCount: 0
-            });
+            groupsMap.set(gid, { id: gid, name: gname, isSystem: false, disabled: dgids.has(gid), cardCount: 0 });
         }
     });
-    
-    // 统计字卡数量（跳过占位符）
     cards.forEach(c => {
         if (c.content === '__GROUP_PLACEHOLDER__') return;
         const gid = c.groupId || 'default';
-        if (groupsMap.has(gid)) {
-            groupsMap.get(gid).cardCount++;
-        }
+        if (groupsMap.has(gid)) groupsMap.get(gid).cardCount++;
     });
-    
-    // 确保 default 分组存在
     if (!groupsMap.has('default')) {
-        groupsMap.set('default', {
-            id: 'default',
-            name: '默认分组',
-            isSystem: false,
-            disabled: dgids.has('default'),
-            cardCount: 0
-        });
+        groupsMap.set('default', { id: 'default', name: '默认分组', isSystem: false, disabled: dgids.has('default'), cardCount: 0 });
     }
-    
     return Array.from(groupsMap.values());
 }
+
 async function getCardsByGroup(gid) {
     try {
         const cards = JSON.parse(localStorage.getItem('wordcards') || '[]');
-        // 确保 cards 是数组
         if (!Array.isArray(cards)) {
             console.warn('wordcards 不是数组，已修复');
             localStorage.setItem('wordcards', JSON.stringify([]));
             return [];
         }
-        
         const disabledCards = JSON.parse(localStorage.getItem('disabledCards') || '[]');
         const dids = new Set(disabledCards.map(d => d.cardId));
-        
-       // 处理系统分组（返回预设词 + 用户添加的字卡，去重）
-if (gid && gid.startsWith('sys_')) {
-    const sg = SYSTEM_GROUPS.find(g => g.id === gid);
-    const userCards = cards
-        .filter(c => c && (c.groupId || 'default') === gid && c.content && c.content !== '__GROUP_PLACEHOLDER__')
-        .map(c => ({ id: c.id, content: c.content, isSystem: false, disabled: dids.has(c.id), groupId: gid }));
-    const sysCards = sg ? sg.words.map((w, i) => ({
-        id: 'sys_' + gid + '_' + i,
-        content: w,
-        isSystem: true,
-        disabled: dids.has('sys_' + gid + '_' + i),
-        groupId: gid
-    })) : [];
-    
-    // 合并后按 content 去重
-    const combined = [...sysCards, ...userCards];
-    const seen = new Set();
-    const unique = combined.filter(c => {
-        if (seen.has(c.content)) return false;
-        seen.add(c.content);
-        return true;
-    });
-    return unique;
-}
-        
-       // 处理普通分组（包括 default）—— 同时匹配 groupId 和 groupName
-        const result = cards
-            .filter(c => {
-                if (!c || !c.content || c.content === '__GROUP_PLACEHOLDER__') return false;
-                const cardGid = c.groupId || 'default';
-                const cardGname = c.groupName || '';
-                return cardGid === gid || cardGname === gid;
-            })
-            .map(c => {
-                // 如果 c.id 不存在，用 groupId + content 生成一个唯一 ID
-                const id = c.id || c._id || (c.groupId + '_' + c.content).replace(/\s/g, '_');
-                return { id: id, content: c.content, isSystem: false, disabled: dids.has(id), groupId: c.groupId || 'default' };
-            });
-
-        return result;  // 👈 加这一行
+        if (gid && gid.startsWith('sys_')) {
+            const sg = SYSTEM_GROUPS.find(g => g.id === gid);
+            const userCards = cards.filter(c => c && (c.groupId || 'default') === gid && c.content && c.content !== '__GROUP_PLACEHOLDER__').map(c => ({ id: c.id, content: c.content, isSystem: false, disabled: dids.has(c.id), groupId: gid }));
+            const sysCards = sg ? sg.words.map((w, i) => ({ id: 'sys_' + gid + '_' + i, content: w, isSystem: true, disabled: dids.has('sys_' + gid + '_' + i), groupId: gid })) : [];
+            const combined = [...sysCards, ...userCards];
+            const seen = new Set();
+            const unique = combined.filter(c => { if (seen.has(c.content)) return false; seen.add(c.content); return true; });
+            return unique;
+        }
+        const result = cards.filter(c => {
+            if (!c || !c.content || c.content === '__GROUP_PLACEHOLDER__') return false;
+            const cardGid = c.groupId || 'default';
+            const cardGname = c.groupName || '';
+            return cardGid === gid || cardGname === gid;
+        }).map(c => {
+            const id = c.id || c._id || (c.groupId + '_' + c.content).replace(/\s/g, '_');
+            return { id: id, content: c.content, isSystem: false, disabled: dids.has(id), groupId: c.groupId || 'default' };
+        });
+        return result;
     } catch (e) {
         console.error('getCardsByGroup 出错:', e);
         return [];
@@ -1213,7 +1262,7 @@ if (gid && gid.startsWith('sys_')) {
 }
 
 async function renderWordCardLibrary() {
-    document.getElementById('wordcardContent').innerHTML = 
+    document.getElementById('wordcardContent').innerHTML =
         '<div class="wordcard-top-bar"><button style="background:#fff0e6;color:#ff9800;" onclick="openBatchAdd()">📝 批量添加</button><button style="background:#e3f2fd;color:#1565c0;" onclick="document.getElementById(\'importCardsInput\').click()">📥 导入</button><button style="background:#e8f5e9;color:#2e7d32;" onclick="exportCardsJSON()">📤 导出</button></div>' +
         '<input type="text" class="wordcard-global-search" id="wordcardGlobalSearch" placeholder="🔍 搜索全部字卡..." oninput="searchAllCardsAndDisplay()">' +
         '<input type="text" class="wordcard-search" id="wordcardSearch" placeholder="🔍 搜索分组名称..." oninput="filterWordCards()">' +
@@ -1236,11 +1285,7 @@ async function searchAllCardsAndDisplay() {
 async function searchAllCards(keyword) {
     const cards = JSON.parse(localStorage.getItem('wordcards') || '[]');
     const all = cards.filter(c => c.content && c.content !== '__GROUP_PLACEHOLDER__' && c.content.toLowerCase().includes(keyword.toLowerCase()));
-    SYSTEM_GROUPS.forEach(g => {
-        g.words.forEach(w => {
-            if (w.toLowerCase().includes(keyword.toLowerCase())) all.push({ content: w, groupId: g.id, groupName: g.name });
-        });
-    });
+    SYSTEM_GROUPS.forEach(g => { g.words.forEach(w => { if (w.toLowerCase().includes(keyword.toLowerCase())) all.push({ content: w, groupId: g.id, groupName: g.name }); }); });
     return all;
 }
 
@@ -1253,12 +1298,10 @@ async function renderGroupList(filter) {
     fg.forEach(g => {
         const item = document.createElement('div');
         item.className = 'group-item';
-        // 对 g.id 进行转义，防止特殊字符破坏 onclick
         const safeGid = g.id.replace(/'/g, "\\'");
         const safeName = g.name.replace(/'/g, "\\'");
-        // 分组是否被禁用
         const isDisabled = g.disabled || false;
-        item.innerHTML = 
+        item.innerHTML =
             '<div class="group-info" onclick="viewGroupCards(\'' + safeGid + '\',\'' + safeName + '\')" style="opacity:' + (isDisabled ? '0.5' : '1') + ';">' +
             '<div style="width:8px;height:8px;border-radius:50%;background:' + (isDisabled ? '#ccc' : '#4cd964') + ';flex-shrink:0;"></div>' +
             '<span style="font-size:13px;font-weight:500;">' + g.name + '</span>' +
@@ -1276,29 +1319,17 @@ async function renderGroupList(filter) {
 
 async function viewGroupCards(gid, gname) {
     let cards = await getCardsByGroup(gid);
-    // 确保 cards 是数组
     if (!Array.isArray(cards)) cards = [];
-    // 过滤掉无效数据：必须存在且有 id 和 content
     cards = cards.filter(c => c && typeof c === 'object' && c.id !== undefined && c.id !== null && c.content);
-    
     const disabledCards = JSON.parse(localStorage.getItem('disabledCards') || '[]');
     const disabledIds = new Set(disabledCards.map(d => d.cardId));
-    
     let html = '<div style="padding:4px 0;margin-top:8px;"><h4 style="margin-bottom:4px;">📋 ' + gname + '</h4><input type="text" placeholder="🔍 搜索本组字卡..." style="width:100%;padding:6px 10px;border-radius:10px;border:1.5px solid #eee;font-size:12px;outline:none;margin-bottom:8px;" oninput="filterGroupCards(this.value)"><div id="groupCardList" style="max-height:300px;overflow-y:auto;">';
-    
     if (cards.length === 0) {
         html += '<p style="color:#ccc;text-align:center;padding:20px;">暂无字卡</p>';
     } else {
         cards.forEach(c => {
             const isDisabled = disabledIds.has(c.id.toString());
-            html += `<div class="wordcard-list-item${isDisabled ? ' disabled' : ''}" style="${isDisabled ? 'opacity:0.5;text-decoration:line-through;' : ''}">
-                <span style="flex:1;text-decoration:${isDisabled ? 'line-through' : 'none'};">${c.content}</span>
-                <div class="card-actions" style="display:flex;gap:4px;">
-                    <span style="background:${isDisabled ? '#e8f5e9' : '#fff8e1'};color:${isDisabled ? '#2e7d32' : '#f57f17'};font-size:10px;padding:2px 6px;border-radius:6px;cursor:pointer;" onclick="toggleCardDisable('${c.id}','${gid}',${c.isSystem || false})">${isDisabled ? '启用' : '禁用'}</span>
-                    <span style="background:#e3f2fd;color:#1565c0;font-size:10px;padding:2px 6px;border-radius:6px;cursor:pointer;" onclick="moveCard('${c.id}','${gid}')">📁 移动</span>
-                    <span style="background:#ffebee;color:#c62828;font-size:10px;padding:2px 6px;border-radius:6px;cursor:pointer;" onclick="deleteCard('${c.id}','${gid}',${c.isSystem || false})">删除</span>
-                </div>
-            </div>`;
+            html += '<div class="wordcard-list-item' + (isDisabled ? ' disabled' : '') + '" style="' + (isDisabled ? 'opacity:0.5;text-decoration:line-through;' : '') + '"><span style="flex:1;text-decoration:' + (isDisabled ? 'line-through' : 'none') + ';">' + c.content + '</span><div class="card-actions" style="display:flex;gap:4px;"><span style="background:' + (isDisabled ? '#e8f5e9' : '#fff8e1') + ';color:' + (isDisabled ? '#2e7d32' : '#f57f17') + ';font-size:10px;padding:2px 6px;border-radius:6px;cursor:pointer;" onclick="toggleCardDisable(\'' + c.id + '\',\'' + gid + '\',' + (c.isSystem || false) + ')">' + (isDisabled ? '启用' : '禁用') + '</span><span style="background:#e3f2fd;color:#1565c0;font-size:10px;padding:2px 6px;border-radius:6px;cursor:pointer;" onclick="moveCard(\'' + c.id + '\',\'' + gid + '\')">📁 移动</span><span style="background:#ffebee;color:#c62828;font-size:10px;padding:2px 6px;border-radius:6px;cursor:pointer;" onclick="deleteCard(\'' + c.id + '\',\'' + gid + '\',' + (c.isSystem || false) + ')">删除</span></div></div>';
         });
     }
     html += '</div><button onclick="closeCardDetail()" style="margin-top:8px;padding:8px;border-radius:12px;background:#f0f0f0;border:none;cursor:pointer;width:100%;">关闭</button></div>';
@@ -1321,16 +1352,11 @@ function filterGroupCards(f) {
 async function toggleCardDisable(cid, gid, isSys) {
     let disabledCards = JSON.parse(localStorage.getItem('disabledCards') || '[]');
     const index = disabledCards.findIndex(d => d.cardId == cid);
-    if (index >= 0) {
-        disabledCards.splice(index, 1);
-    } else {
-        disabledCards.push({ cardId: cid });
-    }
+    if (index >= 0) disabledCards.splice(index, 1);
+    else disabledCards.push({ cardId: cid });
     localStorage.setItem('disabledCards', JSON.stringify(disabledCards));
     const gname = document.querySelector('#wordcardDetailArea h4')?.textContent.replace('📋 ', '') || '';
-    if (gname) {
-        viewGroupCards(gid, gname);
-    }
+    if (gname) viewGroupCards(gid, gname);
     renderGroupList();
     showToast(index >= 0 ? '已启用' : '已禁用');
 }
@@ -1349,9 +1375,7 @@ async function deleteCard(cid, gid, isSys) {
         }
     }
     const gname = document.querySelector('#wordcardDetailArea h4')?.textContent.replace('📋 ', '') || '';
-    if (gname) {
-        viewGroupCards(gid, gname);
-    }
+    if (gname) viewGroupCards(gid, gname);
     renderGroupList();
     showToast(isSys ? '已禁用' : '已删除');
 }
@@ -1360,23 +1384,11 @@ async function moveCard(cid, fromGid) {
     const groups = await getAllGroups();
     let groupListHtml = '';
     groups.forEach(g => {
-        groupListHtml += `<div onclick="confirmMoveCard('${cid}','${fromGid}','${g.id}')" style="padding:8px 12px;border-bottom:1px solid #f0f0f0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
-            <span>${g.name}</span>
-            <span style="font-size:11px;color:var(--text-light);">${g.cardCount || 0}条</span>
-        </div>`;
+        groupListHtml += '<div onclick="confirmMoveCard(\'' + cid + '\',\'' + fromGid + '\',\'' + g.id + '\')" style="padding:8px 12px;border-bottom:1px solid #f0f0f0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;"><span>' + g.name + '</span><span style="font-size:11px;color:var(--text-light);">' + (g.cardCount || 0) + '条</span></div>';
     });
-    
     const modal = document.createElement('div');
     modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:999;display:flex;align-items:center;justify-content:center;';
-    modal.innerHTML = `
-        <div style="background:#fff;border-radius:16px;padding:20px;width:85%;max-width:400px;max-height:70vh;overflow-y:auto;">
-            <h4 style="text-align:center;margin-bottom:12px;">📁 选择目标分组</h4>
-            <div style="max-height:50vh;overflow-y:auto;border:1px solid #eee;border-radius:8px;">
-                ${groupListHtml}
-            </div>
-            <button onclick="this.closest('div[style]').remove()" style="width:100%;margin-top:12px;padding:10px;border-radius:12px;background:#f0f0f0;border:none;cursor:pointer;font-size:14px;">取消</button>
-        </div>
-    `;
+    modal.innerHTML = '<div style="background:#fff;border-radius:16px;padding:20px;width:85%;max-width:400px;max-height:70vh;overflow-y:auto;"><h4 style="text-align:center;margin-bottom:12px;">📁 选择目标分组</h4><div style="max-height:50vh;overflow-y:auto;border:1px solid #eee;border-radius:8px;">' + groupListHtml + '</div><button onclick="this.closest(\'div[style]\').remove()" style="width:100%;margin-top:12px;padding:10px;border-radius:12px;background:#f0f0f0;border:none;cursor:pointer;font-size:14px;">取消</button></div>';
     document.body.appendChild(modal);
 }
 
@@ -1394,8 +1406,11 @@ async function confirmMoveCard(cid, fromGid, targetGid) {
         card.groupId = targetGid;
         card.groupName = tg.name;
         localStorage.setItem('wordcards', JSON.stringify(cards));
+        
+        // 获取当前显示的分组名称
         const gname = document.querySelector('#wordcardDetailArea h4')?.textContent.replace('📋 ', '') || '';
         if (gname) {
+            // 重新加载当前分组，显示移动后的结果
             viewGroupCards(fromGid, gname);
         }
         renderGroupList();
@@ -1406,11 +1421,8 @@ async function confirmMoveCard(cid, fromGid, targetGid) {
 async function toggleGroupDisable(gid) {
     let disabledGroups = JSON.parse(localStorage.getItem('disabledGroups') || '[]');
     const index = disabledGroups.findIndex(d => d.groupId === gid);
-    if (index >= 0) {
-        disabledGroups.splice(index, 1);
-    } else {
-        disabledGroups.push({ groupId: gid });
-    }
+    if (index >= 0) disabledGroups.splice(index, 1);
+    else disabledGroups.push({ groupId: gid });
     localStorage.setItem('disabledGroups', JSON.stringify(disabledGroups));
     renderGroupList();
     showToast(index >= 0 ? '已启用' : '已禁用');
@@ -1431,12 +1443,7 @@ async function createGroup() {
     if (!v) return;
     const gid = 'group_' + Date.now();
     let cards = JSON.parse(localStorage.getItem('wordcards') || '[]');
-    cards.push({
-        groupId: gid,
-        groupName: v,
-        content: '__GROUP_PLACEHOLDER__',
-        timestamp: Date.now()
-    });
+    cards.push({ groupId: gid, groupName: v, content: '__GROUP_PLACEHOLDER__', timestamp: Date.now() });
     localStorage.setItem('wordcards', JSON.stringify(cards));
     document.getElementById('newGroupInput').value = '';
     renderGroupList();
@@ -1465,13 +1472,7 @@ async function confirmBatchAdd() {
     const existingContents = new Set(allCards.filter(c => c && c.content && c.content !== '__GROUP_PLACEHOLDER__').map(c => c.content));
     for (let l of lines) {
         if (existingContents.has(l)) { skipped++; continue; }
-        allCards.push({
-            id: Date.now() + Math.random() * 1000 + added,
-            groupId: gid,
-            groupName: gn,
-            content: l,
-            timestamp: Date.now()
-        });
+        allCards.push({ id: Date.now() + Math.random() * 1000 + added, groupId: gid, groupName: gn, content: l, timestamp: Date.now() });
         existingContents.add(l);
         added++;
     }
@@ -1483,11 +1484,7 @@ async function confirmBatchAdd() {
 
 async function exportCardsJSON() {
     const cards = JSON.parse(localStorage.getItem('wordcards') || '[]');
-    const data = cards.filter(c => c.content !== '__GROUP_PLACEHOLDER__').map(c => ({
-        groupId: c.groupId || 'default',
-        groupName: c.groupName || '默认分组',
-        content: c.content
-    }));
+    const data = cards.filter(c => c.content !== '__GROUP_PLACEHOLDER__').map(c => ({ groupId: c.groupId || 'default', groupName: c.groupName || '默认分组', content: c.content }));
     downloadBlob(JSON.stringify(data, null, 2), '字卡导出.json');
 }
 
@@ -1500,18 +1497,12 @@ async function importCardsFile(event) {
         let allCards = JSON.parse(localStorage.getItem('wordcards') || '[]');
         let existing = new Set(allCards.filter(x => x.content && x.content !== '__GROUP_PLACEHOLDER__').map(x => x.content));
         let count = 0;
-        
         if (d.customReplies && d.customReplyGroups) {
             for (var g of d.customReplyGroups) {
                 if (g.items && g.items.length > 0) {
                     for (var item of g.items) {
                         if (!existing.has(item)) {
-                            allCards.push({
-                                groupId: g.id.toString(),
-                                groupName: g.name,
-                                content: item,
-                                timestamp: Date.now()
-                            });
+                            allCards.push({ groupId: g.id.toString(), groupName: g.name, content: item, timestamp: Date.now() });
                             existing.add(item);
                             count++;
                         }
@@ -1520,12 +1511,7 @@ async function importCardsFile(event) {
             }
             for (var r of d.customReplies) {
                 if (!existing.has(r)) {
-                    allCards.push({
-                        groupId: 'default',
-                        groupName: '默认分组',
-                        content: r,
-                        timestamp: Date.now()
-                    });
+                    allCards.push({ groupId: 'default', groupName: '默认分组', content: r, timestamp: Date.now() });
                     existing.add(r);
                     count++;
                 }
@@ -1534,12 +1520,7 @@ async function importCardsFile(event) {
             var items = Array.isArray(d) ? d : [];
             for (var i of items) {
                 if (i.content && i.content.trim() && !existing.has(i.content.trim())) {
-                    allCards.push({
-                        groupId: i.groupId || 'default',
-                        groupName: i.groupName || '默认分组',
-                        content: i.content.trim(),
-                        timestamp: Date.now()
-                    });
+                    allCards.push({ groupId: i.groupId || 'default', groupName: i.groupName || '默认分组', content: i.content.trim(), timestamp: Date.now() });
                     existing.add(i.content.trim());
                     count++;
                 }
@@ -1552,19 +1533,43 @@ async function importCardsFile(event) {
     event.target.value = '';
 }
 
-// ============ 表情包管理（来自版本A） ============
+// ============ 表情包管理 ============
 function openEmojiManage() {
     showPage('emojiManagePage');
     renderEmojiManage();
 }
 
 async function renderEmojiManage() {
-    const emojis = await dbGetAll('emojis');
-    document.getElementById('emojiManageContent').innerHTML = 
-        '<div class="emoji-manage-grid">' + emojis.map(e => '<div class="emoji-manage-item" onclick="if(confirm(\'删除？\')){deleteEmoji(' + e.id + ')}"><img src="' + e.data + '"><div class="del-overlay">×</div></div>').join('') + 
-        '<div class="add-emoji-area" onclick="document.getElementById(\'emojiManageInput\').click()">+</div></div><div style="text-align:center;margin-top:10px;font-size:11px;color:var(--text-light);">点击表情删除，点击+添加</div>';
+    const emojiList = await dbGetAll('emojis');
+    const realEmojis = emojiList.filter(e => e.data !== '');
+    const groups = JSON.parse(localStorage.getItem('emojiGroups') || '["全部"]');
+    const currentGroup = localStorage.getItem('manageEmojiGroup') || '全部';
+    
+    // 构建分组标签（带删除按钮）
+    let groupHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;padding:8px;background:#f5f5f5;border-radius:12px;align-items:center;">';
+    groups.forEach(g => {
+        groupHtml += '<span style="display:inline-flex;align-items:center;gap:2px;">';
+        groupHtml += '<button class="emoji-group-tab ' + (g === currentGroup ? 'active' : '') + '" onclick="switchManageGroup(\'' + g + '\')" style="padding:4px 12px;border-radius:12px;font-size:12px;cursor:pointer;border:none;background:' + (g === currentGroup ? 'var(--primary)' : 'transparent') + ';color:' + (g === currentGroup ? '#fff' : '#999') + ';">' + g + '</button>';
+        if (g !== '全部') {
+            groupHtml += '<span onclick="deleteEmojiGroup(\'' + g + '\')" style="cursor:pointer;color:#ff4757;font-size:12px;margin-left:-2px;">✕</span>';
+        }
+        groupHtml += '</span>';
+    });
+    groupHtml += '<button onclick="addEmojiGroupFromManage()" style="padding:4px 10px;border-radius:12px;font-size:14px;cursor:pointer;border:none;background:#f0f0f0;color:#666;">➕</button></div>';
+    
+    let html = groupHtml + '<div class="emoji-manage-grid">';
+    
+    const filtered = currentGroup === '全部' ? realEmojis : realEmojis.filter(e => (e.group || '全部') === currentGroup);
+    if (filtered.length === 0) {
+        html += '<div style="color:#ccc;text-align:center;padding:40px;grid-column:1/-1;">这个分组还没有表情包</div>';
+    } else {
+        filtered.forEach(e => {
+            html += '<div class="emoji-manage-item" onclick="if(confirm(\'删除？\')){deleteEmoji(' + e.id + ')}"><img src="' + e.data + '" style="width:100%;height:100%;object-fit:cover;padding:4px;border-radius:8px;"><div class="del-overlay">×</div><div style="position:absolute;bottom:2px;left:4px;right:4px;font-size:8px;color:#999;background:rgba(255,255,255,0.8);text-align:center;border-radius:4px;padding:1px;">' + (e.group || '全部') + '</div></div>';
+        });
+    }
+    html += '<div class="add-emoji-area" onclick="document.getElementById(\'emojiManageInput\').click()">+</div></div><div style="text-align:center;margin-top:10px;font-size:11px;color:var(--text-light);">点击表情删除，点击+添加</div>';
+    document.getElementById('emojiManageContent').innerHTML = html;
 }
-
 async function deleteEmoji(id) { await dbDelete('emojis', id); renderEmojiManage(); showToast('已删除'); }
 
 async function handleEmojiManageUpload(event) {
@@ -1578,7 +1583,7 @@ async function handleEmojiManageUpload(event) {
     event.target.value = '';
 }
 
-// ============ 塔罗占卜（来自版本A） ============
+// ============ 塔罗占卜 ============
 function openTarotPage() {
     showPage('tarotPage');
     renderTarotPage();
@@ -1587,7 +1592,7 @@ function openTarotPage() {
 let selectedSpread = 1;
 
 function renderTarotPage() {
-    document.getElementById('tarotContent').innerHTML = 
+    document.getElementById('tarotContent').innerHTML =
         '<div style="background:linear-gradient(180deg,#0d0015,#1a0030,#0d0020);color:#e0d0f0;padding:16px;min-height:100%;"><div style="text-align:center;margin-bottom:20px;"><div style="font-size:44px;">🔮</div><div style="font-size:20px;font-weight:700;color:#f0d0ff;">命运之轮的指引</div></div>' +
         '<div style="background:rgba(255,255,255,0.06);border-radius:14px;padding:14px;margin-bottom:14px;"><div style="font-size:12px;color:#c0a0e0;">✨ 选择牌阵</div><div style="display:flex;gap:8px;" id="spreadOptions">' +
         '<div onclick="selectSpread(1,this)" style="flex:1;padding:12px;border-radius:10px;text-align:center;cursor:pointer;border:2px solid #d0a0ff;background:rgba(180,130,255,0.15);"><div style="font-size:24px;">🃏</div><div>单张指引</div></div>' +
@@ -1637,11 +1642,7 @@ function getFull78Deck() {
     var r = ['王牌','二','三','四','五','六','七','八','九','十','侍从','骑士','王后','国王'];
     var ic = {权杖:'🪵',圣杯:'🍷',宝剑:'🗡️',星币:'🪙'};
     var mn = [];
-    s.forEach(function(st) {
-        r.forEach(function(rk) {
-            mn.push({name:st+rk,emoji:ic[st],meaning:st+'的'+rk,icon:ic[st]});
-        });
-    });
+    s.forEach(function(st) { r.forEach(function(rk) { mn.push({name:st+rk,emoji:ic[st],meaning:st+'的'+rk,icon:ic[st]}); }); });
     return m.concat(mn);
 }
 
@@ -1677,7 +1678,7 @@ async function drawTarot() {
     btn.textContent = '🌟 重新占卜';
 }
 
-// ============ 数据管理（来自版本B：导出功能） ============
+// ============ 数据管理 ============
 function downloadBlob(content, filename) {
     var b = new Blob([content], { type: 'application/json;charset=utf-8' });
     var url = URL.createObjectURL(b);
@@ -1687,10 +1688,7 @@ function downloadBlob(content, filename) {
     a.style.display = 'none';
     document.body.appendChild(a);
     a.click();
-    setTimeout(function() {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }, 500);
+    setTimeout(function() { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
     showToast('✅ 已导出：' + filename);
 }
 
@@ -1706,7 +1704,7 @@ async function renderDataManage() {
     const logs = await dbGetAll('callLogs');
     const total = JSON.stringify({ msgs, cards, emojis, logs });
     const kb = (new Blob([total]).size / 1024).toFixed(1);
-    document.getElementById('dataManageContent').innerHTML = 
+    document.getElementById('dataManageContent').innerHTML =
         '<div class="stat-card"><h4 style="font-size:13px;color:var(--text-light);margin-bottom:8px;">📊 存储用量</h4>' +
         '<div class="stat-row"><span>聊天消息</span><span class="stat-value">' + msgs.length + ' 条</span></div>' +
         '<div class="stat-row"><span>字卡数量</span><span class="stat-value">' + cards.filter(c => c.content !== '__GROUP_PLACEHOLDER__').length + ' 条</span></div>' +
@@ -1719,618 +1717,6 @@ async function renderDataManage() {
         '<button class="action-btn" style="background:#ffebee;color:#c62828;" onclick="if(confirm(\'确定清除聊天记录？\'))clearChat()">🗑 清空聊天记录</button>';
 }
 
-function openWishPage() {
-    showPage('wishPage');
-    renderWishPage();
-}
-
-function renderWishPage() {
-    const wishes = JSON.parse(localStorage.getItem('wishes') || '[]');
-    let html = `
-        <div style="margin-bottom:16px;display:flex;gap:8px;">
-            <input type="text" id="wishInput" placeholder="写下你的愿望..." style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;">
-            <button onclick="addWish()" style="padding:10px 20px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;">许愿</button>
-        </div>
-        <div id="wishList">
-    `;
-    if (wishes.length === 0) {
-        html += '<p style="color:#ccc;text-align:center;padding:40px;">✨ 还没有愿望，许个愿吧～</p>';
-    } else {
-        wishes.forEach((w, i) => {
-            html += `
-                <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;">
-                    <span onclick="toggleWish(${i})" style="cursor:pointer;font-size:20px;">${w.done ? '✅' : '⬜'}</span>
-                    <span style="flex:1;font-size:14px;text-decoration:${w.done ? 'line-through' : 'none'};color:${w.done ? '#ccc' : '#333'};">${w.content}</span>
-                    <span style="font-size:11px;color:#999;">${w.time}</span>
-                    <span onclick="deleteWish(${i})" style="cursor:pointer;color:#ff4757;font-size:14px;">✕</span>
-                </div>
-            `;
-        });
-    }
-    html += '</div>';
-    document.getElementById('wishContent').innerHTML = html;
-}
-
-function addWish() {
-    const input = document.getElementById('wishInput');
-    const content = input.value.trim();
-    if (!content) return;
-    const wishes = JSON.parse(localStorage.getItem('wishes') || '[]');
-    wishes.push({
-        content: content,
-        done: false,
-        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-    });
-    localStorage.setItem('wishes', JSON.stringify(wishes));
-    input.value = '';
-    renderWishPage();
-}
-
-function toggleWish(index) {
-    const wishes = JSON.parse(localStorage.getItem('wishes') || '[]');
-    wishes[index].done = !wishes[index].done;
-    localStorage.setItem('wishes', JSON.stringify(wishes));
-    renderWishPage();
-}
-
-function deleteWish(index) {
-    const wishes = JSON.parse(localStorage.getItem('wishes') || '[]');
-    wishes.splice(index, 1);
-    localStorage.setItem('wishes', JSON.stringify(wishes));
-    renderWishPage();
-}
-
-function openAnniversaryPage() {
-    showPage('anniversaryPage');
-    renderAnniversaryPage();
-}
-
-function renderAnniversaryPage() {
-    const anniversaries = JSON.parse(localStorage.getItem('anniversaries') || '[]');
-    let html = `
-        <div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;">
-            <input type="date" id="anniversaryDate" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;min-width:150px;">
-            <input type="text" id="anniversaryName" placeholder="纪念日名称..." style="flex:2;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;min-width:120px;">
-            <button onclick="addAnniversary()" style="padding:10px 20px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;">添加</button>
-        </div>
-        <div id="anniversaryList">
-    `;
-    if (anniversaries.length === 0) {
-        html += '<p style="color:#ccc;text-align:center;padding:40px;">📅 还没有纪念日，添加一个吧～</p>';
-    } else {
-        // 按日期排序（最新的在前）
-        anniversaries.sort((a, b) => new Date(b.date) - new Date(a.date));
-        anniversaries.forEach((item, i) => {
-            const days = Math.floor((Date.now() - new Date(item.date)) / (1000 * 60 * 60 * 24));
-            html += `
-                <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;">
-                    <span style="font-size:16px;">📅</span>
-                    <span style="flex:1;font-size:14px;">${item.name}</span>
-                    <span style="font-size:12px;color:#999;">${item.date}</span>
-                    <span style="font-size:12px;color:var(--primary);font-weight:600;">${days >= 0 ? '已过 ' + days + ' 天' : '还有 ' + Math.abs(days) + ' 天'}</span>
-                    <span onclick="deleteAnniversary(${i})" style="cursor:pointer;color:#ff4757;font-size:14px;">✕</span>
-                </div>
-            `;
-        });
-    }
-    html += '</div>';
-    document.getElementById('anniversaryContent').innerHTML = html;
-}
-
-// ===== 答案之书 =====
-async function getAnswerBookGroups() {
-    const groups = await getAllGroups();
-    return groups.filter(g => g.id !== 'default' && g.cardCount > 0);
-}
-
-async function getAnswerFromGroup(groupId) {
-    const allCards = await dbGetAll('wordcards');
-    const cards = allCards.filter(c => 
-        c.groupId === groupId && 
-        c.content && 
-        c.content !== '__GROUP_PLACEHOLDER__' &&
-        c.content.length > 1
-    );
-    if (cards.length === 0) return null;
-    return cards[Math.floor(Math.random() * cards.length)].content;
-}
-
-// ===== 答案之书 =====
-
-// 1. 获取所有分组
-async function getAnswerBookGroups() {
-    const groups = await getAllGroups();
-    return groups.filter(g => g.id !== 'default' && g.cardCount > 0);
-}
-
-// 2. 从选中分组随机取一条字卡
-async function getAnswerFromGroup(groupId) {
-    const allCards = await dbGetAll('wordcards');
-    const cards = allCards.filter(c => 
-        c.groupId === groupId && 
-        c.content && 
-        c.content !== '__GROUP_PLACEHOLDER__' &&
-        c.content.length > 1
-    );
-    if (cards.length === 0) return null;
-    return cards[Math.floor(Math.random() * cards.length)].content;
-}
-
-// 3. 打开答案之书页面
-function openAnswerBookPage() {
-    showPage('answerBookPage');
-    renderAnswerBookPage();
-}
-
-// 4. 渲染答案之书页面
-async function renderAnswerBookPage() {
-    const selectedGroup = localStorage.getItem('answerBookGroup') || '';
-    const groups = await getAnswerBookGroups();
-    const history = JSON.parse(localStorage.getItem('answerBookHistory') || '[]');
-    
-    let html = `
-        <div style="margin-bottom:16px;">
-            <label style="font-size:13px;color:#999;display:block;margin-bottom:4px;">📂 选择答案来源分组</label>
-            <select id="answerBookGroupSelect" onchange="saveAnswerBookGroup()" style="width:100%;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;background:#fff;">
-                <option value="">-- 请选择分组 --</option>
-    `;
-    groups.forEach(g => {
-        html += `<option value="${g.id}" ${g.id === selectedGroup ? 'selected' : ''}>${g.name}（${g.cardCount}条）</option>`;
-    });
-    html += `
-            </select>
-        </div>
-        <div style="margin-bottom:16px;display:flex;gap:8px;">
-            <input type="text" id="answerBookInput" placeholder="写下你的问题..." style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;" onkeydown="if(event.key==='Enter')askAnswerBook()">
-            <button onclick="askAnswerBook()" style="padding:10px 20px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;">提问</button>
-        </div>
-        <div id="answerBookResult" style="background:#f8f0ff;border-radius:12px;padding:20px;text-align:center;margin-bottom:16px;display:none;">
-            <div style="font-size:13px;color:#999;margin-bottom:4px;">📖 秦彻正在翻阅答案之书...</div>
-            <div id="answerBookText" style="font-size:18px;font-weight:600;color:#6b20d4;margin-top:8px;"></div>
-        </div>
-        <div id="answerBookHistory">
-            <div style="font-size:13px;color:#999;margin-bottom:8px;">📝 对话记录</div>
-    `;
-    if (history.length === 0) {
-        html += '<p style="color:#ccc;text-align:center;padding:20px;">还没有提问记录</p>';
-    } else {
-        history.slice().reverse().forEach(item => {
-            html += `
-                <div style="display:flex;flex-direction:column;padding:10px 0;border-bottom:1px solid #f0f0f0;">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
-                        <span style="font-size:12px;color:#999;">你：</span>
-                        <span style="font-size:14px;color:#333;">${item.question}</span>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <img src="${getAvatar('contact')}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">
-                        <span style="font-size:14px;color:#6b20d4;font-weight:500;">${item.answer}</span>
-                    </div>
-                    <div style="font-size:10px;color:#ccc;margin-top:2px;">${item.time}</div>
-                </div>
-            `;
-        });
-    }
-    html += '</div>';
-    document.getElementById('answerBookContent').innerHTML = html;
-}
-
-// 5. 保存选中的分组
-function saveAnswerBookGroup() {
-    const select = document.getElementById('answerBookGroupSelect');
-    const selectedValue = select.value;
-    localStorage.setItem('answerBookGroup', selectedValue);
-    // 清空历史记录
-    localStorage.setItem('answerBookHistory', JSON.stringify([]));
-    renderAnswerBookPage();
-}
-
-// 6. 提问
-async function askAnswerBook() {
-    const input = document.getElementById('answerBookInput');
-    const question = input.value.trim();
-    if (!question) return;
-    
-    const groupId = document.getElementById('answerBookGroupSelect').value;
-    if (!groupId) {
-        alert('请先选择答案来源分组');
-        return;
-    }
-    
-    const resultDiv = document.getElementById('answerBookResult');
-    const textDiv = document.getElementById('answerBookText');
-    resultDiv.style.display = 'block';
-    textDiv.textContent = '📖 翻阅中...';
-    textDiv.style.color = '#999';
-    
-    await new Promise(r => setTimeout(r, 1500));
-    
-    const answer = await getAnswerFromGroup(groupId);
-    if (!answer) {
-        textDiv.textContent = '😅 这个分组里还没有字卡，快去添加吧！';
-        textDiv.style.color = '#ff6b81';
-        return;
-    }
-    
-    textDiv.textContent = answer;
-    textDiv.style.color = '#6b20d4';
-    
-    const history = JSON.parse(localStorage.getItem('answerBookHistory') || '[]');
-    history.push({
-        question: question,
-        answer: answer,
-        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-    });
-    localStorage.setItem('answerBookHistory', JSON.stringify(history));
-    input.value = '';
-    renderAnswerBookPage();
-    resultDiv.scrollIntoView({ behavior: 'smooth' });
-}
-async function renderAnswerBookPage() {
-    const selectedGroup = localStorage.getItem('answerBookGroup') || '';
-    const groups = await getAnswerBookGroups();
-    const history = JSON.parse(localStorage.getItem('answerBookHistory') || '[]');
-    
-    let html = `
-        <div style="margin-bottom:16px;">
-            <label style="font-size:13px;color:#999;display:block;margin-bottom:4px;">📂 选择答案来源分组</label>
-            <select id="answerBookGroupSelect" onchange="saveAnswerBookGroup()" style="width:100%;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;background:#fff;">
-                <option value="">-- 请选择分组 --</option>
-    `;
-    groups.forEach(g => {
-        html += `<option value="${g.id}" ${g.id === selectedGroup ? 'selected' : ''}>${g.name}（${g.cardCount}条）</option>`;
-    });
-    html += `
-            </select>
-        </div>
-        <div style="margin-bottom:16px;display:flex;gap:8px;">
-            <input type="text" id="answerBookInput" placeholder="写下你的问题..." style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;" onkeydown="if(event.key==='Enter')askAnswerBook()">
-            <button onclick="askAnswerBook()" style="padding:10px 20px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;">提问</button>
-        </div>
-        <div id="answerBookResult" style="background:#f8f0ff;border-radius:12px;padding:20px;text-align:center;margin-bottom:16px;display:none;">
-            <div style="font-size:13px;color:#999;margin-bottom:4px;">📖 秦彻正在翻阅答案之书...</div>
-            <div id="answerBookText" style="font-size:18px;font-weight:600;color:#6b20d4;margin-top:8px;"></div>
-        </div>
-        <div id="answerBookHistory">
-            <div style="font-size:13px;color:#999;margin-bottom:8px;">📝 对话记录</div>
-    `;
-    if (history.length === 0) {
-        html += '<p style="color:#ccc;text-align:center;padding:20px;">还没有提问记录</p>';
-    } else {
-        history.slice().reverse().forEach(item => {
-            html += `
-                <div style="display:flex;flex-direction:column;padding:10px 0;border-bottom:1px solid #f0f0f0;">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
-                        <span style="font-size:12px;color:#999;">你：</span>
-                        <span style="font-size:14px;color:#333;">${item.question}</span>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <img src="${getAvatar('contact')}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">
-                        <span style="font-size:14px;color:#6b20d4;font-weight:500;">${item.answer}</span>
-                    </div>
-                    <div style="font-size:10px;color:#ccc;margin-top:2px;">${item.time}</div>
-                </div>
-            `;
-        });
-    }
-    html += '</div>';
-    document.getElementById('answerBookContent').innerHTML = html;
-}
-
-function saveAnswerBookGroup() {
-    const select = document.getElementById('answerBookGroupSelect');
-    localStorage.setItem('answerBookGroup', select.value);
-    // 清空历史记录（可选）
-    if (select.value && !confirm('切换分组会清空当前对话记录，确定吗？')) {
-        select.value = localStorage.getItem('answerBookGroup') || '';
-        return;
-    }
-    localStorage.setItem('answerBookHistory', JSON.stringify([]));
-    renderAnswerBookPage();
-}
-
-async function askAnswerBook() {
-    const input = document.getElementById('answerBookInput');
-    const question = input.value.trim();
-    if (!question) return;
-    
-    const groupId = document.getElementById('answerBookGroupSelect').value;
-    if (!groupId) {
-        alert('请先选择答案来源分组');
-        return;
-    }
-    
-    // 显示加载状态
-    const resultDiv = document.getElementById('answerBookResult');
-    const textDiv = document.getElementById('answerBookText');
-    resultDiv.style.display = 'block';
-    textDiv.textContent = '📖 翻阅中...';
-    textDiv.style.color = '#999';
-    
-    // 延迟1.5秒模拟翻书
-    await new Promise(r => setTimeout(r, 1500));
-    
-    const answer = await getAnswerFromGroup(groupId);
-    if (!answer) {
-        textDiv.textContent = '😅 这个分组里还没有字卡，快去添加吧！';
-        textDiv.style.color = '#ff6b81';
-        return;
-    }
-    
-    textDiv.textContent = answer;
-    textDiv.style.color = '#6b20d4';
-    
-    // 保存历史
-    const history = JSON.parse(localStorage.getItem('answerBookHistory') || '[]');
-    history.push({
-        question: question,
-        answer: answer,
-        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-    });
-    localStorage.setItem('answerBookHistory', JSON.stringify(history));
-    input.value = '';
-    renderAnswerBookPage();
-    // 滚动到结果
-    resultDiv.scrollIntoView({ behavior: 'smooth' });
-}
-
-function addAnniversary() {
-    const date = document.getElementById('anniversaryDate').value;
-    const name = document.getElementById('anniversaryName').value.trim();
-    if (!date || !name) return;
-    const anniversaries = JSON.parse(localStorage.getItem('anniversaries') || '[]');
-    anniversaries.push({ date, name });
-    localStorage.setItem('anniversaries', JSON.stringify(anniversaries));
-    document.getElementById('anniversaryDate').value = '';
-    document.getElementById('anniversaryName').value = '';
-    renderAnniversaryPage();
-}
-
-function deleteAnniversary(index) {
-    const anniversaries = JSON.parse(localStorage.getItem('anniversaries') || '[]');
-    anniversaries.splice(index, 1);
-    localStorage.setItem('anniversaries', JSON.stringify(anniversaries));
-    renderAnniversaryPage();
-}
-
-function deleteAnniversary(index) {
-    const anniversaries = JSON.parse(localStorage.getItem('anniversaries') || '[]');
-    anniversaries.splice(index, 1);
-    localStorage.setItem('anniversaries', JSON.stringify(anniversaries));
-    renderAnniversaryPage();
-}
-
-// 👇 在这里添加「倾听我心」的代码
-function openChoicePage() {
-    showPage('choicePage');
-    renderChoicePage();
-}
-
-// 直接替换 renderChoicePage 函数
-renderChoicePage = function() {
-    const question = localStorage.getItem('choiceQuestion') || '';
-    const options = JSON.parse(localStorage.getItem('choiceOptions') || '[]');
-    const history = JSON.parse(localStorage.getItem('choiceHistory') || '[]');
-    const result = localStorage.getItem('choiceResult') || '';
-    
-    let html = `
-        <div style="text-align:center;margin-bottom:20px;">
-            <div style="font-size:14px;color:#666;font-style:italic;margin-bottom:12px;">💭 秦彻，请告诉我你的选择</div>
-            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-                <input type="text" id="choiceQuestionInput" placeholder="你在纠结什么？" value="${question}" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #f0dce0;background:#fff;color:#000;font-size:14px;outline:none;min-width:150px;">
-                <button onclick="saveQuestion()" style="padding:10px 16px;border-radius:12px;background:#e8b4c8;color:#fff;border:none;cursor:pointer;font-weight:500;">确定</button>
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-                <input type="text" id="choiceOptionInput" placeholder="输入选项..." style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #f0dce0;background:#fff;color:#000;font-size:14px;outline:none;min-width:120px;" onkeydown="if(event.key==='Enter')addOption()">
-                <button onclick="addOption()" style="padding:10px 16px;border-radius:12px;background:#e8b4c8;color:#fff;border:none;cursor:pointer;font-weight:500;">+ 添加选项</button>
-                ${options.length >= 2 ? `<button onclick="makeChoice()" style="padding:10px 16px;border-radius:12px;background:#d4a0b8;color:#fff;border:none;cursor:pointer;font-weight:500;">💗 请秦彻选择</button>` : ''}
-            </div>
-            <div id="optionList" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;">
-    `;
-    if (options.length === 0) {
-        html += '<div style="color:#bbb;font-size:13px;">还没有选项，添加一些吧～</div>';
-    } else {
-        options.forEach((opt, i) => {
-            html += `
-                <div style="padding:12px 20px;border-radius:20px;background:#fdf5f7;border:1.5px solid #f0dce0;font-size:14px;color:#000;display:flex;align-items:center;gap:8px;">
-                    <span style="color:#999;">${i+1}.</span>
-                    <span style="color:#000;font-weight:500;">${opt}</span>
-                    <span onclick="removeOption(${i})" style="color:#d4a0b8;cursor:pointer;font-size:14px;">✕</span>
-                </div>
-            `;
-        });
-    }
-    html += `
-            </div>
-            <div id="choiceResult" style="background:rgba(255,255,255,0.8);border-radius:16px;padding:20px;margin-bottom:16px;border:1.5px solid #f0dce0;${!result ? 'display:none;' : ''}">
-                <div style="font-size:14px;color:#666;margin-bottom:4px;">💗 秦彻的建议</div>
-                <div id="choiceResultText" style="font-size:22px;color:#000;font-weight:500;">${result}</div>
-            </div>
-            <div id="choiceHistory" style="text-align:left;margin-top:8px;max-height:300px;overflow-y:auto;">
-                <div style="font-size:12px;color:#bbb;margin-bottom:8px;">📜 历史记录</div>
-    `;
-    if (history.length === 0) {
-        html += '<div style="color:#ddd;font-size:13px;text-align:center;padding:12px;">还没有记录</div>';
-    } else {
-        history.slice().reverse().forEach(item => {
-            html += `
-                <div style="padding:8px 0;border-bottom:1px solid #f5e8ec;font-size:13px;">
-                    <div style="color:#333;">💭 ${item.question}</div>
-                    <div style="color:#000;font-weight:500;">💗 ${item.choice}</div>
-                    <div style="color:#bbb;font-size:10px;">${item.time}</div>
-                </div>
-            `;
-        });
-    }
-    html += '</div></div>';
-    document.getElementById('choiceContent').innerHTML = html;
-};
-
-// 执行渲染
-renderChoicePage();
-function saveQuestion() {
-    const input = document.getElementById('choiceQuestionInput');
-    localStorage.setItem('choiceQuestion', input.value.trim());
-    renderChoicePage();
-}
-
-function addOption() {
-    const input = document.getElementById('choiceOptionInput');
-    const val = input.value.trim();
-    if (!val) return;
-    const options = JSON.parse(localStorage.getItem('choiceOptions') || '[]');
-    options.push(val);
-    localStorage.setItem('choiceOptions', JSON.stringify(options));
-    input.value = '';
-    renderChoicePage();
-}
-
-function removeOption(index) {
-    const options = JSON.parse(localStorage.getItem('choiceOptions') || '[]');
-    options.splice(index, 1);
-    localStorage.setItem('choiceOptions', JSON.stringify(options));
-    renderChoicePage();
-}
-
-function openChoicePage() {
-    showPage('choicePage');
-    renderChoicePage();
-}
-
-function renderChoicePage() {
-    const question = localStorage.getItem('choiceQuestion') || '';
-    const options = JSON.parse(localStorage.getItem('choiceOptions') || '[]');
-    const history = JSON.parse(localStorage.getItem('choiceHistory') || '[]');
-    const result = localStorage.getItem('choiceResult') || '';
-    
-    let html = `
-        <div style="text-align:center;margin-bottom:20px;">
-            <div style="font-size:14px;color:#c0a0b0;font-style:italic;margin-bottom:12px;">💭 秦彻，请告诉我你的选择</div>
-            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-                <input type="text" id="choiceQuestionInput" placeholder="你在纠结什么？" value="${question}" style="flex:1;padding:10px;border-radius:12px;border:1px solid #3d2a3a;background:rgba(255,255,255,0.05);color:#e0d0d0;font-size:14px;outline:none;min-width:150px;">
-                <button onclick="saveQuestion()" style="padding:10px 16px;border-radius:12px;background:#6b3a5a;color:#fff;border:none;cursor:pointer;">确定</button>
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-                <input type="text" id="choiceOptionInput" placeholder="输入选项..." style="flex:1;padding:10px;border-radius:12px;border:1px solid #3d2a3a;background:rgba(255,255,255,0.05);color:#e0d0d0;font-size:14px;outline:none;min-width:120px;" onkeydown="if(event.key==='Enter')addOption()">
-                <button onclick="addOption()" style="padding:10px 16px;border-radius:12px;background:#6b3a5a;color:#fff;border:none;cursor:pointer;">+ 添加选项</button>
-                ${options.length >= 2 ? `<button onclick="makeChoice()" style="padding:10px 16px;border-radius:12px;background:#9b6a8a;color:#fff;border:none;cursor:pointer;">💗 请秦彻选择</button>` : ''}
-            </div>
-            <div id="optionList" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;">
-    `;
-    if (options.length === 0) {
-        html += '<div style="color:#6a5a6a;font-size:13px;">还没有选项，添加一些吧～</div>';
-    } else {
-        options.forEach((opt, i) => {
-            html += `
-                <div style="padding:12px 20px;border-radius:20px;background:rgba(255,255,255,0.06);border:1px solid #4a3a4a;font-size:14px;color:#e0d0d0;display:flex;align-items:center;gap:8px;">
-                    <span>${i+1}.</span>
-                    <span>${opt}</span>
-                    <span onclick="removeOption(${i})" style="color:#6a4a5a;cursor:pointer;font-size:12px;">✕</span>
-                </div>
-            `;
-        });
-    }
-    html += `
-            </div>
-            <div id="choiceResult" style="background:rgba(255,255,255,0.04);border-radius:16px;padding:20px;margin-bottom:16px;border:1px solid #4a3a4a;${!result ? 'display:none;' : ''}">
-                <div style="font-size:13px;color:#c0a0b0;margin-bottom:4px;">💗 秦彻的建议</div>
-                <div id="choiceResultText" style="font-size:20px;color:#f0d0e0;font-weight:400;">${result}</div>
-            </div>
-            <div id="choiceHistory" style="text-align:left;margin-top:8px;max-height:300px;overflow-y:auto;">
-                <div style="font-size:12px;color:#6a5a6a;margin-bottom:8px;">📜 历史记录</div>
-    `;
-    if (history.length === 0) {
-        html += '<div style="color:#4a3a4a;font-size:13px;text-align:center;padding:12px;">还没有记录</div>';
-    } else {
-        history.slice().reverse().forEach(item => {
-            html += `
-                <div style="padding:8px 0;border-bottom:1px solid #2a1a2a;font-size:13px;">
-                    <div style="color:#8a7a8a;">💭 ${item.question}</div>
-                    <div style="color:#f0d0e0;">💗 ${item.choice}</div>
-                    <div style="color:#4a3a4a;font-size:10px;">${item.time}</div>
-                </div>
-            `;
-        });
-    }
-    html += '</div></div>';
-    document.getElementById('choiceContent').innerHTML = html;
-}
-function makeChoice() {
-    const options = JSON.parse(localStorage.getItem('choiceOptions') || '[]');
-    if (options.length < 2) {
-        alert('至少需要2个选项');
-        return;
-    }
-    const question = localStorage.getItem('choiceQuestion') || '未知问题';
-    const choice = options[Math.floor(Math.random() * options.length)];
-    
-    const result = `💗 笑笑，我的建议是：${choice}`;
-    localStorage.setItem('choiceResult', result);
-    
-    const history = JSON.parse(localStorage.getItem('choiceHistory') || '[]');
-    history.push({
-        question: question,
-        choice: choice,
-        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-    });
-    localStorage.setItem('choiceHistory', JSON.stringify(history));
-    
-    renderChoicePage();
-}
-
-function saveQuestion() {
-    const input = document.getElementById('choiceQuestionInput');
-    const question = input.value.trim();
-    if (!question) return;
-    localStorage.setItem('choiceQuestion', question);
-    localStorage.setItem('choiceOptions', JSON.stringify([]));
-    renderChoicePage();
-    setTimeout(() => {
-        document.getElementById('choiceOptionInput').focus();
-    }, 200);
-}
-
-function addOption() {
-    const input = document.getElementById('choiceOptionInput');
-    const val = input.value.trim();
-    if (!val) return;
-    const options = JSON.parse(localStorage.getItem('choiceOptions') || '[]');
-    options.push(val);
-    localStorage.setItem('choiceOptions', JSON.stringify(options));
-    input.value = '';
-    renderChoicePage();
-}
-
-function removeOption(index) {
-    const options = JSON.parse(localStorage.getItem('choiceOptions') || '[]');
-    options.splice(index, 1);
-    localStorage.setItem('choiceOptions', JSON.stringify(options));
-    renderChoicePage();
-}
-
-function pickOption(index) {
-    const options = JSON.parse(localStorage.getItem('choiceOptions') || '[]');
-    if (options.length === 0) return;
-    const question = localStorage.getItem('choiceQuestion') || '未知问题';
-    const choice = options[index];
-    
-    const resultDiv = document.getElementById('choiceResult');
-    const resultText = document.getElementById('choiceResultText');
-    resultDiv.style.display = 'block';
-    resultText.textContent = `💗 笑笑，我为你选择：${choice}`;
-    
-    const history = JSON.parse(localStorage.getItem('choiceHistory') || '[]');
-    history.push({
-        question: question,
-        choice: choice,
-        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-    });
-    localStorage.setItem('choiceHistory', JSON.stringify(history));
-    renderChoicePage();
-    // 重新获取元素
-    setTimeout(() => {
-        document.getElementById('choiceResult')?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-}
 async function exportChat() {
     const msgs = await dbGetAll('messages');
     msgs.sort((a, b) => a.timestamp - b.timestamp);
@@ -2356,14 +1742,11 @@ async function exportAll() {
         const disabledCards = await dbGetAll('disabledCards');
         const disabledGroups = await dbGetAll('disabledGroups');
         const avatarHistory = await dbGetAll('avatarHistory');
-        
         const totalCount = messages.length + wordcards.length + emojis.length + callLogs.length;
-        
         if (totalCount === 0) {
             showToast('⚠️ 没有数据可导出，请先发送几条消息再试');
             return;
         }
-        
         const data = { messages, settings, wordcards, emojis, avatars, callLogs, patOptions, statusOptions, disabledCards, disabledGroups, avatarHistory, exportTime: new Date().toISOString(), totalCount };
         downloadBlob(JSON.stringify(data, null, 2), '时光树洞_' + new Date().toLocaleDateString().replace(/\//g, '-') + '.json');
         showToast('✅ 导出成功！共 ' + totalCount + ' 条数据');
@@ -2419,23 +1802,248 @@ async function clearChat() {
     showToast('已清空');
 }
 
-// ============ 背景（来自版本A） ============
+// ============ 许愿便利贴 ============
+function openWishPage() {
+    showPage('wishPage');
+    renderWishPage();
+}
+
+function renderWishPage() {
+    const wishes = JSON.parse(localStorage.getItem('wishes') || '[]');
+    let html = '<div style="margin-bottom:16px;display:flex;gap:8px;"><input type="text" id="wishInput" placeholder="写下你的愿望..." style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;"><button onclick="addWish()" style="padding:10px 20px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;">许愿</button></div><div id="wishList">';
+    if (wishes.length === 0) {
+        html += '<p style="color:#ccc;text-align:center;padding:40px;">✨ 还没有愿望，许个愿吧～</p>';
+    } else {
+        wishes.forEach((w, i) => {
+            html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;"><span onclick="toggleWish(' + i + ')" style="cursor:pointer;font-size:20px;">' + (w.done ? '✅' : '⬜') + '</span><span style="flex:1;font-size:14px;text-decoration:' + (w.done ? 'line-through' : 'none') + ';color:' + (w.done ? '#ccc' : '#333') + ';">' + w.content + '</span><span style="font-size:11px;color:#999;">' + w.time + '</span><span onclick="deleteWish(' + i + ')" style="cursor:pointer;color:#ff4757;font-size:14px;">✕</span></div>';
+        });
+    }
+    html += '</div>';
+    document.getElementById('wishContent').innerHTML = html;
+}
+
+function addWish() {
+    const input = document.getElementById('wishInput');
+    const content = input.value.trim();
+    if (!content) return;
+    const wishes = JSON.parse(localStorage.getItem('wishes') || '[]');
+    wishes.push({ content: content, done: false, time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) });
+    localStorage.setItem('wishes', JSON.stringify(wishes));
+    input.value = '';
+    renderWishPage();
+}
+
+function toggleWish(index) {
+    const wishes = JSON.parse(localStorage.getItem('wishes') || '[]');
+    wishes[index].done = !wishes[index].done;
+    localStorage.setItem('wishes', JSON.stringify(wishes));
+    renderWishPage();
+}
+
+function deleteWish(index) {
+    const wishes = JSON.parse(localStorage.getItem('wishes') || '[]');
+    wishes.splice(index, 1);
+    localStorage.setItem('wishes', JSON.stringify(wishes));
+    renderWishPage();
+}
+
+// ============ 纪念日 ============
+function openAnniversaryPage() {
+    showPage('anniversaryPage');
+    renderAnniversaryPage();
+}
+
+function renderAnniversaryPage() {
+    const anniversaries = JSON.parse(localStorage.getItem('anniversaries') || '[]');
+    let html = '<div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;"><input type="date" id="anniversaryDate" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;min-width:150px;"><input type="text" id="anniversaryName" placeholder="纪念日名称..." style="flex:2;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;min-width:120px;"><button onclick="addAnniversary()" style="padding:10px 20px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;">添加</button></div><div id="anniversaryList">';
+    if (anniversaries.length === 0) {
+        html += '<p style="color:#ccc;text-align:center;padding:40px;">📅 还没有纪念日，添加一个吧～</p>';
+    } else {
+        anniversaries.sort((a, b) => new Date(b.date) - new Date(a.date));
+        anniversaries.forEach((item, i) => {
+            const days = Math.floor((Date.now() - new Date(item.date)) / (1000 * 60 * 60 * 24));
+            html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;"><span style="font-size:16px;">📅</span><span style="flex:1;font-size:14px;">' + item.name + '</span><span style="font-size:12px;color:#999;">' + item.date + '</span><span style="font-size:12px;color:var(--primary);font-weight:600;">' + (days >= 0 ? '已过 ' + days + ' 天' : '还有 ' + Math.abs(days) + ' 天') + '</span><span onclick="deleteAnniversary(' + i + ')" style="cursor:pointer;color:#ff4757;font-size:14px;">✕</span></div>';
+        });
+    }
+    html += '</div>';
+    document.getElementById('anniversaryContent').innerHTML = html;
+}
+
+function addAnniversary() {
+    const date = document.getElementById('anniversaryDate').value;
+    const name = document.getElementById('anniversaryName').value.trim();
+    if (!date || !name) return;
+    const anniversaries = JSON.parse(localStorage.getItem('anniversaries') || '[]');
+    anniversaries.push({ date, name });
+    localStorage.setItem('anniversaries', JSON.stringify(anniversaries));
+    document.getElementById('anniversaryDate').value = '';
+    document.getElementById('anniversaryName').value = '';
+    renderAnniversaryPage();
+}
+
+function deleteAnniversary(index) {
+    const anniversaries = JSON.parse(localStorage.getItem('anniversaries') || '[]');
+    anniversaries.splice(index, 1);
+    localStorage.setItem('anniversaries', JSON.stringify(anniversaries));
+    renderAnniversaryPage();
+}
+
+// ============ 答案之书 ============
+async function getAnswerBookGroups() {
+    const groups = await getAllGroups();
+    return groups.filter(g => g.id !== 'default' && g.cardCount > 0);
+}
+
+async function getAnswerFromGroup(groupId) {
+    const allCards = await dbGetAll('wordcards');
+    const cards = allCards.filter(c => c.groupId === groupId && c.content && c.content !== '__GROUP_PLACEHOLDER__' && c.content.length > 1);
+    if (cards.length === 0) return null;
+    return cards[Math.floor(Math.random() * cards.length)].content;
+}
+
+function openAnswerBookPage() {
+    showPage('answerBookPage');
+    renderAnswerBookPage();
+}
+
+async function renderAnswerBookPage() {
+    const selectedGroup = localStorage.getItem('answerBookGroup') || '';
+    const groups = await getAnswerBookGroups();
+    const history = JSON.parse(localStorage.getItem('answerBookHistory') || '[]');
+    let html = '<div style="margin-bottom:16px;"><label style="font-size:13px;color:#999;display:block;margin-bottom:4px;">📂 选择答案来源分组</label><select id="answerBookGroupSelect" onchange="saveAnswerBookGroup()" style="width:100%;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;background:#fff;"><option value="">-- 请选择分组 --</option>';
+    groups.forEach(g => { html += '<option value="' + g.id + '" ' + (g.id === selectedGroup ? 'selected' : '') + '>' + g.name + '（' + g.cardCount + '条）</option>'; });
+    html += '</select></div><div style="margin-bottom:16px;display:flex;gap:8px;"><input type="text" id="answerBookInput" placeholder="写下你的问题..." style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;" onkeydown="if(event.key===\'Enter\')askAnswerBook()"><button onclick="askAnswerBook()" style="padding:10px 20px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;">提问</button></div><div id="answerBookResult" style="background:#f8f0ff;border-radius:12px;padding:20px;text-align:center;margin-bottom:16px;display:none;"><div style="font-size:13px;color:#999;margin-bottom:4px;">📖 秦彻正在翻阅答案之书...</div><div id="answerBookText" style="font-size:18px;font-weight:600;color:#6b20d4;margin-top:8px;"></div></div><div id="answerBookHistory"><div style="font-size:13px;color:#999;margin-bottom:8px;">📝 对话记录</div>';
+    if (history.length === 0) {
+        html += '<p style="color:#ccc;text-align:center;padding:20px;">还没有提问记录</p>';
+    } else {
+        history.slice().reverse().forEach(item => {
+            html += '<div style="display:flex;flex-direction:column;padding:10px 0;border-bottom:1px solid #f0f0f0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;"><span style="font-size:12px;color:#999;">你：</span><span style="font-size:14px;color:#333;">' + item.question + '</span></div><div style="display:flex;align-items:center;gap:8px;"><img src="' + getAvatar('contact') + '" style="width:24px;height:24px;border-radius:50%;object-fit:cover;"><span style="font-size:14px;color:#6b20d4;font-weight:500;">' + item.answer + '</span></div><div style="font-size:10px;color:#ccc;margin-top:2px;">' + item.time + '</div></div>';
+        });
+    }
+    html += '</div>';
+    document.getElementById('answerBookContent').innerHTML = html;
+}
+
+function saveAnswerBookGroup() {
+    const select = document.getElementById('answerBookGroupSelect');
+    localStorage.setItem('answerBookGroup', select.value);
+    localStorage.setItem('answerBookHistory', JSON.stringify([]));
+    renderAnswerBookPage();
+}
+
+async function askAnswerBook() {
+    const input = document.getElementById('answerBookInput');
+    const question = input.value.trim();
+    if (!question) return;
+    const groupId = document.getElementById('answerBookGroupSelect').value;
+    if (!groupId) { alert('请先选择答案来源分组'); return; }
+    const resultDiv = document.getElementById('answerBookResult');
+    const textDiv = document.getElementById('answerBookText');
+    resultDiv.style.display = 'block';
+    textDiv.textContent = '📖 翻阅中...';
+    textDiv.style.color = '#999';
+    await new Promise(r => setTimeout(r, 1500));
+    const answer = await getAnswerFromGroup(groupId);
+    if (!answer) {
+        textDiv.textContent = '😅 这个分组里还没有字卡，快去添加吧！';
+        textDiv.style.color = '#ff6b81';
+        return;
+    }
+    textDiv.textContent = answer;
+    textDiv.style.color = '#6b20d4';
+    const history = JSON.parse(localStorage.getItem('answerBookHistory') || '[]');
+    history.push({ question: question, answer: answer, time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) });
+    localStorage.setItem('answerBookHistory', JSON.stringify(history));
+    input.value = '';
+    renderAnswerBookPage();
+    resultDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ============ 倾听我心 ============
+function openChoicePage() {
+    showPage('choicePage');
+    renderChoicePage();
+}
+
+function renderChoicePage() {
+    const question = localStorage.getItem('choiceQuestion') || '';
+    const options = JSON.parse(localStorage.getItem('choiceOptions') || '[]');
+    const history = JSON.parse(localStorage.getItem('choiceHistory') || '[]');
+    const result = localStorage.getItem('choiceResult') || '';
+    let html = '<div style="text-align:center;margin-bottom:20px;"><div style="font-size:14px;color:#666;font-style:italic;margin-bottom:12px;">💭 秦彻，请告诉我你的选择</div><div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;"><input type="text" id="choiceQuestionInput" placeholder="你在纠结什么？" value="' + question + '" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #f0dce0;background:#fff;color:#000;font-size:14px;outline:none;min-width:150px;"><button onclick="saveQuestion()" style="padding:10px 16px;border-radius:12px;background:#e8b4c8;color:#fff;border:none;cursor:pointer;font-weight:500;">确定</button></div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"><input type="text" id="choiceOptionInput" placeholder="输入选项..." style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #f0dce0;background:#fff;color:#000;font-size:14px;outline:none;min-width:120px;" onkeydown="if(event.key===\'Enter\')addOption()"><button onclick="addOption()" style="padding:10px 16px;border-radius:12px;background:#e8b4c8;color:#fff;border:none;cursor:pointer;font-weight:500;">+ 添加选项</button>' + (options.length >= 2 ? '<button onclick="makeChoice()" style="padding:10px 16px;border-radius:12px;background:#d4a0b8;color:#fff;border:none;cursor:pointer;font-weight:500;">💗 请秦彻选择</button>' : '') + '</div><div id="optionList" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;">';
+    if (options.length === 0) {
+        html += '<div style="color:#bbb;font-size:13px;">还没有选项，添加一些吧～</div>';
+    } else {
+        options.forEach((opt, i) => {
+            html += '<div style="padding:12px 20px;border-radius:20px;background:#fdf5f7;border:1.5px solid #f0dce0;font-size:14px;color:#000;display:flex;align-items:center;gap:8px;"><span style="color:#999;">' + (i+1) + '.</span><span style="color:#000;font-weight:500;">' + opt + '</span><span onclick="removeOption(' + i + ')" style="color:#d4a0b8;cursor:pointer;font-size:14px;">✕</span></div>';
+        });
+    }
+    html += '</div><div id="choiceResult" style="background:rgba(255,255,255,0.8);border-radius:16px;padding:20px;margin-bottom:16px;border:1.5px solid #f0dce0;' + (!result ? 'display:none;' : '') + '"><div style="font-size:14px;color:#666;margin-bottom:4px;">💗 秦彻的建议</div><div id="choiceResultText" style="font-size:22px;color:#000;font-weight:500;">' + result + '</div></div><div id="choiceHistory" style="text-align:left;margin-top:8px;max-height:300px;overflow-y:auto;"><div style="font-size:12px;color:#bbb;margin-bottom:8px;">📜 历史记录</div>';
+    if (history.length === 0) {
+        html += '<div style="color:#ddd;font-size:13px;text-align:center;padding:12px;">还没有记录</div>';
+    } else {
+        history.slice().reverse().forEach(item => {
+            html += '<div style="padding:8px 0;border-bottom:1px solid #f5e8ec;font-size:13px;"><div style="color:#333;">💭 ' + item.question + '</div><div style="color:#000;font-weight:500;">💗 ' + item.choice + '</div><div style="color:#bbb;font-size:10px;">' + item.time + '</div></div>';
+        });
+    }
+    html += '</div></div>';
+    document.getElementById('choiceContent').innerHTML = html;
+}
+
+function saveQuestion() {
+    const input = document.getElementById('choiceQuestionInput');
+    const question = input.value.trim();
+    if (!question) return;
+    localStorage.setItem('choiceQuestion', question);
+    localStorage.setItem('choiceOptions', JSON.stringify([]));
+    renderChoicePage();
+    setTimeout(() => { document.getElementById('choiceOptionInput').focus(); }, 200);
+}
+
+function addOption() {
+    const input = document.getElementById('choiceOptionInput');
+    const val = input.value.trim();
+    if (!val) return;
+    const options = JSON.parse(localStorage.getItem('choiceOptions') || '[]');
+    options.push(val);
+    localStorage.setItem('choiceOptions', JSON.stringify(options));
+    input.value = '';
+    renderChoicePage();
+}
+
+function removeOption(index) {
+    const options = JSON.parse(localStorage.getItem('choiceOptions') || '[]');
+    options.splice(index, 1);
+    localStorage.setItem('choiceOptions', JSON.stringify(options));
+    renderChoicePage();
+}
+
+function makeChoice() {
+    const options = JSON.parse(localStorage.getItem('choiceOptions') || '[]');
+    if (options.length < 2) { alert('至少需要2个选项'); return; }
+    const question = localStorage.getItem('choiceQuestion') || '未知问题';
+    const choice = options[Math.floor(Math.random() * options.length)];
+    const result = '💗 笑笑，我的建议是：' + choice;
+    localStorage.setItem('choiceResult', result);
+    const history = JSON.parse(localStorage.getItem('choiceHistory') || '[]');
+    history.push({ question: question, choice: choice, time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) });
+    localStorage.setItem('choiceHistory', JSON.stringify(history));
+    renderChoicePage();
+}
+
+// ============ 背景 ============
 function openBackgroundSettings() {
     showPage('backgroundPage');
     renderBackground();
 }
 
 function renderBackground() {
-    document.getElementById('backgroundContent').innerHTML = 
+    document.getElementById('backgroundContent').innerHTML =
         '<div class="settings-section"><h4>🏠 首页背景</h4><div class="bg-preset-grid">' +
-        [{id:'default',icon:'🌸',color:'#fff5f7'},{id:'sunset',icon:'🌅',color:'#ffecd2'},{id:'ocean',icon:'🌊',color:'#e0f7fa'},{id:'lavender',icon:'💜',color:'#f3e5f5'}].map(p => 
-            '<div class="bg-preset-item ' + (S.homeBg === p.id ? 'selected' : '') + '" style="background:' + p.color + ';" onclick="setHomeBg(\'' + p.id + '\')">' + p.icon + '</div>'
-        ).join('') + 
+        [{id:'default',icon:'🌸',color:'#fff5f7'},{id:'sunset',icon:'🌅',color:'#ffecd2'},{id:'ocean',icon:'🌊',color:'#e0f7fa'},{id:'lavender',icon:'💜',color:'#f3e5f5'}].map(p => '<div class="bg-preset-item ' + (S.homeBg === p.id ? 'selected' : '') + '" style="background:' + p.color + ';" onclick="setHomeBg(\'' + p.id + '\')">' + p.icon + '</div>').join('') +
         '</div><button style="width:100%;margin-top:8px;padding:10px;border-radius:16px;background:#f5f5f5;border:none;cursor:pointer;font-size:13px;" onclick="document.getElementById(\'homeBgInput\').click()">🖼️ 从相册选择首页背景</button></div>' +
         '<div class="settings-section"><h4>💬 聊天背景</h4><div class="bg-preset-grid">' +
-        [{id:'default',icon:'⬜',color:'#f8f8f8'},{id:'warm',icon:'💛',color:'#fffdf5'},{id:'cool',icon:'💙',color:'#f5f8ff'},{id:'pink',icon:'💗',color:'#fff5f7'}].map(p => 
-            '<div class="bg-preset-item ' + (S.chatBg === p.id ? 'selected' : '') + '" style="background:' + p.color + ';" onclick="setChatBg(\'' + p.id + '\')">' + p.icon + '</div>'
-        ).join('') + 
+        [{id:'default',icon:'⬜',color:'#f8f8f8'},{id:'warm',icon:'💛',color:'#fffdf5'},{id:'cool',icon:'💙',color:'#f5f8ff'},{id:'pink',icon:'💗',color:'#fff5f7'}].map(p => '<div class="bg-preset-item ' + (S.chatBg === p.id ? 'selected' : '') + '" style="background:' + p.color + ';" onclick="setChatBg(\'' + p.id + '\')">' + p.icon + '</div>').join('') +
         '</div><button style="width:100%;margin-top:8px;padding:10px;border-radius:16px;background:#f5f5f5;border:none;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="document.getElementById(\'chatBgInput\').click()"><span>🖼️</span> 从相册选择聊天背景</button></div>';
 }
 
@@ -2444,10 +2052,19 @@ function setHomeBg(id) {
     S.homeBgImage = '';
     const m = { default:'#fff5f7', sunset:'#ffecd2', ocean:'#e0f7fa', lavender:'#f3e5f5' };
     const el = document.getElementById('homeInner');
-    if (el) { el.style.background = m[id] || m.default; el.style.backgroundImage = 'none'; el.style.backgroundSize = 'auto'; el.style.backgroundPosition = ''; }
+    if (el) {
+        el.style.background = m[id] || m.default;
+        el.style.backgroundImage = 'none';
+        el.style.backgroundSize = 'auto';
+        el.style.backgroundPosition = '';
+    }
     dbPut('bgSettings', { key: 'homeBg', value: id });
     dbPut('bgSettings', { key: 'homeBgImage', value: '' });
     renderBackground();
+    // 👇 刷新「我们的宇宙」页面
+    if (document.getElementById('ourUniversePage').classList.contains('active')) {
+        renderOurUniverse();
+    }
     showToast('首页背景已更新');
 }
 
@@ -2456,13 +2073,19 @@ function setChatBg(id) {
     S.chatBgImage = '';
     const m = { default:'#f8f8f8', warm:'#fffdf5', cool:'#f5f8ff', pink:'#fff5f7' };
     const el = document.getElementById('chatArea');
-    if (el) { el.style.background = m[id] || m.default; el.style.backgroundImage = 'none'; }
+    if (el) {
+        el.style.background = m[id] || m.default;
+        el.style.backgroundImage = 'none';
+    }
     dbPut('bgSettings', { key: 'chatBg', value: id });
     dbPut('bgSettings', { key: 'chatBgImage', value: '' });
     renderBackground();
+    // 👇 刷新「我们的宇宙」页面
+    if (document.getElementById('ourUniversePage').classList.contains('active')) {
+        renderOurUniverse();
+    }
     showToast('聊天背景已更新');
 }
-
 async function handleChatBgUpload(event) {
     const f = event.target.files[0];
     if (!f) return;
@@ -2493,10 +2116,10 @@ async function handleHomeBgUpload(event) {
     event.target.value = '';
 }
 
-// ============ 聊天设置（来自版本A，完整保留） ============
+// ============ 聊天设置 ============
 function openChatSettings() {
     const cs = S.chatSettings;
-    document.getElementById('chatSettingsPanel').innerHTML = 
+    document.getElementById('chatSettingsPanel').innerHTML =
         '<h4 style="text-align:center;margin-bottom:16px;">🐱 聊天设置</h4>' +
         '<div class="settings-section"><h4>📝 顶部文案</h4><div class="pat-setting-row"><input type="text" id="setTopQuote" value="' + (S.topQuote || '').replace(/"/g, '&quot;') + '" placeholder="输入浪漫语录..." style="flex:1;padding:7px 10px;border-radius:12px;border:1.5px solid #eee;font-size:12px;outline:none;"><button onclick="saveTopQuoteFromPanel()" style="padding:7px 12px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:12px;cursor:pointer;">保存</button></div></div>' +
         '<div class="settings-section"><h4>💬 消息交互</h4>' +
@@ -2566,7 +2189,7 @@ function startAutoSendIfNeeded() {
 
 function restartAutoSend() { startAutoSendIfNeeded(); }
 
-// ============ 初始化（来自版本A，改造为读取 localStorage） ============
+// ============ 初始化 ============
 async function init() {
     try {
         localStorage.setItem('test', '1');
@@ -2577,91 +2200,41 @@ async function init() {
         showToast('❌ 存储不可用，请检查浏览器设置');
         return;
     }
-
-    // ===== 加载设置（使用 localStorage） =====
     const savedSettings = localStorage.getItem('settings');
     if (savedSettings) {
         try {
             const allS = JSON.parse(savedSettings);
             allS.forEach(x => {
                 if (x.key === 'chatSettings') {
-                    try {
-                        S.chatSettings = JSON.parse(x.value);
-                        console.log('✅ 加载 chatSettings:', S.chatSettings);
-                    } catch(e) {
-                        console.error('解析 chatSettings 失败:', e);
-                    }
-                } else if (x.key in S) {
-                    S[x.key] = x.value;
-                }
+                    try { S.chatSettings = JSON.parse(x.value); console.log('✅ 加载 chatSettings:', S.chatSettings); } catch(e) { console.error('解析 chatSettings 失败:', e); }
+                } else if (x.key in S) { S[x.key] = x.value; }
             });
-        } catch(e) {
-            console.error('加载设置失败:', e);
-        }
-    } else {
-        console.log('⚠️ 没有找到保存的设置');
-    }
-
-    // 确保 chatSettings 有默认值
+        } catch(e) { console.error('加载设置失败:', e); }
+    } else { console.log('⚠️ 没有找到保存的设置'); }
     if (!S.chatSettings || typeof S.chatSettings !== 'object') {
-        S.chatSettings = {
-            quoteReply: true,
-            readReceipt: 'text',
-            readNotReply: false,
-            typing: true,
-            autoSend: false,
-            autoSendInterval: '10',
-            emojiMix: true,
-            simCall: true
-        };
+        S.chatSettings = { quoteReply: true, readReceipt: 'text', readNotReply: false, typing: true, autoSend: false, autoSendInterval: '10', emojiMix: true, simCall: true };
     }
-
-    // ===== 加载头像 =====
     const savedAvatars = localStorage.getItem('avatars');
     if (savedAvatars) {
         try {
             const allA = JSON.parse(savedAvatars);
             allA.forEach(x => {
-                if (x.key === 'myAvatar') {
-                    S.myAvatar = x.data;
-                    console.log('✅ 已恢复我的头像');
-                } else if (x.key === 'contactAvatar') {
-                    S.contactAvatar = x.data;
-                    console.log('✅ 已恢复秦彻头像');
-                }
+                if (x.key === 'myAvatar') { S.myAvatar = x.data; console.log('✅ 已恢复我的头像'); }
+                else if (x.key === 'contactAvatar') { S.contactAvatar = x.data; console.log('✅ 已恢复秦彻头像'); }
             });
-        } catch(e) {
-            console.log('头像数据格式错误，已跳过');
-        }
+        } catch(e) { console.log('头像数据格式错误，已跳过'); }
     }
-
-    // ===== 加载拍一拍 =====
     const savedPat = localStorage.getItem('patOptions');
     if (savedPat) {
         try {
             const allP = JSON.parse(savedPat);
-            if (Array.isArray(allP) && allP.length > 0) {
-                patOptions = allP.map(x => x.content || x);
-                console.log('✅ 已恢复拍一拍');
-            }
-        } catch(e) {
-            console.log('拍一拍数据格式错误');
-        }
+            if (Array.isArray(allP) && allP.length > 0) { patOptions = allP.map(x => x.content || x); console.log('✅ 已恢复拍一拍'); }
+        } catch(e) { console.log('拍一拍数据格式错误'); }
     }
-
-    // ===== 加载昵称 =====
     const savedMyName = localStorage.getItem('myName');
-    if (savedMyName) {
-        S.myName = savedMyName;
-        console.log('✅ 已恢复我的昵称');
-    }
+    if (savedMyName) { S.myName = savedMyName; console.log('✅ 已恢复我的昵称'); }
     const savedContactName = localStorage.getItem('contactName');
-    if (savedContactName) {
-        S.contactName = savedContactName;
-        console.log('✅ 已恢复对方昵称');
-    }
-
-    // ===== 加载背景设置 =====
+    if (savedContactName) { S.contactName = savedContactName; console.log('✅ 已恢复对方昵称'); }
     const savedBg = localStorage.getItem('bgSettings');
     if (savedBg) {
         try {
@@ -2673,78 +2246,44 @@ async function init() {
                 else if (x.key === 'chatBgImage') S.chatBgImage = x.value;
             });
             console.log('✅ 已恢复背景设置');
-        } catch(e) {
-            console.log('背景数据格式错误');
-        }
+        } catch(e) { console.log('背景数据格式错误'); }
     }
-
-    // ===== 加载表情包（仅统计，实际加载在 loadEmojiPanel 中） =====
     const emojis = JSON.parse(localStorage.getItem('emojis') || '[]');
-    if (emojis.length > 0) {
-        console.log('✅ 已加载', emojis.length, '个表情包');
-    }
-
-    // ===== 应用背景 =====
-    // 首页背景
+    if (emojis.length > 0) { console.log('✅ 已加载', emojis.length, '个表情包'); }
     const homeEl = document.getElementById('homeInner');
     if (S.homeBg && S.homeBg !== 'default') {
         if (S.homeBg === 'custom' && S.homeBgImage) {
-            if (homeEl) {
-                homeEl.style.backgroundImage = 'url(' + S.homeBgImage + ')';
-                homeEl.style.backgroundSize = 'cover';
-                homeEl.style.backgroundPosition = 'center';
-            }
+            if (homeEl) { homeEl.style.backgroundImage = 'url(' + S.homeBgImage + ')'; homeEl.style.backgroundSize = 'cover'; homeEl.style.backgroundPosition = 'center'; }
         } else {
             const m2 = { sunset: '#ffecd2', ocean: '#e0f7fa', lavender: '#f3e5f5' };
-            if (m2[S.homeBg] && homeEl) {
-                homeEl.style.background = m2[S.homeBg];
-                homeEl.style.backgroundImage = 'none';
-            }
+            if (m2[S.homeBg] && homeEl) { homeEl.style.background = m2[S.homeBg]; homeEl.style.backgroundImage = 'none'; }
         }
     }
-
-    // 聊天背景
     const chatEl = document.getElementById('chatArea');
     if (S.chatBg && S.chatBg !== 'default') {
         if (S.chatBg === 'custom' && S.chatBgImage) {
-            if (chatEl) {
-                chatEl.style.backgroundImage = 'url(' + S.chatBgImage + ')';
-                chatEl.style.backgroundSize = 'cover';
-                chatEl.style.backgroundPosition = 'center';
-            }
+            if (chatEl) { chatEl.style.backgroundImage = 'url(' + S.chatBgImage + ')'; chatEl.style.backgroundSize = 'cover'; chatEl.style.backgroundPosition = 'center'; }
         } else {
             const m = { warm: '#fffdf5', cool: '#f5f8ff', pink: '#fff5f7' };
-            if (m[S.chatBg] && chatEl) {
-                chatEl.style.background = m[S.chatBg];
-                chatEl.style.backgroundImage = 'none';
-            }
+            if (m[S.chatBg] && chatEl) { chatEl.style.background = m[S.chatBg]; chatEl.style.backgroundImage = 'none'; }
         }
     }
-
-    // ===== 通话悬浮球事件绑定 =====
     const ball = document.getElementById('callFloatBall');
     if (ball) {
         const newBall = ball.cloneNode(true);
         ball.parentNode.replaceChild(newBall, ball);
         const freshBall = document.getElementById('callFloatBall');
-
         freshBall.addEventListener('touchstart', function(e) {
             if (callState !== 'active') return;
-            ballDragging = true;
-            ballMoved = false;
+            ballDragging = true; ballMoved = false;
             const t = e.touches[0];
-            ballStartX = t.clientX;
-            ballStartY = t.clientY;
+            ballStartX = t.clientX; ballStartY = t.clientY;
             const r = freshBall.getBoundingClientRect();
-            ballLeft = r.left;
-            ballTop = r.top;
-            freshBall.style.right = 'auto';
-            freshBall.style.bottom = 'auto';
-            freshBall.style.left = ballLeft + 'px';
-            freshBall.style.top = ballTop + 'px';
+            ballLeft = r.left; ballTop = r.top;
+            freshBall.style.right = 'auto'; freshBall.style.bottom = 'auto';
+            freshBall.style.left = ballLeft + 'px'; freshBall.style.top = ballTop + 'px';
             e.preventDefault();
         }, { passive: false });
-
         freshBall.addEventListener('touchmove', function(e) {
             if (!ballDragging) return;
             ballMoved = true;
@@ -2753,39 +2292,28 @@ async function init() {
             let tp = ballTop + (t.clientY - ballStartY);
             l = Math.max(4, Math.min(window.innerWidth - 58, l));
             tp = Math.max(60, Math.min(window.innerHeight - 160, tp));
-            freshBall.style.left = l + 'px';
-            freshBall.style.top = tp + 'px';
+            freshBall.style.left = l + 'px'; freshBall.style.top = tp + 'px';
             e.preventDefault();
         }, { passive: false });
-
         freshBall.addEventListener('touchend', function() {
             if (!ballDragging) return;
             ballDragging = false;
-            if (!ballMoved && callState === 'active') {
-                restoreCall();
-                return;
-            }
+            if (!ballMoved && callState === 'active') { restoreCall(); return; }
             const r = freshBall.getBoundingClientRect();
-            if (r.left + r.width / 2 < window.innerWidth / 2) {
-                freshBall.style.left = '4px';
-                freshBall.style.right = 'auto';
-            } else {
-                freshBall.style.right = '4px';
-                freshBall.style.left = 'auto';
-            }
+            if (r.left + r.width / 2 < window.innerWidth / 2) { freshBall.style.left = '4px'; freshBall.style.right = 'auto'; }
+            else { freshBall.style.right = '4px'; freshBall.style.left = 'auto'; }
         });
     }
-
-    // ===== 收尾 =====
     updateHome();
     startAutoSendIfNeeded();
     console.log('✅ V16 已启动（localStorage模式）');
-    // ===== 恢复气泡样式 =====
-    setTimeout(function() {
-        applyBubbleStyle();
-    }, 300);
-
-    // ===== 修复分组数据格式 =====
+    if (!localStorage.getItem('emojiGroups')) {
+        localStorage.setItem('emojiGroups', JSON.stringify(['全部']));
+    }
+    const emojisData = JSON.parse(localStorage.getItem('emojis') || '[]');
+    const newEmojisData = emojisData.map(e => { if (e.group) return e; return { ...e, group: '全部' }; });
+    localStorage.setItem('emojis', JSON.stringify(newEmojisData));
+    setTimeout(function() { applyBubbleStyle(); }, 300);
     const groupsData = localStorage.getItem('wordcardGroups');
     if (groupsData) {
         try {
@@ -2796,18 +2324,14 @@ async function init() {
                 allCards.forEach(c => {
                     const gid = c.groupId || 'default';
                     const gname = c.groupName || '默认分组';
-                    if (!groupsMap[gid]) {
-                        groupsMap[gid] = { id: gid, name: gname, count: 0 };
-                    }
+                    if (!groupsMap[gid]) { groupsMap[gid] = { id: gid, name: gname, count: 0 }; }
                     groupsMap[gid].count++;
                 });
                 const groupsArray = Object.values(groupsMap);
                 localStorage.setItem('wordcardGroups', JSON.stringify(groupsArray));
                 console.log('✅ 分组数据已重建，共', groupsArray.length, '个分组');
             }
-        } catch(e) {
-            console.log('分组数据格式错误，已跳过');
-        }
+        } catch(e) { console.log('分组数据格式错误，已跳过'); }
     }
 }
 
