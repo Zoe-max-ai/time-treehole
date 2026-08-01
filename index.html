@@ -174,7 +174,8 @@
         <div class="home-card" onclick="openTarotPage()"><div class="card-icon" style="background:#f3e5f5;">🔮</div><div class="card-title">塔罗占卜</div></div>
         <div class="home-card" onclick="openChoicePage()"><div class="card-icon" style="background:#fce4ec;">💗</div><div class="card-title">倾听我心</div></div>
         <div class="home-card" onclick="openCallLogPage()"><div class="card-icon" style="background:#e8f5e9;">📞</div><div class="card-title">通话记录</div></div>
-        <div class="home-card" onclick="openDataManage()"><div class="card-icon" style="background:#f5f5f5;">💾</div><div class="card-title">数据管理</div></div>
+<div class="home-card" onclick="openModuleSettings()"><div class="card-icon" style="background:#e8e8e8;">⚙️</div><div class="card-title">模块设置</div></div>        
+<div class="home-card" onclick="openDataManage()"><div class="card-icon" style="background:#f5f5f5;">💾</div><div class="card-title">数据管理</div></div>
     </div>
     <div class="home-footer">🌳 秦彻和笑笑的时光树洞</div>
 </div></div>
@@ -211,8 +212,15 @@
 <div class="page" id="ourUniversePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">💫 我们的宇宙</span></div><div class="generic-content" id="ourUniverseContent"></div></div>
 <div class="page" id="wordcardLibraryPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📝 字卡库</span></div><div class="wordcard-content" id="wordcardContent"></div></div>
 <div class="page" id="emojiManagePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">😊 表情包管理</span></div><div class="generic-content" id="emojiManageContent"></div></div>
-<div class="page" id="wishPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">✨ 许愿便利贴</span></div><div class="generic-content" id="wishContent"></div></div>
-<div class="page" id="anniversaryPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📅 纪念日</span></div><div class="generic-content" id="anniversaryContent"></div></div>
+<div class="page" id="wishPage">
+    <div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">✨ 许愿与留言</span></div>
+    <div style="display:flex;border-bottom:1px solid #f0f0f0;background:#fff;">
+        <button onclick="switchWishTab('wish')" id="wishTabBtn" style="flex:1;padding:10px;border:none;background:transparent;font-size:14px;font-weight:600;color:var(--primary);border-bottom:2px solid var(--primary);cursor:pointer;">📝 许愿</button>
+        <button onclick="switchWishTab('board')" id="boardTabBtn" style="flex:1;padding:10px;border:none;background:transparent;font-size:14px;font-weight:600;color:#999;border-bottom:2px solid transparent;cursor:pointer;">💬 留言板</button>
+    </div>
+    <div id="wishTabContent" style="flex:1;overflow-y:auto;padding:12px;background:#f8f5f0;"></div>
+    <div id="boardTabContent" style="flex:1;overflow-y:auto;padding:12px;background:#f8f5f0;display:none;"></div>
+</div><div class="page" id="anniversaryPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📅 纪念日</span></div><div class="generic-content" id="anniversaryContent"></div></div>
 <div class="page" id="answerBookPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📖 答案之书</span></div><div class="generic-content" id="answerBookContent"></div></div>
 <div class="page" id="choicePage" style="background:linear-gradient(180deg,#fff5f7,#fce4ec);color:#333;min-height:100vh;">
     <div class="navbar" style="background:transparent;border:none;">
@@ -223,9 +231,17 @@
 </div>
 <div class="page" id="tarotPage"><div class="navbar" style="background:transparent;border:none;"><button class="back-btn" style="background:rgba(255,255,255,0.12);color:#fff;" onclick="goHome()">←</button><span class="title" style="color:#e0d0f0;">🔮 塔罗占卜</span></div><div id="tarotContent" style="flex:1;overflow-y:auto;"></div></div>
 <div class="page" id="callLogPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📞 通话记录</span></div><div class="call-log-list" id="callLogContent" style="flex:1;overflow-y:auto;padding:12px;"></div></div>
+<div class="page" id="moduleSettingsPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">⚙️ 模块设置</span></div><div class="generic-content" id="moduleSettingsContent"></div></div>
 <div class="page" id="dataManagePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">💾 数据管理</span></div><div class="generic-content" id="dataManageContent"></div></div>
 <div class="page" id="backgroundPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🎨 更换背景</span></div><div class="generic-content" id="backgroundContent"></div></div>
-
+<div class="page" id="tarotChatPage"><div style="height:100%;display:flex;flex-direction:column;">
+    <div class="chat-topbar"><button class="back-arrow" onclick="goHome()">←</button><div class="romantic-quote">🔮 塔罗对话</div><span class="chat-settings-cat" onclick="openTarotChatSettings()">⚙️</span></div>
+    <div class="chat-area" id="tarotChatArea"><div style="text-align:center;color:#ccc;padding:40px;">💬 开始你的塔罗对话吧</div></div>
+    <div class="bottombar">
+        <input type="text" id="tarotMessageInput" placeholder="说点什么..." onkeydown="if(event.key==='Enter'){sendTarotMessage();}">
+        <button class="send-btn" id="tarotSendBtn" onclick="sendTarotMessage()">➤</button>
+    </div>
+</div></div>
 <input type="file" id="imageMsgInput" accept="image/*" onchange="handleImageMessage(event)">
 <input type="file" id="emojiInput" accept="image/*" onchange="handleEmojiUpload(event)" multiple>
 <input type="file" id="emojiManageInput" accept="image/*" onchange="handleEmojiUpload(event)" multiple>
@@ -612,16 +628,28 @@ async function autoReply() {
 }
 
 async function getRandomReply() {
+    // 读取模块设置中选中的分组
+    const selectedGroups = JSON.parse(localStorage.getItem('chatGroups') || '[]');
     const cards = await dbGetAll('wordcards');
     const disabledCards = JSON.parse(localStorage.getItem('disabledCards') || '[]');
     const disabledIds = new Set(disabledCards.map(d => String(d.cardId)));
+    
+    // 如果没有选中任何分组，从所有字卡中取
     const valid = cards.filter(c => {
         if (!c || !c.content) return false;
         if (c.content === '__GROUP_PLACEHOLDER__') return false;
         if (c.content.length <= 1) return false;
-        return !disabledIds.has(String(c.id));
+        if (disabledIds.has(String(c.id))) return false;
+        // 如果选了分组，只从选中的分组取
+        if (selectedGroups.length > 0) {
+            return selectedGroups.includes(c.groupName) || selectedGroups.includes(c.groupId);
+        }
+        return true;
     });
-    if (valid.length === 0) return '😅 字卡库还是空的，先给我加点字卡吧～';
+    
+    if (valid.length === 0) {
+        return '😅 字卡库还是空的，先给我加点字卡吧～';
+    }
     return valid[Math.floor(Math.random() * valid.length)].content;
 }
 
@@ -632,20 +660,33 @@ async function addSysMsg(c) {
 }
 
 async function smartComposeReply() {
+    // 读取模块设置中选中的分组
+    const selectedGroups = JSON.parse(localStorage.getItem('chatGroups') || '[]');
     const allCards = await dbGetAll('wordcards');
     const disabledCards = JSON.parse(localStorage.getItem('disabledCards') || '[]');
     const disabledIds = new Set(disabledCards.map(d => String(d.cardId)));
+    
+    // 如果没有选中任何分组，从所有字卡中取
     const validCards = allCards.filter(c => {
         if (!c || !c.content) return false;
         if (c.content === '__GROUP_PLACEHOLDER__') return false;
         if (c.content.length <= 1) return false;
-        return !disabledIds.has(String(c.id));
+        if (disabledIds.has(String(c.id))) return false;
+        if (selectedGroups.length > 0) {
+            return selectedGroups.includes(c.groupName) || selectedGroups.includes(c.groupId);
+        }
+        return true;
     });
-    if (validCards.length === 0) return '😅 字卡库还是空的，先给我加点字卡吧～';
+    
+    if (validCards.length === 0) {
+        return '😅 字卡库还是空的，先给我加点字卡吧～';
+    }
+    
     const count = Math.min(Math.floor(Math.random() * 5) + 2, validCards.length);
     const shuffled = validCards.sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, count);
     let sentence = selected.map(c => c.content).join('');
+    
     if (!/[，。！？…～~]$/.test(sentence)) {
         const punctuations = ['。', '！', '？', '…', '～'];
         sentence += punctuations[Math.floor(Math.random() * punctuations.length)];
@@ -1220,9 +1261,6 @@ async function getAllGroups() {
         const gid = c.groupId || 'default';
         if (groupsMap.has(gid)) groupsMap.get(gid).cardCount++;
     });
-    if (!groupsMap.has('default')) {
-        groupsMap.set('default', { id: 'default', name: '默认分组', isSystem: false, disabled: dgids.has('default'), cardCount: 0 });
-    }
     return Array.from(groupsMap.values());
 }
 
@@ -1275,11 +1313,48 @@ async function renderWordCardLibrary() {
 async function searchAllCardsAndDisplay() {
     const kw = document.getElementById('wordcardGlobalSearch').value.trim();
     const container = document.getElementById('globalSearchResults');
-    if (!kw) { container.style.display = 'none'; container.innerHTML = ''; return; }
+    if (!kw) {
+        container.style.display = 'none';
+        container.innerHTML = '';
+        return;
+    }
+    
     const results = await searchAllCards(kw);
     container.style.display = 'block';
-    if (results.length === 0) { container.innerHTML = '<p style="text-align:center;color:#ccc;padding:10px;">未找到匹配的字卡</p>'; return; }
-    container.innerHTML = '<div style="background:#fff;border-radius:12px;padding:10px;margin-bottom:8px;box-shadow:var(--shadow);"><div style="font-size:12px;color:var(--text-light);margin-bottom:6px;">🔍 找到 ' + results.length + ' 条：</div>' + results.map(c => '<div class="wordcard-list-item"><span style="flex:1;">' + c.content + '</span><span style="font-size:10px;color:var(--text-light);">' + (c.groupName || '') + '</span></div>').join('') + '</div>';
+    
+    if (results.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:#ccc;padding:10px;">未找到匹配的字卡</p>';
+        return;
+    }
+    
+    // 获取禁用列表
+    const disabledCards = JSON.parse(localStorage.getItem('disabledCards') || '[]');
+    const disabledIds = new Set(disabledCards.map(d => d.cardId));
+    
+    let html = '<div style="background:#fff;border-radius:12px;padding:10px;margin-bottom:8px;box-shadow:var(--shadow);">';
+    html += '<div style="font-size:12px;color:var(--text-light);margin-bottom:6px;">🔍 找到 ' + results.length + ' 条：</div>';
+    
+    results.forEach(c => {
+        const isDisabled = disabledIds.has(c.id?.toString());
+        const content = c.content || c;
+        const groupName = c.groupName || '';
+        const cardId = c.id || Date.now() + Math.random() * 1000;
+        
+        html += `
+            <div class="wordcard-list-item" style="${isDisabled ? 'opacity:0.5;text-decoration:line-through;' : ''}">
+                <span style="flex:1;text-decoration:${isDisabled ? 'line-through' : 'none'};">${content}</span>
+                <span style="font-size:10px;color:var(--text-light);margin-right:8px;">${groupName}</span>
+                <div class="card-actions" style="display:flex;gap:4px;">
+                    <span style="background:${isDisabled ? '#e8f5e9' : '#fff8e1'};color:${isDisabled ? '#2e7d32' : '#f57f17'};font-size:10px;padding:2px 6px;border-radius:6px;cursor:pointer;" onclick="toggleCardDisable('${cardId}','${c.groupId || 'default'}',${c.isSystem || false})">${isDisabled ? '启用' : '禁用'}</span>
+                    <span style="background:#e3f2fd;color:#1565c0;font-size:10px;padding:2px 6px;border-radius:6px;cursor:pointer;" onclick="moveCard('${cardId}','${c.groupId || 'default'}')">📁 移动</span>
+                    <span style="background:#ffebee;color:#c62828;font-size:10px;padding:2px 6px;border-radius:6px;cursor:pointer;" onclick="deleteCard('${cardId}','${c.groupId || 'default'}',${c.isSystem || false})">删除</span>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
 }
 
 async function searchAllCards(keyword) {
@@ -1318,6 +1393,7 @@ async function renderGroupList(filter) {
 }
 
 async function viewGroupCards(gid, gname) {
+localStorage.setItem('currentGroupName', gname);
     let cards = await getCardsByGroup(gid);
     if (!Array.isArray(cards)) cards = [];
     cards = cards.filter(c => c && typeof c === 'object' && c.id !== undefined && c.id !== null && c.content);
@@ -1359,6 +1435,11 @@ async function toggleCardDisable(cid, gid, isSys) {
     if (gname) viewGroupCards(gid, gname);
     renderGroupList();
     showToast(index >= 0 ? '已启用' : '已禁用');
+// 如果搜索结果区域可见，自动刷新搜索
+const searchContainer = document.getElementById('globalSearchResults');
+if (searchContainer && searchContainer.style.display !== 'none') {
+    searchAllCardsAndDisplay();
+}
 }
 
 async function deleteCard(cid, gid, isSys) {
@@ -1378,6 +1459,11 @@ async function deleteCard(cid, gid, isSys) {
     if (gname) viewGroupCards(gid, gname);
     renderGroupList();
     showToast(isSys ? '已禁用' : '已删除');
+    // 如果搜索结果区域可见，自动刷新搜索
+    const searchContainer = document.getElementById('globalSearchResults');
+    if (searchContainer && searchContainer.style.display !== 'none') {
+        searchAllCardsAndDisplay();
+    }
 }
 
 async function moveCard(cid, fromGid) {
@@ -1407,17 +1493,19 @@ async function confirmMoveCard(cid, fromGid, targetGid) {
         card.groupName = tg.name;
         localStorage.setItem('wordcards', JSON.stringify(cards));
         
-        // 获取当前显示的分组名称
-        const gname = document.querySelector('#wordcardDetailArea h4')?.textContent.replace('📋 ', '') || '';
-        if (gname) {
-            // 重新加载当前分组，显示移动后的结果
-            viewGroupCards(fromGid, gname);
-        }
-        renderGroupList();
         showToast('✅ 已移动到「' + tg.name + '」');
+        
+        // 保存当前分组名，刷新后恢复
+        const currentGname = document.querySelector('#wordcardDetailArea h4')?.textContent.replace('📋 ', '') || localStorage.getItem('currentGroupName') || '';
+        if (currentGname) {
+            localStorage.setItem('refreshToGroup', currentGname);
+        }
+        localStorage.setItem('refreshToPage', 'wordcardLibraryPage');
+        
+        // 刷新页面
+        location.reload();
     }
 }
-
 async function toggleGroupDisable(gid) {
     let disabledGroups = JSON.parse(localStorage.getItem('disabledGroups') || '[]');
     const index = disabledGroups.findIndex(d => d.groupId === gid);
@@ -1429,6 +1517,25 @@ async function toggleGroupDisable(gid) {
 }
 
 async function deleteGroup(gid) {
+    if (gid === 'default') {
+        if (!confirm('确定删除默认分组吗？')) return;
+        
+        let cards = JSON.parse(localStorage.getItem('wordcards') || '[]');
+        // 删除所有属于默认分组的字卡（因为已经没有字卡了，这一步其实不会删掉任何东西）
+        cards = cards.filter(c => (c.groupId || 'default') !== 'default');
+        localStorage.setItem('wordcards', JSON.stringify(cards));
+        
+        // 从分组列表中移除默认分组
+        const groups = JSON.parse(localStorage.getItem('wordcardGroups') || '[]');
+        const filtered = groups.filter(g => g.id !== 'default');
+        localStorage.setItem('wordcardGroups', JSON.stringify(filtered));
+        
+        renderGroupList();
+        closeCardDetail();
+        showToast('✅ 默认分组已删除');
+        return;
+    }
+    
     if (!confirm('确定删除？')) return;
     let cards = JSON.parse(localStorage.getItem('wordcards') || '[]');
     cards = cards.filter(c => (c.groupId || 'default') !== gid);
@@ -1437,7 +1544,6 @@ async function deleteGroup(gid) {
     closeCardDetail();
     showToast('已删除');
 }
-
 async function createGroup() {
     const v = document.getElementById('newGroupInput').value.trim();
     if (!v) return;
@@ -1594,6 +1700,7 @@ let selectedSpread = 1;
 function renderTarotPage() {
     document.getElementById('tarotContent').innerHTML =
         '<div style="background:linear-gradient(180deg,#0d0015,#1a0030,#0d0020);color:#e0d0f0;padding:16px;min-height:100%;"><div style="text-align:center;margin-bottom:20px;"><div style="font-size:44px;">🔮</div><div style="font-size:20px;font-weight:700;color:#f0d0ff;">命运之轮的指引</div></div>' +
+'<div style="text-align:center;margin-bottom:16px;"><button onclick="openTarotChat()" style="padding:12px 24px;border-radius:24px;background:linear-gradient(135deg,#6b20d4,#9b40f0);color:#fff;border:none;font-size:16px;cursor:pointer;box-shadow:0 4px 16px rgba(107,32,212,0.3);">🔮 进入塔罗对话</button></div>' +
         '<div style="background:rgba(255,255,255,0.06);border-radius:14px;padding:14px;margin-bottom:14px;"><div style="font-size:12px;color:#c0a0e0;">✨ 选择牌阵</div><div style="display:flex;gap:8px;" id="spreadOptions">' +
         '<div onclick="selectSpread(1,this)" style="flex:1;padding:12px;border-radius:10px;text-align:center;cursor:pointer;border:2px solid #d0a0ff;background:rgba(180,130,255,0.15);"><div style="font-size:24px;">🃏</div><div>单张指引</div></div>' +
         '<div onclick="selectSpread(3,this)" style="flex:1;padding:12px;border-radius:10px;text-align:center;cursor:pointer;border:2px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);"><div style="font-size:24px;">🃏🃏🃏</div><div>三张牌阵</div></div></div></div>' +
@@ -1603,6 +1710,174 @@ function renderTarotPage() {
     selectedSpread = 1;
 }
 
+// ============ 塔罗对话 ============
+
+function openTarotChat() {
+    showPage('tarotChatPage');
+    loadTarotMessages();
+    applyBubbleStyle();
+    // 👇 同步聊天背景
+    const chatEl = document.getElementById('tarotChatArea');
+    if (S.chatBg && S.chatBg !== 'default') {
+        if (S.chatBg === 'custom' && S.chatBgImage) {
+            chatEl.style.backgroundImage = 'url(' + S.chatBgImage + ')';
+            chatEl.style.backgroundSize = 'cover';
+            chatEl.style.backgroundPosition = 'center';
+        } else {
+            const m = { warm:'#fffdf5', cool:'#f5f8ff', pink:'#fff5f7' };
+            if (m[S.chatBg]) {
+                chatEl.style.background = m[S.chatBg];
+                chatEl.style.backgroundImage = 'none';
+            }
+        }
+    }
+}
+
+function openTarotChatSettings() {
+    const currentDelay = localStorage.getItem('tarotReplyDelay') || '3';
+    const html = `
+        <div style="padding:20px;">
+            <h4 style="text-align:center;margin-bottom:16px;">⚙️ 塔罗对话设置</h4>
+            <div class="settings-section">
+                <div class="settings-row">
+                    <span>回复延迟（秒）</span>
+                    <input type="number" id="tarotDelayInput" value="${currentDelay}" min="1" max="60" style="width:70px;text-align:center;border:1px solid #eee;border-radius:6px;padding:4px;">
+                </div>
+                <button onclick="saveTarotDelay()" style="width:100%;padding:10px;border-radius:12px;background:var(--primary);color:#fff;border:none;cursor:pointer;font-size:14px;margin-top:8px;">保存</button>
+            </div>
+            <button onclick="closeTarotSettings()" style="width:100%;padding:10px;border-radius:12px;background:#f0f0f0;border:none;cursor:pointer;font-size:14px;margin-top:8px;">关闭</button>
+        </div>
+    `;
+    const overlay = document.createElement('div');
+    overlay.id = 'tarotSettingsOverlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:280;display:flex;justify-content:center;align-items:flex-end;';
+    overlay.innerHTML = `<div style="background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto;">${html}</div>`;
+    overlay.onclick = function(e) { if (e.target === this) this.remove(); };
+    document.body.appendChild(overlay);
+}
+
+function closeTarotSettings() {
+    document.getElementById('tarotSettingsOverlay')?.remove();
+}
+
+function saveTarotDelay() {
+    const val = parseInt(document.getElementById('tarotDelayInput').value) || 3;
+    const final = Math.max(1, Math.min(60, val));
+    localStorage.setItem('tarotReplyDelay', String(final));
+    showToast('✅ 延迟已设为 ' + final + ' 秒');
+    closeTarotSettings();
+}
+
+async function loadTarotMessages() {
+    const msgs = JSON.parse(localStorage.getItem('tarotMessages') || '[]');
+    const ca = document.getElementById('tarotChatArea');
+    ca.innerHTML = '';
+    if (msgs.length === 0) {
+        ca.innerHTML = '<div style="text-align:center;color:#ccc;padding:40px;">💬 开始你的塔罗对话吧</div>';
+    }
+    msgs.forEach(m => renderTarotMsg(m));
+    scrollTarotBottom();
+}
+
+function renderTarotMsg(m) {
+    const ca = document.getElementById('tarotChatArea');
+    const empty = ca.querySelector('#emptyChat');
+    if (empty) empty.remove();
+
+    const w = document.createElement('div');
+    w.className = 'message-wrapper ' + (m.sender === 'me' ? 'right' : 'left');
+
+    const av = document.createElement('img');
+    av.className = 'message-avatar';
+    av.src = m.sender === 'me' ? getAvatar('me') : getAvatar('contact');
+    if (m.sender === 'other') av.onclick = function() { openProfile(); };
+
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    
+    const preset = BUBBLE_PRESETS.find(p => p.id === S.bubbleStyle) || BUBBLE_PRESETS[0];
+    if (m.sender === 'me') {
+        b.style.background = preset.myBg;
+        b.style.color = preset.myText;
+    } else {
+        b.style.background = preset.otherBg;
+        b.style.color = preset.otherText;
+    }
+
+    b.textContent = m.content;
+
+    const t = document.createElement('div');
+    t.className = 'message-time';
+    t.textContent = fmtTime(m.timestamp);
+
+    w.appendChild(av);
+    w.appendChild(b);
+    w.appendChild(t);
+    ca.appendChild(w);
+    scrollTarotBottom();
+}
+
+function scrollTarotBottom() {
+    requestAnimationFrame(() => {
+        const ca = document.getElementById('tarotChatArea');
+        if (ca) ca.scrollTop = ca.scrollHeight;
+    });
+}
+
+async function sendTarotMessage() {
+    const input = document.getElementById('tarotMessageInput');
+    const c = input.value.trim();
+    if (!c) return;
+    
+    const msg = { sender: 'me', content: c, type: 'text', timestamp: Date.now() };
+    const msgs = JSON.parse(localStorage.getItem('tarotMessages') || '[]');
+    msgs.push(msg);
+    localStorage.setItem('tarotMessages', JSON.stringify(msgs));
+    renderTarotMsg(msg);
+    input.value = '';
+    document.getElementById('tarotSendBtn').disabled = true;
+    
+    const delay = parseInt(localStorage.getItem('tarotReplyDelay') || '3') * 1000;
+    setTimeout(() => {
+        tarotAutoReply();
+    }, delay);
+}
+
+async function tarotAutoReply() {
+    const groupName = localStorage.getItem('tarotGroup');
+    if (!groupName) {
+        const reply = '😅 请先在「模块设置」中选择塔罗分组';
+        const m = { sender: 'other', content: reply, type: 'text', timestamp: Date.now() };
+        const msgs = JSON.parse(localStorage.getItem('tarotMessages') || '[]');
+        msgs.push(m);
+        localStorage.setItem('tarotMessages', JSON.stringify(msgs));
+        renderTarotMsg(m);
+        document.getElementById('tarotSendBtn').disabled = false;
+        return;
+    }
+    
+    const allCards = await dbGetAll('wordcards');
+    const cards = allCards.filter(c => 
+        (c.groupName === groupName || c.groupId === groupName) && 
+        c.content && 
+        c.content !== '__GROUP_PLACEHOLDER__' && 
+        c.content.length > 1
+    );
+    
+    let reply;
+    if (cards.length === 0) {
+        reply = '😅 这个分组里还没有字卡，快去添加吧！';
+    } else {
+        reply = cards[Math.floor(Math.random() * cards.length)].content;
+    }
+    
+    const m = { sender: 'other', content: reply, type: 'text', timestamp: Date.now() };
+    const msgs = JSON.parse(localStorage.getItem('tarotMessages') || '[]');
+    msgs.push(m);
+    localStorage.setItem('tarotMessages', JSON.stringify(msgs));
+    renderTarotMsg(m);
+    document.getElementById('tarotSendBtn').disabled = false;
+}
 function selectSpread(n, el) {
     selectedSpread = n;
     document.querySelectorAll('#spreadOptions > div').forEach(e => {
@@ -1678,6 +1953,100 @@ async function drawTarot() {
     btn.textContent = '🌟 重新占卜';
 }
 
+// ============ 模块设置 ============
+function openModuleSettings() {
+    showPage('moduleSettingsPage');
+    renderModuleSettings();
+}
+
+async function renderModuleSettings() {
+    // 获取所有分组
+    const groups = await getAllGroups();
+    const groupOptions = groups.map(g => g.name);
+    
+    // 读取已保存的配置
+    const chatGroups = JSON.parse(localStorage.getItem('chatGroups') || '[]');
+    const mailboxGroups = JSON.parse(localStorage.getItem('mailboxGroups') || '[]');
+    const tarotGroup = localStorage.getItem('tarotGroup') || '';
+    const answerBookGroup = localStorage.getItem('answerBookGroup') || '';
+    
+    let html = `
+        <div style="margin-bottom:16px;font-size:13px;color:#999;">选择各模块使用的字卡分组</div>
+        
+        <div class="settings-section">
+            <h4>💬 聊天混用</h4>
+            <div style="font-size:12px;color:#999;margin-bottom:6px;">多选：秦彻聊天时从这些分组取字卡</div>
+            ${groupOptions.map(g => `
+                <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:14px;">
+                    <input type="checkbox" class="chat-group-checkbox" value="${g}" ${chatGroups.includes(g) ? 'checked' : ''}>
+                    ${g}
+                </label>
+            `).join('')}
+            <button onclick="saveChatGroups()" style="margin-top:8px;padding:6px 16px;border-radius:12px;background:var(--primary);color:#fff;border:none;cursor:pointer;font-size:12px;">保存聊天分组</button>
+        </div>
+        
+        <div class="settings-section">
+            <h4>📮 留言板</h4>
+            <div style="font-size:12px;color:#999;margin-bottom:6px;">多选：秦彻留言时从这些分组取字卡</div>
+            ${groupOptions.map(g => `
+                <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:14px;">
+                    <input type="checkbox" class="mailbox-group-checkbox" value="${g}" ${mailboxGroups.includes(g) ? 'checked' : ''}>
+                    ${g}
+                </label>
+            `).join('')}
+            <button onclick="saveMailboxGroups()" style="margin-top:8px;padding:6px 16px;border-radius:12px;background:var(--primary);color:#fff;border:none;cursor:pointer;font-size:12px;">保存留言板分组</button>
+        </div>
+        
+        <div class="settings-section">
+            <h4>🔮 塔罗传讯</h4>
+            <div style="font-size:12px;color:#999;margin-bottom:6px;">单选：塔罗占卜使用这个分组</div>
+            <select id="tarotGroupSelect" style="width:100%;padding:8px 12px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;">
+                <option value="">-- 请选择 --</option>
+                ${groupOptions.map(g => `<option value="${g}" ${g === tarotGroup ? 'selected' : ''}>${g}</option>`).join('')}
+            </select>
+            <button onclick="saveTarotGroup()" style="margin-top:8px;padding:6px 16px;border-radius:12px;background:var(--primary);color:#fff;border:none;cursor:pointer;font-size:12px;">保存塔罗分组</button>
+        </div>
+        
+        <div class="settings-section">
+            <h4>📖 答案之书</h4>
+            <div style="font-size:12px;color:#999;margin-bottom:6px;">单选：答案之书使用这个分组</div>
+            <select id="answerBookGroupSelect" style="width:100%;padding:8px 12px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;">
+                <option value="">-- 请选择 --</option>
+                ${groupOptions.map(g => `<option value="${g}" ${g === answerBookGroup ? 'selected' : ''}>${g}</option>`).join('')}
+            </select>
+            <button onclick="saveAnswerBookGroupFromSettings()" style="margin-top:8px;padding:6px 16px;border-radius:12px;background:var(--primary);color:#fff;border:none;cursor:pointer;font-size:12px;">保存答案之书分组</button>
+        </div>
+    `;
+    
+    document.getElementById('moduleSettingsContent').innerHTML = html;
+}
+
+// 保存函数
+function saveChatGroups() {
+    const checks = document.querySelectorAll('.chat-group-checkbox:checked');
+    const groups = Array.from(checks).map(el => el.value);
+    localStorage.setItem('chatGroups', JSON.stringify(groups));
+    showToast('✅ 聊天分组已保存');
+}
+
+function saveMailboxGroups() {
+    const checks = document.querySelectorAll('.mailbox-group-checkbox:checked');
+    const groups = Array.from(checks).map(el => el.value);
+    localStorage.setItem('mailboxGroups', JSON.stringify(groups));
+    showToast('✅ 留言板分组已保存');
+}
+
+function saveTarotGroup() {
+    const select = document.getElementById('tarotGroupSelect');
+    localStorage.setItem('tarotGroup', select.value);
+    showToast('✅ 塔罗分组已保存');
+}
+
+function saveAnswerBookGroupFromSettings() {
+    const select = document.getElementById('answerBookGroupSelect');
+    localStorage.setItem('answerBookGroup', select.value);
+    showToast('✅ 答案之书分组已保存');
+}
 // ============ 数据管理 ============
 function downloadBlob(content, filename) {
     var b = new Blob([content], { type: 'application/json;charset=utf-8' });
@@ -1802,24 +2171,67 @@ async function clearChat() {
     showToast('已清空');
 }
 
-// ============ 许愿便利贴 ============
+// ============ 许愿与留言 ============
+
+let currentWishTab = 'wish';
+
 function openWishPage() {
     showPage('wishPage');
-    renderWishPage();
+    switchWishTab('wish');
 }
 
+function switchWishTab(tab) {
+    currentWishTab = tab;
+    const wishBtn = document.getElementById('wishTabBtn');
+    const boardBtn = document.getElementById('boardTabBtn');
+    const wishContent = document.getElementById('wishTabContent');
+    const boardContent = document.getElementById('boardTabContent');
+    
+    if (tab === 'wish') {
+        wishBtn.style.color = 'var(--primary)';
+        wishBtn.style.borderBottom = '2px solid var(--primary)';
+        boardBtn.style.color = '#999';
+        boardBtn.style.borderBottom = '2px solid transparent';
+        wishContent.style.display = 'block';
+        boardContent.style.display = 'none';
+        renderWishPage();
+    } else {
+        boardBtn.style.color = 'var(--primary)';
+        boardBtn.style.borderBottom = '2px solid var(--primary)';
+        wishBtn.style.color = '#999';
+        wishBtn.style.borderBottom = '2px solid transparent';
+        boardContent.style.display = 'block';
+        wishContent.style.display = 'none';
+        renderBoardPage();
+    }
+}
+
+// ----- 许愿 -----
 function renderWishPage() {
     const wishes = JSON.parse(localStorage.getItem('wishes') || '[]');
-    let html = '<div style="margin-bottom:16px;display:flex;gap:8px;"><input type="text" id="wishInput" placeholder="写下你的愿望..." style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;"><button onclick="addWish()" style="padding:10px 20px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;">许愿</button></div><div id="wishList">';
+    let html = `
+        <div style="margin-bottom:16px;display:flex;gap:8px;">
+            <input type="text" id="wishInput" placeholder="写下你的愿望..." style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;background:#fff;">
+            <button onclick="addWish()" style="padding:10px 20px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;">许愿</button>
+        </div>
+        <div id="wishList">
+    `;
     if (wishes.length === 0) {
         html += '<p style="color:#ccc;text-align:center;padding:40px;">✨ 还没有愿望，许个愿吧～</p>';
     } else {
         wishes.forEach((w, i) => {
-            html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;"><span onclick="toggleWish(' + i + ')" style="cursor:pointer;font-size:20px;">' + (w.done ? '✅' : '⬜') + '</span><span style="flex:1;font-size:14px;text-decoration:' + (w.done ? 'line-through' : 'none') + ';color:' + (w.done ? '#ccc' : '#333') + ';">' + w.content + '</span><span style="font-size:11px;color:#999;">' + w.time + '</span><span onclick="deleteWish(' + i + ')" style="cursor:pointer;color:#ff4757;font-size:14px;">✕</span></div>';
+            html += `
+                <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;background:#fff;border-radius:8px;margin-bottom:4px;padding:8px 12px;">
+                    <span onclick="toggleWish(${i})" style="cursor:pointer;font-size:20px;">${w.done ? '✅' : '⬜'}</span>
+                    <span style="flex:1;font-size:14px;text-decoration:${w.done ? 'line-through' : 'none'};color:${w.done ? '#ccc' : '#333'};">${w.content}</span>
+                    <span style="font-size:11px;color:#999;">${w.time}</span>
+                    <span onclick="deleteWish(${i})" style="cursor:pointer;color:#ff4757;font-size:14px;">✕</span>
+                </div>
+            `;
         });
     }
     html += '</div>';
-    document.getElementById('wishContent').innerHTML = html;
+    document.getElementById('wishTabContent').innerHTML = html;
 }
 
 function addWish() {
@@ -1827,7 +2239,7 @@ function addWish() {
     const content = input.value.trim();
     if (!content) return;
     const wishes = JSON.parse(localStorage.getItem('wishes') || '[]');
-    wishes.push({ content: content, done: false, time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) });
+    wishes.push({ content, done: false, time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) });
     localStorage.setItem('wishes', JSON.stringify(wishes));
     input.value = '';
     renderWishPage();
@@ -1845,6 +2257,169 @@ function deleteWish(index) {
     wishes.splice(index, 1);
     localStorage.setItem('wishes', JSON.stringify(wishes));
     renderWishPage();
+}
+
+// ----- 留言板 -----
+async function renderBoardPage() {
+    const messages = JSON.parse(localStorage.getItem('boardMessages') || '[]');
+    const delay = parseInt(localStorage.getItem('boardReplyDelay') || '12');
+    
+    // 检查秦彻是否需要自动留言
+    await checkBoardAutoReply();
+    
+    // 重新读取最新数据
+    const updated = JSON.parse(localStorage.getItem('boardMessages') || '[]');
+    
+    let html = `
+        <div style="margin-bottom:12px;font-size:12px;color:#999;">💬 秦彻会随机在 6~24 小时内回复你</div>
+        <div style="margin-bottom:16px;display:flex;gap:8px;">
+            <input type="text" id="boardInput" placeholder="写一条留言..." style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;background:#fff;">
+            <button onclick="addBoardMessage()" style="padding:10px 20px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;">留言</button>
+        </div>
+        <div id="boardList">
+    `;
+    
+    if (updated.length === 0) {
+        html += '<p style="color:#ccc;text-align:center;padding:40px;">💬 还没有留言，写一条吧～</p>';
+    } else {
+        updated.slice().reverse().forEach(item => {
+            const isUser = item.sender === 'user';
+            const name = isUser ? S.myName : S.contactName;
+            const avatar = isUser ? getAvatar('me') : getAvatar('contact');
+            const isReplied = item.replied || false;
+            const isQinReply = item.sender === 'qin' && item.replyTo;
+            
+            html += `
+                <div style="background:#fff;border-radius:12px;padding:12px 16px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,0.04);border-left:3px solid ${isUser ? '#ff6b81' : '#6b20d4'};">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                        <img src="${avatar}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;">
+                        <span style="font-size:13px;font-weight:600;">${name}</span>
+                        <span style="font-size:10px;color:#ccc;margin-left:auto;">${item.time}</span>
+                    </div>
+                    <div style="font-size:14px;color:#333;margin-bottom:4px;">${item.content}</div>
+                    ${item.replyTo ? `<div style="font-size:11px;color:#999;background:#f5f5f5;padding:4px 8px;border-radius:6px;margin-bottom:4px;">↳ 回复：${item.replyTo}</div>` : ''}
+                    <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:4px;">
+                        ${!isUser && !isReplied ? `<span style="font-size:10px;color:#ff9800;">⏳ 待回复</span>` : ''}
+                        ${isUser && !isReplied ? `<span style="font-size:10px;color:#4caf50;">✅ 等待秦彻回复...</span>` : ''}
+                        ${isUser && isReplied ? `<span style="font-size:10px;color:#999;">✅ 已回复</span>` : ''}
+                        ${isUser && !isReplied ? `<button onclick="replyBoardMessage(${item.id})" style="padding:2px 10px;border-radius:12px;border:1px solid var(--primary);background:transparent;color:var(--primary);cursor:pointer;font-size:11px;">回复</button>` : ''}
+                        ${!isUser && !isReplied ? `<button onclick="replyBoardMessage(${item.id})" style="padding:2px 10px;border-radius:12px;border:1px solid var(--primary);background:transparent;color:var(--primary);cursor:pointer;font-size:11px;">回复</button>` : ''}
+                        ${isUser && isReplied ? `<span style="font-size:10px;color:#999;">已结束</span>` : ''}
+                        ${!isUser && isReplied ? `<span style="font-size:10px;color:#999;">已结束</span>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+    }
+    html += '</div>';
+    document.getElementById('boardTabContent').innerHTML = html;
+}
+
+function addBoardMessage() {
+    const input = document.getElementById('boardInput');
+    const content = input.value.trim();
+    if (!content) return;
+    const messages = JSON.parse(localStorage.getItem('boardMessages') || '[]');
+    const id = Date.now() + Math.random() * 1000;
+    messages.push({
+        id: id,
+        sender: 'user',
+        content: content,
+        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+        replied: false,
+        replyTo: null,
+        timestamp: Date.now()
+    });
+    localStorage.setItem('boardMessages', JSON.stringify(messages));
+    // 记录触发回复的时间
+    localStorage.setItem('boardLastTriggerTime', String(Date.now()));
+    input.value = '';
+    renderBoardPage();
+}
+
+function replyBoardMessage(id) {
+    const messages = JSON.parse(localStorage.getItem('boardMessages') || '[]');
+    const item = messages.find(m => m.id === id);
+    if (!item) return;
+    
+    const replyContent = prompt('输入你的回复：');
+    if (!replyContent || replyContent.trim() === '') return;
+    
+    const newId = Date.now() + Math.random() * 1000;
+    messages.push({
+        id: newId,
+        sender: 'user',
+        content: replyContent.trim(),
+        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+        replied: false,
+        replyTo: item.content,
+        timestamp: Date.now()
+    });
+    localStorage.setItem('boardMessages', JSON.stringify(messages));
+    // 触发秦彻回复
+    localStorage.setItem('boardLastTriggerTime', String(Date.now()));
+    renderBoardPage();
+}
+
+async function checkBoardAutoReply() {
+    const messages = JSON.parse(localStorage.getItem('boardMessages') || '[]');
+    const lastTrigger = parseInt(localStorage.getItem('boardLastTriggerTime') || '0');
+    const delay = parseInt(localStorage.getItem('boardReplyDelay') || '12');
+    const now = Date.now();
+    
+    // 检查是否有未回复的用户留言
+    const unReplied = messages.filter(m => m.sender === 'user' && !m.replied);
+    if (unReplied.length === 0) return;
+    
+    // 检查是否到了回复时间
+    if (lastTrigger === 0 || (now - lastTrigger) < delay * 3600 * 1000) return;
+    
+    // 生成秦彻回复
+    const groupName = localStorage.getItem('mailboxGroups') ? JSON.parse(localStorage.getItem('mailboxGroups'))[0] : null;
+    let replyContent = '😅 还没有设置留言板分组哦～';
+    
+    if (groupName) {
+        const allCards = await dbGetAll('wordcards');
+        const cards = allCards.filter(c => 
+            (c.groupName === groupName || c.groupId === groupName) && 
+            c.content && 
+            c.content !== '__GROUP_PLACEHOLDER__' && 
+            c.content.length > 1
+        );
+        if (cards.length > 0) {
+            const count = Math.min(Math.floor(Math.random() * 5) + 2, cards.length);
+            const shuffled = cards.sort(() => Math.random() - 0.5);
+            const selected = shuffled.slice(0, count);
+            replyContent = selected.map(c => c.content).join('');
+            if (!/[，。！？…～~]$/.test(replyContent)) {
+                const punctuations = ['。', '！', '？', '…', '～'];
+                replyContent += punctuations[Math.floor(Math.random() * punctuations.length)];
+            }
+        }
+    }
+    
+    // 标记所有未回复的用户留言为已回复
+    messages.forEach(m => {
+        if (m.sender === 'user' && !m.replied) {
+            m.replied = true;
+        }
+    });
+    
+    // 添加秦彻回复
+    const id = Date.now() + Math.random() * 1000;
+    messages.push({
+        id: id,
+        sender: 'qin',
+        content: replyContent,
+        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+        replied: true,
+        replyTo: '用户留言',
+        timestamp: Date.now()
+    });
+    
+    localStorage.setItem('boardMessages', JSON.stringify(messages));
+    // 重置触发时间
+    localStorage.setItem('boardLastTriggerTime', String(now));
 }
 
 // ============ 纪念日 ============
@@ -1894,9 +2469,14 @@ async function getAnswerBookGroups() {
     return groups.filter(g => g.id !== 'default' && g.cardCount > 0);
 }
 
-async function getAnswerFromGroup(groupId) {
+async function getAnswerFromGroup(groupName) {
     const allCards = await dbGetAll('wordcards');
-    const cards = allCards.filter(c => c.groupId === groupId && c.content && c.content !== '__GROUP_PLACEHOLDER__' && c.content.length > 1);
+    const cards = allCards.filter(c => 
+        (c.groupName === groupName || c.groupId === groupName) && 
+        c.content && 
+        c.content !== '__GROUP_PLACEHOLDER__' && 
+        c.content.length > 1
+    );
     if (cards.length === 0) return null;
     return cards[Math.floor(Math.random() * cards.length)].content;
 }
@@ -1907,17 +2487,40 @@ function openAnswerBookPage() {
 }
 
 async function renderAnswerBookPage() {
-    const selectedGroup = localStorage.getItem('answerBookGroup') || '';
+    const selectedGroup = localStorage.getItem('answerBookGroup') || '未选择';
     const groups = await getAnswerBookGroups();
     const history = JSON.parse(localStorage.getItem('answerBookHistory') || '[]');
-    let html = '<div style="margin-bottom:16px;"><label style="font-size:13px;color:#999;display:block;margin-bottom:4px;">📂 选择答案来源分组</label><select id="answerBookGroupSelect" onchange="saveAnswerBookGroup()" style="width:100%;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;background:#fff;"><option value="">-- 请选择分组 --</option>';
-    groups.forEach(g => { html += '<option value="' + g.id + '" ' + (g.id === selectedGroup ? 'selected' : '') + '>' + g.name + '（' + g.cardCount + '条）</option>'; });
-    html += '</select></div><div style="margin-bottom:16px;display:flex;gap:8px;"><input type="text" id="answerBookInput" placeholder="写下你的问题..." style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;" onkeydown="if(event.key===\'Enter\')askAnswerBook()"><button onclick="askAnswerBook()" style="padding:10px 20px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;">提问</button></div><div id="answerBookResult" style="background:#f8f0ff;border-radius:12px;padding:20px;text-align:center;margin-bottom:16px;display:none;"><div style="font-size:13px;color:#999;margin-bottom:4px;">📖 秦彻正在翻阅答案之书...</div><div id="answerBookText" style="font-size:18px;font-weight:600;color:#6b20d4;margin-top:8px;"></div></div><div id="answerBookHistory"><div style="font-size:13px;color:#999;margin-bottom:8px;">📝 对话记录</div>';
+    
+    let html = `
+        <div style="margin-bottom:12px;font-size:13px;color:#999;">📂 当前分组：${selectedGroup}</div>
+        <div style="margin-bottom:16px;display:flex;gap:8px;">
+            <input type="text" id="answerBookInput" placeholder="写下你的问题..." style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #eee;font-size:14px;outline:none;" onkeydown="if(event.key==='Enter')askAnswerBook()">
+            <button onclick="askAnswerBook()" style="padding:10px 20px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:14px;cursor:pointer;">提问</button>
+        </div>
+        <div id="answerBookResult" style="background:#f8f0ff;border-radius:12px;padding:20px;text-align:center;margin-bottom:16px;display:none;">
+            <div style="font-size:13px;color:#999;margin-bottom:4px;">📖 秦彻正在翻阅答案之书...</div>
+            <div id="answerBookText" style="font-size:18px;font-weight:600;color:#6b20d4;margin-top:8px;"></div>
+        </div>
+        <div id="answerBookHistory">
+            <div style="font-size:13px;color:#999;margin-bottom:8px;">📝 对话记录</div>
+    `;
     if (history.length === 0) {
         html += '<p style="color:#ccc;text-align:center;padding:20px;">还没有提问记录</p>';
     } else {
         history.slice().reverse().forEach(item => {
-            html += '<div style="display:flex;flex-direction:column;padding:10px 0;border-bottom:1px solid #f0f0f0;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;"><span style="font-size:12px;color:#999;">你：</span><span style="font-size:14px;color:#333;">' + item.question + '</span></div><div style="display:flex;align-items:center;gap:8px;"><img src="' + getAvatar('contact') + '" style="width:24px;height:24px;border-radius:50%;object-fit:cover;"><span style="font-size:14px;color:#6b20d4;font-weight:500;">' + item.answer + '</span></div><div style="font-size:10px;color:#ccc;margin-top:2px;">' + item.time + '</div></div>';
+            html += `
+                <div style="display:flex;flex-direction:column;padding:10px 0;border-bottom:1px solid #f0f0f0;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+                        <span style="font-size:12px;color:#999;">你：</span>
+                        <span style="font-size:14px;color:#333;">${item.question}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <img src="${getAvatar('contact')}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">
+                        <span style="font-size:14px;color:#6b20d4;font-weight:500;">${item.answer}</span>
+                    </div>
+                    <div style="font-size:10px;color:#ccc;margin-top:2px;">${item.time}</div>
+                </div>
+            `;
         });
     }
     html += '</div>';
@@ -1935,8 +2538,12 @@ async function askAnswerBook() {
     const input = document.getElementById('answerBookInput');
     const question = input.value.trim();
     if (!question) return;
-    const groupId = document.getElementById('answerBookGroupSelect').value;
-    if (!groupId) { alert('请先选择答案来源分组'); return; }
+    
+    const groupId = localStorage.getItem('answerBookGroup');
+    if (!groupId) {
+        alert('请先在「模块设置」中选择答案之书分组');
+        return;
+    }
     const resultDiv = document.getElementById('answerBookResult');
     const textDiv = document.getElementById('answerBookText');
     resultDiv.style.display = 'block';
@@ -2274,6 +2881,7 @@ async function init() {
         ball.parentNode.replaceChild(newBall, ball);
         const freshBall = document.getElementById('callFloatBall');
         freshBall.addEventListener('touchstart', function(e) {
+console.log('🟢 touchstart 触发'); 
             if (callState !== 'active') return;
             ballDragging = true; ballMoved = false;
             const t = e.touches[0];
@@ -2285,6 +2893,7 @@ async function init() {
             e.preventDefault();
         }, { passive: false });
         freshBall.addEventListener('touchmove', function(e) {
+console.log('🟢 touchmove 触发');  
             if (!ballDragging) return;
             ballMoved = true;
             const t = e.touches[0];
@@ -2295,7 +2904,7 @@ async function init() {
             freshBall.style.left = l + 'px'; freshBall.style.top = tp + 'px';
             e.preventDefault();
         }, { passive: false });
-        freshBall.addEventListener('touchend', function() {
+                freshBall.addEventListener('touchend', function() {
             if (!ballDragging) return;
             ballDragging = false;
             if (!ballMoved && callState === 'active') { restoreCall(); return; }
@@ -2303,10 +2912,97 @@ async function init() {
             if (r.left + r.width / 2 < window.innerWidth / 2) { freshBall.style.left = '4px'; freshBall.style.right = 'auto'; }
             else { freshBall.style.right = '4px'; freshBall.style.left = 'auto'; }
         });
+
+        // 👇 添加鼠标事件（PC 拖动）
+        freshBall.addEventListener('mousedown', function(e) {
+            if (callState !== 'active') return;
+            ballDragging = true;
+            ballMoved = false;
+            const pos = e;
+            ballStartX = pos.clientX;
+            ballStartY = pos.clientY;
+            const r = freshBall.getBoundingClientRect();
+            ballLeft = r.left;
+            ballTop = r.top;
+            freshBall.style.right = 'auto';
+            freshBall.style.bottom = 'auto';
+            freshBall.style.left = ballLeft + 'px';
+            freshBall.style.top = ballTop + 'px';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!ballDragging) return;
+            ballMoved = true;
+            let l = ballLeft + (e.clientX - ballStartX);
+            let tp = ballTop + (e.clientY - ballStartY);
+            l = Math.max(4, Math.min(window.innerWidth - 58, l));
+            tp = Math.max(60, Math.min(window.innerHeight - 160, tp));
+            freshBall.style.left = l + 'px';
+            freshBall.style.top = tp + 'px';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mouseup', function(e) {
+            if (!ballDragging) return;
+            ballDragging = false;
+            if (!ballMoved && callState === 'active') {
+                restoreCall();
+                return;
+            }
+            const r = freshBall.getBoundingClientRect();
+            if (r.left + r.width / 2 < window.innerWidth / 2) {
+                freshBall.style.left = '4px';
+                freshBall.style.right = 'auto';
+            } else {
+                freshBall.style.right = '4px';
+                freshBall.style.left = 'auto';
+            }
+        });
     }
     updateHome();
     startAutoSendIfNeeded();
     console.log('✅ V16 已启动（localStorage模式）');
+    // ===== 自动修复：将表情符号移到「表情符号」分组 =====
+    const emojiItems = ['😊','😂','🥰','😘','❤️','💕','🌟','✨','🌸','🎉','😢','😍','🌙','☀️','💔','🔥','👋'];
+    let cardData = JSON.parse(localStorage.getItem('wordcards') || '[]');
+    let movedCount = 0;
+    cardData.forEach(c => {
+        if (emojiItems.includes(c.content) && c.groupName !== '表情符号') {
+            c.groupId = '表情符号';
+            c.groupName = '表情符号';
+            movedCount++;
+        }
+    });
+    if (movedCount > 0) {
+        localStorage.setItem('wordcards', JSON.stringify(cardData));
+        console.log('✅ 自动修复：', movedCount, '个表情符号已移到「表情符号」分组');
+    }
+    // 刷新后恢复页面
+    const refreshPage = localStorage.getItem('refreshToPage');
+    if (refreshPage === 'wordcardLibraryPage') {
+        const refreshGroup = localStorage.getItem('refreshToGroup') || '';
+        localStorage.removeItem('refreshToPage');
+        localStorage.removeItem('refreshToGroup');
+        
+        // 延迟一下，等页面加载完成
+        setTimeout(() => {
+            showPage('wordcardLibraryPage');
+            renderWordCardLibrary();
+            if (refreshGroup) {
+                // 延迟后打开对应的分组
+                setTimeout(() => {
+                    const groups = document.querySelectorAll('.group-item .group-info');
+                    groups.forEach(el => {
+                        if (el.textContent.includes(refreshGroup)) {
+                            el.click();
+                        }
+                    });
+                }, 300);
+            }
+        }, 200);
+    }
+
     if (!localStorage.getItem('emojiGroups')) {
         localStorage.setItem('emojiGroups', JSON.stringify(['全部']));
     }
