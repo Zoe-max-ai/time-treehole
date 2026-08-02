@@ -693,14 +693,14 @@ function renderChoicePage() {
         '<div class="romantic-quote" style="color:#d4a8b8;">💭 倾听我心 · 选择即答案</div>' +
         '<span style="width:30px;flex-shrink:0;"></span>' +
         '</div>' +
-        '<div id="choiceChatArea" class="chat-area" style="' + bgStyle + '">' + chatHtml + '</div>' +
+      '<div id="choiceChatArea" class="chat-area" style="' + bgStyle + 'padding-bottom:60px;">' + chatHtml + '</div>' +
   '<div style="position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:rgba(255,255,255,0.98);padding:8px 10px;border-top:1px solid #f0ece8;z-index:100;display:flex;align-items:center;gap:8px;">' +
     '<div id="choiceInputTrigger" onclick="toggleChoiceInput()" style="flex:1;border:1.5px solid #e8e0d8;border-radius:18px;padding:8px 14px;font-size:14px;background:#f5f5f5;cursor:pointer;color:#999;">' +
         '<span id="choiceInputPlaceholder">💬 点击输入你的问题...</span>' +
     '</div>' +
     '<button onclick="sendChoice()" style="width:36px;height:36px;border-radius:50%;background:#d4a8b8;color:#fff;border:none;font-size:18px;flex-shrink:0;cursor:pointer;">➤</button>' +
 '</div>'+
-        '<div id="choiceInputPanel" style="display:none;background:#fff;border-radius:16px 16px 0 0;padding:16px 18px;border-top:1px solid #f0ece8;flex-shrink:0;box-shadow:0 -4px 20px rgba(0,0,0,0.06);max-height:70vh;overflow-y:auto;">' +
+      '<div id="choiceInputPanel" style="display:none;position:fixed;bottom:52px;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;border-radius:16px 16px 0 0;padding:16px 18px;border-top:1px solid #f0ece8;box-shadow:0 -4px 20px rgba(0,0,0,0.06);max-height:60vh;overflow-y:auto;z-index:101;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
         '<span style="font-size:14px;font-weight:600;color:#333;">✏️ 写下你的问题</span>' +
         '<span onclick="toggleChoiceInput()" style="cursor:pointer;color:#ccc;font-size:20px;line-height:1;">✕</span>' +
