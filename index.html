@@ -694,13 +694,14 @@ function renderChoicePage() {
         '<span style="width:30px;flex-shrink:0;"></span>' +
         '</div>' +
         '<div id="choiceChatArea" class="chat-area" style="' + bgStyle + '">' + chatHtml + '</div>' +
-        '<div class="bottombar">' +
-        '<div id="choiceInputTrigger" onclick="toggleChoiceInput()" style="flex:1;border:1.5px solid #e8e0d8;border-radius:18px;padding:8px 14px;font-size:14px;background:#f5f5f5;cursor:pointer;color:#999;display:flex;align-items:center;justify-content:space-between;">' +
-        '<span id="choiceInputPlaceholder">💬 点击输入你的问题...</span>' +
-        '<span style="font-size:12px;color:#ccc;">✏️</span>' +
+    '<div class="bottombar" style="display:table;width:100%;table-layout:fixed;">' +
+    '<div id="choiceInputTrigger" onclick="toggleChoiceInput()" style="display:table-cell;vertical-align:middle;padding-right:8px;">' +
+        '<div style="border:1.5px solid #e8e0d8;border-radius:18px;padding:8px 14px;font-size:14px;background:#f5f5f5;cursor:pointer;color:#999;">' +
+            '<span id="choiceInputPlaceholder">💬 点击输入你的问题...</span>' +
         '</div>' +
-        '<button class="send-btn" onclick="sendChoice()">➤</button>' +
-        '</div>' +
+    '</div>' +
+    '<button class="send-btn" onclick="sendChoice()" style="display:table-cell;vertical-align:middle;width:36px;">➤</button>' +
+'</div>' +
         '<div id="choiceInputPanel" style="display:none;background:#fff;border-radius:16px 16px 0 0;padding:16px 18px;border-top:1px solid #f0ece8;flex-shrink:0;box-shadow:0 -4px 20px rgba(0,0,0,0.06);max-height:70vh;overflow-y:auto;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
         '<span style="font-size:14px;font-weight:600;color:#333;">✏️ 写下你的问题</span>' +
