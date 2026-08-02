@@ -453,8 +453,9 @@ async function toggleCardDisable(cid, gid, isSys) {
 async function deleteCard(cid, gid, isSys) {
     if (!isSys) {
         let cards = JSON.parse(localStorage.getItem('wordcards') || '[]');
-        cards = cards.filter(c => String(c.id) !== String(cid));
-        localStorage.setItem('wordcards', JSON.stringify(cards));
+       cards = cards.filter(c => String(c.id) !== String(cid));
+console.log('删除前数量:', JSON.parse(localStorage.getItem('wordcards')||'[]').length, '删除后数量:', cards.length, '要删的id:', cid);
+localStorage.setItem('wordcards', JSON.stringify(cards));
     } else {
         let disabledCards = JSON.parse(localStorage.getItem('disabledCards') || '[]');
         if (!disabledCards.find(d => String(d.cardId) === String(cid))) {
