@@ -582,7 +582,78 @@ async function askAnswerBook(){const input=document.getElementById('answerBookIn
 
 // ============ 倾听我心 ============
 function openChoicePage(){showPage('choicePage');renderChoicePage();}
-function renderChoicePage(){const history=JSON.parse(localStorage.getItem('choiceHistory')||'[]');const myAvatar=getAvatar('me');const contactAvatar=getAvatar('contact');const preset=BUBBLE_PRESETS.find(p=>p.id===S.bubbleStyle)||BUBBLE_PRESETS[0];let bgStyle='background:#f8f5f0;';if(S.chatBg==='custom'&&S.chatBgImage){bgStyle='background-image:url(\''+S.chatBgImage+'\');background-size:cover;background-position:center;';}else if(S.chatBg&&S.chatBg!=='default'){const bgMap={warm:'#fffdf5',cool:'#f5f8ff',pink:'#fff5f7'};bgStyle='background:'+(bgMap[S.chatBg]||'#f8f5f0')+';';}let chatHtml='';if(history.length===0){chatHtml='<div style="text-align:center;color:#ccc;padding:40px;font-size:14px;">💬 开始你的选择吧</div>';}else{history.forEach(item=>{let displayQuestion=item.question;if(!displayQuestion.startsWith('秦彻，请告诉我你的选择：')){displayQuestion='秦彻，请告诉我你的选择：'+(item.rawQuestion||item.question);}chatHtml+='<div style="margin-bottom:14px;"><div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:4px;"><div style="max-width:78%;background:'+preset.myBg+';color:'+preset.myText+';padding:9px 14px;border-radius:16px 4px 16px 16px;font-size:14px;line-height:1.5;word-break:break-word;text-align:left;">'+displayQuestion+'</div><img src="'+myAvatar+'" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;margin-top:2px;border:2px solid #f0ece8;"></div><div style="display:flex;justify-content:flex-start;gap:8px;"><img src="'+contactAvatar+'" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;margin-top:2px;border:2px solid #f0ece8;cursor:pointer;" onclick="openProfile()"><div style="max-width:78%;background:'+preset.otherBg+';color:'+preset.otherText+';padding:9px 14px;border-radius:4px 16px 16px 16px;font-size:14px;line-height:1.5;word-break:break-word;text-align:left;border:1px solid #eee4dc;">笑笑，我的建议是：'+item.choice+'</div></div></div>';});}const html='<div style="height:100%;display:flex;flex-direction:column;background:#f8f5f0;"><div class="chat-topbar" style="background:#fff;padding:8px 12px;display:flex;align-items:center;border-bottom:1px solid #f0ece8;flex-shrink:0;min-height:42px;gap:8px;"><button class="back-arrow" onclick="goHome()" style="width:30px;height:30px;border-radius:50%;background:#f5f5f5;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;border:none;color:#333;flex-shrink:0;">←</button><div style="flex:1;text-align:center;font-size:14px;color:#d4a8b8;font-style:italic;">💭 倾听我心 · 选择即答案</div><span style="font-size:18px;cursor:pointer;flex-shrink:0;padding:2px 4px;opacity:0;">⚙️</span></div><div id="choiceChatArea" style="flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:12px;'+bgStyle+'">'+chatHtml+'</div><div style="background:rgba(255,255,255,0.98);padding:10px 12px 12px 12px;display:flex;align-items:center;gap:10px;border-top:1px solid #f0ece8;flex-shrink:0;min-height:52px;"><div id="choiceInputTrigger" onclick="toggleChoiceInput()" style="flex:1;border:1.5px solid #e8e0d8;border-radius:20px;padding:10px 16px;font-size:14px;outline:none;background:#f5f5f5;min-width:0;cursor:pointer;color:#999;display:flex;align-items:center;justify-content:space-between;"><span id="choiceInputPlaceholder">💬 点击输入你的问题...</span><span style="font-size:12px;color:#ccc;margin-left:8px;">✏️</span></div><button onclick="sendChoice()" id="choiceSendBtn" style="width:42px;height:42px;min-width:42px;border-radius:50%;background:#d4a8b8;color:#fff;border:none;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;box-shadow:0 2px 8px rgba(212,168,184,0.35);">➤</button></div><div id="choiceInputPanel" style="display:none;background:#fff;border-radius:16px 16px 0 0;padding:16px 18px 20px;border-top:1px solid #f0ece8;flex-shrink:0;box-shadow:0 -4px 20px rgba(0,0,0,0.06);"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-size:13px;color:#999;">✏️ 写下你的问题</span><span onclick="toggleChoiceInput()" style="cursor:pointer;color:#ccc;font-size:18px;">✕</span></div><div style="margin-bottom:10px;"><input type="text" id="choiceQuestionInput" placeholder="输入你的问题..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;"></div><div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;"><input type="text" id="choiceOptionAInput" placeholder="选项A..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;"><input type="text" id="choiceOptionBInput" placeholder="选项B..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;"></div><button onclick="sendChoice()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;border:1.5px solid #d4a8b8;color:#fff;font-size:15px;cursor:pointer;transition:all 0.2s;box-sizing:border-box;font-weight:500;" onmouseover="this.style.background=\'#c498a8\'" onmouseout="this.style.background=\'#d4a8b8\'">💗 发送</button></div></div>';document.getElementById('choiceContent').innerHTML=html;const chatArea=document.getElementById('choiceChatArea');if(chatArea)chatArea.scrollTop=chatArea.scrollHeight;}
+function renderChoicePage() {
+    const history = JSON.parse(localStorage.getItem('choiceHistory') || '[]');
+    const myAvatar = getAvatar('me');
+    const contactAvatar = getAvatar('contact');
+    const preset = BUBBLE_PRESETS.find(p => p.id === S.bubbleStyle) || BUBBLE_PRESETS[0];
+    
+    let bgStyle = 'background:#f8f5f0;';
+    if (S.chatBg === 'custom' && S.chatBgImage) {
+        bgStyle = 'background-image:url(\'' + S.chatBgImage + '\');background-size:cover;background-position:center;';
+    } else if (S.chatBg && S.chatBg !== 'default') {
+        const bgMap = { warm: '#fffdf5', cool: '#f5f8ff', pink: '#fff5f7' };
+        bgStyle = 'background:' + (bgMap[S.chatBg] || '#f8f5f0') + ';';
+    }
+    
+    let chatHtml = '';
+    if (history.length === 0) {
+        chatHtml = '<div style="text-align:center;color:#ccc;padding:40px;font-size:14px;">💬 开始你的选择吧</div>';
+    } else {
+        history.forEach(item => {
+            let displayQuestion = item.question;
+            if (!displayQuestion.startsWith('秦彻，请告诉我你的选择：')) {
+                displayQuestion = '秦彻，请告诉我你的选择：' + (item.rawQuestion || item.question);
+            }
+            chatHtml += '<div style="margin-bottom:14px;">' +
+                '<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:4px;">' +
+                '<div style="max-width:78%;background:' + preset.myBg + ';color:' + preset.myText + ';padding:9px 14px;border-radius:16px 4px 16px 16px;font-size:14px;line-height:1.5;word-break:break-word;text-align:left;">' + displayQuestion + '</div>' +
+                '<img src="' + myAvatar + '" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;margin-top:2px;border:2px solid #f0ece8;">' +
+                '</div>' +
+                '<div style="display:flex;justify-content:flex-start;gap:8px;">' +
+                '<img src="' + contactAvatar + '" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;margin-top:2px;border:2px solid #f0ece8;cursor:pointer;" onclick="openProfile()">' +
+                '<div style="max-width:78%;background:' + preset.otherBg + ';color:' + preset.otherText + ';padding:9px 14px;border-radius:4px 16px 16px 16px;font-size:14px;line-height:1.5;word-break:break-word;text-align:left;border:1px solid #eee4dc;">笑笑，我的建议是：' + item.choice + '</div>' +
+                '</div>' +
+                '</div>';
+        });
+    }
+    
+    const html = '<div style="height:100%;display:flex;flex-direction:column;background:#f8f5f0;">' +
+        '<div class="chat-topbar" style="background:#fff;padding:8px 12px;display:flex;align-items:center;border-bottom:1px solid #f0ece8;flex-shrink:0;min-height:42px;gap:8px;">' +
+        '<button class="back-arrow" onclick="goHome()" style="width:30px;height:30px;border-radius:50%;background:#f5f5f5;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;border:none;color:#333;flex-shrink:0;">←</button>' +
+        '<div style="flex:1;text-align:center;font-size:14px;color:#d4a8b8;font-style:italic;">💭 倾听我心 · 选择即答案</div>' +
+        '<span style="font-size:18px;cursor:pointer;flex-shrink:0;padding:2px 4px;opacity:0;">⚙️</span>' +
+        '</div>' +
+        '<div id="choiceChatArea" style="flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:12px;' + bgStyle + '">' + chatHtml + '</div>' +
+        // ===== 底部栏（改成 .bottombar 类） =====
+        '<div class="bottombar" style="background:rgba(255,255,255,0.98);padding:8px 10px;border-top:1px solid #f0ece8;flex-shrink:0;min-height:48px;">' +
+        '<div id="choiceInputTrigger" onclick="toggleChoiceInput()" style="flex:1;border:1.5px solid #e8e0d8;border-radius:18px;padding:8px 14px;font-size:14px;outline:none;background:#f5f5f5;min-width:0;cursor:pointer;color:#999;display:flex;align-items:center;justify-content:space-between;">' +
+        '<span id="choiceInputPlaceholder">💬 点击输入你的问题...</span>' +
+        '<span style="font-size:12px;color:#ccc;">✏️</span>' +
+        '</div>' +
+        '<button class="send-btn" onclick="sendChoice()" style="background:#d4a8b8;font-size:18px;">➤</button>' +
+        '</div>' +
+        // ===== 输入面板 =====
+        '<div id="choiceInputPanel" style="display:none;background:#fff;border-radius:16px 16px 0 0;padding:16px 18px 20px;border-top:1px solid #f0ece8;flex-shrink:0;box-shadow:0 -4px 20px rgba(0,0,0,0.06);">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+        '<span style="font-size:13px;color:#999;">✏️ 写下你的问题</span>' +
+        '<span onclick="toggleChoiceInput()" style="cursor:pointer;color:#ccc;font-size:18px;">✕</span>' +
+        '</div>' +
+        '<div style="margin-bottom:10px;">' +
+        '<input type="text" id="choiceQuestionInput" placeholder="输入你的问题..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">' +
+        '<input type="text" id="choiceOptionAInput" placeholder="选项A..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
+        '<input type="text" id="choiceOptionBInput" placeholder="选项B..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
+        '</div>' +
+        '<button onclick="sendChoice()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;border:1.5px solid #d4a8b8;color:#fff;font-size:15px;cursor:pointer;transition:all 0.2s;box-sizing:border-box;font-weight:500;" onmouseover="this.style.background=\'#c498a8\'" onmouseout="this.style.background=\'#d4a8b8\'">💗 发送</button>' +
+        '</div>' +
+        '</div>';
+    
+    document.getElementById('choiceContent').innerHTML = html;
+    const chatArea = document.getElementById('choiceChatArea');
+    if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
+}
 function toggleChoiceInput(){const panel=document.getElementById('choiceInputPanel');const placeholder=document.getElementById('choiceInputPlaceholder');if(panel.style.display==='none'){panel.style.display='block';placeholder.textContent='✏️ 正在输入...';setTimeout(()=>{document.getElementById('choiceQuestionInput').focus();},200);panel.scrollIntoView({behavior:'smooth'});}else{panel.style.display='none';placeholder.textContent='💬 点击输入你的问题...';}}
 function sendChoice(){const question=document.getElementById('choiceQuestionInput').value.trim();const optionA=document.getElementById('choiceOptionAInput').value.trim();const optionB=document.getElementById('choiceOptionBInput').value.trim();if(!question||!optionA||!optionB){alert('请完整填写：\n• 问题\n• 选项A\n• 选项B');return;}const displayQuestion='秦彻，请告诉我你的选择：'+question;const choice=Math.random()<0.5?optionA:optionB;const history=JSON.parse(localStorage.getItem('choiceHistory')||'[]');history.push({question:displayQuestion,rawQuestion:question,choice:choice,time:new Date().toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})});localStorage.setItem('choiceHistory',JSON.stringify(history));document.getElementById('choiceQuestionInput').value='';document.getElementById('choiceOptionAInput').value='';document.getElementById('choiceOptionBInput').value='';document.getElementById('choiceInputPanel').style.display='none';document.getElementById('choiceInputPlaceholder').textContent='💬 点击输入你的问题...';renderChoicePage();}
 function saveQuestion(){const input=document.getElementById('choiceQuestionInput');const question=input.value.trim();if(!question)return;localStorage.setItem('choiceQuestion',question);localStorage.setItem('choiceOptions',JSON.stringify([]));renderChoicePage();setTimeout(()=>{document.getElementById('choiceOptionInput').focus();},200);}
