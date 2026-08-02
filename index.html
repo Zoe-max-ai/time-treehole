@@ -136,6 +136,18 @@
         .emoji-group-tab{padding:4px 12px;border-radius:12px;font-size:12px;cursor:pointer;border:none;background:transparent;color:#999;transition:all 0.2s;}
         .emoji-group-tab.active{background:var(--primary);color:#fff;}
         .emoji-group-tab.add{background:#f0f0f0;color:#666;font-size:14px;padding:4px 10px;}
+#choiceChatArea .message-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+}
+#choiceChatArea .message-wrapper.right {
+    align-self: flex-end !important;
+    align-items: flex-end !important;
+}
+#choiceChatArea .message-wrapper.left {
+    align-self: flex-start !important;
+    align-items: flex-start !important;
+}
     </style>
 </head>
 <body>
@@ -674,59 +686,58 @@ function renderChoicePage() {
             if (displayQuestion.indexOf('秦彻，请告诉我你的选择') !== 0) {
                 displayQuestion = '秦彻，请告诉我你的选择：' + (item.rawQuestion || item.question);
             }
-            chatHtml += '<div style="margin-bottom:16px;">' +
-                '<div class="message-wrapper right">' +
-                '<img class="message-avatar" src="' + myAvatar + '" style="border:2px solid #f0ece8;">' +
-                '<div class="bubble" style="background:' + preset.myBg + ';color:' + preset.myText + ';">' + displayQuestion + '</div>' +
-                '</div>' +
-                '<div class="message-wrapper left">' +
-                '<img class="message-avatar" src="' + contactAvatar + '" style="border:2px solid #f0ece8;cursor:pointer;" onclick="openProfile()">' +
-                '<div class="bubble" style="background:' + preset.otherBg + ';color:' + preset.otherText + ';border:1px solid #eee4dc;">笑笑，我的建议是：' + item.choice + '</div>' +
-                '</div>' +
-                '</div>';
+           chatHtml += '<div class="message-wrapper right">' +
+    '<img class="message-avatar" src="' + myAvatar + '">' +
+    '<div class="bubble" style="background:' + preset.myBg + ';color:' + preset.myText + ';">' + displayQuestion + '</div>' +
+    '<div class="message-time"></div>' +
+    '</div>' +
+    '<div class="message-wrapper left">' +
+    '<img class="message-avatar" src="' + contactAvatar + '" onclick="openProfile()">' +
+    '<div class="bubble" style="background:' + preset.otherBg + ';color:' + preset.otherText + ';">笑笑，我的建议是：' + item.choice + '</div>' +
+    '<div class="message-time"></div>' +
+    '</div>';
         });
     }
 
-    var html = '<div style="height:100%;display:flex;flex-direction:column;background:#f8f5f0;">' +
-        '<div class="chat-topbar">' +
-        '<button class="back-arrow" onclick="goHome()">←</button>' +
-        '<div class="romantic-quote" style="color:#d4a8b8;">💭 倾听我心 · 选择即答案</div>' +
-        '<span style="width:30px;flex-shrink:0;"></span>' +
-        '</div>' +
-      '<div id="choiceChatArea" class="chat-area" style="' + bgStyle + 'padding-bottom:60px;">' + chatHtml + '</div>' +
-  '<div style="position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:rgba(255,255,255,0.98);padding:8px 10px;border-top:1px solid #f0ece8;z-index:100;display:flex;align-items:center;gap:8px;">' +
-    '<div id="choiceInputTrigger" onclick="toggleChoiceInput()" style="flex:1;border:1.5px solid #e8e0d8;border-radius:18px;padding:8px 14px;font-size:14px;background:#f5f5f5;cursor:pointer;color:#999;">' +
-        '<span id="choiceInputPlaceholder">💬 点击输入你的问题...</span>' +
+var html = '<div style="height:100%;display:flex;flex-direction:column;background:#f8f5f0;">' +
+    '<div class="chat-topbar">' +
+    '<button class="back-arrow" onclick="goHome()">←</button>' +
+    '<div class="romantic-quote" style="color:#d4a8b8;">💭 倾听我心 · 选择即答案</div>' +
+    '<span style="width:30px;flex-shrink:0;"></span>' +
     '</div>' +
-    '<button onclick="sendChoice()" style="width:36px;height:36px;border-radius:50%;background:#d4a8b8;color:#fff;border:none;font-size:18px;flex-shrink:0;cursor:pointer;">➤</button>' +
-'</div>'+
-      '<div id="choiceInputPanel" style="display:none;position:fixed;bottom:52px;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;border-radius:16px 16px 0 0;padding:16px 18px;border-top:1px solid #f0ece8;box-shadow:0 -4px 20px rgba(0,0,0,0.06);max-height:60vh;overflow-y:auto;z-index:101;">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
-        '<span style="font-size:14px;font-weight:600;color:#333;">✏️ 写下你的问题</span>' +
-        '<span onclick="toggleChoiceInput()" style="cursor:pointer;color:#ccc;font-size:20px;line-height:1;">✕</span>' +
-        '</div>' +
-        '<input type="text" id="choiceQuestionInput" placeholder="输入你的问题..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;margin-bottom:12px;">' +
-        '<div id="choiceOptionsContainer" style="margin-bottom:8px;">' +
-        '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
-        '<input type="text" class="choice-option-input" placeholder="选项A..." style="flex:1;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
-        '<span onclick="removeChoiceOption(this)" style="cursor:pointer;color:#ccc;font-size:16px;display:flex;align-items:center;padding:0 4px;">✕</span>' +
-        '</div>' +
-        '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
-        '<input type="text" class="choice-option-input" placeholder="选项B..." style="flex:1;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
-        '<span onclick="removeChoiceOption(this)" style="cursor:pointer;color:#ccc;font-size:16px;display:flex;align-items:center;padding:0 4px;">✕</span>' +
-        '</div>' +
-        '</div>' +
-        '<button onclick="addChoiceOption()" style="width:100%;padding:8px;border-radius:10px;border:2px dashed #e8e0d8;background:transparent;color:#999;font-size:13px;cursor:pointer;margin-bottom:12px;">➕ 添加选项</button>' +
-        '<button onclick="sendChoice()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;border:none;color:#fff;font-size:15px;cursor:pointer;box-sizing:border-box;font-weight:500;">💗 发送</button>' +
-        '</div>' +
-        '</div>';
+'<div id="choiceChatArea" class="chat-area" style="padding:12px 10px;display:flex;flex-direction:column;gap:12px;' + bgStyle + '">' + chatHtml + '</div>' +
+    '<div class="bottombar">' +
+    '<div id="choiceInputTrigger" onclick="toggleChoiceInput()" style="flex:1;border:1.5px solid #e8e0d8;border-radius:18px;padding:8px 14px;font-size:14px;background:#f5f5f5;cursor:pointer;color:#999;">' +
+    '<span id="choiceInputPlaceholder">💬 点击输入你的问题...</span>' +
+    '</div>' +
+    '<button class="send-btn" onclick="sendChoice()">➤</button>' +
+    '</div>' +
+    '<div id="choiceInputPanel" style="display:none;background:#fff;border-radius:16px 16px 0 0;padding:16px 18px;border-top:1px solid #f0ece8;box-shadow:0 -4px 20px rgba(0,0,0,0.06);max-height:60vh;overflow-y:auto;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+    '<span style="font-size:14px;font-weight:600;color:#333;">✏️ 写下你的问题</span>' +
+    '<span onclick="toggleChoiceInput()" style="cursor:pointer;color:#ccc;font-size:20px;line-height:1;">✕</span>' +
+    '</div>' +
+    '<input type="text" id="choiceQuestionInput" placeholder="输入你的问题..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;margin-bottom:12px;">' +
+    '<div id="choiceOptionsContainer" style="margin-bottom:8px;">' +
+    '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
+    '<input type="text" class="choice-option-input" placeholder="选项A..." style="flex:1;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
+    '<span onclick="removeChoiceOption(this)" style="cursor:pointer;color:#ccc;font-size:16px;display:flex;align-items:center;padding:0 4px;">✕</span>' +
+    '</div>' +
+    '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
+    '<input type="text" class="choice-option-input" placeholder="选项B..." style="flex:1;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
+    '<span onclick="removeChoiceOption(this)" style="cursor:pointer;color:#ccc;font-size:16px;display:flex;align-items:center;padding:0 4px;">✕</span>' +
+    '</div>' +
+    '</div>' +
+    '<button onclick="addChoiceOption()" style="width:100%;padding:8px;border-radius:10px;border:2px dashed #e8e0d8;background:transparent;color:#999;font-size:13px;cursor:pointer;margin-bottom:12px;">➕ 添加选项</button>' +
+    '<button onclick="sendChoice()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;border:none;color:#fff;font-size:15px;cursor:pointer;box-sizing:border-box;font-weight:500;">💗 发送</button>' +
+    '</div>' +
+    '</div>';
 
-    document.getElementById('choiceContent').innerHTML = html;
+   document.getElementById('choiceContent').innerHTML = html;
 
-    var chatArea = document.getElementById('choiceChatArea');
-    if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
+var chatArea = document.getElementById('choiceChatArea');
+if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
 }
-
 // 添加选项
 function addChoiceOption() {
     var container = document.getElementById('choiceOptionsContainer');
@@ -752,7 +763,7 @@ function removeChoiceOption(el) {
 }
 
 // 发送选择（重写）
-function sendChoice() {
+function sendChoice(){
     var question = document.getElementById('choiceQuestionInput').value.trim();
     var inputs = document.querySelectorAll('.choice-option-input');
     var options = [];
@@ -771,9 +782,8 @@ function sendChoice() {
     history.push({
         question: displayQuestion,
         rawQuestion: question,
-        options: options,
         choice: choice,
-        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+        time: new Date().toLocaleString('zh-CN', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'})
     });
     localStorage.setItem('choiceHistory', JSON.stringify(history));
 
