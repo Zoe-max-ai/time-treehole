@@ -214,7 +214,11 @@
 </div><div class="page" id="anniversaryPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📅 纪念日</span></div><div class="generic-content" id="anniversaryContent"></div></div>
 <div class="page" id="answerBookPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📖 答案之书</span></div><div class="generic-content" id="answerBookContent"></div></div>
 <div class="page" id="choicePage" style="color:#333;min-height:100vh;">
-    <div class="generic-content" id="choiceContent" style="padding:0;background:transparent;height:100vh;"></div>
+    <div class="navbar">
+        <button class="back-btn" onclick="goHome()">←</button>
+        <span class="title">💭 倾听我心</span>
+    </div>
+    <div class="generic-content" id="choiceContent" style="padding:0;background:transparent;height:calc(100vh - 48px);"></div>
 </div>
 <div class="page" id="tarotPage"><div class="navbar" style="background:#fff;border-bottom:1px solid #f0ece8;"><button class="back-btn" style="background:#f5f5f5;color:#333;" onclick="goHome()">←</button><span class="title" style="color:#333;">🔮 塔罗占卜</span></div><div id="tarotContent" style="flex:1;overflow-y:auto;"></div></div><div class="page" id="callLogPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📞 通话记录</span></div><div class="call-log-list" id="callLogContent" style="flex:1;overflow-y:auto;padding:12px;"></div></div>
 <div class="page" id="moduleSettingsPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">⚙️ 模块设置</span></div><div class="generic-content" id="moduleSettingsContent"></div></div>
@@ -660,110 +664,136 @@ function deleteAnniversary(index){const anniversaries=JSON.parse(localStorage.ge
 async function getAnswerBookGroups(){const groups=await getAllGroups();return groups.filter(g=>g.id!=='default'&&g.cardCount>0);}
 async function getAnswerFromGroup(groupName){const allCards=await dbGetAll('wordcards');const cards=allCards.filter(c=>(c.groupName===groupName||c.groupId===groupName)&&c.content&&c.content!=='__GROUP_PLACEHOLDER__'&&c.content.length>1);if(cards.length===0)return null;return cards[Math.floor(Math.random()*cards.length)].content;}
 function openAnswerBookPage(){showPage('answerBookPage');renderAnswerBookPage();}
-async function renderAnswerBookPage(){const selectedGroup=localStorage.getItem('answerBookGroup')||'未选择';const groups=await getAnswerBookGroups();const history=JSON.parse(localStorage.getItem('answerBookHistory')||'[]');let html='<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;"><div style="width:100%;max-width:400px;"><div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:16px;"><div style="font-size:13px;color:#999;margin-bottom:4px;">📂 当前分组</div><div style="font-size:15px;color:#333;font-weight:500;">'+selectedGroup+'</div></div><div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:16px;"><div style="display:flex;gap:8px;"><input type="text" id="answerBookInput" placeholder="写下你的问题..." style="flex:1;padding:12px 16px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;" onkeydown="if(event.key===\'Enter\')askAnswerBook()"><button onclick="askAnswerBook()" style="padding:12px 20px;border-radius:12px;background:#f5f0eb;border:1.5px solid #e8e0d8;color:#666;font-size:14px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background=\'#e8e0d8\'" onmouseout="this.style.background=\'#f5f0eb\'">提问</button></div></div><div id="answerBookResult" style="background:#fff;border-radius:16px;padding:20px;text-align:center;margin-bottom:16px;border:1px solid #f0ece8;display:none;"><div style="font-size:13px;color:#999;margin-bottom:4px;">📖 秦彻正在翻阅答案之书...</div><div id="answerBookText" style="font-size:18px;font-weight:500;color:#d4a8b8;margin-top:8px;"></div></div><div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;"><div style="font-size:13px;color:#999;margin-bottom:8px;">📝 对话记录</div>';if(history.length===0){html+='<p style="color:#ccc;text-align:center;padding:20px;font-size:14px;">还没有提问记录</p>';}else{history.slice().reverse().forEach(item=>{html+='<div style="padding:10px 0;border-bottom:1px solid #f5f0eb;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;"><span style="font-size:12px;color:#999;">你：</span><span style="font-size:14px;color:#333;">'+item.question+'</span></div><div style="display:flex;align-items:center;gap:8px;"><img src="'+getAvatar('contact')+'" style="width:20px;height:20px;border-radius:50%;object-fit:cover;"><span style="font-size:14px;color:#d4a8b8;font-weight:500;">'+item.answer+'</span></div><div style="font-size:10px;color:#ccc;margin-top:2px;">'+item.time+'</div></div>';});}html+='</div></div></div>';document.getElementById('answerBookContent').innerHTML=html;}
+async function renderAnswerBookPage() {
+    const selectedGroup = localStorage.getItem('answerBookGroup') || '未选择';
+    const groups = await getAnswerBookGroups();
+    const history = JSON.parse(localStorage.getItem('answerBookHistory') || '[]');
+
+    let html = '';
+    html += '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">';
+    html += '  <div style="width:100%;max-width:400px;">';
+
+    // ===== 欢迎语（替代分组显示） =====
+    html += '    <div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:16px;text-align:center;">';
+    html += '      <div style="font-size:14px;color:#999;font-style:italic;">📖 答案之书 · 困惑时翻开，自有答案</div>';
+    html += '    </div>';
+
+    // ===== 输入框 + 提问按钮 =====
+    html += '    <div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:16px;">';
+    html += '      <div style="display:flex;gap:8px;">';
+    html += '        <input type="text" id="answerBookInput" placeholder="写下你的问题..." style="flex:1;padding:12px 16px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;" onkeydown="if(event.key===\'Enter\')askAnswerBook()">';
+    html += '        <button onclick="askAnswerBook()" style="padding:12px 20px;border-radius:12px;background:#f5f0eb;border:1.5px solid #e8e0d8;color:#666;font-size:14px;cursor:pointer;">提问</button>';
+    html += '      </div>';
+    html += '    </div>';
+
+    // ===== 结果框（默认隐藏） =====
+    html += '    <div id="answerBookResult" style="background:#fff;border-radius:16px;padding:20px;text-align:center;margin-bottom:16px;border:1px solid #f0ece8;display:none;">';
+    html += '      <div style="font-size:13px;color:#999;margin-bottom:4px;">📖 秦彻正在翻阅答案之书...</div>';
+    html += '      <div id="answerBookText" style="font-size:18px;font-weight:500;color:#d4a8b8;margin-top:8px;"></div>';
+    html += '    </div>';
+
+    // ===== 历史记录 =====
+    html += '    <div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;">';
+    html += '      <div style="font-size:13px;color:#999;margin-bottom:8px;">📝 对话记录</div>';
+
+    if (history.length === 0) {
+        html += '      <p style="color:#ccc;text-align:center;padding:20px;font-size:14px;">还没有提问记录</p>';
+    } else {
+        history.slice().reverse().forEach(function(item) {
+            html += '      <div style="padding:10px 0;border-bottom:1px solid #f5f0eb;">';
+            html += '        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">';
+            html += '          <span style="font-size:12px;color:#999;">你：</span>';
+            html += '          <span style="font-size:14px;color:#333;">' + item.question + '</span>';
+            html += '        </div>';
+            html += '        <div style="display:flex;align-items:center;gap:8px;">';
+            html += '          <img src="' + getAvatar('contact') + '" style="width:20px;height:20px;border-radius:50%;object-fit:cover;">';
+            html += '          <span style="font-size:14px;color:#d4a8b8;font-weight:500;">' + item.answer + '</span>';
+            html += '        </div>';
+            html += '        <div style="font-size:10px;color:#ccc;margin-top:2px;">' + item.time + '</div>';
+            html += '      </div>';
+        });
+    }
+
+    html += '    </div>';
+    html += '  </div>';
+    html += '</div>';
+
+    document.getElementById('answerBookContent').innerHTML = html;
+}
 function saveAnswerBookGroup(){const select=document.getElementById('answerBookGroupSelect');localStorage.setItem('answerBookGroup',select.value);localStorage.setItem('answerBookHistory',JSON.stringify([]));renderAnswerBookPage();}
 async function askAnswerBook(){const input=document.getElementById('answerBookInput');const question=input.value.trim();if(!question)return;const groupId=localStorage.getItem('answerBookGroup');if(!groupId){alert('请先在「模块设置」中选择答案之书分组');return;}const resultDiv=document.getElementById('answerBookResult');const textDiv=document.getElementById('answerBookText');resultDiv.style.display='block';textDiv.textContent='📖 翻阅中...';textDiv.style.color='#999';await new Promise(r=>setTimeout(r,1500));const answer=await getAnswerFromGroup(groupId);if(!answer){textDiv.textContent='😅 这个分组里还没有字卡，快去添加吧！';textDiv.style.color='#ff6b81';return;}textDiv.textContent=answer;textDiv.style.color='#6b20d4';const history=JSON.parse(localStorage.getItem('answerBookHistory')||'[]');history.push({question:question,answer:answer,time:new Date().toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})});localStorage.setItem('answerBookHistory',JSON.stringify(history));input.value='';renderAnswerBookPage();resultDiv.scrollIntoView({behavior:'smooth'});}
 
 // ============ 倾听我心 ============
-function openChoicePage(){showPage('choicePage');renderChoicePage();}
+function openChoicePage() {
+    showPage('choicePage');
+    renderChoicePage();
+}
+
 function renderChoicePage() {
     var history = JSON.parse(localStorage.getItem('choiceHistory') || '[]');
-    var myAvatar = getAvatar('me');
-    var contactAvatar = getAvatar('contact');
-    var preset = BUBBLE_PRESETS.find(function(p) { return p.id === S.bubbleStyle; }) || BUBBLE_PRESETS[0];
 
-    var bgStyle = '';
-    if (S.chatBg === 'custom' && S.chatBgImage) {
-        bgStyle = 'background-image:url(' + S.chatBgImage + ');background-size:cover;background-position:center;';
-    }
-
-    var chatHtml = '';
+    var historyHtml = '';
     if (history.length === 0) {
-        chatHtml = '<div style="text-align:center;color:#ccc;padding:60px 20px;font-size:14px;">💬 开始你的选择吧</div>';
+        historyHtml = '<div style="color:#ccc;font-size:13px;text-align:center;padding:16px;">还没有记录</div>';
     } else {
-        history.forEach(function(item) {
-            var displayQuestion = item.question;
-            if (displayQuestion.indexOf('秦彻，请告诉我你的选择') !== 0) {
-                displayQuestion = '秦彻，请告诉我你的选择：' + (item.rawQuestion || item.question);
-            }
-           chatHtml += '<div class="message-wrapper right">' +
-    '<img class="message-avatar" src="' + myAvatar + '">' +
-    '<div class="bubble" style="background:' + preset.myBg + ';color:' + preset.myText + ';">' + displayQuestion + '</div>' +
-    '<div class="message-time"></div>' +
-    '</div>' +
-    '<div class="message-wrapper left">' +
-    '<img class="message-avatar" src="' + contactAvatar + '" onclick="openProfile()">' +
-    '<div class="bubble" style="background:' + preset.otherBg + ';color:' + preset.otherText + ';">笑笑，我的建议是：' + item.choice + '</div>' +
-    '<div class="message-time"></div>' +
-    '</div>';
+        history.slice().reverse().forEach(function(item) {
+            historyHtml += '<div style="padding:10px 0;border-bottom:1px solid #f5f0eb;">' +
+                '<div style="font-size:13px;color:#999;margin-bottom:2px;">💭 ' + item.question + '</div>' +
+                '<div style="font-size:15px;color:#d4a8b8;font-weight:500;">💗 ' + item.choice + '</div>' +
+                '<div style="font-size:10px;color:#ccc;margin-top:2px;">' + item.time + '</div>' +
+                '</div>';
         });
     }
 
-var html = '<div style="height:100%;display:flex;flex-direction:column;background:#f8f5f0;">' +
-    '<div class="chat-topbar">' +
-    '<button class="back-arrow" onclick="goHome()">←</button>' +
-    '<div class="romantic-quote" style="color:#d4a8b8;">💭 倾听我心 · 选择即答案</div>' +
-    '<span style="width:30px;flex-shrink:0;"></span>' +
-    '</div>' +
-'<div id="choiceChatArea" class="chat-area" style="padding:12px 10px;padding-bottom:60px;display:flex;flex-direction:column;gap:12px;' + bgStyle + '">' + chatHtml + '</div>' +
-    '<div style="position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:rgba(255,255,255,0.98);padding:8px 10px;border-top:1px solid #f0ece8;z-index:100;display:flex;align-items:center;gap:8px;">' +
-    '<div id="choiceInputTrigger" onclick="toggleChoiceInput()" style="flex:1;border:1.5px solid #e8e0d8;border-radius:18px;padding:8px 14px;font-size:14px;background:#f5f5f5;cursor:pointer;color:#999;">' +
-    '<span id="choiceInputPlaceholder">💬 点击输入你的问题...</span>' +
-    '</div>' +
-   '<button onclick="sendChoice()" style="width:36px;height:36px;border-radius:50%;background:#d4a8b8;color:#fff;border:none;font-size:18px;cursor:pointer;">➤</button>' +
-    '</div>' +
-'<div id="choiceInputPanel" style="display:none;background:#fff;border-radius:16px 16px 0 0;padding:16px 18px;border-top:1px solid #f0ece8;box-shadow:0 -4px 20px rgba(0,0,0,0.06);max-height:55vh;overflow-y:scroll;-webkit-overflow-scrolling:touch;">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
-    '<span style="font-size:14px;font-weight:600;color:#333;">✏️ 写下你的问题</span>' +
-    '<span onclick="toggleChoiceInput()" style="cursor:pointer;color:#ccc;font-size:20px;line-height:1;">✕</span>' +
-    '</div>' +
-    '<input type="text" id="choiceQuestionInput" placeholder="输入你的问题..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;margin-bottom:12px;">' +
-    '<div id="choiceOptionsContainer" style="margin-bottom:8px;">' +
-    '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
-    '<input type="text" class="choice-option-input" placeholder="选项A..." style="flex:1;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
-    '<span onclick="removeChoiceOption(this)" style="cursor:pointer;color:#ccc;font-size:16px;display:flex;align-items:center;padding:0 4px;">✕</span>' +
-    '</div>' +
-    '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
-    '<input type="text" class="choice-option-input" placeholder="选项B..." style="flex:1;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
-    '<span onclick="removeChoiceOption(this)" style="cursor:pointer;color:#ccc;font-size:16px;display:flex;align-items:center;padding:0 4px;">✕</span>' +
-    '</div>' +
-    '</div>' +
-    '<button onclick="addChoiceOption()" style="width:100%;padding:8px;border-radius:10px;border:2px dashed #e8e0d8;background:transparent;color:#999;font-size:13px;cursor:pointer;margin-bottom:12px;">➕ 添加选项</button>' +
-    '<button onclick="sendChoice()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;border:none;color:#fff;font-size:15px;cursor:pointer;box-sizing:border-box;font-weight:500;">💗 发送</button>' +
-    '</div>' +
-    '</div>';
+    var html = '<div style="padding:16px;background:#f8f5f0;min-height:100vh;">' +
+        '<div style="max-width:400px;margin:0 auto;">' +
+        '<div style="text-align:center;margin-bottom:20px;">' +
+        '<div style="font-size:20px;font-weight:600;color:#d4a8b8;margin-bottom:4px;">💭 倾听我心</div>' +
+        '<div style="font-size:13px;color:#999;">秦彻帮你做选择</div>' +
+        '</div>' +
+        '<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid #f0ece8;">' +
+        '<div style="font-size:13px;color:#999;margin-bottom:8px;">✏️ 你在纠结什么？</div>' +
+        '<input type="text" id="choiceQuestionInput" placeholder="输入你的问题..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
+        '</div>' +
+        '<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid #f0ece8;">' +
+        '<div style="font-size:13px;color:#999;margin-bottom:8px;">📋 选项</div>' +
+        '<div id="choiceOptionsContainer">' +
+        '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
+        '<input type="text" class="choice-option-input" placeholder="选项A..." style="flex:1;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
+        '</div>' +
+        '<div style="display:flex;gap:6px;margin-bottom:6px;">' +
+        '<input type="text" class="choice-option-input" placeholder="选项B..." style="flex:1;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
+        '</div>' +
+        '</div>' +
+        '<button onclick="addChoiceOption()" style="width:100%;padding:8px;border-radius:10px;border:2px dashed #e8e0d8;background:transparent;color:#999;font-size:13px;cursor:pointer;margin-bottom:10px;">➕ 添加更多选项</button>' +
+        '<button onclick="makeChoice()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:15px;cursor:pointer;font-weight:500;">💗 让秦彻帮我选</button>' +
+        '</div>' +
+        '<div id="choiceResultBox" style="display:none;margin-top:12px;padding:16px;background:#fdf5f7;border-radius:12px;border:2px solid #d4a8b8;text-align:center;">' +
+        '<div style="font-size:13px;color:#999;margin-bottom:4px;">💗 秦彻的建议</div>' +
+        '<div id="choiceResultText" style="font-size:20px;color:#d4a8b8;font-weight:600;"></div>' +
+        '</div>' +
+        '<div style="background:#fff;border-radius:16px;padding:16px;border:1px solid #f0ece8;margin-top:12px;">' +
+        '<div style="font-size:13px;color:#999;margin-bottom:10px;">📜 历史记录</div>' +
+        historyHtml +
+        '</div>' +
+        '</div>' +
+        '</div>';
 
-   document.getElementById('choiceContent').innerHTML = html;
-
-var chatArea = document.getElementById('choiceChatArea');
-if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
+    document.getElementById('choiceContent').innerHTML = html;
 }
-// 添加选项
+
 function addChoiceOption() {
     var container = document.getElementById('choiceOptionsContainer');
     var count = container.querySelectorAll('.choice-option-input').length;
-    var label = String.fromCharCode(65 + count); // C, D, E...
+    var label = String.fromCharCode(65 + count);
     var row = document.createElement('div');
     row.style.cssText = 'display:flex;gap:6px;margin-bottom:6px;';
-    row.innerHTML = '<input type="text" class="choice-option-input" placeholder="选项' + label + '..." style="flex:1;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
-        '<span onclick="removeChoiceOption(this)" style="cursor:pointer;color:#ccc;font-size:16px;display:flex;align-items:center;padding:0 4px;">✕</span>';
+    row.innerHTML = '<input type="text" class="choice-option-input" placeholder="选项' + label + '..." style="flex:1;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#f8f5f0;font-size:14px;outline:none;color:#333;box-sizing:border-box;">';
     container.appendChild(row);
     row.querySelector('input').focus();
 }
 
-// 移除选项
-function removeChoiceOption(el) {
-    var container = document.getElementById('choiceOptionsContainer');
-    var rows = container.querySelectorAll('div[style]');
-    if (rows.length <= 2) {
-        showToast('至少保留2个选项');
-        return;
-    }
-    el.parentElement.remove();
-}
-
-// 发送选择（重写）
-function sendChoice(){
+function makeChoice() {
     var question = document.getElementById('choiceQuestionInput').value.trim();
     var inputs = document.querySelectorAll('.choice-option-input');
     var options = [];
@@ -772,40 +802,41 @@ function sendChoice(){
         if (v) options.push(v);
     });
 
-    if (!question) { alert('请输入问题'); return; }
-    if (options.length < 2) { alert('至少填写2个选项'); return; }
+    if (!question) {
+        alert('请输入问题');
+        return;
+    }
+    if (options.length < 2) {
+        alert('至少填写2个选项');
+        return;
+    }
 
-    var displayQuestion = '秦彻，请告诉我你的选择：' + question;
     var choice = options[Math.floor(Math.random() * options.length)];
 
     var history = JSON.parse(localStorage.getItem('choiceHistory') || '[]');
     history.push({
-        question: displayQuestion,
-        rawQuestion: question,
+        question: question,
         choice: choice,
-        time: new Date().toLocaleString('zh-CN', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'})
+        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
     });
     localStorage.setItem('choiceHistory', JSON.stringify(history));
 
-    document.getElementById('choiceInputPanel').style.display = 'none';
-    document.getElementById('choiceInputPlaceholder').textContent = '💬 点击输入你的问题...';
-    renderChoicePage();
-}
+    // 清空输入
+    document.getElementById('choiceQuestionInput').value = '';
+    var allInputs = document.querySelectorAll('.choice-option-input');
+    allInputs.forEach(function(inp) {
+        inp.value = '';
+    });
 
-function toggleChoiceInput() {
-    var panel = document.getElementById('choiceInputPanel');
-    var placeholder = document.getElementById('choiceInputPlaceholder');
-    if (!panel || !placeholder) return;
-    if (panel.style.display === 'none' || panel.style.display === '') {
-        panel.style.display = 'block';
-        placeholder.textContent = '✏️ 正在输入...';
-        setTimeout(function() {
-            var qInput = document.getElementById('choiceQuestionInput');
-            if (qInput) qInput.focus();
-        }, 200);
-    } else {
-        panel.style.display = 'none';
-        placeholder.textContent = '💬 点击输入你的问题...';
+    // 重新渲染
+    renderChoicePage();
+
+    // 显示结果框
+    var resultBox = document.getElementById('choiceResultBox');
+    var resultText = document.getElementById('choiceResultText');
+    if (resultBox) {
+        resultBox.style.display = 'block';
+        resultText.textContent = choice;
     }
 }
 
