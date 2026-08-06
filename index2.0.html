@@ -129,6 +129,160 @@
         .emoji-group-tab{padding:4px 12px;border-radius:12px;font-size:12px;cursor:pointer;border:none;background:transparent;color:#999;transition:all 0.2s;}
         .emoji-group-tab.active{background:var(--primary);color:#fff;}
         .emoji-group-tab.add{background:#f0f0f0;color:#666;font-size:14px;padding:4px 10px;}
+/* ===== 乌鸦从门里飞出 ===== */
+@keyframes crowFlyIn {
+    0% { 
+        transform: translateY(20px) scale(0.3); 
+        opacity: 0; 
+    }
+    60% { 
+        transform: translateY(-5px) scale(1.1); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: translateY(0px) scale(1); 
+        opacity: 1; 
+    }
+}
+
+/* 翅膀扇动 */
+@keyframes wingFlap {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+}
+
+@keyframes wingFlapReverse {
+    0%, 100% { transform: rotate(5deg); }
+    50% { transform: rotate(-5deg); }
+}
+
+/* 纸条滑落动画 */
+@keyframes paperSlideDown {
+    0% { transform: translateY(-30px) scale(0.9); opacity: 0; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* ===== SVG 乌鸦 ===== */
+.crow-svg {
+    width: 100px;
+    height: 80px;
+    animation: crowFlyIn 0.8s ease-out forwards;
+}
+
+/* ===== 简约门 ===== */
+.door {
+    display: inline-block;
+    position: relative;
+    width: 80px;
+    height: 120px;
+    background: #d4c8b0;
+    border: 3px solid #8a7a6a;
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    transition: transform 0.8s ease;
+    transform-origin: left center;
+}
+
+.door-closed {
+    transform: perspective(600px) rotateY(0deg);
+}
+
+.door-open {
+    transform: perspective(600px) rotateY(-35deg);
+}
+
+.door-handle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    background: #b8860b;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* 门框 */
+.door-frame {
+    display: inline-block;
+    padding: 4px;
+    background: #8a7a6a;
+    border-radius: 8px;
+}
+
+/* ===== 清爽纸条 ===== */
+.paper {
+    background: #f7f0e6;
+    padding: 18px 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    border: 1.5px solid #e0d4c0;
+    font-family: cursive;
+    font-size: 17px;
+    color: #4a3a2a;
+    text-align: center;
+    max-width: 260px;
+    margin: 0 auto;
+    animation: paperSlideDown 0.6s ease-out;
+    position: relative;
+    line-height: 1.7;
+    letter-spacing: 0.3px;
+}
+
+.paper::before,
+.paper::after {
+    display: none;
+}
+
+.paper-rough {
+    border-radius: 12px;
+    clip-path: none;
+}
+/* ===== 强制乌鸦飞行动画 ===== */
+@keyframes crowFlyUp {
+    0% { 
+        transform: translateY(-30px) scale(0.3); 
+        opacity: 0; 
+    }
+    50% { 
+        transform: translateY(5px) scale(1.1); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: translateY(0px) scale(1); 
+        opacity: 1; 
+    }
+}
+
+@keyframes wingFlapFast {
+    0%, 100% { transform: rotate(-20deg); }
+    50% { transform: rotate(20deg); }
+}
+
+@keyframes wingFlapFastReverse {
+    0%, 100% { transform: rotate(20deg); }
+    50% { transform: rotate(-20deg); }
+}
+
+.crow-svg {
+    width: 100px;
+    height: 80px;
+}
+
+.crow-fly {
+    animation: crowFlyUp 0.9s ease-out forwards !important;
+}
+
+.wing-left {
+    transform-origin: 55px 45px !important;
+    animation: wingFlapFast 0.15s ease-in-out infinite alternate !important;
+}
+
+.wing-right {
+    transform-origin: 70px 42px !important;
+    animation: wingFlapFastReverse 0.15s ease-in-out infinite alternate !important;
+}
     </style>
 </head>
 <body>
@@ -145,8 +299,17 @@
         <div class="home-card" onclick="openCallLogPage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div><div class="card-title">通话记录</div></div>
         <div class="home-card" onclick="openWishPage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M4 4a2 2 0 0 1 2-2h10l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><polyline points="16 2 16 8 22 8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="14" y2="16"/></svg></div><div class="card-title">许愿便利贴</div></div>
         <div class="home-card" onclick="openAnniversaryPage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="card-title">纪念日</div></div>
-        <div class="home-card" onclick="openAnswerBookPage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="6" y1="8" x2="18" y2="8"/><line x1="6" y1="16" x2="12" y2="16"/></svg></div><div class="card-title">答案之书</div></div>
-        <div class="home-card" onclick="openChoicePage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div class="card-title">倾听我心</div></div>
+        <div class="home-card" onclick="openChoicePage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div class="card-title">如果你知道</div></div>
+<div class="home-card" onclick="openHisRoom()">
+    <div class="card-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5">
+            <path d="M3 12L5 10L12 3L19 10L21 12"/>
+            <path d="M5 10V20H19V10"/>
+            <rect x="8" y="14" width="4" height="6"/>
+        </svg>
+    </div>
+    <div class="card-title">他的房间</div>
+</div>
         <div class="home-card" onclick="openModuleSettings()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><div class="card-title">模块设置</div></div>
         <div class="home-card" onclick="openDataManage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg></div><div class="card-title">数据管理</div></div>
     </div>
@@ -181,7 +344,17 @@
 <div class="chat-settings-overlay" id="chatSettingsOverlay" onclick="if(event.target===this)closeChatSettings()"><div class="chat-settings-panel" id="chatSettingsPanel"></div></div>
 <div class="batch-add-modal" id="batchAddModal"><div class="modal-content"><h4 style="text-align:center;margin-bottom:12px;">📝 批量添加字卡</h4><textarea id="batchAddTextarea" placeholder="输入字卡内容，每行一个..."></textarea><select id="batchGroupSelect" style="margin:8px 0;"></select><div style="display:flex;gap:8px;"><button style="flex:1;padding:10px;border-radius:20px;background:#f0f0f0;border:none;cursor:pointer;" onclick="closeBatchAdd()">取消</button><button style="flex:1;padding:10px;border-radius:20px;background:var(--primary);color:#fff;border:none;cursor:pointer;" onclick="confirmBatchAdd()">确认</button></div></div></div>
 <div class="profile-overlay" id="profileOverlay" onclick="if(event.target===this)closeProfile()"><div class="profile-card"><img id="pfAvatar" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 10px;border:3px solid #f0f0f0;"><div id="pfName" style="font-size:18px;font-weight:700;"></div><div style="display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:16px;font-size:13px;margin:6px 0 14px;background:#f0f9f0;color:#4a8a4a;"><span style="width:6px;height:6px;border-radius:50%;background:#4cd964;"></span><span id="pfStatus"></span></div><div style="background:#fdf8ff;border-radius:14px;padding:14px;margin-bottom:16px;"><div style="font-size:11px;color:#b0a0c0;">💭 秦彻想说</div><div id="pfMood" style="font-size:14px;color:#5a4a6a;"></div></div><button onclick="triggerPat(S.contactName)" style="padding:8px 20px;border-radius:20px;background:var(--primary);color:#fff;border:none;cursor:pointer;">👋 拍一拍</button><button onclick="closeProfile()" style="display:block;width:100%;padding:10px;border-radius:16px;background:#f0f0f0;color:#666;border:none;cursor:pointer;margin-top:8px;">关闭</button></div></div>
-
+<!-- 他的房间 - 弹窗 -->
+<div id="hisRoomOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div id="hisRoomModal" style="background:#f5efe8;border-radius:24px;padding:24px;width:90%;max-width:360px;max-height:80vh;overflow-y:auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+        <button onclick="closeHisRoom()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#b0a090;">✕</button>
+        <div style="text-align:center;font-size:18px;font-weight:600;color:#5a4a3a;margin-bottom:16px;letter-spacing:2px;">🚪 他的房间</div>
+        <div id="hisRoomScene" style="position:relative;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            <div id="hisRoomContent"></div>
+        </div>
+        <div id="hisRoomActions" style="margin-top:16px;display:flex;gap:10px;justify-content:center;"></div>
+    </div>
+</div>
 <div class="page" id="ourUniversePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">💫 我们的宇宙</span></div><div class="generic-content" id="ourUniverseContent"></div></div>
 <div class="page" id="wordcardLibraryPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📝 字卡库</span></div><div class="wordcard-content" id="wordcardContent"></div></div>
 <div class="page" id="emojiManagePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">😊 表情包管理</span></div><div class="generic-content" id="emojiManageContent"></div></div>
@@ -195,8 +368,7 @@
     <div id="boardTabContent" style="flex:1;overflow-y:auto;padding:12px;background:#f8f5f0;display:none;"></div>
 </div>
 <div class="page" id="anniversaryPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📅 纪念日</span></div><div class="generic-content" id="anniversaryContent"></div></div>
-<div class="page" id="answerBookPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📖 答案之书</span></div><div class="generic-content" id="answerBookContent"></div></div>
-<div class="page" id="choicePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">💭 倾听我心</span></div><div class="generic-content" id="choiceContent" style="padding:0;background:transparent;height:calc(100vh - 48px);"></div></div>
+<div class="page" id="choicePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">💭 如果你知道</span></div><div class="generic-content" id="choiceContent" style="padding:0;background:transparent;height:calc(100vh - 48px);"></div></div>
 <div class="page" id="tarotPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🔮 塔罗占卜</span></div><div id="tarotContent" style="flex:1;overflow-y:auto;"></div></div>
 <div class="page" id="tarotChatPage">
     <div style="height:100%;display:flex;flex-direction:column;">
@@ -235,7 +407,7 @@
 (async function() {
 // ============ IndexedDB 存储层 ============
 const DB_NAME = 'TimeTreeDB';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 let db = null;
 
 function openDB() {
@@ -243,7 +415,7 @@ function openDB() {
         const req = indexedDB.open(DB_NAME, DB_VERSION);
         req.onupgradeneeded = (e) => {
             const d = e.target.result;
-            ['messages','settings','wordcards','emojis','avatars','callLogs','patOptions','statusOptions','disabledCards','disabledGroups','avatarHistory','bgSettings','boardMessages','wishes','anniversaries','answerBookHistory','choiceHistory','tarotMessages','calendarSettings'].forEach(s => {
+            ['messages','settings','wordcards','emojis','avatars','callLogs','patOptions','statusOptions','disabledCards','disabledGroups','avatarHistory','bgSettings','boardMessages','wishes','anniversaries','answerBookHistory','choiceHistory','tarotMessages','tarotHistory','calendarSettings'].forEach(s => {
                 if(!d.objectStoreNames.contains(s)) d.createObjectStore(s, {keyPath:'id', autoIncrement:true});
             });
         };
@@ -707,14 +879,14 @@ window.db = null;
 
 window.openDB = function() {
     return new Promise(function(resolve, reject) {
-        var req = indexedDB.open('TimeTreeDB', 3);
+        var req = indexedDB.open('TimeTreeDB', 4);
         req.onupgradeneeded = function(e) {
             var d = e.target.result;
             var stores = ['messages', 'settings', 'wordcards', 'emojis', 'avatars',
-                'callLogs', 'patOptions', 'statusOptions', 'disabledCards',
-                'disabledGroups', 'avatarHistory', 'bgSettings', 'boardMessages',
-                'wishes', 'anniversaries', 'answerBookHistory', 'choiceHistory',
-                'tarotMessages', 'calendarSettings', 'tarotSettings'];
+    'callLogs', 'patOptions', 'statusOptions', 'disabledCards',
+    'disabledGroups', 'avatarHistory', 'bgSettings', 'boardMessages',
+    'wishes', 'anniversaries', 'answerBookHistory', 'choiceHistory',
+    'tarotMessages', 'calendarSettings', 'tarotSettings', 'tarotHistory'];
             stores.forEach(function(s) {
                 if (!d.objectStoreNames.contains(s)) {
                     if (s === 'settings' || s === 'bgSettings' || s === 'tarotSettings') {
@@ -876,6 +1048,7 @@ async function renderBoardPage() {
     } else {
         msgs.slice().reverse().forEach(function(m) {
             const isUser = m.sender === 'user';
+            const isQin = m.sender === 'qin';
             const name = isUser ? S.myName : S.contactName;
             const avatar = isUser ? getAvatar('me') : getAvatar('contact');
             h += '<div style="background:#fff;border-radius:4px 16px 16px 16px;padding:16px 18px;border:1px solid #f0e8e0;box-shadow:0 2px 6px rgba(0,0,0,0.02);position:relative;">' +
@@ -884,7 +1057,6 @@ async function renderBoardPage() {
                 '<img src="' + avatar + '" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">' +
                 '<span style="font-size:14px;font-weight:500;color:#333;">' + name + '</span>' +
                 '<span style="font-size:10px;color:#ccc;margin-left:auto;">' + (m.time || '') + '</span>' +
-                // ===== 删除键 =====
                 '<span onclick="deleteBoardMsg(' + m.id + ')" style="cursor:pointer;color:#d4a8b8;font-size:12px;padding:0 4px;">✕</span>' +
                 '</div>' +
                 '<div style="font-size:14px;color:#444;margin-bottom:6px;word-break:break-word;padding-left:4px;">' + m.content + '</div>';
@@ -892,18 +1064,51 @@ async function renderBoardPage() {
                 h += '<div style="font-size:11px;color:#bbb;background:#f8f5f2;padding:4px 10px;border-radius:8px;margin-bottom:6px;">↳ 回复：' + m.replyTo + '</div>';
             }
             h += '<div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:2px;">';
-            if (!isUser && !m.replied) h += '<span style="font-size:10px;color:#d4a8b8;">⏳ 待回复</span>';
-            if (isUser && !m.replied) h += '<span style="font-size:10px;color:#aaa;">等待秦彻回复...</span>';
-            if (isUser && m.replied) h += '<span style="font-size:10px;color:#ccc;">已回复</span>';
-            if (!isUser && m.replied) h += '<span style="font-size:10px;color:#ccc;">已结束</span>';
-            if (!m.replied && isUser) {
-                h += '<button onclick="replyBoardMsg(' + m.id + ')" style="padding:4px 14px;border-radius:14px;border:1px solid #d4a8b8;background:transparent;color:#d4a8b8;font-size:11px;cursor:pointer;">回复</button>';
+            
+            // ===== 状态标签 + 回复按钮 =====
+            if (isUser) {
+                // 用户留言
+                if (!m.replied) {
+                    h += '<span style="font-size:10px;color:#aaa;">等待秦彻回复...</span>';
+                    h += '<button onclick="replyBoardMsg(' + m.id + ')" style="padding:4px 14px;border-radius:14px;border:1px solid #d4a8b8;background:transparent;color:#d4a8b8;font-size:11px;cursor:pointer;">回复</button>';
+                } else {
+                    h += '<span style="font-size:10px;color:#ccc;">已回复</span>';
+                }
+            } else if (isQin) {
+                // 秦彻主动发的纸条
+                h += '<span style="font-size:10px;color:#d4a8b8;">💌 秦彻的纸条</span>';
+                // 可以回复秦彻
+                h += '<button onclick="replyToQin(' + m.id + ')" style="padding:4px 14px;border-radius:14px;border:1px solid #d4a8b8;background:transparent;color:#d4a8b8;font-size:11px;cursor:pointer;">💬 回复</button>';
             }
+            
             h += '</div></div>';
         });
     }
     h += '</div></div>';
     document.getElementById('boardTabContent').innerHTML = h;
+}
+async function replyToQin(msgId) {
+    var reply = prompt('回复秦彻：');
+    if (!reply || !reply.trim()) return;
+    
+    var msgs = await dbGetAll('boardMessages');
+    var target = msgs.find(m => m.id === msgId);
+    if (!target) {
+        showToast('⚠️ 消息不存在');
+        return;
+    }
+    
+    var newMsg = {
+        sender: 'user',
+        content: reply.trim(),
+        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+        replied: false,
+        replyTo: target.content,
+        timestamp: Date.now()
+    };
+    await dbPut('boardMessages', newMsg);
+    showToast('✅ 已回复秦彻');
+    renderBoardPage();
 }
 async function addBoardMessage(){const input=document.getElementById('boardInput');const c=input.value.trim();if(!c)return;await dbPut('boardMessages',{sender:'user',content:c,time:new Date().toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}),replied:false,timestamp:Date.now()});input.value='';renderBoardPage();}
 async function deleteBoardMsg(id){await dbDelete('boardMessages',id);renderBoardPage();}
@@ -999,56 +1204,8 @@ async function addAnniversary(){const date=document.getElementById('anniversaryD
 async function deleteAnniversary(index){const a=await dbGetAll('anniversaries');a.splice(index,1);await idbClear('anniversaries');for(const x of a)await dbPut('anniversaries',x);renderAnniversaryPage();}
 async function changeMonth(delta){const now=new Date();const cy=parseInt(await getCal('calendarYear',String(now.getFullYear())));const cm=parseInt(await getCal('calendarMonth',String(now.getMonth())));let nm=cm+delta,ny=cy;if(nm>11){nm=0;ny++;}if(nm<0){nm=11;ny--;}await setCal('calendarYear',String(ny));await setCal('calendarMonth',String(nm));renderAnniversaryPage();}
 
-// ============ 答案之书 ============
-function openAnswerBookPage(){showPage('answerBookPage');renderAnswerBookPage();}
-async function renderAnswerBookPage() {
-    const history = await dbGetAll('answerBookHistory');
-    let h = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">' +
-        '<div style="width:100%;max-width:400px;">' +
-        // ===== 顶部欢迎语（恢复成以前的样式） =====
-        '<div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:16px;text-align:center;">' +
-        '<div style="font-size:14px;color:#999;font-style:italic;">📖 答案之书 · 困惑时翻开，自有答案</div>' +
-        '</div>' +
-        // ===== 输入框 + 提问按钮 =====
-        '<div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:16px;">' +
-        '<div style="display:flex;gap:8px;">' +
-        '<input type="text" id="answerBookInput" placeholder="写下你的问题..." style="flex:1;padding:12px 16px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;" onkeydown="if(event.key===\'Enter\')askAnswerBook()">' +
-        '<button onclick="askAnswerBook()" style="padding:12px 20px;border-radius:12px;background:#f5f0eb;border:1.5px solid #e8e0d8;color:#666;font-size:14px;cursor:pointer;">提问</button>' +
-        '</div>' +
-        '</div>' +
-        // ===== 结果框 =====
-        '<div id="answerBookResult" style="background:#fff;border-radius:16px;padding:20px;text-align:center;margin-bottom:16px;border:1px solid #f0ece8;display:none;">' +
-        '<div id="answerBookText" style="font-size:18px;font-weight:500;color:#d4a8b8;"></div>' +
-        '</div>' +
-        // ===== 历史记录 =====
-        '<div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;">' +
-        '<div style="font-size:13px;color:#999;margin-bottom:8px;">📝 对话记录</div>';
-    
-    if (history.length === 0) {
-        h += '<p style="color:#ccc;text-align:center;padding:20px;font-size:14px;">还没有提问记录</p>';
-    } else {
-        history.slice().reverse().forEach(function(item) {
-            h += '<div style="padding:10px 0;border-bottom:1px solid #f5f0eb;">' +
-                '<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">' +
-                '<span style="font-size:12px;color:#999;">你：</span>' +
-                '<span style="font-size:14px;color:#333;">' + item.question + '</span>' +
-                '</div>' +
-                '<div style="display:flex;align-items:center;gap:8px;">' +
-                '<img src="' + getAvatar('contact') + '" style="width:20px;height:20px;border-radius:50%;object-fit:cover;">' +
-                '<span style="font-size:14px;color:#d4a8b8;font-weight:500;">' + item.answer + '</span>' +
-                '</div>' +
-                '<div style="font-size:10px;color:#ccc;margin-top:2px;">' + item.time + '</div>' +
-                '</div>';
-        });
-    }
-    
-    h += '</div></div></div>';
-    document.getElementById('answerBookContent').innerHTML = h;
-}
-async function askAnswerBook(){const input=document.getElementById('answerBookInput');const q=input.value.trim();if(!q)return;const gid=await getCal('answerBookGroup','');if(!gid){alert('请先在「模块设置」中选择答案之书分组');return;}const result=document.getElementById('answerBookResult');const text=document.getElementById('answerBookText');result.style.display='block';text.textContent='📖 翻阅中...';await new Promise(r=>setTimeout(r,1500));const answer=await getAnswerFromGroup(gid)||'😅 这个分组里还没有字卡';text.textContent=answer;const history=await dbGetAll('answerBookHistory');history.push({question:q,answer,time:new Date().toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})});await idbClear('answerBookHistory');for(const h of history)await dbPut('answerBookHistory',h);input.value='';renderAnswerBookPage();}
-async function getAnswerFromGroup(gn){const cards=await dbGetAll('wordcards');const valid=cards.filter(c=>(c.groupName===gn||c.groupId===gn)&&c.content&&c.content!=='__GROUP_PLACEHOLDER__'&&c.content.length>1);return valid.length>0?valid[Math.floor(Math.random()*valid.length)].content:null;}
 
-// ============ 倾听我心 ============
+// ============ 如果你知道 ============
 function openChoicePage(){showPage('choicePage');renderChoicePage();}
 async function renderChoicePage() {
     const history = await dbGetAll('choiceHistory');
@@ -1069,8 +1226,7 @@ async function renderChoicePage() {
         '<div style="max-width:400px;margin:0 auto;">' +
         // 标题 + 副标题
         '<div style="text-align:center;margin-bottom:20px;">' +
-        '<div style="font-size:20px;font-weight:600;color:#d4a8b8;">倾听我心 · 选择即答案</div>' +
-        '<div style="font-size:13px;color:#999;margin-top:4px;">秦彻帮你做选择</div>' +
+    '<div style="font-size:22px;font-weight:600;color:#d4a8b8;">如果你知道，请给我答案</div>' +
         '</div>' +
         // 问题输入
         '<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid #f0ece8;">' +
@@ -1130,8 +1286,7 @@ async function renderChoicePage() {
         '<div style="max-width:400px;margin:0 auto;">' +
         // 标题 + 副标题
         '<div style="text-align:center;margin-bottom:20px;">' +
-        '<div style="font-size:20px;font-weight:600;color:#d4a8b8;">倾听我心 · 选择即答案</div>' +
-        '<div style="font-size:13px;color:#999;margin-top:4px;">秦彻帮你做选择</div>' +
+     '<div style="font-size:22px;font-weight:600;color:#d4a8b8;">如果你知道，请给我答案</div>' +
         '</div>' +
         // 问题输入
         '<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid #f0ece8;">' +
@@ -1239,271 +1394,456 @@ async function makeChoice() {
         }
     }
 }
-// ============ 塔罗占卜 ============
-function selectSpread(n, el) {
-    // 取消所有高亮
-    var options = document.querySelectorAll('#spreadOptions > div');
-    options.forEach(function(opt) {
-        opt.style.borderColor = '#e8e0d8';
-        opt.style.background = '#fff';
-    });
-    // 高亮选中的
-    if (el) {
-        el.style.borderColor = '#d4a8b8';
-        el.style.background = 'rgba(212,168,184,0.15)';
-    }
-    // 存储选中的牌阵张数
-    window.selectedSpread = n;
+// ============ 塔罗占卜（秦彻翻牌） ============
+var tarotState = 'idle';
+
+function openTarotPage() {
+    showPage('tarotPage');
+    renderTarotPage();
 }
-function openTarotPage(){showPage('tarotPage');renderTarotPage();}
-function renderTarotPage() {
-    var h = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">' +
+
+async function renderTarotPage() {
+    // ===== 读取历史记录 =====
+    var history = await dbGetAll('tarotHistory') || [];
+    history.sort(function(a, b) { return b.timestamp - a.timestamp; });
+    var recentHistory = history.slice(0, 10);
+
+    var historyHtml = '';
+    if (recentHistory.length === 0) {
+        historyHtml = '<div style="color:#ccc;text-align:center;padding:12px 0;font-size:13px;">暂无占卜记录</div>';
+    } else {
+        recentHistory.forEach(function(item) {
+            var time = new Date(item.timestamp).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+            historyHtml += '<div style="padding:6px 0;border-bottom:1px solid #f5f0eb;font-size:13px;color:#555;display:flex;justify-content:space-between;align-items:center;">' +
+                '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px;text-align:left;">' + item.question + '</span>' +
+                '<span style="color:#d4a8b8;font-weight:500;flex-shrink:0;text-align:center;min-width:60px;">🃏 ' + item.card + '</span>' +
+                '<span style="color:#ccc;font-size:11px;flex-shrink:0;margin-left:8px;text-align:right;">' + time + '</span>' +
+                '</div>';
+        });
+    }
+
+    var html = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">' +
         '<div style="width:100%;max-width:400px;text-align:center;">' +
-        '<div style="font-size:44px;">🔮</div>' +
-        '<div style="font-size:20px;font-weight:600;margin-bottom:16px;">命运之轮的指引</div>' +
-        // 塔罗传讯入口
-        '<div style="background:#fff;border-radius:16px;padding:14px;margin-bottom:14px;">' +
-        '<button onclick="openTarotChat()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;">🔮 进入塔罗传讯</button>' +
-        '</div>' +
-        // 牌阵选择
-        '<div style="background:#fff;border-radius:16px;padding:14px;margin-bottom:14px;">' +
-        '<div style="font-size:12px;color:#999;margin-bottom:6px;">✨ 选择牌阵</div>' +
-        '<div style="display:flex;gap:8px;" id="spreadOptions">' +
-        '<div onclick="selectSpread(1,this)" style="flex:1;padding:10px;border-radius:10px;border:2px solid #d4a8b8;background:rgba(212,168,184,0.15);cursor:pointer;">' +
-        '<div>🃏</div><div style="font-size:11px;">单张指引</div>' +
-        '</div>' +
-        '<div onclick="selectSpread(3,this)" style="flex:1;padding:10px;border-radius:10px;border:2px solid #e8e0d8;background:#fff;cursor:pointer;">' +
-        '<div>🃏🃏🃏</div><div style="font-size:11px;">三张牌阵</div>' +
+        '<div style="font-size:44px;margin-bottom:4px;">🔮</div>' +
+        '<div style="font-size:20px;font-weight:600;color:#333;margin-bottom:16px;">我们来通过塔罗沟通吧</div>' +
+        // 呼唤区域
+        '<div id="tarotCallArea" style="background:#fff;border-radius:16px;padding:20px;border:1px solid #f0ece8;margin-bottom:12px;">' +
+        '<div id="tarotCallStatus" style="font-size:14px;color:#999;margin-bottom:12px;">💬 呼唤秦彻，让他为你翻牌</div>' +
+        '<button id="tarotCallBtn" onclick="tarotCall()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:15px;cursor:pointer;font-weight:500;">🌟 呼唤秦彻</button>' +
+        '<div id="tarotResponseArea" style="display:none;margin-top:12px;">' +
+        '<div id="tarotResponseText" style="font-size:15px;color:#d4a8b8;font-weight:500;padding:8px 0;font-style:italic;"></div>' +
+        '<div style="display:flex;gap:8px;margin-top:8px;">' +
+        '<button id="tarotAskBtn" onclick="tarotShowQuestion()" style="flex:1;padding:10px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;">💬 提问</button>' +
+        '<button onclick="tarotEnd()" style="flex:1;padding:10px;border-radius:12px;background:#f0f0f0;color:#666;border:none;font-size:14px;cursor:pointer;">结束</button>' +
         '</div>' +
         '</div>' +
         '</div>' +
-        // 问题和抽牌
-        '<div style="background:#fff;border-radius:16px;padding:14px;border:1px solid #f0ece8;">' +
-        '<textarea id="tarotQuestion" placeholder="默念你的问题..." style="width:100%;padding:10px;border-radius:10px;border:1.5px solid #e8e0d8;min-height:70px;margin-bottom:8px;font-size:14px;outline:none;box-sizing:border-box;"></textarea>' +
-        '<button id="drawBtn" onclick="drawTarot()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:15px;cursor:pointer;">🌟 开始塔罗占卜</button>' +
-        '<div id="tarotResult" style="display:none;margin-top:14px;background:#fff;border-radius:16px;padding:14px;">' +
-        '<div id="tarotCardsRow" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;"></div>' +
-        '<div id="tarotReading" style="font-size:13px;line-height:1.7;text-align:left;color:#555;"></div>' +
+        // 提问区域（默认隐藏）
+        '<div id="tarotQuestionArea" style="display:none;background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:12px;">' +
+        '<textarea id="tarotQuestionInput" placeholder="输入你想问的问题..." style="width:100%;padding:10px;border-radius:10px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;min-height:60px;resize:none;outline:none;box-sizing:border-box;"></textarea>' +
+        '<button onclick="tarotDraw()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:15px;cursor:pointer;font-weight:500;margin-top:8px;">🃏 翻牌</button>' +
+        '<button onclick="tarotBackToCall()" style="width:100%;padding:8px;border-radius:12px;background:transparent;color:#999;border:none;font-size:13px;cursor:pointer;margin-top:4px;">← 返回</button>' +
         '</div>' +
+        // 翻牌结果区域
+        '<div id="tarotResultArea" style="display:none;background:#fff;border-radius:16px;padding:20px;border:2px solid #d4a8b8;margin-bottom:12px;min-height:150px;">' +
+        '<div style="font-size:13px;color:#999;margin-bottom:8px;">🃏 翻牌结果</div>' +
+        '<div id="tarotCardDisplay" style="font-size:24px;font-weight:600;color:#d4a8b8;padding:12px 0;"></div>' +
+        '<div style="display:flex;gap:8px;margin-top:12px;">' +
+        '<button onclick="tarotAgain()" style="flex:1;padding:10px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;">🔄 再问一次</button>' +
+        '<button onclick="tarotEnd()" style="flex:1;padding:10px;border-radius:12px;background:#f0f0f0;color:#666;border:none;font-size:14px;cursor:pointer;">结束</button>' +
+        '</div>' +
+        '</div>' +
+        // 历史记录
+        '<div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-top:12px;width:100%;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+        '<div style="font-size:13px;color:#999;">📜 历史记录</div>' +
+        '<button onclick="tarotClearHistory()" style="padding:2px 12px;border-radius:12px;background:#f5f5f5;color:#999;border:none;font-size:11px;cursor:pointer;">清空</button>' +
+        '</div>' +
+        '<div id="tarotHistoryList">' + historyHtml + '</div>' +
         '</div>' +
         '</div>' +
         '</div>';
-    document.getElementById('tarotContent').innerHTML = h;
-    window.selectedSpread = 1;
-}
-// ============ 塔罗占卜核心函数 ============
 
-// 选牌阵
-function selectSpread(n, el) {
-    var options = document.querySelectorAll('#spreadOptions > div');
-    options.forEach(function(opt) {
-        opt.style.borderColor = '#e8e0d8';
-        opt.style.background = '#fff';
-    });
-    if (el) {
-        el.style.borderColor = '#d4a8b8';
-        el.style.background = 'rgba(212,168,184,0.15)';
+    document.getElementById('tarotContent').innerHTML = html;
+    tarotState = 'idle';
+}
+
+// ============ 塔罗交互函数（全部从字卡取） ============
+
+async function tarotCall() {
+    var groupName = await getCal('tarotGroup', '');
+    if (!groupName) {
+        showToast('⚠️ 请先在「模块设置」中选择翻牌分组');
+        return;
     }
-    window.selectedSpread = n;
-}
 
-// 抽牌
-function drawTarot() {
-    var btn = document.getElementById('drawBtn');
-    if (!btn) return;
-    btn.disabled = true;
-    btn.textContent = '🌟 洗牌中...';
-    
-    setTimeout(function() {
-        var deck = getFull78Deck();
-        var cards = [];
-        var used = new Set();
-        var count = window.selectedSpread || 1;
-        
-        while (cards.length < count) {
-            var idx = Math.floor(Math.random() * deck.length);
-            if (!used.has(idx)) {
-                used.add(idx);
-                cards.push({
-                    name: deck[idx].name,
-                    emoji: deck[idx].emoji || '🃏',
-                    meaning: deck[idx].meaning,
-                    icon: deck[idx].icon || '🃏',
-                    reversed: Math.random() < 0.2
-                });
-            }
-        }
-        
-        var resultBox = document.getElementById('tarotResult');
-        if (resultBox) resultBox.style.display = 'block';
-        
-        var row = document.getElementById('tarotCardsRow');
-        if (row) {
-            row.innerHTML = '';
-            var pos = count === 1 ? ['指引'] : ['过去', '现在', '未来'];
-            cards.forEach(function(c, i) {
-                var ce = document.createElement('div');
-                ce.style.cssText = 'width:95px;height:150px;border-radius:12px;cursor:pointer;position:relative;transform-style:preserve-3d;transition:transform 0.6s;';
-                ce.innerHTML = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;border-radius:12px;backface-visibility:hidden;background:linear-gradient(135deg,#1a0050,#2d0070);border:2px solid rgba(180,140,255,0.4);display:flex;align-items:center;justify-content:center;"><div style="width:70px;height:110px;border:3px double rgba(200,170,255,0.7);border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;"><div style="position:absolute;top:4px;left:4px;right:4px;bottom:4px;border:1px solid rgba(200,170,255,0.4);border-radius:5px;"></div><div style="width:36px;height:36px;border:2px solid rgba(200,170,255,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center;"><span style="font-size:20px;color:rgba(200,170,255,0.8);">★</span></div></div></div><div style="position:absolute;top:0;left:0;right:0;bottom:0;border-radius:12px;backface-visibility:hidden;background:#f8f0ff;border:2px solid rgba(160,120,220,0.5);transform:rotateY(180deg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px;"><span style="font-size:22px;">' + (c.icon || c.emoji) + '</span><span style="font-size:10px;font-weight:700;color:#4a1a80;">' + c.name + (c.reversed ? '(逆)' : '') + '</span><span style="font-size:8px;color:#7050a0;">' + (c.reversed ? '逆位：需反思' : c.meaning) + '</span><span style="font-size:8px;color:#a080c0;">' + pos[i] + '</span></div>';
-                ce.onclick = function() {
-                    this.style.transform = this.style.transform === 'rotateY(180deg)' ? '' : 'rotateY(180deg)';
-                };
-                row.appendChild(ce);
-                setTimeout(function() {
-                    ce.style.transform = 'rotateY(180deg)';
-                }, 600 + i * 500);
-            });
-        }
-        
-        var reading = document.getElementById('tarotReading');
-        if (reading) {
-            var pos2 = count === 1 ? ['指引'] : ['过去', '现在', '未来'];
-            var text = cards.map(function(c, i) {
-                return pos2[i] + '：' + c.name + (c.reversed ? '（逆位）' : '') + ' - ' + (c.reversed ? '需反思调整' : c.meaning);
-            }).join('<br>');
-            reading.innerHTML = '<p style="color:#d0a0ff;">📖 解读</p><p>' + text + '</p>';
-        }
-        
+    var btn = document.getElementById('tarotCallBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '稍等...';
+    }
+
+    var statusDiv = document.getElementById('tarotCallStatus');
+    if (statusDiv) {
+        statusDiv.textContent = '🔮 秦彻正在赶来...';
+    }
+
+    await new Promise(function(r) { setTimeout(r, 2000); });
+
+    var response = await getRandomFromGroup(groupName);
+    if (!response) {
+        showToast('⚠️ 字卡分组为空，请先添加字卡');
         if (btn) {
             btn.disabled = false;
-            btn.textContent = '🌟 重新占卜';
+            btn.textContent = '🌟 呼唤秦彻';
         }
-    }, 1500);
-}
-
-// 78张塔罗牌
-function getFull78Deck() {
-    var major = [
-        { name: '愚者', emoji: '🌟', meaning: '新的开始，冒险精神', icon: '🧳' },
-        { name: '魔术师', emoji: '🎩', meaning: '创造力，技能，自信', icon: '🪄' },
-        { name: '女祭司', emoji: '🌙', meaning: '直觉，内在智慧', icon: '📜' },
-        { name: '皇后', emoji: '👑', meaning: '丰饶，美丽自然', icon: '🌾' },
-        { name: '皇帝', emoji: '🏛️', meaning: '权威，稳定秩序', icon: '🗡️' },
-        { name: '教皇', emoji: '📿', meaning: '信仰，精神指引', icon: '📖' },
-        { name: '恋人', emoji: '💕', meaning: '爱情，重要选择', icon: '👫' },
-        { name: '战车', emoji: '⚔️', meaning: '胜利，勇往直前', icon: '🐴' },
-        { name: '力量', emoji: '🦁', meaning: '勇气，内在力量', icon: '💪' },
-        { name: '隐者', emoji: '🏔️', meaning: '内省，寻求真理', icon: '🕯️' },
-        { name: '命运之轮', emoji: '🎡', meaning: '命运转折', icon: '🎰' },
-        { name: '正义', emoji: '⚖️', meaning: '公平，因果', icon: '🏛️' },
-        { name: '倒吊人', emoji: '🙃', meaning: '换个角度', icon: '🪢' },
-        { name: '死神', emoji: '🦋', meaning: '结束即新生', icon: '💀' },
-        { name: '节制', emoji: '🌊', meaning: '平衡调和', icon: '🏺' },
-        { name: '恶魔', emoji: '🔗', meaning: '挣脱枷锁', icon: '😈' },
-        { name: '高塔', emoji: '⚡', meaning: '突变启示', icon: '🗼' },
-        { name: '星星', emoji: '⭐', meaning: '希望治愈', icon: '🌟' },
-        { name: '月亮', emoji: '🌑', meaning: '潜意识', icon: '🌙' },
-        { name: '太阳', emoji: '☀️', meaning: '快乐成功', icon: '🌻' },
-        { name: '审判', emoji: '📯', meaning: '重生觉醒', icon: '👼' },
-        { name: '世界', emoji: '🌍', meaning: '圆满成就', icon: '🏆' }
-    ];
-    var suits = ['权杖', '圣杯', '宝剑', '星币'];
-    var ranks = ['王牌', '二', '三', '四', '五', '六', '七', '八', '九', '十', '侍从', '骑士', '王后', '国王'];
-    var icons = { 权杖: '🪵', 圣杯: '🍷', 宝剑: '🗡️', 星币: '🪙' };
-    var minor = [];
-    suits.forEach(function(s) {
-        ranks.forEach(function(r) {
-            minor.push({ name: s + r, emoji: icons[s], meaning: s + '的' + r, icon: icons[s] });
-        });
-    });
-    return major.concat(minor);
-}
-// ============ 塔罗传讯 ============
-async function openTarotChat() {
-    showPage('tarotChatPage');
-    applyBubbleStyle();
-    
-    // 应用聊天背景
-    var chatEl = document.getElementById('tarotChatArea');
-    if (S.chatBg === 'custom' && S.chatBgImage && chatEl) {
-        chatEl.style.backgroundImage = 'url(' + S.chatBgImage + ')';
-        chatEl.style.backgroundSize = 'cover';
-        chatEl.style.backgroundPosition = 'center';
-    } else if (S.chatBg && S.chatBg !== 'default' && chatEl) {
-        var m = { warm: '#fffdf5', cool: '#f5f8ff', pink: '#fff5f7' };
-        if (m[S.chatBg]) {
-            chatEl.style.background = m[S.chatBg];
-            chatEl.style.backgroundImage = 'none';
-        }
-    }
-    
-    await loadTarotMessages();
-}
-
-async function loadTarotMessages() {
-    var ca = document.getElementById('tarotChatArea');
-    if (!ca) return;
-    
-    var msgs = await dbGetAll('tarotMessages');
-    ca.innerHTML = '';
-    
-    if (!msgs || msgs.length === 0) {
-        ca.innerHTML = '<div style="text-align:center;color:#ccc;padding:40px;">💬 开始你的塔罗对话吧</div>';
+        if (statusDiv) statusDiv.textContent = '💬 字卡分组是空的…';
         return;
     }
-    
-    msgs.forEach(function(m) { renderTarotMsg(m); });
-    ca.scrollTop = ca.scrollHeight;
+
+    var responseText = document.getElementById('tarotResponseText');
+    var responseArea = document.getElementById('tarotResponseArea');
+    var callBtn = document.getElementById('tarotCallBtn');
+
+    if (responseText) responseText.textContent = '💬 ' + response;
+    if (responseArea) responseArea.style.display = 'block';
+    if (callBtn) callBtn.style.display = 'none';
+    if (statusDiv) statusDiv.textContent = '✨ 秦彻回应了';
+
+    if (btn) {
+        btn.disabled = false;
+        btn.textContent = '🌟 呼唤秦彻';
+    }
+
+    tarotState = 'called';
 }
 
-function renderTarotMsg(m) {
-    const ca = document.getElementById('tarotChatArea');
-    const w = document.createElement('div');
-    w.className = 'message-wrapper ' + (m.sender === 'me' ? 'right' : 'left');
-    const av = document.createElement('img');
-    av.className = 'message-avatar';
-    av.src = m.sender === 'me' ? getAvatar('me') : getAvatar('contact');
-    const b = document.createElement('div');
-    b.className = 'bubble';
-    b.textContent = m.content;
-    const t = document.createElement('div');
-    t.className = 'message-time';
-    t.textContent = fmtTime(m.timestamp);
-    w.appendChild(av); w.appendChild(b); w.appendChild(t);
-    ca.appendChild(w);
-    ca.scrollTop = ca.scrollHeight;
+function tarotShowQuestion() {
+    var area = document.getElementById('tarotQuestionArea');
+    if (area) area.style.display = 'block';
+    var input = document.getElementById('tarotQuestionInput');
+    if (input) input.focus();
+    tarotState = 'asking';
 }
 
-async function sendTarotMessage() {
-    const input = document.getElementById('tarotMessageInput');
-    const c = input.value.trim();
-    if (!c) return;
-    const msg = { sender: 'me', content: c, type: 'text', timestamp: Date.now() };
-    const id = await dbPut('tarotMessages', msg);
-    msg.id = id;
-    renderTarotMsg(msg);
-    input.value = '';
-    setTimeout(() => tarotAutoReply(), 1000);
+function tarotBackToCall() {
+    var area = document.getElementById('tarotQuestionArea');
+    if (area) area.style.display = 'none';
+    var input = document.getElementById('tarotQuestionInput');
+    if (input) input.value = '';
+    tarotState = 'called';
 }
 
-async function tarotAutoReply() {
-    const groupName = await getCal('tarotGroup', '');
+async function tarotDraw() {
+    var groupName = await getCal('tarotGroup', '');
     if (!groupName) {
-        const m = { sender: 'other', content: '🔮 请先在「模块设置」中选择塔罗传讯分组', type: 'text', timestamp: Date.now() };
-        await dbPut('tarotMessages', m);
-        renderTarotMsg(m);
+        showToast('⚠️ 请先在「模块设置」中选择翻牌分组');
         return;
     }
-    const allCards = await dbGetAll('wordcards');
-    const cards = allCards.filter(c => (c.groupName === groupName || c.groupId === groupName) && c.content && c.content !== '__GROUP_PLACEHOLDER__' && c.content.length > 1);
-    let reply;
-    if (cards.length === 0) {
-        reply = '🔮 这个分组里还没有字卡，快去添加吧！';
-    } else {
-        reply = cards[Math.floor(Math.random() * cards.length)].content;
+
+    var input = document.getElementById('tarotQuestionInput');
+    var question = input ? input.value.trim() : '';
+    if (!question) {
+        showToast('请输入问题');
+        return;
     }
-    const m = { sender: 'other', content: reply, type: 'text', timestamp: Date.now() };
-    const id = await dbPut('tarotMessages', m);
-    m.id = id;
-    renderTarotMsg(m);
+
+    var questionArea = document.getElementById('tarotQuestionArea');
+    var resultArea = document.getElementById('tarotResultArea');
+    var cardDisplay = document.getElementById('tarotCardDisplay');
+
+    if (questionArea) questionArea.style.display = 'none';
+    if (resultArea) resultArea.style.display = 'block';
+    if (cardDisplay) cardDisplay.textContent = '🃏 翻牌中...';
+
+    await new Promise(function(r) { setTimeout(r, 1500); });
+
+    var card = await getRandomFromGroup(groupName);
+    if (!card) {
+        showToast('⚠️ 字卡分组为空，请先添加字卡');
+        if (cardDisplay) cardDisplay.textContent = '🃏 暂无字卡';
+        return;
+    }
+
+    if (cardDisplay) cardDisplay.textContent = '🃏 ' + card;
+
+    // ===== 保存历史记录 =====
+    await dbPut('tarotHistory', {
+        question: question,
+        card: card,
+        timestamp: Date.now()
+    });
+
+    // ===== 刷新历史记录列表 =====
+    refreshTarotHistory();
+
+    tarotState = 'result';
+}
+
+function tarotAgain() {
+    var resultArea = document.getElementById('tarotResultArea');
+    var questionArea = document.getElementById('tarotQuestionArea');
+    var input = document.getElementById('tarotQuestionInput');
+
+    if (resultArea) resultArea.style.display = 'none';
+    if (questionArea) questionArea.style.display = 'block';
+    if (input) {
+        input.value = '';
+        input.focus();
+    }
+    tarotState = 'asking';
+}
+
+async function tarotEnd() {
+    // 不弹任何话，直接重置页面
+    var callBtn = document.getElementById('tarotCallBtn');
+    var responseArea = document.getElementById('tarotResponseArea');
+    var questionArea = document.getElementById('tarotQuestionArea');
+    var resultArea = document.getElementById('tarotResultArea');
+    var statusDiv = document.getElementById('tarotCallStatus');
+    var input = document.getElementById('tarotQuestionInput');
+
+    if (callBtn) callBtn.style.display = 'block';
+    if (responseArea) responseArea.style.display = 'none';
+    if (questionArea) questionArea.style.display = 'none';
+    if (resultArea) resultArea.style.display = 'none';
+    if (statusDiv) statusDiv.textContent = '💬 呼唤秦彻，让他为你翻牌';
+    if (input) input.value = '';
+
+    tarotState = 'idle';
+}
+
+async function getRandomFromGroup(groupName) {
+    var allCards = await dbGetAll('wordcards');
+    var cards = allCards.filter(function(c) {
+        return (c.groupName === groupName || c.groupId === groupName) &&
+               c.content &&
+               c.content !== '__GROUP_PLACEHOLDER__' &&
+               c.content.length > 1;
+    });
+    if (cards.length === 0) return null;
+    return cards[Math.floor(Math.random() * cards.length)].content;
+}
+
+async function refreshTarotHistory() {
+    var history = await dbGetAll('tarotHistory') || [];
+    history.sort(function(a, b) { return b.timestamp - a.timestamp; });
+    var recent = history.slice(0, 10);
+
+    var listDiv = document.getElementById('tarotHistoryList');
+    if (!listDiv) return;
+
+    if (recent.length === 0) {
+        listDiv.innerHTML = '<div style="color:#ccc;font-size:13px;text-align:center;padding:12px 0;">暂无占卜记录</div>';
+        return;
+    }
+
+    var html = '';
+    recent.forEach(function(item) {
+        var time = new Date(item.timestamp).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+        html += '<div style="padding:6px 0;border-bottom:1px solid #f5f0eb;font-size:13px;color:#555;display:flex;justify-content:space-between;align-items:center;">' +
+            '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px;text-align:left;">' + item.question + '</span>' +
+            '<span style="color:#d4a8b8;font-weight:500;flex-shrink:0;text-align:center;min-width:60px;">🃏 ' + item.card + '</span>' +
+            '<span style="color:#ccc;font-size:11px;flex-shrink:0;margin-left:8px;text-align:right;">' + time + '</span>' +
+            '</div>';
+    });
+    listDiv.innerHTML = html;
+}
+async function tarotClearHistory() {
+    if (!confirm('确定清空所有翻牌历史记录吗？')) return;
+    await dbClear('tarotHistory');
+    renderTarotPage();
+    showToast('✅ 已清空历史记录');
+}
+// ============ 他的房间 ============
+
+let hisRoomState = 'idle';
+
+function openHisRoom() {
+    var overlay = document.getElementById('hisRoomOverlay');
+    if (overlay) {
+        overlay.style.display = 'flex';
+        hisRoomState = 'idle';
+        renderHisRoomScene();
+    }
+}
+
+function closeHisRoom() {
+    var overlay = document.getElementById('hisRoomOverlay');
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+    hisRoomState = 'idle';
+}
+
+function renderHisRoomScene() {
+    var container = document.getElementById('hisRoomContent');
+    if (!container) return;
+    
+    if (hisRoomState === 'idle') {
+        container.innerHTML = `
+            <div style="text-align:center;padding:10px 0;">
+                <div class="door-frame">
+                    <div class="door door-closed">
+                        <div class="door-handle"></div>
+                    </div>
+                </div>
+                <div style="font-size:14px;color:#b0a090;margin-top:12px;">门关着，里面很安静…</div>
+            </div>
+        `;
+        var actions = document.getElementById('hisRoomActions');
+        if (actions) {
+            actions.innerHTML = `
+                <button onclick="knockHisRoom()" style="padding:12px 40px;border-radius:30px;background:#d4a8b8;color:#fff;border:none;font-size:16px;cursor:pointer;box-shadow:0 4px 16px rgba(212,168,184,0.3);">🚪 敲敲门</button>
+            `;
+        }
+    }
+}
+
+async function knockHisRoom() {
+    var groupName = await getCal('hisRoomGroup', '');
+    if (!groupName) {
+        showToast('⚠️ 请先在「模块设置」中选择他的房间分组');
+        return;
+    }
+
+    var card = await getRandomFromGroup(groupName);
+    if (!card) card = '今天想一个人待着。';
+
+    hisRoomState = 'doorOpen';
+    var container = document.getElementById('hisRoomContent');
+    if (container) {
+        container.innerHTML = `
+    <div style="text-align:center;padding:5px 0;">
+        <div class="door-frame" style="display:inline-block;">
+            <div class="door door-open" style="transform:perspective(600px) rotateY(-35deg);">
+                <div class="door-handle"></div>
+            </div>
+        </div>
+        <div style="margin-top:-10px;">
+            <svg class="crow-svg crow-fly" viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="60" cy="55" rx="32" ry="24" fill="#1a1a1a"/>
+<ellipse cx="33" cy="50" rx="12" ry="14" fill="#1a1a1a"/>
+<polygon points="28,48 3,22 8,40 22,56" fill="#1a1a1a"/>
+<polygon points="100,40 112,38 100,44" fill="#f5a623"/>
+<ellipse class="wing-left" cx="45" cy="40" rx="28" ry="14" fill="#2a2a2a" transform="rotate(-15, 45, 40)"/>
+<ellipse class="wing-right" cx="75" cy="38" rx="25" ry="12" fill="#222" transform="rotate(10, 75, 38)"/>
+<circle cx="85" cy="40" r="16" fill="#1a1a1a"/>
+<line x1="55" y1="75" x2="50" y2="85" stroke="#333" stroke-width="2"/>
+<line x1="65" y1="75" x2="70" y2="85" stroke="#333" stroke-width="2"/>
+<rect x="42" y="85" width="36" height="10" rx="2" fill="#f5efe0" stroke="#e8dcc8" stroke-width="0.5"/>
+<!-- 眼睛放在最后，永远在最上面 -->
+<circle cx="91" cy="37" r="4" fill="white"/>
+<circle cx="92" cy="36" r="2" fill="#1a1a1a"/>
+</svg>
+        </div>
+        <div id="hisRoomPaperContainer" style="margin-top:4px;opacity:0;transition:opacity 0.6s ease;">
+            <div class="paper paper-rough">
+                ${card}
+            </div>
+        </div>
+    </div>
+`;
+
+// 触发乌鸦飞行动画
+setTimeout(function() {
+    var crow = document.getElementById('crowSvg');
+    if (crow) {
+        crow.style.opacity = '1';
+        crow.style.transform = 'translateY(0px) scale(1)';
+    }
+}, 100);
+
+// 等待 1.2 秒后显示纸条
+setTimeout(function() {
+    var paperContainer = document.getElementById('hisRoomPaperContainer');
+    if (paperContainer) {
+        paperContainer.style.opacity = '1';
+    }
+}, 1200);
+
+        setTimeout(function() {
+            var paperContainer = document.getElementById('hisRoomPaperContainer');
+            if (paperContainer) {
+                paperContainer.style.opacity = '1';
+            }
+        }, 1200);
+    }
+
+    setTimeout(function() {
+        var actions = document.getElementById('hisRoomActions');
+        if (actions) {
+            actions.innerHTML = `
+                <button onclick="saveHisRoomPaper('${card.replace(/'/g, "\\'")}')" style="flex:1;padding:10px;border-radius:14px;background:#d4a8b8;color:#fff;border:none;font-size:15px;cursor:pointer;">📎 收藏纸条</button>
+                <button onclick="closeHisRoom()" style="flex:1;padding:10px;border-radius:14px;background:#f0ece8;color:#7a6a5a;border:none;font-size:15px;cursor:pointer;">🗑 不要了</button>
+            `;
+        }
+        hisRoomState = 'paperShown';
+    }, 1600);
+}
+
+async function saveHisRoomPaper(content) {
+    var msg = {
+        sender: 'qin',
+        content: content,
+        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+        timestamp: Date.now()
+        // 不加 replied 字段，或设为 false
+    };
+    await dbPut('boardMessages', msg);
+    showToast('✅ 已收藏到留言板');
+    closeHisRoom();
+    if (document.getElementById('boardTabContent') && document.getElementById('boardTabContent').style.display !== 'none') {
+        renderBoardPage();
+    }
+}
+
+async function saveHisRoomGroup() {
+    var select = document.getElementById('hisRoomGroupSelect');
+    var value = select ? select.value : '';
+    await setCal('hisRoomGroup', value);
+    showToast('✅ 他的房间分组已保存：' + (value || '未选择'));
 }
 // ============ 模块设置 ============
 function openModuleSettings(){showPage('moduleSettingsPage');renderModuleSettings();}
-async function renderModuleSettings(){const groups=await getAllGroups();const go=groups.map(g=>g.name);const cg=JSON.parse(await getCal('chatGroups','[]'));const mg=JSON.parse(await getCal('mailboxGroups','[]'));const tg=await getCal('tarotGroup','');const ag=await getCal('answerBookGroup','');let h='<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;"><div style="width:100%;max-width:400px;"><div class="settings-section"><h4>💬 聊天混用</h4>'+go.map(g=>'<label style="display:flex;align-items:center;gap:8px;padding:4px 0;"><input type="checkbox" class="chat-group-checkbox" value="'+g+'" '+(cg.includes(g)?'checked':'')+'>'+g+'</label>').join('')+'<button onclick="saveChatGroups()" style="margin-top:10px;padding:6px 16px;border-radius:12px;background:#f5f0eb;border:none;">保存聊天分组</button></div><div class="settings-section"><h4>📮 留言板</h4>'+go.map(g=>'<label style="display:flex;align-items:center;gap:8px;padding:4px 0;"><input type="checkbox" class="mailbox-group-checkbox" value="'+g+'" '+(mg.includes(g)?'checked':'')+'>'+g+'</label>').join('')+'<button onclick="saveMailboxGroups()" style="margin-top:10px;padding:6px 16px;border-radius:12px;background:#f5f0eb;border:none;">保存留言板分组</button></div><div class="settings-section"><h4>🔮 塔罗传讯</h4><select id="tarotGroupSelect" style="width:100%;padding:10px;border-radius:12px;border:1.5px solid #e8e0d8;"><option value="">-- 请选择 --</option>'+go.map(g=>'<option value="'+g+'" '+(g===tg?'selected':'')+'>'+g+'</option>').join('')+'</select><button onclick="saveTarotGroup()" style="margin-top:10px;padding:6px 16px;border-radius:12px;background:#f5f0eb;border:none;">保存塔罗分组</button></div><div class="settings-section"><h4>📖 答案之书</h4><select id="answerBookGroupSelect" style="width:100%;padding:10px;border-radius:12px;border:1.5px solid #e8e0d8;"><option value="">-- 请选择 --</option>'+go.map(g=>'<option value="'+g+'" '+(g===ag?'selected':'')+'>'+g+'</option>').join('')+'</select><button onclick="saveAnswerBookGroupFromSettings()" style="margin-top:10px;padding:6px 16px;border-radius:12px;background:#f5f0eb;border:none;">保存答案之书分组</button></div></div></div>';document.getElementById('moduleSettingsContent').innerHTML=h;}
+async function renderModuleSettings() {
+    const groups = await getAllGroups();
+    const go = groups.map(g => g.name);
+    const cg = JSON.parse(await getCal('chatGroups', '[]'));
+    const mg = JSON.parse(await getCal('mailboxGroups', '[]'));
+    const tg = await getCal('tarotGroup', '');
+    const hg = await getCal('hisRoomGroup', '');
+
+    let h = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;"><div style="width:100%;max-width:400px;">';
+
+    // 聊天混用
+    h += '<div class="settings-section"><h4>💬 聊天混用</h4>' +
+        go.map(g => '<label style="display:flex;align-items:center;gap:8px;padding:4px 0;"><input type="checkbox" class="chat-group-checkbox" value="' + g + '" ' + (cg.includes(g) ? 'checked' : '') + '>' + g + '</label>').join('') +
+        '<button onclick="saveChatGroups()" style="margin-top:10px;padding:6px 16px;border-radius:12px;background:#f5f0eb;border:none;">保存聊天分组</button></div>';
+
+    // 留言板
+    h += '<div class="settings-section"><h4>📮 留言板</h4>' +
+        go.map(g => '<label style="display:flex;align-items:center;gap:8px;padding:4px 0;"><input type="checkbox" class="mailbox-group-checkbox" value="' + g + '" ' + (mg.includes(g) ? 'checked' : '') + '>' + g + '</label>').join('') +
+        '<button onclick="saveMailboxGroups()" style="margin-top:10px;padding:6px 16px;border-radius:12px;background:#f5f0eb;border:none;">保存留言板分组</button></div>';
+
+    // 秦彻翻牌
+    h += '<div class="settings-section"><h4>🔮 秦彻翻牌</h4>' +
+        '<select id="tarotGroupSelect" style="width:100%;padding:10px;border-radius:12px;border:1.5px solid #e8e0d8;"><option value="">-- 请选择 --</option>' +
+        go.map(g => '<option value="' + g + '" ' + (g === tg ? 'selected' : '') + '>' + g + '</option>').join('') +
+        '</select><button onclick="saveTarotGroup()" style="margin-top:10px;padding:6px 16px;border-radius:12px;background:#f5f0eb;border:none;">保存翻牌分组</button></div>';
+
+    // 他的房间（新增）
+    h += '<div class="settings-section"><h4>🚪 他的房间</h4>' +
+        '<select id="hisRoomGroupSelect" style="width:100%;padding:10px;border-radius:12px;border:1.5px solid #e8e0d8;"><option value="">-- 请选择 --</option>' +
+        go.map(g => '<option value="' + g + '" ' + (g === hg ? 'selected' : '') + '>' + g + '</option>').join('') +
+        '</select><button onclick="saveHisRoomGroup()" style="margin-top:10px;padding:6px 16px;border-radius:12px;background:#f5f0eb;border:none;">保存房间分组</button></div>';
+
+    h += '</div></div>';
+    document.getElementById('moduleSettingsContent').innerHTML = h;
+}
 async function saveChatGroups(){const cbs=document.querySelectorAll('.chat-group-checkbox:checked');const s=Array.from(cbs).map(cb=>cb.value);await setCal('chatGroups',JSON.stringify(s));showToast('✅ 已保存');}
 async function saveMailboxGroups(){const cbs=document.querySelectorAll('.mailbox-group-checkbox:checked');const s=Array.from(cbs).map(cb=>cb.value);await setCal('mailboxGroups',JSON.stringify(s));showToast('✅ 已保存');}
 async function saveTarotGroup(){const v=document.getElementById('tarotGroupSelect').value;await setCal('tarotGroup',v);showToast('✅ 已保存');}
-async function saveAnswerBookGroupFromSettings(){const v=document.getElementById('answerBookGroupSelect').value;await setCal('answerBookGroup',v);showToast('✅ 已保存');}
 
 // ============ 数据管理 ============
 function openDataManage(){showPage('dataManagePage');renderDataManage();}
@@ -1838,49 +2178,120 @@ async function init() {
 }
 
 // 暴露所有函数到全局作用域
-window.openChatPage=openChatPage;window.openOurUniverse=openOurUniverse;window.openWordCardLibrary=openWordCardLibrary;
-window.openEmojiManage=openEmojiManage;window.openTarotPage=openTarotPage;window.openCallLogPage=openCallLogPage;
-window.openWishPage=openWishPage;window.openAnniversaryPage=openAnniversaryPage;window.openAnswerBookPage=openAnswerBookPage;
-window.openChoicePage=openChoicePage;window.openModuleSettings=openModuleSettings;window.openDataManage=openDataManage;
-window.goHome=goHome;window.showPage=showPage;window.updateHome=updateHome;window.showToast=showToast;
-window.sendMessage=sendMessage;window.toggleEmojiPanel=toggleEmojiPanel;window.switchEmojiTab=switchEmojiTab;
-window.switchEmojiGroup=switchEmojiGroup;window.sendEmoji=sendEmoji;window.addEmojiGroup=addEmojiGroup;
-window.addEmojiGroupFromManage=addEmojiGroupFromManage;window.deleteEmojiGroup=deleteEmojiGroup;
-window.switchManageGroup=switchManageGroup;window.deleteEmoji=deleteEmoji;
-window.openBatchAdd=openBatchAdd;window.closeBatchAdd=closeBatchAdd;window.confirmBatchAdd=confirmBatchAdd;
-window.exportCardsJSON=exportCardsJSON;window.importCardsFile=importCardsFile;
-window.searchAllCardsAndDisplay=searchAllCardsAndDisplay;window.filterWordCards=filterWordCards;
-window.viewGroupCards=viewGroupCards;window.closeCardDetail=closeCardDetail;
-window.toggleCardDisable=toggleCardDisable;window.deleteCard=deleteCard;window.deleteGroup=deleteGroup;
-window.createGroup=createGroup;window.renderGroupList=renderGroupList;
-window.editNick=editNick;window.refreshMood=refreshMood;window.addPat=addPat;window.delPat=delPat;
-window.addStatusOpt=addStatusOpt;window.selectHistoryAvatar=selectHistoryAvatar;
-window.deleteHistoryAvatar=deleteHistoryAvatar;window.loadAvatarHistory=loadAvatarHistory;
-window.startCall=startCall;window.answerCall=answerCall;window.endCall=endCall;window.minimizeCall=minimizeCall;
-window.switchWishTab=switchWishTab;window.addWish=addWish;window.toggleWish=toggleWish;window.deleteWish=deleteWish;
-window.addBoardMessage=addBoardMessage;window.deleteBoardMsg=deleteBoardMsg;window.replyBoardMsg=replyBoardMsg;
-window.addAnniversary=addAnniversary;window.deleteAnniversary=deleteAnniversary;window.changeMonth=changeMonth;
-window.askAnswerBook=askAnswerBook;window.addChoiceOption=addChoiceOption;window.makeChoice=makeChoice;
-window.selectSpread=selectSpread;window.drawTarot=drawTarot;
-window.saveChatGroups=saveChatGroups;window.saveMailboxGroups=saveMailboxGroups;
-window.saveTarotGroup=saveTarotGroup;window.saveAnswerBookGroupFromSettings=saveAnswerBookGroupFromSettings;
-window.exportChat=exportChat;window.exportAll=exportAll;window.clearChat=clearChat;
-window.openChatSettings=openChatSettings;window.closeChatSettings=closeChatSettings;
-window.saveAllChatSettings=saveAllChatSettings;window.saveTopQuoteFromPanel=saveTopQuoteFromPanel;
-window.editTopQuote=editTopQuote;window.setHomeBg=setHomeBg;window.setChatBg=setChatBg;
-window.handleImageMessage=handleImageMessage;window.handleEmojiUpload=handleEmojiUpload;
-window.handleMyAvatarUpload=handleMyAvatarUpload;window.handleContactAvatarUpload=handleContactAvatarUpload;
-window.handleChatBgUpload=handleChatBgUpload;window.handleHomeBgUpload=handleHomeBgUpload;
-window.importAllData=importAllData;window.openProfile=openProfile;window.closeProfile=closeProfile;
-window.triggerPat=triggerPat;window.addPatChat=addPatChat;
-window.selectBubblePreset=selectBubblePreset;window.applyBubbleStyle=applyBubbleStyle;window.toggleChatSetting=toggleChatSetting;window.restartAutoSend=restartAutoSend;
-window.moveCard=moveCard;window.confirmMoveCard=confirmMoveCard;
-window.openTarotChat=openTarotChat;window.sendTarotMessage=sendTarotMessage;window.loadTarotMessages=loadTarotMessages;
-window.tarotAutoReply=tarotAutoReply;
+window.openChatPage = openChatPage;
+window.openOurUniverse = openOurUniverse;
+window.openWordCardLibrary = openWordCardLibrary;
+window.openEmojiManage = openEmojiManage;
+window.openTarotPage = openTarotPage;
+window.openCallLogPage = openCallLogPage;
+window.openWishPage = openWishPage;
+window.openAnniversaryPage = openAnniversaryPage;
+window.openChoicePage = openChoicePage;
+window.openModuleSettings = openModuleSettings;
+window.openDataManage = openDataManage;
+window.goHome = goHome;
+window.showPage = showPage;
+window.updateHome = updateHome;
+window.showToast = showToast;
+window.sendMessage = sendMessage;
+window.toggleEmojiPanel = toggleEmojiPanel;
+window.switchEmojiTab = switchEmojiTab;
+window.switchEmojiGroup = switchEmojiGroup;
+window.sendEmoji = sendEmoji;
+window.addEmojiGroup = addEmojiGroup;
+window.addEmojiGroupFromManage = addEmojiGroupFromManage;
+window.deleteEmojiGroup = deleteEmojiGroup;
+window.switchManageGroup = switchManageGroup;
+window.deleteEmoji = deleteEmoji;
+window.openBatchAdd = openBatchAdd;
+window.closeBatchAdd = closeBatchAdd;
+window.confirmBatchAdd = confirmBatchAdd;
+window.exportCardsJSON = exportCardsJSON;
+window.importCardsFile = importCardsFile;
+window.searchAllCardsAndDisplay = searchAllCardsAndDisplay;
+window.filterWordCards = filterWordCards;
+window.viewGroupCards = viewGroupCards;
+window.closeCardDetail = closeCardDetail;
+window.toggleCardDisable = toggleCardDisable;
+window.deleteCard = deleteCard;
+window.deleteGroup = deleteGroup;
+window.createGroup = createGroup;
+window.renderGroupList = renderGroupList;
+window.editNick = editNick;
+window.refreshMood = refreshMood;
+window.addPat = addPat;
+window.delPat = delPat;
+window.addStatusOpt = addStatusOpt;
+window.selectHistoryAvatar = selectHistoryAvatar;
+window.deleteHistoryAvatar = deleteHistoryAvatar;
+window.loadAvatarHistory = loadAvatarHistory;
+window.startCall = startCall;
+window.answerCall = answerCall;
+window.endCall = endCall;
+window.minimizeCall = minimizeCall;
+window.switchWishTab = switchWishTab;
+window.addWish = addWish;
+window.toggleWish = toggleWish;
+window.deleteWish = deleteWish;
+window.addBoardMessage = addBoardMessage;
+window.deleteBoardMsg = deleteBoardMsg;
+window.replyBoardMsg = replyBoardMsg;
+window.addAnniversary = addAnniversary;
+window.deleteAnniversary = deleteAnniversary;
+window.changeMonth = changeMonth;
+window.addChoiceOption = addChoiceOption;
+window.makeChoice = makeChoice;
+window.saveChatGroups = saveChatGroups;
+window.saveMailboxGroups = saveMailboxGroups;
+window.saveTarotGroup = saveTarotGroup;
+window.exportChat = exportChat;
+window.exportAll = exportAll;
+window.clearChat = clearChat;
+window.openChatSettings = openChatSettings;
+window.closeChatSettings = closeChatSettings;
+window.saveAllChatSettings = saveAllChatSettings;
+window.saveTopQuoteFromPanel = saveTopQuoteFromPanel;
+window.editTopQuote = editTopQuote;
+window.setHomeBg = setHomeBg;
+window.setChatBg = setChatBg;
+window.handleImageMessage = handleImageMessage;
+window.handleEmojiUpload = handleEmojiUpload;
+window.handleMyAvatarUpload = handleMyAvatarUpload;
+window.handleContactAvatarUpload = handleContactAvatarUpload;
+window.handleChatBgUpload = handleChatBgUpload;
+window.handleHomeBgUpload = handleHomeBgUpload;
+window.importAllData = importAllData;
+window.openProfile = openProfile;
+window.closeProfile = closeProfile;
+window.triggerPat = triggerPat;
+window.addPatChat = addPatChat;
+window.selectBubblePreset = selectBubblePreset;
+window.applyBubbleStyle = applyBubbleStyle;
+window.toggleChatSetting = toggleChatSetting;
+window.restartAutoSend = restartAutoSend;
+window.moveCard = moveCard;
+window.confirmMoveCard = confirmMoveCard;
 window.renderCallLogs = renderCallLogs;
 window.openCallLogPage = openCallLogPage;
-window.makeChoice = makeChoice;
 window.renderChoicePage = renderChoicePage;
+window.tarotCall = tarotCall;
+window.tarotShowQuestion = tarotShowQuestion;
+window.tarotBackToCall = tarotBackToCall;
+window.tarotDraw = tarotDraw;
+window.tarotAgain = tarotAgain;
+window.tarotEnd = tarotEnd;
+window.renderTarotPage = renderTarotPage;
+window.openTarotPage = openTarotPage;
+window.getRandomFromGroup = getRandomFromGroup;
+window.openHisRoom = openHisRoom;
+window.closeHisRoom = closeHisRoom;
+window.knockHisRoom = knockHisRoom;
+window.saveHisRoomPaper = saveHisRoomPaper;
+window.renderHisRoomScene = renderHisRoomScene;
+window.saveHisRoomGroup = saveHisRoomGroup;
+window.replyToQin = replyToQin;
+window.refreshTarotHistory = refreshTarotHistory;
+window.tarotClearHistory = tarotClearHistory;
 
 init();
 })();
