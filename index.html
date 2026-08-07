@@ -346,7 +346,7 @@
 <div class="profile-overlay" id="profileOverlay" onclick="if(event.target===this)closeProfile()"><div class="profile-card"><img id="pfAvatar" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 10px;border:3px solid #f0f0f0;"><div id="pfName" style="font-size:18px;font-weight:700;"></div><div style="display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:16px;font-size:13px;margin:6px 0 14px;background:#f0f9f0;color:#4a8a4a;"><span style="width:6px;height:6px;border-radius:50%;background:#4cd964;"></span><span id="pfStatus"></span></div><div style="background:#fdf8ff;border-radius:14px;padding:14px;margin-bottom:16px;"><div style="font-size:11px;color:#b0a0c0;">💭 秦彻想说</div><div id="pfMood" style="font-size:14px;color:#5a4a6a;"></div></div><button onclick="triggerPat(S.contactName)" style="padding:8px 20px;border-radius:20px;background:var(--primary);color:#fff;border:none;cursor:pointer;">👋 拍一拍</button><button onclick="closeProfile()" style="display:block;width:100%;padding:10px;border-radius:16px;background:#f0f0f0;color:#666;border:none;cursor:pointer;margin-top:8px;">关闭</button></div></div>
 <!-- 他的房间 - 弹窗 -->
 <div id="hisRoomOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-    <div id="hisRoomModal" style="background:#f5efe8;border-radius:24px;padding:24px;width:90%;max-width:360px;max-height:80vh;overflow-y:auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+   <div id="hisRoomModal" style="background:#f5efe8;border-radius:24px;padding:24px;width:90%;max-width:360px;max-height:80vh;overflow-y:auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.3);min-height:380px;">
         <button onclick="closeHisRoom()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#b0a090;">✕</button>
         <div style="text-align:center;font-size:18px;font-weight:600;color:#5a4a3a;margin-bottom:16px;letter-spacing:2px;">🚪 他的房间</div>
         <div id="hisRoomScene" style="position:relative;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
@@ -1025,15 +1025,156 @@ function openCallLogPage() {
 async function renderCallLogs(){const logs=await dbGetAll('callLogs');logs.sort((a,b)=>b.timestamp-a.timestamp);const c=document.getElementById('callLogContent');let h='<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;"><div style="width:100%;max-width:400px;">';if(logs.length===0)h+='<div style="background:#fff;border-radius:16px;padding:40px;text-align:center;"><div style="font-size:48px;">📞</div><div style="font-size:14px;color:#ccc;">暂无通话记录</div></div>';else{const g={};logs.forEach(l=>{const d=new Date(l.timestamp).toLocaleDateString('zh-CN');if(!g[d])g[d]=[];g[d].push(l);});for(let[d,ls]of Object.entries(g)){h+='<div style="margin-bottom:14px;"><div style="font-size:12px;color:#aaa;margin-bottom:8px;">'+d+'</div>';ls.forEach(l=>{const mi=Math.floor(l.duration/60),s=l.duration%60;h+='<div style="background:#fff;border-radius:16px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;"><div style="font-size:24px;">📞</div><div style="flex:1;"><div style="font-size:14px;font-weight:500;">'+l.contactName+'</div><div style="font-size:11px;color:#aaa;">'+(l.type==='incoming'?'来电':'呼出')+'</div></div><div style="text-align:right;"><div>'+mi+'分'+s+'秒</div><div style="font-size:10px;color:#ccc;">'+new Date(l.timestamp).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})+'</div></div></div>';});h+='</div>';}}h+='</div></div>';c.innerHTML=h;}
 
 // ============ 许愿与留言 ============
-function openWishPage(){showPage('wishPage');switchWishTab('wish');}
-function switchWishTab(tab){currentWishTab=tab;const wb=document.getElementById('wishTabBtn');const bb=document.getElementById('boardTabBtn');const wc=document.getElementById('wishTabContent');const bc=document.getElementById('boardTabContent');if(tab==='wish'){wb.style.color='var(--primary)';wb.style.borderBottom='2px solid var(--primary)';bb.style.color='#999';bb.style.borderBottom='2px solid transparent';wc.style.display='block';bc.style.display='none';renderWishPage();}else{bb.style.color='var(--primary)';bb.style.borderBottom='2px solid var(--primary)';wb.style.color='#999';wb.style.borderBottom='2px solid transparent';bc.style.display='block';wc.style.display='none';renderBoardPage();}}
-async function renderWishPage(){const wishes=await dbGetAll('wishes');let h='<div style="padding:16px;display:flex;flex-direction:column;align-items:center;"><div style="width:100%;max-width:400px;margin-bottom:20px;display:flex;gap:8px;"><input type="text" id="wishInput" placeholder="写下你的愿望..." style="flex:1;padding:12px;border-radius:12px;border:1.5px solid #e8e0d8;font-size:14px;"><button onclick="addWish()" style="padding:12px 20px;border-radius:12px;background:#f5f0eb;border:none;font-size:14px;">📝</button></div><div id="wishList" style="width:100%;max-width:400px;">';if(wishes.length===0)h+='<p style="color:#ccc;text-align:center;padding:40px;">✨ 还没有愿望，写一个吧</p>';else wishes.forEach((w,i)=>{h+='<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;"><span onclick="toggleWish('+w.id+')" style="cursor:pointer;font-size:18px;">'+(w.done?'✅':'○')+'</span><div style="flex:1;"><div style="font-size:15px;text-decoration:'+(w.done?'line-through':'none')+';">'+w.content+'</div><div style="font-size:10px;color:#ccc;">'+w.time+'</div></div><span onclick="deleteWish('+w.id+')" style="cursor:pointer;color:#d4a8b8;">✕</span></div>';});h+='</div></div>';document.getElementById('wishTabContent').innerHTML=h;}
-async function addWish(){const input=document.getElementById('wishInput');const c=input.value.trim();if(!c)return;await dbPut('wishes',{content:c,done:false,time:new Date().toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}),timestamp:Date.now()});input.value='';renderWishPage();}
-async function toggleWish(id){const wishes=await dbGetAll('wishes');const w=wishes.find(x=>x.id===id);if(w){w.done=!w.done;await dbPut('wishes',w);renderWishPage();}}
-async function deleteWish(id){await dbDelete('wishes',id);renderWishPage();}
+
+function openWishPage() {
+    showPage('wishPage');
+    switchWishTab('wish');
+}
+
+function switchWishTab(tab) {
+    currentWishTab = tab;
+    var wb = document.getElementById('wishTabBtn');
+    var bb = document.getElementById('boardTabBtn');
+    var wc = document.getElementById('wishTabContent');
+    var bc = document.getElementById('boardTabContent');
+    if (tab === 'wish') {
+        wb.style.color = 'var(--primary)';
+        wb.style.borderBottom = '2px solid var(--primary)';
+        bb.style.color = '#999';
+        bb.style.borderBottom = '2px solid transparent';
+        wc.style.display = 'block';
+        bc.style.display = 'none';
+        renderWishPage();
+    } else {
+        bb.style.color = 'var(--primary)';
+        bb.style.borderBottom = '2px solid var(--primary)';
+        wb.style.color = '#999';
+        wb.style.borderBottom = '2px solid transparent';
+        bc.style.display = 'block';
+        wc.style.display = 'none';
+        renderBoardPage();
+    }
+}
+
+// ===== 许愿 =====
+async function renderWishPage() {
+    var wishes = await dbGetAll('wishes');
+    var h = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;">' +
+        '<div style="width:100%;max-width:400px;margin-bottom:20px;display:flex;gap:8px;">' +
+        '<input type="text" id="wishInput" placeholder="写下你的愿望..." style="flex:1;padding:12px;border-radius:12px;border:1.5px solid #e8e0d8;font-size:14px;">' +
+        '<button onclick="addWish()" style="padding:12px 20px;border-radius:12px;background:#f5f0eb;border:none;font-size:14px;">📝</button>' +
+        '</div>' +
+        '<div id="wishList" style="width:100%;max-width:400px;">';
+    if (wishes.length === 0) {
+        h += '<p style="color:#ccc;text-align:center;padding:40px;">✨ 还没有愿望，写一个吧</p>';
+    } else {
+        wishes.forEach(function(w) {
+            h += '<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;">' +
+                '<span onclick="toggleWish(' + w.id + ')" style="cursor:pointer;font-size:18px;">' + (w.done ? '✅' : '○') + '</span>' +
+                '<div style="flex:1;">' +
+                '<div style="font-size:15px;text-decoration:' + (w.done ? 'line-through' : 'none') + ';">' + w.content + '</div>' +
+                '<div style="font-size:10px;color:#ccc;">' + w.time + '</div>' +
+                '</div>' +
+                '<span onclick="deleteWish(' + w.id + ')" style="cursor:pointer;color:#d4a8b8;">✕</span>' +
+                '</div>';
+        });
+    }
+    h += '</div></div>';
+    document.getElementById('wishTabContent').innerHTML = h;
+}
+
+async function addWish() {
+    var input = document.getElementById('wishInput');
+    var c = input.value.trim();
+    if (!c) return;
+    await dbPut('wishes', {
+        content: c,
+        done: false,
+        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+        timestamp: Date.now()
+    });
+    input.value = '';
+    renderWishPage();
+}
+
+async function toggleWish(id) {
+    var wishes = await dbGetAll('wishes');
+    var w = wishes.find(function(x) { return x.id === id; });
+    if (w) {
+        w.done = !w.done;
+        await dbPut('wishes', w);
+        renderWishPage();
+    }
+}
+
+async function deleteWish(id) {
+    await dbDelete('wishes', id);
+    renderWishPage();
+}
+
+// ===== 秦彻每日主动留言 =====
+async function checkQinDailyMessage() {
+    var all = await idbGetAll('calendarSettings');
+    var item = all.find(function(x) { return x.key === 'mailboxGroups'; });
+    var rawValue = item ? item.value : null;
+    
+    var groups = null;
+    try {
+        groups = JSON.parse(rawValue);
+    } catch(e) {
+        groups = rawValue ? [rawValue] : [];
+    }
+    
+    if (!groups || !Array.isArray(groups) || groups.length === 0) {
+        console.log('⚠️ 留言板分组未设置');
+        return;
+    }
+    
+    var today = new Date().toLocaleDateString('zh-CN');
+    var lastDate = localStorage.getItem('lastQinMessageDate');
+    
+    if (lastDate === today) {
+        console.log('✅ 今天秦彻已经留言了');
+        return;
+    }
+    
+    var allCards = await idbGetAll('wordcards');
+    
+    var cards = allCards.filter(function(c) {
+        return groups.some(function(g) {
+            return c.groupName === g || c.groupId === g;
+        }) &&
+        c.content &&
+        c.content !== '__GROUP_PLACEHOLDER__' &&
+        c.content.length > 1;
+    });
+    
+    if (cards.length === 0) {
+        console.log('⚠️ 所选分组中没有字卡');
+        return;
+    }
+    
+    var content = cards[Math.floor(Math.random() * cards.length)].content;
+    
+    await dbPut('boardMessages', {
+        sender: 'qin',
+        content: content,
+        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+        replied: false,
+        isDaily: true,
+        timestamp: Date.now()
+    });
+    
+    localStorage.setItem('lastQinMessageDate', today);
+    console.log('✅ 秦彻主动留言已发送');
+}
+// ===== 留言板 =====
 async function renderBoardPage() {
-    const msgs = await dbGetAll('boardMessages');
-    let h = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;">' +
+    // 检查秦彻每日留言
+    await checkQinDailyMessage();
+    
+    var msgs = await dbGetAll('boardMessages');
+    var h = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;">' +
         '<div style="width:100%;max-width:400px;margin-bottom:16px;">' +
         '<div style="font-size:12px;color:#aaa;text-align:center;margin-bottom:12px;">💬 秦彻会随机在 6~24 小时内回复你</div>' +
         '<div style="display:flex;gap:8px;">' +
@@ -1047,10 +1188,10 @@ async function renderBoardPage() {
         h += '<p style="color:#ccc;text-align:center;padding:40px;font-size:14px;">💬 还没有留言，写一条吧～</p>';
     } else {
         msgs.slice().reverse().forEach(function(m) {
-            const isUser = m.sender === 'user';
-            const isQin = m.sender === 'qin';
-            const name = isUser ? S.myName : S.contactName;
-            const avatar = isUser ? getAvatar('me') : getAvatar('contact');
+            var isUser = m.sender === 'user';
+            var isQin = m.sender === 'qin';
+            var name = isUser ? S.myName : S.contactName;
+            var avatar = isUser ? getAvatar('me') : getAvatar('contact');
             h += '<div style="background:#fff;border-radius:4px 16px 16px 16px;padding:16px 18px;border:1px solid #f0e8e0;box-shadow:0 2px 6px rgba(0,0,0,0.02);position:relative;">' +
                 '<div style="position:absolute;top:-6px;left:12px;font-size:14px;color:#ccc;">📌</div>' +
                 '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding-top:4px;">' +
@@ -1065,9 +1206,7 @@ async function renderBoardPage() {
             }
             h += '<div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:2px;">';
             
-            // ===== 状态标签 + 回复按钮 =====
             if (isUser) {
-                // 用户留言
                 if (!m.replied) {
                     h += '<span style="font-size:10px;color:#aaa;">等待秦彻回复...</span>';
                     h += '<button onclick="replyBoardMsg(' + m.id + ')" style="padding:4px 14px;border-radius:14px;border:1px solid #d4a8b8;background:transparent;color:#d4a8b8;font-size:11px;cursor:pointer;">回复</button>';
@@ -1075,10 +1214,12 @@ async function renderBoardPage() {
                     h += '<span style="font-size:10px;color:#ccc;">已回复</span>';
                 }
             } else if (isQin) {
-                // 秦彻主动发的纸条
-                h += '<span style="font-size:10px;color:#d4a8b8;">💌 秦彻的纸条</span>';
-                // 可以回复秦彻
-                h += '<button onclick="replyToQin(' + m.id + ')" style="padding:4px 14px;border-radius:14px;border:1px solid #d4a8b8;background:transparent;color:#d4a8b8;font-size:11px;cursor:pointer;">💬 回复</button>';
+                if (m.replied) {
+                    h += '<span style="font-size:10px;color:#ccc;">已结束</span>';
+                } else {
+                    h += '<span style="font-size:10px;color:#d4a8b8;">💌 秦彻的留言</span>';
+                    h += '<button onclick="replyToQin(' + m.id + ')" style="padding:4px 14px;border-radius:14px;border:1px solid #d4a8b8;background:transparent;color:#d4a8b8;font-size:11px;cursor:pointer;">💬 回复</button>';
+                }
             }
             
             h += '</div></div>';
@@ -1087,16 +1228,59 @@ async function renderBoardPage() {
     h += '</div></div>';
     document.getElementById('boardTabContent').innerHTML = h;
 }
+
+async function addBoardMessage() {
+    var input = document.getElementById('boardInput');
+    var c = input.value.trim();
+    if (!c) return;
+    await dbPut('boardMessages', {
+        sender: 'user',
+        content: c,
+        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+        replied: false,
+        timestamp: Date.now()
+    });
+    input.value = '';
+    renderBoardPage();
+}
+
+async function deleteBoardMsg(id) {
+    await dbDelete('boardMessages', id);
+    renderBoardPage();
+}
+
+async function replyBoardMsg(id) {
+    var msgs = await dbGetAll('boardMessages');
+    var msg = msgs.find(function(m) { return m.id === id; });
+    if (!msg) return;
+    var reply = prompt('输入回复：');
+    if (!reply || !reply.trim()) return;
+    msg.replied = true;
+    await dbPut('boardMessages', msg);
+    await dbPut('boardMessages', {
+        sender: 'qin',
+        content: reply.trim(),
+        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+        replied: true,
+        timestamp: Date.now()
+    });
+    renderBoardPage();
+}
+
 async function replyToQin(msgId) {
     var reply = prompt('回复秦彻：');
     if (!reply || !reply.trim()) return;
     
     var msgs = await dbGetAll('boardMessages');
-    var target = msgs.find(m => m.id === msgId);
+    var target = msgs.find(function(m) { return m.id === msgId; });
     if (!target) {
         showToast('⚠️ 消息不存在');
         return;
     }
+    
+    // 标记秦彻的留言为已回复
+    target.replied = true;
+    await dbPut('boardMessages', target);
     
     var newMsg = {
         sender: 'user',
@@ -1110,10 +1294,6 @@ async function replyToQin(msgId) {
     showToast('✅ 已回复秦彻');
     renderBoardPage();
 }
-async function addBoardMessage(){const input=document.getElementById('boardInput');const c=input.value.trim();if(!c)return;await dbPut('boardMessages',{sender:'user',content:c,time:new Date().toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}),replied:false,timestamp:Date.now()});input.value='';renderBoardPage();}
-async function deleteBoardMsg(id){await dbDelete('boardMessages',id);renderBoardPage();}
-async function replyBoardMsg(id){const msgs=await dbGetAll('boardMessages');const msg=msgs.find(m=>m.id===id);if(!msg)return;const reply=prompt('输入回复：');if(!reply||!reply.trim())return;msg.replied=true;await dbPut('boardMessages',msg);await dbPut('boardMessages',{sender:'qin',content:reply.trim(),time:new Date().toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}),replied:true,timestamp:Date.now()});renderBoardPage();}
-
 // ============ 纪念日 ============
 function openAnniversaryPage(){showPage('anniversaryPage');renderAnniversaryPage();}
 async function renderAnniversaryPage() {
@@ -1655,9 +1835,10 @@ async function tarotClearHistory() {
     renderTarotPage();
     showToast('✅ 已清空历史记录');
 }
-// ============ 他的房间 ============
+// ============ 他的房间（PNG 版） ============
 
 let hisRoomState = 'idle';
+const IMG_BASE = 'https://cdn.jsdelivr.net/gh/Zoe-max-ai/time-treehole/';
 
 function openHisRoom() {
     var overlay = document.getElementById('hisRoomOverlay');
@@ -1674,6 +1855,39 @@ function closeHisRoom() {
         overlay.style.display = 'none';
     }
     hisRoomState = 'idle';
+    // 停止翅膀扇动
+    stopWingFlap();
+}
+
+var wingTimer = null;
+var wingOpen = true;
+
+function enterHisRoom() {
+    closeHisRoom();
+    openChatPage();
+}
+
+function startWingFlap() {
+    var crow = document.getElementById('hisRoomCrow');
+    if (!crow) return;
+    wingOpen = true;
+    if (wingTimer) clearInterval(wingTimer);
+    wingTimer = setInterval(function() {
+        wingOpen = !wingOpen;
+        crow.src = wingOpen ? 'https://cdn.jsdelivr.net/gh/Zoe-max-ai/time-treehole/乌鸦_张开翅膀.png' : 'https://cdn.jsdelivr.net/gh/Zoe-max-ai/time-treehole/乌鸦_收拢翅膀.png';
+    }, 150);
+}
+
+function stopWingFlap() {
+    if (wingTimer) {
+        clearInterval(wingTimer);
+        wingTimer = null;
+    }
+    // 停在张开状态
+    var crow = document.getElementById('hisRoomCrow');
+    if (crow) {
+        crow.src = IMG_BASE + '乌鸦_张开翅膀.png';
+    }
 }
 
 function renderHisRoomScene() {
@@ -1683,11 +1897,7 @@ function renderHisRoomScene() {
     if (hisRoomState === 'idle') {
         container.innerHTML = `
             <div style="text-align:center;padding:10px 0;">
-                <div class="door-frame">
-                    <div class="door door-closed">
-                        <div class="door-handle"></div>
-                    </div>
-                </div>
+                <img src="${IMG_BASE}门_关着.png" style="width:220px;height:auto;display:block;margin:0 auto;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
                 <div style="font-size:14px;color:#b0a090;margin-top:12px;">门关着，里面很安静…</div>
             </div>
         `;
@@ -1714,88 +1924,63 @@ async function knockHisRoom() {
     var container = document.getElementById('hisRoomContent');
     if (container) {
         container.innerHTML = `
-    <div style="text-align:center;padding:5px 0;">
-        <div class="door-frame" style="display:inline-block;">
-            <div class="door door-open" style="transform:perspective(600px) rotateY(-35deg);">
-                <div class="door-handle"></div>
+            <div style="text-align:center;padding:5px 0;position:relative;">
+                <!-- 门打开 -->
+                <img src="${IMG_BASE}门_开着.png" style="width:220px;height:auto;display:block;margin:0 auto;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+                
+                <!-- 乌鸦（初始隐藏，从门位置飞出） -->
+                <img id="hisRoomCrow" src="${IMG_BASE}乌鸦_张开翅膀.png" style="position:absolute;top:160px;left:50%;transform:translateX(-50%);width:100px;height:auto;opacity:0;transition:opacity 0.3s ease, transform 0.8s ease-out;pointer-events:none;">                
+                <!-- 纸条（初始隐藏） -->
+                <div id="hisRoomPaperContainer" style="position:absolute;top:220px;left:50%;transform:translateX(-50%);opacity:0;transition:opacity 0.6s ease;pointer-events:none;width:160px;">
+                    <img src="${IMG_BASE}纸条.png" style="width:100%;height:auto;display:block;">
+                    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:75%;text-align:center;font-family:cursive;font-size:14px;color:#4a3a2a;line-height:1.4;padding:4px;">
+                        ${card}
+                    </div>
+                </div>
             </div>
-        </div>
-        <div style="margin-top:-10px;">
-            <svg class="crow-svg crow-fly" viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">
-    <ellipse cx="60" cy="55" rx="32" ry="24" fill="#1a1a1a"/>
-<ellipse cx="33" cy="50" rx="12" ry="14" fill="#1a1a1a"/>
-<polygon points="28,48 3,22 8,40 22,56" fill="#1a1a1a"/>
-<polygon points="100,40 112,38 100,44" fill="#f5a623"/>
-<ellipse class="wing-left" cx="45" cy="40" rx="28" ry="14" fill="#2a2a2a" transform="rotate(-15, 45, 40)"/>
-<ellipse class="wing-right" cx="75" cy="38" rx="25" ry="12" fill="#222" transform="rotate(10, 75, 38)"/>
-<circle cx="85" cy="40" r="16" fill="#1a1a1a"/>
-<line x1="55" y1="75" x2="50" y2="85" stroke="#333" stroke-width="2"/>
-<line x1="65" y1="75" x2="70" y2="85" stroke="#333" stroke-width="2"/>
-<rect x="42" y="85" width="36" height="10" rx="2" fill="#f5efe0" stroke="#e8dcc8" stroke-width="0.5"/>
-<!-- 眼睛放在最后，永远在最上面 -->
-<circle cx="91" cy="37" r="4" fill="white"/>
-<circle cx="92" cy="36" r="2" fill="#1a1a1a"/>
-</svg>
-        </div>
-        <div id="hisRoomPaperContainer" style="margin-top:4px;opacity:0;transition:opacity 0.6s ease;">
-            <div class="paper paper-rough">
-                ${card}
-            </div>
-        </div>
-    </div>
-`;
+        `;
 
-// 触发乌鸦飞行动画
-setTimeout(function() {
-    var crow = document.getElementById('crowSvg');
-    if (crow) {
-        crow.style.opacity = '1';
-        crow.style.transform = 'translateY(0px) scale(1)';
-    }
-}, 100);
+        // 延迟显示乌鸦
+        setTimeout(function() {
+            var crow = document.getElementById('hisRoomCrow');
+            if (crow) {
+                crow.style.opacity = '1';
+                crow.style.transform = 'translateX(-50%) translateY(0px)';
+                // 开始翅膀扇动
+                startWingFlap();
+            }
+        }, 400);
 
-// 等待 1.2 秒后显示纸条
-setTimeout(function() {
-    var paperContainer = document.getElementById('hisRoomPaperContainer');
-    if (paperContainer) {
-        paperContainer.style.opacity = '1';
-    }
-}, 1200);
-
+        // 延迟显示纸条
         setTimeout(function() {
             var paperContainer = document.getElementById('hisRoomPaperContainer');
             if (paperContainer) {
                 paperContainer.style.opacity = '1';
             }
-        }, 1200);
+            // 停止翅膀扇动（停在张开）
+            setTimeout(function() {
+                stopWingFlap();
+            }, 400);
+        }, 1400);
     }
 
+    // 显示按钮
     setTimeout(function() {
         var actions = document.getElementById('hisRoomActions');
         if (actions) {
             actions.innerHTML = `
-                <button onclick="saveHisRoomPaper('${card.replace(/'/g, "\\'")}')" style="flex:1;padding:10px;border-radius:14px;background:#d4a8b8;color:#fff;border:none;font-size:15px;cursor:pointer;">📎 收藏纸条</button>
-                <button onclick="closeHisRoom()" style="flex:1;padding:10px;border-radius:14px;background:#f0ece8;color:#7a6a5a;border:none;font-size:15px;cursor:pointer;">🗑 不要了</button>
+                <button onclick="enterHisRoom()" style="flex:1;padding:10px;border-radius:14px;background:#d4a8b8;color:#fff;border:none;font-size:15px;cursor:pointer;">🚪 进入房间</button>
+                <button onclick="closeHisRoom()" style="flex:1;padding:10px;border-radius:14px;background:#f0ece8;color:#7a6a5a;border:none;font-size:15px;cursor:pointer;">🍃 安静离开</button>
             `;
         }
         hisRoomState = 'paperShown';
-    }, 1600);
+    }, 1800);
 }
 
-async function saveHisRoomPaper(content) {
-    var msg = {
-        sender: 'qin',
-        content: content,
-        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
-        timestamp: Date.now()
-        // 不加 replied 字段，或设为 false
-    };
-    await dbPut('boardMessages', msg);
-    showToast('✅ 已收藏到留言板');
+function enterHisRoom() {
     closeHisRoom();
-    if (document.getElementById('boardTabContent') && document.getElementById('boardTabContent').style.display !== 'none') {
-        renderBoardPage();
-    }
+    // 跳转到聊天页面
+    openChatPage();
 }
 
 async function saveHisRoomGroup() {
@@ -2236,6 +2421,7 @@ window.deleteWish = deleteWish;
 window.addBoardMessage = addBoardMessage;
 window.deleteBoardMsg = deleteBoardMsg;
 window.replyBoardMsg = replyBoardMsg;
+window.replyToQin = replyToQin;
 window.addAnniversary = addAnniversary;
 window.deleteAnniversary = deleteAnniversary;
 window.changeMonth = changeMonth;
@@ -2283,15 +2469,14 @@ window.tarotEnd = tarotEnd;
 window.renderTarotPage = renderTarotPage;
 window.openTarotPage = openTarotPage;
 window.getRandomFromGroup = getRandomFromGroup;
+window.refreshTarotHistory = refreshTarotHistory;
+window.tarotClearHistory = tarotClearHistory;
 window.openHisRoom = openHisRoom;
 window.closeHisRoom = closeHisRoom;
 window.knockHisRoom = knockHisRoom;
-window.saveHisRoomPaper = saveHisRoomPaper;
 window.renderHisRoomScene = renderHisRoomScene;
+window.enterHisRoom = enterHisRoom;
 window.saveHisRoomGroup = saveHisRoomGroup;
-window.replyToQin = replyToQin;
-window.refreshTarotHistory = refreshTarotHistory;
-window.tarotClearHistory = tarotClearHistory;
 
 init();
 })();
