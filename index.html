@@ -346,7 +346,7 @@
 <div class="profile-overlay" id="profileOverlay" onclick="if(event.target===this)closeProfile()"><div class="profile-card"><img id="pfAvatar" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 10px;border:3px solid #f0f0f0;"><div id="pfName" style="font-size:18px;font-weight:700;"></div><div style="display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:16px;font-size:13px;margin:6px 0 14px;background:#f0f9f0;color:#4a8a4a;"><span style="width:6px;height:6px;border-radius:50%;background:#4cd964;"></span><span id="pfStatus"></span></div><div style="background:#fdf8ff;border-radius:14px;padding:14px;margin-bottom:16px;"><div style="font-size:11px;color:#b0a0c0;">💭 秦彻想说</div><div id="pfMood" style="font-size:14px;color:#5a4a6a;"></div></div><button onclick="triggerPat(S.contactName)" style="padding:8px 20px;border-radius:20px;background:var(--primary);color:#fff;border:none;cursor:pointer;">👋 拍一拍</button><button onclick="closeProfile()" style="display:block;width:100%;padding:10px;border-radius:16px;background:#f0f0f0;color:#666;border:none;cursor:pointer;margin-top:8px;">关闭</button></div></div>
 <!-- 他的房间 - 弹窗 -->
 <div id="hisRoomOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-   <div id="hisRoomModal" style="background:#f5efe8;border-radius:24px;padding:24px;width:90%;max-width:360px;max-height:80vh;overflow-y:auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.3);min-height:380px;">
+    <div id="hisRoomModal" style="background:#f5efe8;border-radius:24px;padding:24px;width:90%;max-width:360px;max-height:80vh;overflow-y:auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
         <button onclick="closeHisRoom()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#b0a090;">✕</button>
         <div style="text-align:center;font-size:18px;font-weight:600;color:#5a4a3a;margin-bottom:16px;letter-spacing:2px;">🚪 他的房间</div>
         <div id="hisRoomScene" style="position:relative;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
@@ -545,10 +545,52 @@ async function openChatPage(){showPage('chatPage');document.getElementById('chat
 async function loadMessages(){const msgs=await dbGetAll('messages');msgs.sort((a,b)=>a.timestamp-b.timestamp);const ca=document.getElementById('chatArea');ca.innerHTML='';if(msgs.length===0){ca.innerHTML='<div style="text-align:center;color:#ccc;padding:40px;">💬 开始你们的对话吧</div>';return;}msgs.forEach(m=>renderMsg(m));scrollBottom();setTimeout(()=>applyBubbleStyle(),100);}
 function renderMsg(m){const ca=document.getElementById('chatArea');if(m.type==='system'){const s=document.createElement('div');s.className='system-msg';s.textContent=m.content;ca.appendChild(s);return;}const w=document.createElement('div');w.className='message-wrapper '+(m.sender==='me'?'right':'left');const av=document.createElement('img');av.className='message-avatar';av.src=m.sender==='me'?getAvatar('me'):getAvatar('contact');if(m.sender==='other')av.onclick=function(){openProfile();};const b=document.createElement('div');b.className='bubble';const preset=BUBBLE_PRESETS.find(p=>p.id===S.bubbleStyle)||BUBBLE_PRESETS[0];if(m.sender==='me'){b.style.background=preset.myBg;b.style.color=preset.myText;}else{b.style.background=preset.otherBg;b.style.color=preset.otherText;}if(m.type==='pat'){b.classList.add('pat-bubble');b.innerHTML='<span>👋 <b>'+(m.sender==='me'?S.myName:S.contactName)+'</b> '+m.content+'</span>';}else if(m.type==='emoji'||m.type==='image'){const img=document.createElement('img');img.src=m.content;img.style.maxWidth='150px';img.style.maxHeight='150px';img.style.objectFit='contain';img.style.borderRadius='6px';b.appendChild(img);}else{b.textContent=m.content;}const t=document.createElement('div');t.className='message-time';t.textContent=fmtTime(m.timestamp);w.appendChild(av);w.appendChild(b);w.appendChild(t);ca.appendChild(w);scrollBottom();}
 async function sendMessage(){const input=document.getElementById('messageInput');const c=input.value.trim();if(!c)return;const msg={sender:'me',content:c,type:'text',timestamp:Date.now()};const id=await dbPut('messages',msg);msg.id=id;renderMsg(msg);scrollBottom();input.value='';autoReply();}
-async function autoReply(){const cs=S.chatSettings;if(cs.readReceipt!=='none'){setTimeout(()=>{if(cs.readReceipt==='graphic'){var myMsgs=document.querySelectorAll('.message-wrapper.right .bubble');if(myMsgs.length>0){var lastBubble=myMsgs[myMsgs.length-1];if(!lastBubble.querySelector('.read-check')){var ck=document.createElement('span');ck.className='read-check';ck.textContent='✓';lastBubble.appendChild(ck);}}}else{addSysMsg('📖 秦彻已读');}},800+Math.random()*1200);}if(cs.readNotReply&&Math.random()<0.4){addSysMsg('💤 秦彻已读但未回复');return;}const min=parseInt(S.minReplyTime)||1,max=parseInt(S.maxReplyTime)||5,cnt=parseInt(S.replyCount)||1;const delay=Math.floor(Math.random()*(max*60000-min*1000+1))+min*1000;if(cs.typing){setTimeout(()=>{const ti=document.createElement('div');ti.className='typing-indicator';ti.textContent='秦彻正在输入...';document.getElementById('chatArea').appendChild(ti);scrollBottom();},delay-2000);}setTimeout(async()=>{const ti=document.querySelector('.typing-indicator');if(ti)ti.remove();for(let i=0;i<cnt;i++){let c=Math.random()<0.5?await smartComposeReply():await getRandomReply();const m={sender:'other',content:c,type:'text',timestamp:Date.now()};const id=await dbPut('messages',m);m.id=id;renderMsg(m);scrollBottom();if(i<cnt-1)await new Promise(r=>setTimeout(r,800+Math.random()*3000));}},delay);}
-async function getRandomReply(){const sg=JSON.parse(await getCal('chatGroups','[]'));const cards=await dbGetAll('wordcards');const dc=await dbGetAll('disabledCards');const dids=new Set(dc.map(d=>String(d.cardId)));const valid=cards.filter(c=>{if(!c||!c.content||c.content==='__GROUP_PLACEHOLDER__'||c.content.length<=1)return false;if(dids.has(String(c.id)))return false;if(sg.length>0)return sg.includes(c.groupName)||sg.includes(c.groupId);return true;});if(valid.length===0)return'😅 字卡库还是空的，先给我加点字卡吧～';return valid[Math.floor(Math.random()*valid.length)].content;}
+async function autoReply(){const cs=S.chatSettings;if(cs.readReceipt!=='none'){setTimeout(()=>{if(cs.readReceipt==='graphic'){var myMsgs=document.querySelectorAll('.message-wrapper.right .bubble');if(myMsgs.length>0){var lastBubble=myMsgs[myMsgs.length-1];if(!lastBubble.querySelector('.read-check')){var ck=document.createElement('span');ck.className='read-check';ck.textContent='✓';lastBubble.appendChild(ck);}}}else{addSysMsg('📖 秦彻已读');}},800+Math.random()*1200);}if(cs.readNotReply&&Math.random()<0.4){addSysMsg('💤 秦彻已读但未回复');return;}const min=parseInt(S.minReplyTime)||1,max=parseInt(S.maxReplyTime)||5,cnt=parseInt(S.replyCount)||1;const delay=Math.floor(Math.random()*(max*60000-min*1000+1))+min*1000;if(cs.typing){setTimeout(()=>{const ti=document.createElement('div');ti.className='typing-indicator';ti.textContent='秦彻正在输入...';document.getElementById('chatArea').appendChild(ti);scrollBottom();},delay-2000);}setTimeout(async()=>{const ti=document.querySelector('.typing-indicator');if(ti)ti.remove();for(let i=0;i<cnt;i++){let c=Math.random()<0.5?await smartComposeReply():await getRandomReply();const m={sender:'other',content:c,type:'text',timestamp:Date.now()};const id=await dbPut('messages',m);m.id=id;renderMsg(m);scrollBottom();// 发表情
+if (cs.emojiMix && Math.random() < 0.15) {
+    var emojiList = await dbGetAll('emojis');
+    if (emojiList && emojiList.length > 0) {
+        var emoji = emojiList[Math.floor(Math.random() * emojiList.length)];
+        if (emoji && emoji.data) {
+            var emojiMsg = { sender: 'other', content: emoji.data, type: 'emoji', timestamp: Date.now() };
+            var emojiId = await dbPut('messages', emojiMsg);
+            emojiMsg.id = emojiId;
+            renderMsg(emojiMsg);
+            scrollBottom();
+        }
+    }
+}
+if(i<cnt-1)await new Promise(r=>setTimeout(r,800+Math.random()*3000));}},delay);}
+async function getRandomReply(){
+    const sg = JSON.parse(await getCal('chatGroups','[]'));
+    const cards = await dbGetAll('wordcards');
+    const dc = await dbGetAll('disabledCards');
+    const dids = new Set(dc.map(d => String(d.cardId)));
+    const valid = cards.filter(c => {
+        if(!c || !c.content || c.content === '__GROUP_PLACEHOLDER__' || c.content.length <= 1) return false;
+        if(dids.has(String(c.id))) return false;
+        if(sg.length > 0) return sg.includes(c.groupName) || sg.includes(c.groupId);
+        return false; // ← 改这里：没勾选任何分组时，不回复
+    });
+    if(valid.length === 0) return '😅 请先在模块设置里勾选聊天分组～';
+    return valid[Math.floor(Math.random() * valid.length)].content;
+}
 async function addSysMsg(c){const m={type:'system',content:c,timestamp:Date.now()};await dbPut('messages',m);renderMsg(m);}
-async function smartComposeReply(){const sg=JSON.parse(await getCal('chatGroups','[]'));const ac=await dbGetAll('wordcards');const dc=await dbGetAll('disabledCards');const dids=new Set(dc.map(d=>String(d.cardId)));const vc=ac.filter(c=>{if(!c||!c.content||c.content==='__GROUP_PLACEHOLDER__'||c.content.length<=1)return false;if(dids.has(String(c.id)))return false;if(sg.length>0)return sg.includes(c.groupName)||sg.includes(c.groupId);return true;});if(vc.length===0)return'😅 字卡库还是空的';const count=Math.min(Math.floor(Math.random()*4)+1,vc.length);const shuffled=vc.sort(()=>Math.random()-0.5);return shuffled.slice(0,count).map(c=>c.content).join(' ');}
+async function smartComposeReply(){
+    const sg = JSON.parse(await getCal('chatGroups','[]'));
+    const ac = await dbGetAll('wordcards');
+    const dc = await dbGetAll('disabledCards');
+    const dids = new Set(dc.map(d => String(d.cardId)));
+    const vc = ac.filter(c => {
+        if(!c || !c.content || c.content === '__GROUP_PLACEHOLDER__' || c.content.length <= 1) return false;
+        if(dids.has(String(c.id))) return false;
+        if(sg.length > 0) return sg.includes(c.groupName) || sg.includes(c.groupId);
+        return false; // ← 改这里
+    });
+    if(vc.length === 0) return '😅 请先在模块设置里勾选聊天分组～';
+    const count = Math.min(Math.floor(Math.random() * 4) + 1, vc.length);
+    const shuffled = vc.sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count).map(c => c.content).join(' ');
+}
 async function handleImageMessage(event){const f=event.target.files[0];if(!f)return;const d=await fileToDataUrl(f);const msg={sender:'me',content:d,type:'image',timestamp:Date.now()};const id=await dbPut('messages',msg);msg.id=id;renderMsg(msg);autoReply();event.target.value='';}
 
 // ============ 表情面板 ============
@@ -1839,6 +1881,7 @@ async function tarotClearHistory() {
 
 let hisRoomState = 'idle';
 const IMG_BASE = 'https://cdn.jsdelivr.net/gh/Zoe-max-ai/time-treehole/';
+const IMG_VERSION = '?v=2';
 
 function openHisRoom() {
     var overlay = document.getElementById('hisRoomOverlay');
@@ -1874,7 +1917,7 @@ function startWingFlap() {
     if (wingTimer) clearInterval(wingTimer);
     wingTimer = setInterval(function() {
         wingOpen = !wingOpen;
-        crow.src = wingOpen ? 'https://cdn.jsdelivr.net/gh/Zoe-max-ai/time-treehole/乌鸦_张开翅膀.png' : 'https://cdn.jsdelivr.net/gh/Zoe-max-ai/time-treehole/乌鸦_收拢翅膀.png';
+        crow.src = wingOpen ? IMG_BASE + '乌鸦_张开翅膀.png' + IMG_VERSION : IMG_BASE + '乌鸦_收拢翅膀.png' + IMG_VERSION;
     }, 150);
 }
 
@@ -1886,7 +1929,7 @@ function stopWingFlap() {
     // 停在张开状态
     var crow = document.getElementById('hisRoomCrow');
     if (crow) {
-        crow.src = IMG_BASE + '乌鸦_张开翅膀.png';
+        crow.src = IMG_BASE + '乌鸦_张开翅膀.png'+ IMG_VERSION;
     }
 }
 
@@ -1897,7 +1940,7 @@ function renderHisRoomScene() {
     if (hisRoomState === 'idle') {
         container.innerHTML = `
             <div style="text-align:center;padding:10px 0;">
-                <img src="${IMG_BASE}门_关着.png" style="width:220px;height:auto;display:block;margin:0 auto;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+                <img src="${IMG_BASE}门_关着.png${IMG_VERSION} style="width:220px;height:auto;display:block;margin:0 auto;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
                 <div style="font-size:14px;color:#b0a090;margin-top:12px;">门关着，里面很安静…</div>
             </div>
         `;
@@ -1926,13 +1969,13 @@ async function knockHisRoom() {
         container.innerHTML = `
             <div style="text-align:center;padding:5px 0;position:relative;">
                 <!-- 门打开 -->
-                <img src="${IMG_BASE}门_开着.png" style="width:220px;height:auto;display:block;margin:0 auto;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+                <img src="${IMG_BASE}门_开着.png${IMG_VERSION}" style="width:220px;height:auto;display:block;margin:0 auto;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
                 
                 <!-- 乌鸦（初始隐藏，从门位置飞出） -->
-                <img id="hisRoomCrow" src="${IMG_BASE}乌鸦_张开翅膀.png" style="position:absolute;top:160px;left:50%;transform:translateX(-50%);width:100px;height:auto;opacity:0;transition:opacity 0.3s ease, transform 0.8s ease-out;pointer-events:none;">                
+                <img id="hisRoomCrow" src="${IMG_BASE}乌鸦_张开翅膀.png${IMG_VERSION}" style="position:absolute;top:160px;left:50%;transform:translateX(-50%);width:100px;height:auto;opacity:0;transition:opacity 0.3s ease, transform 0.8s ease-out;pointer-events:none;">                
                 <!-- 纸条（初始隐藏） -->
                 <div id="hisRoomPaperContainer" style="position:absolute;top:220px;left:50%;transform:translateX(-50%);opacity:0;transition:opacity 0.6s ease;pointer-events:none;width:160px;">
-                    <img src="${IMG_BASE}纸条.png" style="width:100%;height:auto;display:block;">
+                    <img src="${IMG_BASE}纸条.png${IMG_VERSION}" style="width:100%;height:auto;display:block;">
                     <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:75%;text-align:center;font-family:cursive;font-size:14px;color:#4a3a2a;line-height:1.4;padding:4px;">
                         ${card}
                     </div>
@@ -1990,11 +2033,18 @@ async function saveHisRoomGroup() {
     showToast('✅ 他的房间分组已保存：' + (value || '未选择'));
 }
 // ============ 模块设置 ============
-function openModuleSettings(){showPage('moduleSettingsPage');renderModuleSettings();}
+async function openModuleSettings() {
+    showPage('moduleSettingsPage');
+    await new Promise(r => requestAnimationFrame(r));
+    await new Promise(r => setTimeout(r, 100));
+    await renderModuleSettings();
+}
+
 async function renderModuleSettings() {
     const groups = await getAllGroups();
     const go = groups.map(g => g.name);
     const cg = JSON.parse(await getCal('chatGroups', '[]'));
+console.log('🔍 renderModuleSettings 读取 chatGroups:', cg);
     const mg = JSON.parse(await getCal('mailboxGroups', '[]'));
     const tg = await getCal('tarotGroup', '');
     const hg = await getCal('hisRoomGroup', '');
@@ -2026,7 +2076,21 @@ async function renderModuleSettings() {
     h += '</div></div>';
     document.getElementById('moduleSettingsContent').innerHTML = h;
 }
-async function saveChatGroups(){const cbs=document.querySelectorAll('.chat-group-checkbox:checked');const s=Array.from(cbs).map(cb=>cb.value);await setCal('chatGroups',JSON.stringify(s));showToast('✅ 已保存');}
+async function saveChatGroups() {
+console.log('🚀 saveChatGroups 被调用了');
+    var cbs = document.querySelectorAll('.chat-group-checkbox:checked');
+    console.log('📋 找到复选框:', cbs.length, '个');
+    var cbs = document.querySelectorAll('.chat-group-checkbox:checked');
+    var s = Array.from(cbs).map(cb => cb.value);
+    var json = JSON.stringify(s);
+    console.log('💾 保存 chatGroups:', json);
+    await setCal('chatGroups', json);
+    // 立即验证
+    var verify = await getCal('chatGroups', '[]');
+    console.log('🔍 验证写入后 chatGroups:', verify);
+    localStorage.setItem('chatGroups_backup', json);
+    showToast('✅ 聊天分组已保存（已选 ' + s.length + ' 个）');
+}
 async function saveMailboxGroups(){const cbs=document.querySelectorAll('.mailbox-group-checkbox:checked');const s=Array.from(cbs).map(cb=>cb.value);await setCal('mailboxGroups',JSON.stringify(s));showToast('✅ 已保存');}
 async function saveTarotGroup(){const v=document.getElementById('tarotGroupSelect').value;await setCal('tarotGroup',v);showToast('✅ 已保存');}
 
@@ -2187,6 +2251,11 @@ function closeProfile(){document.getElementById('profileOverlay').classList.remo
 await window.openDB();
 async function init() {
     console.log('🚀 时光树洞 2.0 启动中...');
+
+// 在 init 最开头就读取 chatGroups
+    var before = await getCal('chatGroups', '[]');
+    console.log('🔍 init 开始时 chatGroups:', before);
+
     try {
         // 1. 打开数据库
         await window.openDB();
@@ -2195,13 +2264,12 @@ async function init() {
         const all = await window.idbGetAll('calendarSettings');
         const seen = {};
         const toDelete = [];
-        all.forEach(function(x) {
-            if (seen[x.key]) {
-                toDelete.push(x.id);
-            } else {
-                seen[x.key] = x.id;
-            }
-        });
+       all.forEach(function(x) {
+    if (seen[x.key] !== undefined) {
+        toDelete.push(seen[x.key]); // 删掉之前保留的旧数据
+    }
+    seen[x.key] = x.id; // 保留最新的
+});
         for (const id of toDelete) {
             await window.idbDelete('calendarSettings', id);
         }
@@ -2242,6 +2310,36 @@ async function init() {
         S.contactMood = await getCal('contactMood', '');
         S.myName = await getCal('myName', '笑笑');
         S.contactName = await getCal('contactName', '秦彻');
+// 恢复模块设置
+try {
+    var chatGroupsStr = await getCal('chatGroups', '[]');
+    console.log('🔍 恢复 chatGroups:', chatGroupsStr);
+    // 确保格式正确
+    if (typeof chatGroupsStr === 'string') {
+        var test = JSON.parse(chatGroupsStr);
+        if (!Array.isArray(test)) {
+            await setCal('chatGroups', '[]');
+        }
+    }
+    
+    var mailboxGroupsStr = await getCal('mailboxGroups', '[]');
+    if (typeof mailboxGroupsStr === 'string') {
+        var test = JSON.parse(mailboxGroupsStr);
+        if (!Array.isArray(test)) {
+            await setCal('mailboxGroups', '[]');
+        }
+    }
+    
+    var emojiGroupsStr = await getCal('emojiGroups', '["全部"]');
+    if (typeof emojiGroupsStr === 'string') {
+        var test = JSON.parse(emojiGroupsStr);
+        if (!Array.isArray(test) || test.length === 0) {
+            await setCal('emojiGroups', '["全部"]');
+        }
+    }
+} catch(e) {
+    console.warn('恢复模块设置失败:', e);
+}
         
         // 5. 应用首页背景
         const homeEl = document.getElementById('homeInner');
@@ -2361,6 +2459,24 @@ async function init() {
         showToast('⚠️ 初始化失败，请刷新页面重试');
     }
 }
+// 在 init() 最后，加这段
+try {
+    var saved = await getCal('chatGroups', '[]');
+    console.log('🔍 init 读取 chatGroups:', saved);
+    // 如果数据被清空，从备份恢复（如果有）
+    if (!saved || saved.length === 0) {
+        var backup = localStorage.getItem('chatGroups_backup');
+        if (backup) {
+            await setCal('chatGroups', backup);
+            console.log('✅ 从备份恢复 chatGroups:', backup);
+        }
+    }
+} catch(e) {
+    console.warn('恢复 chatGroups 失败:', e);
+}
+
+var finalCheck = await getCal('chatGroups', '[]');
+console.log('🔍 init 结束前 chatGroups:', finalCheck);
 
 // 暴露所有函数到全局作用域
 window.openChatPage = openChatPage;
@@ -2477,6 +2593,11 @@ window.knockHisRoom = knockHisRoom;
 window.renderHisRoomScene = renderHisRoomScene;
 window.enterHisRoom = enterHisRoom;
 window.saveHisRoomGroup = saveHisRoomGroup;
+window.getAllGroups = getAllGroups;
+window.getCal = getCal;
+window.setCal = setCal;
+window.renderHisRoom = renderHisRoomScene;
+window.IMG_BASE = IMG_BASE;
 
 init();
 })();
