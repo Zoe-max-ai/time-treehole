@@ -346,9 +346,9 @@
 <div class="profile-overlay" id="profileOverlay" onclick="if(event.target===this)closeProfile()"><div class="profile-card"><img id="pfAvatar" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 10px;border:3px solid #f0f0f0;"><div id="pfName" style="font-size:18px;font-weight:700;"></div><div style="display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:16px;font-size:13px;margin:6px 0 14px;background:#f0f9f0;color:#4a8a4a;"><span style="width:6px;height:6px;border-radius:50%;background:#4cd964;"></span><span id="pfStatus"></span></div><div style="background:#fdf8ff;border-radius:14px;padding:14px;margin-bottom:16px;"><div style="font-size:11px;color:#b0a0c0;">💭 秦彻想说</div><div id="pfMood" style="font-size:14px;color:#5a4a6a;"></div></div><button onclick="triggerPat(S.contactName)" style="padding:8px 20px;border-radius:20px;background:var(--primary);color:#fff;border:none;cursor:pointer;">👋 拍一拍</button><button onclick="closeProfile()" style="display:block;width:100%;padding:10px;border-radius:16px;background:#f0f0f0;color:#666;border:none;cursor:pointer;margin-top:8px;">关闭</button></div></div>
 <!-- 他的房间 - 弹窗 -->
 <div id="hisRoomOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-    <div id="hisRoomModal" style="background:#f5efe8;border-radius:24px;padding:24px;width:90%;max-width:360px;max-height:80vh;overflow-y:auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div id="hisRoomModal" style="background:#f5efe8;border-radius:24px;padding:32px 24px 24px 24px;width:90%;max-width:360px;max-height:80vh;overflow-y:auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
         <button onclick="closeHisRoom()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#b0a090;">✕</button>
-        <div style="text-align:center;font-size:18px;font-weight:600;color:#5a4a3a;margin-bottom:16px;letter-spacing:2px;">🚪 他的房间</div>
+       <div style="text-align:center;font-size:18px;font-weight:600;color:#5a4a3a;margin-bottom:24px;letter-spacing:2px;font-family:\'STXingkai\',\'华文行楷\',\'KaiTi\',\'STKaiti\',cursive;">' + randomTitle + '</div>
         <div id="hisRoomScene" style="position:relative;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
             <div id="hisRoomContent"></div>
         </div>
@@ -543,23 +543,168 @@ function compressImage(file,maxWidth,maxHeight){return new Promise((resolve,reje
 // ============ 聊天 ============
 async function openChatPage(){showPage('chatPage');document.getElementById('chatTopQuote').textContent=S.topQuote;await loadMessages();loadEmojiPanel();applyBubbleStyle();startAutoSendIfNeeded();}
 async function loadMessages(){const msgs=await dbGetAll('messages');msgs.sort((a,b)=>a.timestamp-b.timestamp);const ca=document.getElementById('chatArea');ca.innerHTML='';if(msgs.length===0){ca.innerHTML='<div style="text-align:center;color:#ccc;padding:40px;">💬 开始你们的对话吧</div>';return;}msgs.forEach(m=>renderMsg(m));scrollBottom();setTimeout(()=>applyBubbleStyle(),100);}
-function renderMsg(m){const ca=document.getElementById('chatArea');if(m.type==='system'){const s=document.createElement('div');s.className='system-msg';s.textContent=m.content;ca.appendChild(s);return;}const w=document.createElement('div');w.className='message-wrapper '+(m.sender==='me'?'right':'left');const av=document.createElement('img');av.className='message-avatar';av.src=m.sender==='me'?getAvatar('me'):getAvatar('contact');if(m.sender==='other')av.onclick=function(){openProfile();};const b=document.createElement('div');b.className='bubble';const preset=BUBBLE_PRESETS.find(p=>p.id===S.bubbleStyle)||BUBBLE_PRESETS[0];if(m.sender==='me'){b.style.background=preset.myBg;b.style.color=preset.myText;}else{b.style.background=preset.otherBg;b.style.color=preset.otherText;}if(m.type==='pat'){b.classList.add('pat-bubble');b.innerHTML='<span>👋 <b>'+(m.sender==='me'?S.myName:S.contactName)+'</b> '+m.content+'</span>';}else if(m.type==='emoji'||m.type==='image'){const img=document.createElement('img');img.src=m.content;img.style.maxWidth='150px';img.style.maxHeight='150px';img.style.objectFit='contain';img.style.borderRadius='6px';b.appendChild(img);}else{b.textContent=m.content;}const t=document.createElement('div');t.className='message-time';t.textContent=fmtTime(m.timestamp);w.appendChild(av);w.appendChild(b);w.appendChild(t);ca.appendChild(w);scrollBottom();}
-async function sendMessage(){const input=document.getElementById('messageInput');const c=input.value.trim();if(!c)return;const msg={sender:'me',content:c,type:'text',timestamp:Date.now()};const id=await dbPut('messages',msg);msg.id=id;renderMsg(msg);scrollBottom();input.value='';autoReply();}
-async function autoReply(){const cs=S.chatSettings;if(cs.readReceipt!=='none'){setTimeout(()=>{if(cs.readReceipt==='graphic'){var myMsgs=document.querySelectorAll('.message-wrapper.right .bubble');if(myMsgs.length>0){var lastBubble=myMsgs[myMsgs.length-1];if(!lastBubble.querySelector('.read-check')){var ck=document.createElement('span');ck.className='read-check';ck.textContent='✓';lastBubble.appendChild(ck);}}}else{addSysMsg('📖 秦彻已读');}},800+Math.random()*1200);}if(cs.readNotReply&&Math.random()<0.4){addSysMsg('💤 秦彻已读但未回复');return;}const min=parseInt(S.minReplyTime)||1,max=parseInt(S.maxReplyTime)||5,cnt=parseInt(S.replyCount)||1;const delay=Math.floor(Math.random()*(max*60000-min*1000+1))+min*1000;if(cs.typing){setTimeout(()=>{const ti=document.createElement('div');ti.className='typing-indicator';ti.textContent='秦彻正在输入...';document.getElementById('chatArea').appendChild(ti);scrollBottom();},delay-2000);}setTimeout(async()=>{const ti=document.querySelector('.typing-indicator');if(ti)ti.remove();for(let i=0;i<cnt;i++){let c=Math.random()<0.5?await smartComposeReply():await getRandomReply();const m={sender:'other',content:c,type:'text',timestamp:Date.now()};const id=await dbPut('messages',m);m.id=id;renderMsg(m);scrollBottom();// 发表情
-if (cs.emojiMix && Math.random() < 0.15) {
-    var emojiList = await dbGetAll('emojis');
-    if (emojiList && emojiList.length > 0) {
-        var emoji = emojiList[Math.floor(Math.random() * emojiList.length)];
-        if (emoji && emoji.data) {
-            var emojiMsg = { sender: 'other', content: emoji.data, type: 'emoji', timestamp: Date.now() };
-            var emojiId = await dbPut('messages', emojiMsg);
-            emojiMsg.id = emojiId;
-            renderMsg(emojiMsg);
-            scrollBottom();
+function renderMsg(m){const ca=document.getElementById('chatArea');if(m.type==='system'){const s=document.createElement('div');s.className='system-msg';s.textContent=m.content;ca.appendChild(s);return;}const w=document.createElement('div');w.className='message-wrapper '+(m.sender==='me'?'right':'left');const av=document.createElement('img');av.className='message-avatar';av.src=m.sender==='me'?getAvatar('me'):getAvatar('contact');if(m.sender==='other')av.onclick=function(){openProfile();};const b=document.createElement('div');b.className='bubble';const preset=BUBBLE_PRESETS.find(p=>p.id===S.bubbleStyle)||BUBBLE_PRESETS[0];if(m.sender==='me'){b.style.background=preset.myBg;b.style.color=preset.myText;}else{b.style.background=preset.otherBg;b.style.color=preset.otherText;}if(m.type==='pat'){b.classList.add('pat-bubble');b.innerHTML='<span>👋 <b>'+(m.sender==='me'?S.myName:S.contactName)+'</b> '+m.content+'</span>';}else if(m.type==='emoji'||m.type==='image'){const img=document.createElement('img');img.src=m.content;img.style.maxWidth='150px';img.style.maxHeight='150px';img.style.objectFit='contain';img.style.borderRadius='6px';b.appendChild(img);}else{b.textContent=m.content;}const t=document.createElement('div');t.className='message-time';t.textContent=fmtTime(m.timestamp);w.appendChild(av);w.appendChild(b);w.appendChild(t);
+// 长按收藏
+b.addEventListener('touchstart', function(e) {
+    var startTime = Date.now();
+    var bubble = this;
+    var timer = setTimeout(function() {
+        if (confirm('收藏这条消息？')) {
+            var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
+            collected.push({
+    id: Date.now(),
+    sender: m.sender,
+    content: m.type === 'pat' ? '👋 ' + m.content : m.content,
+    time: fmtTime(m.timestamp),
+    collectedBy: 'me'
+});
+            localStorage.setItem('collectedMessages', JSON.stringify(collected));
+            showToast('✅ 已收藏到许愿页');
         }
+    }, 600);
+    bubble.addEventListener('touchend', function() { clearTimeout(timer); }, { once: true });
+    bubble.addEventListener('touchmove', function() { clearTimeout(timer); }, { once: true });
+});
+// 电脑端右键收藏
+b.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    if (confirm('收藏这条消息？')) {
+        var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
+        collected.push({
+    id: Date.now(),
+    sender: m.sender,
+    content: m.type === 'pat' ? '👋 ' + m.content : m.content,
+    time: fmtTime(m.timestamp),
+    collectedBy: 'me'
+});
+        localStorage.setItem('collectedMessages', JSON.stringify(collected));
+        showToast('✅ 已收藏到许愿页');
+    }
+});
+ca.appendChild(w);scrollBottom();}
+async function sendMessage(){const input=document.getElementById('messageInput');const c=input.value.trim();if(!c)return;const msg={sender:'me',content:c,type:'text',timestamp:Date.now()};const id=await dbPut('messages',msg);msg.id=id;renderMsg(msg);scrollBottom();input.value='';autoReply();}
+async function autoReply(){
+    const cs = S.chatSettings;
+    
+    // 已读回执
+    if (cs.readReceipt !== 'none') {
+        setTimeout(() => {
+            if (cs.readReceipt === 'graphic') {
+                var myMsgs = document.querySelectorAll('.message-wrapper.right .bubble');
+                if (myMsgs.length > 0) {
+                    var lastBubble = myMsgs[myMsgs.length - 1];
+                    if (!lastBubble.querySelector('.read-check')) {
+                        var ck = document.createElement('span');
+                        ck.className = 'read-check';
+                        ck.textContent = '✓';
+                        lastBubble.appendChild(ck);
+                    }
+                }
+            } else {
+                addSysMsg('📖 秦彻已读');
+            }
+        }, 800 + Math.random() * 1200);
+    }
+    
+    // 已读不回（精简版）
+    if (cs.readNotReply) {
+        var roll = Math.random();
+        if (roll < 0.5) {
+            // 50%：已读，沉默
+            addSysMsg('📖 秦彻已读');
+            return;
+        } else if (roll < 0.7) {
+            // 20%：正在输入又删掉
+            var ti = document.createElement('div');
+            ti.className = 'typing-indicator';
+            ti.textContent = '秦彻正在输入...';
+            document.getElementById('chatArea').appendChild(ti);
+            scrollBottom();
+            setTimeout(function() {
+                var t = document.querySelector('.typing-indicator');
+                if (t) t.remove();
+            }, 2000);
+            return;
+        }
+        // 30%：正常回复，继续往下走
+    }
+    
+    const min = parseInt(S.minReplyTime) || 1,
+        max = parseInt(S.maxReplyTime) || 5,
+        cnt = parseInt(S.replyCount) || 1;
+    const delay = Math.floor(Math.random() * (max * 60000 - min * 1000 + 1)) + min * 1000;
+    
+    if (cs.typing) {
+        setTimeout(() => {
+            const ti = document.createElement('div');
+            ti.className = 'typing-indicator';
+            ti.textContent = '秦彻正在输入...';
+            document.getElementById('chatArea').appendChild(ti);
+            scrollBottom();
+        }, delay - 2000);
+    }
+    
+    setTimeout(async () => {
+        const ti = document.querySelector('.typing-indicator');
+        if (ti) ti.remove();
+        
+        for (let i = 0; i < cnt; i++) {
+            let c = await smartComposeReply();
+            const m = { sender: 'other', content: c, type: 'text', timestamp: Date.now() };
+            const id = await dbPut('messages', m);
+            m.id = id;
+            renderMsg(m);
+            scrollBottom();
+// 秦彻随机收藏你说的话
+if (Math.random() < Math.random()) {
+    var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
+    var allMsgs = await dbGetAll('messages');
+    var myMsgs = allMsgs.filter(function(x) { return x.sender === 'me' && x.type === 'text'; });
+    if (myMsgs.length > 0) {
+        var pick = myMsgs[Math.floor(Math.random() * myMsgs.length)];
+        collected.push({
+            id: Date.now(),
+            sender: 'me',
+            content: pick.content,
+            time: fmtTime(pick.timestamp),
+            collectedBy: 'qin'
+        });
+        localStorage.setItem('collectedMessages', JSON.stringify(collected));
     }
 }
+            
+            // 发表情
+            if (cs.emojiMix && Math.random() < 0.15) {
+                var emojiList = await dbGetAll('emojis');
+                if (emojiList && emojiList.length > 0) {
+                    var emoji = emojiList[Math.floor(Math.random() * emojiList.length)];
+                    if (emoji && emoji.data) {
+                        var emojiMsg = { sender: 'other', content: emoji.data, type: 'emoji', timestamp: Date.now() };
+                        var emojiId = await dbPut('messages', emojiMsg);
+                        emojiMsg.id = emojiId;
+                        renderMsg(emojiMsg);
+                        scrollBottom();
+                    }
+                }
+            }
+            
+// 👇 新增：拍一拍
+if (Math.random() < 0.05 && patOptions.length > 0) {
+    var pat = patOptions[Math.floor(Math.random() * patOptions.length)];
+    var patMsg = { sender: 'other', content: pat, type: 'pat', timestamp: Date.now() };
+    var patId = await dbPut('messages', patMsg);
+    patMsg.id = patId;
+    renderMsg(patMsg);
+    scrollBottom();
+    triggerPat(S.contactName, pat);
+}
+
+// 👇 新增：模拟来电
+if (cs.simCall && Math.random() < 0.01 && callState === 'idle') {
+    setTimeout(function() { startCallFromQinChe(); }, 2000);
+}
 if(i<cnt-1)await new Promise(r=>setTimeout(r,800+Math.random()*3000));}},delay);}
+
 async function getRandomReply(){
     const sg = JSON.parse(await getCal('chatGroups','[]'));
     const cards = await dbGetAll('wordcards');
@@ -584,12 +729,31 @@ async function smartComposeReply(){
         if(!c || !c.content || c.content === '__GROUP_PLACEHOLDER__' || c.content.length <= 1) return false;
         if(dids.has(String(c.id))) return false;
         if(sg.length > 0) return sg.includes(c.groupName) || sg.includes(c.groupId);
-        return false; // ← 改这里
+        return false;
     });
     if(vc.length === 0) return '😅 请先在模块设置里勾选聊天分组～';
+    
     const count = Math.min(Math.floor(Math.random() * 4) + 1, vc.length);
     const shuffled = vc.sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, count).map(c => c.content).join(' ');
+    var selected = shuffled.slice(0, count);
+    
+    // 随机删一张
+    if (selected.length > 1 && Math.random() < Math.random()) {
+        var del = Math.floor(Math.random() * selected.length);
+        selected.splice(del, 1);
+    }
+    
+    // 随机重复一张
+    if (selected.length > 0 && Math.random() < Math.random()) {
+        var dup = selected[Math.floor(Math.random() * selected.length)];
+        selected.push(dup);
+    }
+    
+    if (selected.length === 0) {
+        selected.push(vc[Math.floor(Math.random() * vc.length)]);
+    }
+    
+    return selected.map(c => c.content).join(' ');
 }
 async function handleImageMessage(event){const f=event.target.files[0];if(!f)return;const d=await fileToDataUrl(f);const msg={sender:'me',content:d,type:'image',timestamp:Date.now()};const id=await dbPut('messages',msg);msg.id=id;renderMsg(msg);autoReply();event.target.value='';}
 
@@ -1065,8 +1229,8 @@ function openCallLogPage() {
     renderCallLogs();
 }
 async function renderCallLogs(){const logs=await dbGetAll('callLogs');logs.sort((a,b)=>b.timestamp-a.timestamp);const c=document.getElementById('callLogContent');let h='<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;"><div style="width:100%;max-width:400px;">';if(logs.length===0)h+='<div style="background:#fff;border-radius:16px;padding:40px;text-align:center;"><div style="font-size:48px;">📞</div><div style="font-size:14px;color:#ccc;">暂无通话记录</div></div>';else{const g={};logs.forEach(l=>{const d=new Date(l.timestamp).toLocaleDateString('zh-CN');if(!g[d])g[d]=[];g[d].push(l);});for(let[d,ls]of Object.entries(g)){h+='<div style="margin-bottom:14px;"><div style="font-size:12px;color:#aaa;margin-bottom:8px;">'+d+'</div>';ls.forEach(l=>{const mi=Math.floor(l.duration/60),s=l.duration%60;h+='<div style="background:#fff;border-radius:16px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;"><div style="font-size:24px;">📞</div><div style="flex:1;"><div style="font-size:14px;font-weight:500;">'+l.contactName+'</div><div style="font-size:11px;color:#aaa;">'+(l.type==='incoming'?'来电':'呼出')+'</div></div><div style="text-align:right;"><div>'+mi+'分'+s+'秒</div><div style="font-size:10px;color:#ccc;">'+new Date(l.timestamp).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})+'</div></div></div>';});h+='</div>';}}h+='</div></div>';c.innerHTML=h;}
-
 // ============ 许愿与留言 ============
+var wishSubTab = 'wish'; // 许愿子标签：wish / collection
 
 function openWishPage() {
     showPage('wishPage');
@@ -1098,31 +1262,96 @@ function switchWishTab(tab) {
     }
 }
 
-// ===== 许愿 =====
-async function renderWishPage() {
-    var wishes = await dbGetAll('wishes');
-    var h = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;">' +
-        '<div style="width:100%;max-width:400px;margin-bottom:20px;display:flex;gap:8px;">' +
-        '<input type="text" id="wishInput" placeholder="写下你的愿望..." style="flex:1;padding:12px;border-radius:12px;border:1.5px solid #e8e0d8;font-size:14px;">' +
-        '<button onclick="addWish()" style="padding:12px 20px;border-radius:12px;background:#f5f0eb;border:none;font-size:14px;">📝</button>' +
-        '</div>' +
-        '<div id="wishList" style="width:100%;max-width:400px;">';
-    if (wishes.length === 0) {
-        h += '<p style="color:#ccc;text-align:center;padding:40px;">✨ 还没有愿望，写一个吧</p>';
+// ===== 许愿（含子标签：许愿 / 收藏） =====
+function switchWishSubTab(tab) {
+    wishSubTab = tab;
+    var wb = document.getElementById('wishSubWish');
+    var cb = document.getElementById('wishSubCollection');
+    if (tab === 'wish') {
+        wb.style.background = '#d4a8b8'; wb.style.color = '#fff';
+        cb.style.background = '#f5f0eb'; cb.style.color = '#999';
     } else {
-        wishes.forEach(function(w) {
-            h += '<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;">' +
-                '<span onclick="toggleWish(' + w.id + ')" style="cursor:pointer;font-size:18px;">' + (w.done ? '✅' : '○') + '</span>' +
-                '<div style="flex:1;">' +
-                '<div style="font-size:15px;text-decoration:' + (w.done ? 'line-through' : 'none') + ';">' + w.content + '</div>' +
-                '<div style="font-size:10px;color:#ccc;">' + w.time + '</div>' +
-                '</div>' +
-                '<span onclick="deleteWish(' + w.id + ')" style="cursor:pointer;color:#d4a8b8;">✕</span>' +
-                '</div>';
-        });
+        cb.style.background = '#d4a8b8'; cb.style.color = '#fff';
+        wb.style.background = '#f5f0eb'; wb.style.color = '#999';
     }
-    h += '</div></div>';
+    renderWishSubContent();
+}
+
+async function renderWishPage() {
+    var h = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;">' +
+        '<div style="width:100%;max-width:400px;">' +
+        // 子标签：两个大卡片并排
+        '<div style="display:flex;gap:10px;margin-bottom:16px;">' +
+        '<div onclick="switchWishSubTab(\'wish\')" id="wishSubWish" ' +
+        'style="flex:1;padding:20px;border-radius:16px;text-align:center;cursor:pointer;' +
+        'background:#d4a8b8;color:#fff;font-size:18px;font-weight:600;">✨ 许愿</div>' +
+        '<div onclick="switchWishSubTab(\'collection\')" id="wishSubCollection" ' +
+        'style="flex:1;padding:20px;border-radius:16px;text-align:center;cursor:pointer;' +
+        'background:#f5f0eb;color:#999;font-size:18px;font-weight:600;">💬 收藏</div>' +
+        '</div>' +
+        '<div id="wishSubContent"></div>' +
+        '</div></div>';
     document.getElementById('wishTabContent').innerHTML = h;
+    renderWishSubContent();
+}
+
+async function renderWishSubContent() {
+    var container = document.getElementById('wishSubContent');
+    if (!container) return;
+
+    if (wishSubTab === 'wish') {
+        // 许愿
+        var wishes = await dbGetAll('wishes');
+        var h = '<div style="width:100%;max-width:400px;margin-bottom:20px;display:flex;gap:8px;">' +
+            '<input type="text" id="wishInput" placeholder="写下你的愿望..." style="flex:1;padding:12px;border-radius:12px;border:1.5px solid #e8e0d8;font-size:14px;">' +
+            '<button onclick="addWish()" style="padding:12px 20px;border-radius:12px;background:#f5f0eb;border:none;font-size:14px;">📝</button>' +
+            '</div>' +
+            '<div id="wishList" style="width:100%;max-width:400px;">';
+        if (wishes.length === 0) {
+            h += '<p style="color:#ccc;text-align:center;padding:40px;">✨ 还没有愿望，写一个吧</p>';
+        } else {
+            wishes.forEach(function(w) {
+                h += '<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;">' +
+                    '<span onclick="toggleWish(' + w.id + ')" style="cursor:pointer;font-size:18px;">' + (w.done ? '✅' : '○') + '</span>' +
+                    '<div style="flex:1;">' +
+                    '<div style="font-size:15px;text-decoration:' + (w.done ? 'line-through' : 'none') + ';">' + w.content + '</div>' +
+                    '<div style="font-size:10px;color:#ccc;">' + w.time + '</div>' +
+                    '</div>' +
+                    '<span onclick="deleteWish(' + w.id + ')" style="cursor:pointer;color:#d4a8b8;">✕</span>' +
+                    '</div>';
+            });
+        }
+        h += '</div>';
+        container.innerHTML = h;
+    } else {
+        // 收藏
+        var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
+        var h = '';
+        if (collected.length === 0) {
+            h = '<p style="color:#ccc;text-align:center;padding:40px;">💬 还没有收藏，长按聊天消息可以收藏哦</p>';
+        } else {
+            collected.slice().reverse().forEach(function(item) {
+                h += '<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:10px;border:1px solid #f0ece8;">' +
+                    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
+                    '<img src="' + (item.sender === 'me' ? getAvatar('me') : getAvatar('contact')) + '" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">' +
+                    '<span style="font-size:13px;font-weight:500;color:#333;">' + (item.sender === 'me' ? S.myName : S.contactName) + '</span>' +
+                    '<span style="font-size:10px;color:#ccc;margin-left:auto;">' + item.time + '</span>' +
+                    '<span style="font-size:10px;color:' + (item.collectedBy === 'qin' ? '#d4a8b8' : '#999') + ';margin-left:4px;">' + (item.collectedBy === 'qin' ? '秦彻收藏' : '笑笑收藏') + '</span>' +
+                    '<span onclick="deleteCollected(' + item.id + ')" style="cursor:pointer;color:#d4a8b8;font-size:12px;">✕</span>' +
+                    '</div>' +
+                    '<div style="font-size:14px;color:#444;line-height:1.5;">' + item.content + '</div>' +
+                    '</div>';
+            });
+        }
+        container.innerHTML = '<div style="width:100%;max-width:400px;">' + h + '</div>';
+    }
+}
+
+async function deleteCollected(id) {
+    var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
+    collected = collected.filter(function(c) { return String(c.id) !== String(id); });
+    localStorage.setItem('collectedMessages', JSON.stringify(collected));
+    renderWishSubContent();
 }
 
 async function addWish() {
@@ -1136,7 +1365,7 @@ async function addWish() {
         timestamp: Date.now()
     });
     input.value = '';
-    renderWishPage();
+    renderWishSubContent();
 }
 
 async function toggleWish(id) {
@@ -1145,17 +1374,18 @@ async function toggleWish(id) {
     if (w) {
         w.done = !w.done;
         await dbPut('wishes', w);
-        renderWishPage();
+        renderWishSubContent();
     }
 }
 
 async function deleteWish(id) {
     await dbDelete('wishes', id);
-    renderWishPage();
+    renderWishSubContent();
 }
 
-// ===== 秦彻每日主动留言 =====
+// ===== 秦彻每日主动留言（新版） =====
 async function checkQinDailyMessage() {
+    // 读取留言板分组
     var all = await idbGetAll('calendarSettings');
     var item = all.find(function(x) { return x.key === 'mailboxGroups'; });
     var rawValue = item ? item.value : null;
@@ -1172,16 +1402,16 @@ async function checkQinDailyMessage() {
         return;
     }
     
+    // 今天已经生成过留言了，跳过
     var today = new Date().toLocaleDateString('zh-CN');
     var lastDate = localStorage.getItem('lastQinMessageDate');
-    
     if (lastDate === today) {
-        console.log('✅ 今天秦彻已经留言了');
+        console.log('✅ 今天秦彻已经留过言了');
         return;
     }
     
+    // 获取分组中的字卡
     var allCards = await idbGetAll('wordcards');
-    
     var cards = allCards.filter(function(c) {
         return groups.some(function(g) {
             return c.groupName === g || c.groupId === g;
@@ -1196,29 +1426,151 @@ async function checkQinDailyMessage() {
         return;
     }
     
-    var content = cards[Math.floor(Math.random() * cards.length)].content;
+    // 今天生成 1~5 条留言
+    var msgCount = Math.floor(Math.random() * 5) + 1;
+    var now = Date.now();
+    var todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    var elapsedMs = now - todayStart.getTime();
     
+    // 已生成的时间戳列表，防止重复
+    var usedTimestamps = [];
+    
+    for (var i = 0; i < msgCount; i++) {
+        // 随机时间戳：分散在今天已过去的时段
+        var randomOffset = Math.floor(Math.random() * elapsedMs);
+        // 确保时间戳不重复
+        var attempts = 0;
+        while (usedTimestamps.indexOf(randomOffset) !== -1 && attempts < 10) {
+            randomOffset = Math.floor(Math.random() * elapsedMs);
+            attempts++;
+        }
+        usedTimestamps.push(randomOffset);
+        
+        var msgTime = new Date(todayStart.getTime() + randomOffset);
+        var timeStr = msgTime.toLocaleString('zh-CN', {
+            month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+        });
+        
+        // 拼字卡 1~4 条
+        var cardCount = Math.min(Math.floor(Math.random() * 4) + 1, cards.length);
+        var shuffled = cards.slice().sort(function() { return Math.random() - 0.5; });
+        var selected = shuffled.slice(0, cardCount);
+// 随机删一张
+if (selected.length > 1 && Math.random() < Math.random()) {
+    var del = Math.floor(Math.random() * selected.length);
+    selected.splice(del, 1);
+}
+// 随机重复一张
+if (selected.length > 0 && Math.random() < Math.random()) {
+    var dup = selected[Math.floor(Math.random() * selected.length)];
+    selected.push(dup);
+}
+        var content = selected.map(function(c) { return c.content; }).join(' ');
+        
+        // 存入数据库
+        await dbPut('boardMessages', {
+            sender: 'qin',
+            content: content,
+            time: timeStr,
+            replied: false,
+            isDaily: true,
+            timestamp: msgTime.getTime()
+        });
+        
+        console.log('✅ 秦彻留言 #' + (i + 1) + ': ' + timeStr + ' - ' + content.substring(0, 20) + '...');
+    }
+    
+// 已读不回开启时，额外多留 1~2 条
+if (S.chatSettings.readNotReply) {
+    var extraCount = Math.floor(Math.random() * 2) + 1; // 1~2 条
+    for (var e = 0; e < extraCount; e++) {
+        var extraCards = Math.min(Math.floor(Math.random() * 4) + 1, cards.length);
+        var extraShuffled = cards.slice().sort(function() { return Math.random() - 0.5; });
+        var extraSelected = extraShuffled.slice(0, extraCards);
+        var extraContent = extraSelected.map(function(c) { return c.content; }).join(' ');
+        
+        var extraTime = new Date(Date.now() - Math.floor(Math.random() * 6 * 3600 * 1000));
+        var extraTimeStr = extraTime.toLocaleString('zh-CN', {
+            month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+        });
+        
+        await dbPut('boardMessages', {
+            sender: 'qin',
+            content: extraContent,
+            time: extraTimeStr,
+            replied: false,
+            isDaily: true,
+            timestamp: extraTime.getTime()
+        });
+    }
+    console.log('✅ 已读不回模式：秦彻额外留了 ' + extraCount + ' 条言');
+}
+    localStorage.setItem('lastQinMessageDate', today);
+    console.log('✅ 秦彻今天共留了 ' + msgCount + ' 条言');
+}
+// ===== 留言板 =====
+async function autoReplyToUser(userMsg) {
+    var groupName = await getCal('mailboxGroups', '[]');
+    var groups = JSON.parse(groupName);
+    if (!groups || groups.length === 0) return;
+    
+    var allCards = await dbGetAll('wordcards');
+    var cards = allCards.filter(function(c) {
+        return groups.some(function(g) { return c.groupName === g || c.groupId === g; }) &&
+            c.content && c.content !== '__GROUP_PLACEHOLDER__' && c.content.length > 1;
+    });
+    if (cards.length === 0) return;
+    
+    // 拼字卡 1~4 条
+    var count = Math.min(Math.floor(Math.random() * 4) + 1, cards.length);
+    var shuffled = cards.slice().sort(function() { return Math.random() - 0.5; });
+    var selected = shuffled.slice(0, count);
+    
+    // 随机删一张
+    if (selected.length > 1 && Math.random() < Math.random()) {
+        selected.splice(Math.floor(Math.random() * selected.length), 1);
+    }
+    // 随机重复一张
+    if (selected.length > 0 && Math.random() < Math.random()) {
+        selected.push(selected[Math.floor(Math.random() * selected.length)]);
+    }
+    
+    var replyContent = selected.map(function(c) { return c.content; }).join(' ');
+    
+    // 标记用户留言已回复
+    userMsg.replied = true;
+    await dbPut('boardMessages', userMsg);
+    
+    // 存入秦彻的回复
     await dbPut('boardMessages', {
         sender: 'qin',
-        content: content,
+        content: replyContent,
         time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
-        replied: false,
-        isDaily: true,
+        replied: true,
+        replyTo: userMsg.content,
         timestamp: Date.now()
     });
     
-    localStorage.setItem('lastQinMessageDate', today);
-    console.log('✅ 秦彻主动留言已发送');
+    localStorage.removeItem('qinReplyPending_' + userMsg.id);
 }
-// ===== 留言板 =====
 async function renderBoardPage() {
-    // 检查秦彻每日留言
     await checkQinDailyMessage();
+// 在 renderBoardPage 最前面加
+var pendingReplies = await dbGetAll('boardMessages');
+pendingReplies.forEach(async function(msg) {
+    if (msg.sender === 'user' && !msg.replied) {
+        var replyTime = parseInt(localStorage.getItem('qinReplyPending_' + msg.id));
+        if (replyTime && Date.now() >= replyTime) {
+            await autoReplyToUser(msg);
+            localStorage.removeItem('qinReplyPending_' + msg.id);
+        }
+    }
+});
     
     var msgs = await dbGetAll('boardMessages');
     var h = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;">' +
         '<div style="width:100%;max-width:400px;margin-bottom:16px;">' +
-        '<div style="font-size:12px;color:#aaa;text-align:center;margin-bottom:12px;">💬 秦彻会随机在 6~24 小时内回复你</div>' +
         '<div style="display:flex;gap:8px;">' +
         '<input type="text" id="boardInput" placeholder="写一条留言..." style="flex:1;padding:12px 16px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;">' +
         '<button onclick="addBoardMessage()" style="padding:12px 20px;border-radius:12px;background:#f5f0eb;border:1.5px solid #e8e0d8;color:#666;font-size:14px;cursor:pointer;">留言</button>' +
@@ -1229,11 +1581,20 @@ async function renderBoardPage() {
     if (msgs.length === 0) {
         h += '<p style="color:#ccc;text-align:center;padding:40px;font-size:14px;">💬 还没有留言，写一条吧～</p>';
     } else {
-        msgs.slice().reverse().forEach(function(m) {
+        // 找出所有秦彻的留言（不含用户回复）
+        var qinMsgs = msgs.filter(function(m) { return m.sender === 'qin' && !m.replyTo; });
+        // 用户独立留言（不是回复秦彻的）
+        var userMsgs = msgs.filter(function(m) { return m.sender === 'user' && !m.replyTo; });
+        
+        // 合并并按时间倒序
+        var allMain = qinMsgs.concat(userMsgs).sort(function(a, b) { return b.timestamp - a.timestamp; });
+        
+        allMain.forEach(function(m) {
             var isUser = m.sender === 'user';
             var isQin = m.sender === 'qin';
             var name = isUser ? S.myName : S.contactName;
             var avatar = isUser ? getAvatar('me') : getAvatar('contact');
+            
             h += '<div style="background:#fff;border-radius:4px 16px 16px 16px;padding:16px 18px;border:1px solid #f0e8e0;box-shadow:0 2px 6px rgba(0,0,0,0.02);position:relative;">' +
                 '<div style="position:absolute;top:-6px;left:12px;font-size:14px;color:#ccc;">📌</div>' +
                 '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding-top:4px;">' +
@@ -1243,27 +1604,35 @@ async function renderBoardPage() {
                 '<span onclick="deleteBoardMsg(' + m.id + ')" style="cursor:pointer;color:#d4a8b8;font-size:12px;padding:0 4px;">✕</span>' +
                 '</div>' +
                 '<div style="font-size:14px;color:#444;margin-bottom:6px;word-break:break-word;padding-left:4px;">' + m.content + '</div>';
-            if (m.replyTo) {
-                h += '<div style="font-size:11px;color:#bbb;background:#f8f5f2;padding:4px 10px;border-radius:8px;margin-bottom:6px;">↳ 回复：' + m.replyTo + '</div>';
-            }
-            h += '<div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:2px;">';
             
-            if (isUser) {
-                if (!m.replied) {
-                    h += '<span style="font-size:10px;color:#aaa;">等待秦彻回复...</span>';
-                    h += '<button onclick="replyBoardMsg(' + m.id + ')" style="padding:4px 14px;border-radius:14px;border:1px solid #d4a8b8;background:transparent;color:#d4a8b8;font-size:11px;cursor:pointer;">回复</button>';
-                } else {
-                    h += '<span style="font-size:10px;color:#ccc;">已回复</span>';
-                }
-            } else if (isQin) {
-                if (m.replied) {
-                    h += '<span style="font-size:10px;color:#ccc;">已结束</span>';
-                } else {
-                    h += '<span style="font-size:10px;color:#d4a8b8;">💌 秦彻的留言</span>';
-                    h += '<button onclick="replyToQin(' + m.id + ')" style="padding:4px 14px;border-radius:14px;border:1px solid #d4a8b8;background:transparent;color:#d4a8b8;font-size:11px;cursor:pointer;">💬 回复</button>';
-                }
-            }
+            // 找这条留言的回复
+            var replies = msgs.filter(function(r) { return r.replyTo && r.replyTo === m.content; });
+            replies.forEach(function(reply) {
+                var rName = reply.sender === 'user' ? S.myName : S.contactName;
+                var rAvatar = reply.sender === 'user' ? getAvatar('me') : getAvatar('contact');
+                h += '<div style="margin-top:8px;padding:8px 12px;background:#fdf5f7;border-radius:10px;border-left:3px solid #d4a8b8;">' +
+                    '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">' +
+                    '<img src="' + rAvatar + '" style="width:18px;height:18px;border-radius:50%;object-fit:cover;">' +
+                    '<span style="font-size:12px;font-weight:500;color:#333;">' + rName + '</span>' +
+                    '<span style="font-size:10px;color:#ccc;margin-left:auto;">' + (reply.time || '') + '</span>' +
+                    '</div>' +
+                    '<div style="font-size:13px;color:#555;word-break:break-word;">' + reply.content + '</div>' +
+                    '</div>';
+            });
             
+            // 操作按钮
+            h += '<div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:8px;">';
+            if (isQin && !m.replied) {
+                h += '<span style="font-size:10px;color:#d4a8b8;">💌 秦彻的留言</span>';
+                h += '<button onclick="replyToQin(' + m.id + ')" style="padding:4px 14px;border-radius:14px;border:1px solid #d4a8b8;background:transparent;color:#d4a8b8;font-size:11px;cursor:pointer;">💬 回复</button>';
+            } else if (isQin && m.replied) {
+                h += '<span style="font-size:10px;color:#ccc;">已结束</span>';
+            } else if (isUser && !m.replied) {
+                h += '<span style="font-size:10px;color:#aaa;">等待秦彻回复...</span>';
+                h += '<button onclick="replyBoardMsg(' + m.id + ')" style="padding:4px 14px;border-radius:14px;border:1px solid #d4a8b8;background:transparent;color:#d4a8b8;font-size:11px;cursor:pointer;">回复</button>';
+            } else if (isUser && m.replied) {
+                h += '<span style="font-size:10px;color:#ccc;">已回复</span>';
+            }
             h += '</div></div>';
         });
     }
@@ -1275,16 +1644,29 @@ async function addBoardMessage() {
     var input = document.getElementById('boardInput');
     var c = input.value.trim();
     if (!c) return;
-    await dbPut('boardMessages', {
+    
+    var userMsg = {
         sender: 'user',
         content: c,
         time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
         replied: false,
         timestamp: Date.now()
-    });
+    };
+    await dbPut('boardMessages', userMsg);
     input.value = '';
     renderBoardPage();
+    
+    // 秦彻在24小时内随机回复
+    var delay = Math.floor(Math.random() * 24 * 60 * 60 * 1000); // 0~24小时
+    var replyTime = Date.now() + delay;
+    localStorage.setItem('qinReplyPending_' + userMsg.id, replyTime);
+    
+    // 立即检查一次：如果随机到很短的时间，马上回复
+    if (delay < 10000) {
+        setTimeout(function() { autoReplyToUser(userMsg); }, delay);
+    }
 }
+
 
 async function deleteBoardMsg(id) {
     await dbDelete('boardMessages', id);
@@ -1637,7 +2019,7 @@ async function renderTarotPage() {
         recentHistory.forEach(function(item) {
             var time = new Date(item.timestamp).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
             historyHtml += '<div style="padding:6px 0;border-bottom:1px solid #f5f0eb;font-size:13px;color:#555;display:flex;justify-content:space-between;align-items:center;">' +
-                '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px;text-align:left;">' + item.question + '</span>' +
+               '<span style="flex:1;word-break:break-all;margin-right:8px;text-align:left;">' + item.question + '</span>' +
                 '<span style="color:#d4a8b8;font-weight:500;flex-shrink:0;text-align:center;min-width:60px;">🃏 ' + item.card + '</span>' +
                 '<span style="color:#ccc;font-size:11px;flex-shrink:0;margin-left:8px;text-align:right;">' + time + '</span>' +
                 '</div>';
@@ -1864,7 +2246,7 @@ async function refreshTarotHistory() {
     recent.forEach(function(item) {
         var time = new Date(item.timestamp).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
         html += '<div style="padding:6px 0;border-bottom:1px solid #f5f0eb;font-size:13px;color:#555;display:flex;justify-content:space-between;align-items:center;">' +
-            '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px;text-align:left;">' + item.question + '</span>' +
+           '<span style="flex:1;word-break:break-all;margin-right:8px;text-align:left;">' + item.question + '</span>' +
             '<span style="color:#d4a8b8;font-weight:500;flex-shrink:0;text-align:center;min-width:60px;">🃏 ' + item.card + '</span>' +
             '<span style="color:#ccc;font-size:11px;flex-shrink:0;margin-left:8px;text-align:right;">' + time + '</span>' +
             '</div>';
@@ -1939,7 +2321,14 @@ function renderHisRoomScene() {
     if (!container) return;
     
     if (hisRoomState === 'idle') {
-       container.innerHTML = `
+        var titles = ['带了束花', '花挂门上了', '还是带了花', '顺手带的花', '花放着，人来了', '……带了花'];
+        var randomTitle = '“' + titles[Math.floor(Math.random() * titles.length)] + '”';
+        
+        // 更新弹窗标题
+        var modalTitle = document.querySelector('#hisRoomModal div');
+if (modalTitle) modalTitle.innerHTML = randomTitle;
+        
+        container.innerHTML = `
     <div style="text-align:center;padding:0;overflow:hidden;">
         <div style="position:relative;display:inline-block;">
             <img src="${IMG_BASE}门_关着.png${IMG_VERSION}" style="width:220px;height:auto;display:block;margin:0 auto;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
@@ -1950,12 +2339,11 @@ function renderHisRoomScene() {
 var actions = document.getElementById('hisRoomActions');
 if (actions) {
     actions.innerHTML = `
-        <button onclick="knockHisRoom()" style="padding:12px 40px;border-radius:30px;background:#d4a8b8;color:#fff;border:none;font-size:16px;cursor:pointer;box-shadow:0 4px 16px rgba(212,168,184,0.3);">🚪 敲敲门</button>
+        <button onclick="knockHisRoom()" style="padding:12px 40px;border-radius:30px;background:#d4a8b8;color:#fff;border:none;font-size:16px;cursor:pointer;box-shadow:0 4px 16px rgba(212,168,184,0.3);">🗝️ 敲敲门</button>
     `;
         }
     }
 }
-
 async function knockHisRoom() {
     var groupName = await getCal('hisRoomGroup', '');
     if (!groupName) {
@@ -2014,7 +2402,7 @@ crow.style.transform = 'translateX(-50%) translateY(50px) scale(1)';
         var actions = document.getElementById('hisRoomActions');
         if (actions) {
             actions.innerHTML = `
-                <button onclick="enterHisRoom()" style="flex:1;padding:10px;border-radius:14px;background:#d4a8b8;color:#fff;border:none;font-size:15px;cursor:pointer;">🚪 进入房间</button>
+                <button onclick="enterHisRoom()" style="flex:1;padding:10px;border-radius:14px;background:#d4a8b8;color:#fff;border:none;font-size:15px;cursor:pointer;">🌸  进入房间</button>
                 <button onclick="closeHisRoom()" style="flex:1;padding:10px;border-radius:14px;background:#f0ece8;color:#7a6a5a;border:none;font-size:15px;cursor:pointer;">🍃 安静离开</button>
             `;
         }
@@ -2600,6 +2988,11 @@ window.getCal = getCal;
 window.setCal = setCal;
 window.renderHisRoom = renderHisRoomScene;
 window.IMG_BASE = IMG_BASE;
+window.startCallFromQinChe = startCallFromQinChe;
+window.switchWishSubTab = switchWishSubTab;
+window.deleteCollected = deleteCollected;
+window.renderWishSubContent = renderWishSubContent;
+window.autoReplyToUser = autoReplyToUser;
 
 init();
 })();
