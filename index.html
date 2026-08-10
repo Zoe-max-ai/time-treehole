@@ -335,7 +335,7 @@
     <div id="callStatusLg" style="font-size:14px;color:rgba(255,255,255,0.7);margin-bottom:30px;">正在呼叫...</div>
     <div id="callTimerLg" style="font-size:40px;font-weight:300;font-family:monospace;letter-spacing:4px;margin-bottom:40px;">00:00:00</div>
     <div style="display:flex;gap:30px;">
-        <button id="answerBtn" onclick="answerCall()" style="display:none;width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;font-size:24px;background:#4cd964;color:#fff;">📞</button>
+        <button id="answerBtn" onclick="answerCall()" style="display:none;width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;font-size:24px;background:#4cd964;color:#fff;display:flex;align-items:center;justify-content:center;line-height:1;">📞</button>
         <button onclick="endCall()" style="width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;font-size:24px;background:#ff4757;color:#fff;">📞</button>
     </div>
 </div>
@@ -2012,19 +2012,21 @@ async function renderTarotPage() {
     history.sort(function(a, b) { return b.timestamp - a.timestamp; });
     var recentHistory = history.slice(0, 10);
 
-    var historyHtml = '';
-    if (recentHistory.length === 0) {
-        historyHtml = '<div style="color:#ccc;text-align:center;padding:12px 0;font-size:13px;">暂无占卜记录</div>';
-    } else {
-        recentHistory.forEach(function(item) {
-            var time = new Date(item.timestamp).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-            historyHtml += '<div style="padding:6px 0;border-bottom:1px solid #f5f0eb;font-size:13px;color:#555;display:flex;justify-content:space-between;align-items:center;">' +
-               '<span style="flex:1;word-break:break-all;margin-right:8px;text-align:left;">' + item.question + '</span>' +
-                '<span style="color:#d4a8b8;font-weight:500;flex-shrink:0;text-align:center;min-width:60px;">🃏 ' + item.card + '</span>' +
-                '<span style="color:#ccc;font-size:11px;flex-shrink:0;margin-left:8px;text-align:right;">' + time + '</span>' +
-                '</div>';
-        });
-    }
+   var historyHtml = '';
+if (recentHistory.length === 0) {
+    historyHtml = '<div style="color:#ccc;text-align:center;padding:12px 0;font-size:13px;">暂无占卜记录</div>';
+} else {
+    recentHistory.forEach(function(item) {
+        var time = new Date(item.timestamp).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+        historyHtml += '<div style="padding:6px 0;border-bottom:1px solid #f5f0eb;font-size:13px;color:#555;">' +
+            '<div style="word-break:break-all;margin-bottom:4px;text-align:left;">' + item.question + '</div>' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+                '<span style="color:#d4a8b8;font-weight:500;text-align:left;">🃏 ' + item.card + '</span>'+
+                '<span style="color:#ccc;font-size:11px;">' + time + '</span>' +
+            '</div>' +
+        '</div>';
+    });
+}
 
     var html = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">' +
         '<div style="width:100%;max-width:400px;text-align:center;">' +
@@ -2162,25 +2164,29 @@ async function tarotDraw() {
 
     await new Promise(function(r) { setTimeout(r, 1500); });
 
-    var card = await getRandomFromGroup(groupName);
-    if (!card) {
+    // 随机 1~3 张牌
+    var cardCount = Math.floor(Math.random() * 3) + 1;
+    var cards = [];
+    for (var i = 0; i < cardCount; i++) {
+        var card = await getRandomFromGroup(groupName);
+        if (card) cards.push(card);
+    }
+    
+    if (cards.length === 0) {
         showToast('⚠️ 字卡分组为空，请先添加字卡');
         if (cardDisplay) cardDisplay.textContent = '🃏 暂无字卡';
         return;
     }
 
-    if (cardDisplay) cardDisplay.textContent = '🃏 ' + card;
+    if (cardDisplay) cardDisplay.textContent = '🃏 ' + cards.join('  ');
 
-    // ===== 保存历史记录 =====
     await dbPut('tarotHistory', {
         question: question,
-        card: card,
+        card: cards.join('  '),
         timestamp: Date.now()
     });
 
-    // ===== 刷新历史记录列表 =====
     refreshTarotHistory();
-
     tarotState = 'result';
 }
 
@@ -2243,14 +2249,16 @@ async function refreshTarotHistory() {
     }
 
     var html = '';
-    recent.forEach(function(item) {
-        var time = new Date(item.timestamp).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-        html += '<div style="padding:6px 0;border-bottom:1px solid #f5f0eb;font-size:13px;color:#555;display:flex;justify-content:space-between;align-items:center;">' +
-           '<span style="flex:1;word-break:break-all;margin-right:8px;text-align:left;">' + item.question + '</span>' +
-            '<span style="color:#d4a8b8;font-weight:500;flex-shrink:0;text-align:center;min-width:60px;">🃏 ' + item.card + '</span>' +
-            '<span style="color:#ccc;font-size:11px;flex-shrink:0;margin-left:8px;text-align:right;">' + time + '</span>' +
-            '</div>';
-    });
+recent.forEach(function(item) {
+    var time = new Date(item.timestamp).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+    html += '<div style="padding:6px 0;border-bottom:1px solid #f5f0eb;font-size:13px;color:#555;">' +
+        '<div style="word-break:break-all;margin-bottom:4px;text-align:left;">' + item.question + '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+          '<span style="color:#d4a8b8;font-weight:500;text-align:left;">🃏 ' + item.card + '</span>'+
+            '<span style="color:#ccc;font-size:11px;">' + time + '</span>' +
+        '</div>' +
+    '</div>';
+});
     listDiv.innerHTML = html;
 }
 async function tarotClearHistory() {
