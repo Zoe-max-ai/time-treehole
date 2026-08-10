@@ -656,7 +656,7 @@ async function autoReply(){
             renderMsg(m);
             scrollBottom();
 // 秦彻随机收藏你说的话
-if (Math.random() < Math.random()) {
+if (Math.random() < 0.05) {
     var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
     var allMsgs = await dbGetAll('messages');
     var myMsgs = allMsgs.filter(function(x) { return x.sender === 'me' && x.type === 'text'; });
