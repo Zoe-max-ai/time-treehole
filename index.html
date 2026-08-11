@@ -283,12 +283,73 @@
     transform-origin: 70px 42px !important;
     animation: wingFlapFastReverse 0.15s ease-in-out infinite alternate !important;
 }
+
+body.light-text .home-avatar-name,
+body.light-text .home-status-tag,
+body.light-text .home-mood-preview,
+body.light-text .home-divider .label,
+body.light-text .home-card .card-title,
+body.light-text .home-footer {
+    color: #fff !important;
+}
+body.light-text .home-status-tag {
+    background: rgba(255,255,255,0.15) !important;
+    border-color: rgba(255,255,255,0.3) !important;
+}
+body.light-text .home-divider .line {
+    background: rgba(255,255,255,0.5) !important;
+}
+body.light-text .home-card .card-icon {
+    background: rgba(255,255,255,0.2) !important;
+    border-color: rgba(255,255,255,0.4) !important;
+}
+body.light-text .home-card .card-icon svg {
+    stroke: #fff !important;
+}
+body.light-text .home-footer {
+    color: rgba(255,255,255,0.6) !important;
+    font-size: 9px !important;
+    text-align: center !important;
+}
+body.light-text #themeToggleBtn {
+    color: #fff !important;
+}
     </style>
 </head>
 <body>
 <!-- 所有页面HTML结构（完整保留） -->
 <div class="page active" id="homePage"><div class="home-page-inner" id="homeInner">
-    <div class="home-top-area"><div class="home-avatar-group"><div><img class="home-avatar-img" id="homeContactAvatar" src=""><div class="home-avatar-name" id="homeContactName">秦彻</div></div><div class="home-heart">💕</div><div><img class="home-avatar-img me" id="homeMyAvatar" src=""><div class="home-avatar-name" id="homeMyName">笑笑</div></div></div><div class="home-status-tag"><span class="home-status-dot"></span><span id="homeStatusText">在线</span></div><div class="home-mood-preview" id="homeMoodPreview"></div></div>
+    <div class="home-top-area" style="position:relative;text-align:center;padding:80px 20px 8px;flex-shrink:0;">
+   <button onclick="toggleHomeTextColor()" id="themeToggleBtn" style="position:absolute;top:8px;right:12px;background:none;border:none;cursor:pointer;color:#999;padding:12px;border-radius:50%;line-height:1;">
+    <svg width="34" height="32" viewBox="0 0 800 700" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <line x1="80" y1="620" x2="280" y2="100"/>
+    <line x1="280" y1="100" x2="305" y2="55"/>
+   <g stroke-width="1.5">
+        <!-- 左侧拉长 -->
+        <line x1="92" y1="588" x2="20" y2="608"/><line x1="104" y1="555" x2="28" y2="580"/>
+        <line x1="116" y1="523" x2="36" y2="550"/><line x1="128" y1="490" x2="44" y2="520"/>
+        <line x1="140" y1="458" x2="54" y2="490"/><line x1="152" y1="425" x2="64" y2="458"/>
+        <line x1="164" y1="393" x2="76" y2="428"/><line x1="176" y1="360" x2="88" y2="398"/>
+        <line x1="188" y1="328" x2="102" y2="368"/><line x1="200" y1="295" x2="118" y2="338"/>
+        <line x1="212" y1="263" x2="134" y2="308"/><line x1="224" y1="230" x2="152" y2="278"/>
+        <line x1="236" y1="198" x2="170" y2="248"/><line x1="248" y1="165" x2="190" y2="218"/>
+        <line x1="260" y1="133" x2="210" y2="188"/>
+        <!-- 右侧拉长 -->
+        <line x1="92" y1="588" x2="165" y2="600"/><line x1="104" y1="555" x2="180" y2="570"/>
+        <line x1="116" y1="523" x2="195" y2="540"/><line x1="128" y1="490" x2="210" y2="510"/>
+        <line x1="140" y1="458" x2="224" y2="480"/><line x1="152" y1="425" x2="238" y2="450"/>
+        <line x1="164" y1="393" x2="252" y2="420"/><line x1="176" y1="360" x2="264" y2="390"/>
+        <line x1="188" y1="328" x2="276" y2="360"/><line x1="200" y1="295" x2="286" y2="330"/>
+        <line x1="212" y1="263" x2="296" y2="300"/><line x1="224" y1="230" x2="304" y2="270"/>
+        <line x1="236" y1="198" x2="310" y2="242"/><line x1="248" y1="165" x2="314" y2="212"/>
+        <line x1="260" y1="133" x2="318" y2="182"/>
+        <!-- 底部 -->
+        <line x1="84" y1="605" x2="18" y2="618"/><line x1="96" y1="572" x2="26" y2="590"/>
+        <line x1="84" y1="605" x2="160" y2="618"/><line x1="96" y1="572" x2="175" y2="588"/>
+    </g>
+</svg>
+</button>
+<div class="home-avatar-group"><div><img class="home-avatar-img" id="homeContactAvatar" src=""><div class="home-avatar-name" id="homeContactName">秦彻</div></div><div class="home-heart">💕</div><div><img class="home-avatar-img me" id="homeMyAvatar" src=""><div class="home-avatar-name" id="homeMyName">笑笑</div></div></div><div class="home-status-tag"><span class="home-status-dot"></span><span id="homeStatusText">在线</span></div><div class="home-mood-preview" id="homeMoodPreview"></div></div>
     <div class="home-divider"><span class="line"></span><span class="label">我们的时光</span><span class="line"></span></div>
     <div class="home-grid-scroll">
 <div class="home-card" onclick="openHisRoom()">
@@ -674,7 +735,7 @@ if (Math.random() < 0.05) {
 }
             
             // 发表情
-            if (cs.emojiMix && Math.random() < 0.15) {
+            if (cs.emojiMix && Math.random() < 0.01) {
                 var emojiList = await dbGetAll('emojis');
                 if (emojiList && emojiList.length > 0) {
                     var emoji = emojiList[Math.floor(Math.random() * emojiList.length)];
@@ -2846,8 +2907,12 @@ try {
                 }
             });
         }
-        
+     
+
         // 8. 更新首页
+if (localStorage.getItem('homeLightText') === 'true') {
+    document.body.classList.add('light-text');
+}
         updateHome();
         startAutoSendIfNeeded();
         console.log('✅ 2.0 启动完成');
@@ -2875,6 +2940,11 @@ try {
 
 var finalCheck = await getCal('chatGroups', '[]');
 console.log('🔍 init 结束前 chatGroups:', finalCheck);
+
+function toggleHomeTextColor() {
+    document.body.classList.toggle('light-text');
+    localStorage.setItem('homeLightText', document.body.classList.contains('light-text'));
+}
 
 // 暴露所有函数到全局作用域
 window.openChatPage = openChatPage;
@@ -3001,6 +3071,7 @@ window.switchWishSubTab = switchWishSubTab;
 window.deleteCollected = deleteCollected;
 window.renderWishSubContent = renderWishSubContent;
 window.autoReplyToUser = autoReplyToUser;
+window.toggleHomeTextColor = toggleHomeTextColor;
 
 init();
 })();
