@@ -612,11 +612,12 @@ b.addEventListener('touchstart', function(e) {
     var timer = setTimeout(function() {
         if (confirm('收藏这条消息？')) {
             var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
-            collected.push({
+           collected.push({
     id: Date.now(),
     sender: m.sender,
     content: m.type === 'pat' ? '👋 ' + m.content : m.content,
     time: fmtTime(m.timestamp),
+    timestamp: m.timestamp,  // ← 加这行
     collectedBy: 'me'
 });
             localStorage.setItem('collectedMessages', JSON.stringify(collected));
@@ -636,6 +637,7 @@ b.addEventListener('contextmenu', function(e) {
     sender: m.sender,
     content: m.type === 'pat' ? '👋 ' + m.content : m.content,
     time: fmtTime(m.timestamp),
+    timestamp: m.timestamp,  // ← 加这行
     collectedBy: 'me'
 });
         localStorage.setItem('collectedMessages', JSON.stringify(collected));
@@ -723,13 +725,14 @@ if (Math.random() < 0.05) {
     var myMsgs = allMsgs.filter(function(x) { return x.sender === 'me' && x.type === 'text'; });
     if (myMsgs.length > 0) {
         var pick = myMsgs[Math.floor(Math.random() * myMsgs.length)];
-        collected.push({
-            id: Date.now(),
-            sender: 'me',
-            content: pick.content,
-            time: fmtTime(pick.timestamp),
-            collectedBy: 'qin'
-        });
+       collected.push({
+    id: Date.now(),
+    sender: 'me',
+    content: pick.content,
+    time: fmtTime(pick.timestamp),
+    timestamp: pick.timestamp,
+    collectedBy: 'qin'
+});
         localStorage.setItem('collectedMessages', JSON.stringify(collected));
     }
 }
