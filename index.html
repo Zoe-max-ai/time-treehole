@@ -1386,25 +1386,38 @@ async function renderWishSubContent() {
         container.innerHTML = h;
     } else {
         // 收藏
-        var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
-        var h = '';
-        if (collected.length === 0) {
-            h = '<p style="color:#ccc;text-align:center;padding:40px;">💬 还没有收藏，长按聊天消息可以收藏哦</p>';
-        } else {
-            collected.slice().reverse().forEach(function(item) {
-                h += '<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:10px;border:1px solid #f0ece8;">' +
-                    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
-                    '<img src="' + (item.sender === 'me' ? getAvatar('me') : getAvatar('contact')) + '" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">' +
-                    '<span style="font-size:13px;font-weight:500;color:#333;">' + (item.sender === 'me' ? S.myName : S.contactName) + '</span>' +
-                    '<span style="font-size:10px;color:#ccc;margin-left:auto;">' + item.time + '</span>' +
-                    '<span style="font-size:10px;color:' + (item.collectedBy === 'qin' ? '#d4a8b8' : '#999') + ';margin-left:4px;">' + (item.collectedBy === 'qin' ? '秦彻收藏' : '笑笑收藏') + '</span>' +
-                    '<span onclick="deleteCollected(' + item.id + ')" style="cursor:pointer;color:#d4a8b8;font-size:12px;">✕</span>' +
-                    '</div>' +
-                    '<div style="font-size:14px;color:#444;line-height:1.5;">' + item.content + '</div>' +
-                    '</div>';
-            });
-        }
-        container.innerHTML = '<div style="width:100%;max-width:400px;">' + h + '</div>';
+       var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
+var h = '';
+if (collected.length === 0) {
+    h = '<p style="color:#ccc;text-align:center;padding:40px;">💬 还没有收藏，长按聊天消息可以收藏哦</p>';
+} else {
+    // 按天分组
+    var dayGroups = {};
+    collected.forEach(function(item) {
+        var ts = item.timestamp || Date.now();
+        var d = new Date(ts);
+        var key = d.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
+        if (!dayGroups[key]) dayGroups[key] = [];
+        dayGroups[key].push(item);
+    });
+
+    Object.keys(dayGroups).sort().reverse().forEach(function(day) {
+        h += '<div style="font-size:12px;color:#999;margin:10px 0 6px;text-align:center;">' + day + '</div>';
+        dayGroups[day].reverse().forEach(function(item) {
+            h += '<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:10px;border:1px solid #f0ece8;">' +
+                '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
+                '<img src="' + (item.sender === 'me' ? getAvatar('me') : getAvatar('contact')) + '" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">' +
+                '<span style="font-size:13px;font-weight:500;color:#333;">' + (item.sender === 'me' ? S.myName : S.contactName) + '</span>' +
+                '<span style="font-size:10px;color:#ccc;margin-left:auto;">' + fmtTime(item.timestamp || Date.now()) + '</span>' +
+                '<span style="font-size:10px;color:' + (item.collectedBy === 'qin' ? '#d4a8b8' : '#999') + ';margin-left:4px;">' + (item.collectedBy === 'qin' ? '秦彻收藏' : '笑笑收藏') + '</span>' +
+                '<span onclick="deleteCollected(' + item.id + ')" style="cursor:pointer;color:#d4a8b8;font-size:12px;">✕</span>' +
+                '</div>' +
+                '<div style="font-size:14px;color:#444;line-height:1.5;">' + item.content + '</div>' +
+                '</div>';
+        });
+    });
+}
+container.innerHTML = '<div style="width:100%;max-width:400px;">' + h + '</div>';
     }
 }
 
