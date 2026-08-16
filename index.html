@@ -314,6 +314,55 @@ body.light-text .home-footer {
 body.light-text #themeToggleBtn {
     color: #fff !important;
 }
+
+/* 私密锁 */
+#lockInputPanel {
+    position: fixed;
+    bottom: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 16px;
+    padding: 16px;
+    z-index: 99999;
+    transition: bottom 0.3s ease;
+    box-shadow: 0 -4px 30px rgba(0,0,0,0.1);
+}
+#lockInputPanel.show {
+    bottom: 40px;
+}
+#lockInputPanel input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1.5px solid #e8e0d8;
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 8px;
+    outline: none;
+    box-sizing: border-box;
+}
+#lockInputPanel.shake {
+    animation: lockShake 0.3s ease;
+}
+@keyframes lockShake {
+    0%,100% { transform: translateX(-50%); }
+    25% { transform: translateX(calc(-50% - 6px)); }
+    75% { transform: translateX(calc(-50% + 6px)); }
+}
+@keyframes lockDenyFlash {
+    0% { box-shadow: 0 0 0 0 rgba(255,71,87,0.4); }
+    100% { box-shadow: 0 0 0 8px rgba(255,71,87,0); }
+}
+.lock-denied {
+    animation: lockDenyFlash 0.3s ease;
+}
+.home-footer.lock-shrink {
+    transform: scale(0.97);
+    color: #555 !important;
+    transition: transform 0.1s, color 0.12s;
+}
     </style>
 </head>
 <body>
@@ -352,7 +401,7 @@ body.light-text #themeToggleBtn {
 <div class="home-avatar-group"><div><img class="home-avatar-img" id="homeContactAvatar" src=""><div class="home-avatar-name" id="homeContactName">秦彻</div></div><div class="home-heart">💕</div><div><img class="home-avatar-img me" id="homeMyAvatar" src=""><div class="home-avatar-name" id="homeMyName">笑笑</div></div></div><div class="home-status-tag"><span class="home-status-dot"></span><span id="homeStatusText">在线</span></div><div class="home-mood-preview" id="homeMoodPreview"></div></div>
     <div class="home-divider"><span class="line"></span><span class="label">我们的时光</span><span class="line"></span></div>
     <div class="home-grid-scroll">
-<div class="home-card" onclick="openHisRoom()">
+<div class="home-card" onclick="checkLock(this, openHisRoom)">
     <div class="card-icon">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5">
             <path d="M3 12L5 10L12 3L19 10L21 12"/>
@@ -362,19 +411,19 @@ body.light-text #themeToggleBtn {
     </div>
     <div class="card-title">他的房间</div>
 </div>
-        <div class="home-card" onclick="openChatPage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="card-title">聊天</div></div>
+        <div class="home-card" onclick="checkLock(this, openChatPage)"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="card-title">聊天</div></div>
         <div class="home-card" onclick="openOurUniverse()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="card-title">我们的宇宙</div></div>
         <div class="home-card" onclick="openWordCardLibrary()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M4 4a2 2 0 0 1 2-2h10l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><polyline points="16 2 16 8 22 8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="14" y2="16"/></svg></div><div class="card-title">字卡库</div></div>
-         <div class="home-card" onclick="openWishPage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M4 4a2 2 0 0 1 2-2h10l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><polyline points="16 2 16 8 22 8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="14" y2="16"/></svg></div><div class="card-title">许愿便利贴</div></div>
+         <div class="home-card" onclick="checkLock(this, openWishPage)"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M4 4a2 2 0 0 1 2-2h10l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><polyline points="16 2 16 8 22 8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="14" y2="16"/></svg></div><div class="card-title">许愿便利贴</div></div>
         <div class="home-card" onclick="openAnniversaryPage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="card-title">纪念日</div></div>
-        <div class="home-card" onclick="openChoicePage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div class="card-title">如果你知道</div></div>
+        <div class="home-card" onclick="checkLock(this, openChoicePage)"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div class="card-title">如果你知道</div></div>
         <div class="home-card" onclick="openTarotPage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4" y1="4" x2="5.5" y2="5.5"/><line x1="18.5" y1="18.5" x2="20" y2="20"/><line x1="20" y1="4" x2="18.5" y2="5.5"/><line x1="5.5" y1="18.5" x2="4" y2="20"/><circle cx="12" cy="12" r="3"/></svg></div><div class="card-title">塔罗占卜</div></div>
        <div class="home-card" onclick="openEmojiManage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div><div class="card-title">表情包管理</div></div>
                <div class="home-card" onclick="openCallLogPage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div><div class="card-title">通话记录</div></div>
               <div class="home-card" onclick="openModuleSettings()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><div class="card-title">模块设置</div></div>
         <div class="home-card" onclick="openDataManage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg></div><div class="card-title">数据管理</div></div>
     </div>
-    <div class="home-footer">🌳 秦彻和笑笑的时光树洞 2.0</div>
+    <div class="home-footer" id="homeFooter">🌳 秦彻和笑笑的时光树洞 2.0</div>
 </div></div>
 
 <div class="page" id="chatPage"><div style="height:100%;display:flex;flex-direction:column;">
@@ -689,6 +738,146 @@ function renderMsg(m){
 
     ca.appendChild(w);
     scrollBottom();
+}
+
+// ============ 私密锁 ============
+var lockState = {
+    unlocked: false,
+    password: null,
+    changingPassword: false
+};
+
+function initLock() {
+    var footer = document.getElementById('homeFooter');
+    if (!footer) return;
+
+    var savedPass = sessionStorage.getItem('lockPassword');
+    var savedState = sessionStorage.getItem('lockUnlocked');
+    if (savedPass) lockState.password = savedPass;
+    if (savedState === 'true') lockState.unlocked = true;
+
+    var clickCount = 0;
+    var clickTimer = null;
+    footer.addEventListener('click', function() {
+        clickCount++;
+        if (clickCount === 1) {
+            clickTimer = setTimeout(function() { clickCount = 0; }, 500);
+        }
+        if (clickCount >= 3) {
+            clickCount = 0;
+            clearTimeout(clickTimer);
+            showLockPanel();
+        }
+    });
+
+    var pressTimer = null;
+    footer.addEventListener('touchstart', function() {
+        pressTimer = setTimeout(function() {
+            lockNow();
+        }, 2000);
+    });
+    footer.addEventListener('touchend', function() { clearTimeout(pressTimer); });
+    footer.addEventListener('touchmove', function() { clearTimeout(pressTimer); });
+
+    var input = document.getElementById('lockPasswordInput');
+    if (input) {
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') submitLockPassword();
+        });
+    }
+}
+
+function showLockPanel() {
+    var panel = document.getElementById('lockInputPanel');
+    if (!panel) return;
+    panel.classList.add('show');
+    var input = document.getElementById('lockPasswordInput');
+    if (input) {
+        input.value = '';
+        if (!lockState.password) {
+            input.placeholder = '设置6位通行令';
+        } else if (lockState.unlocked) {
+            input.placeholder = '输入旧通行令';
+            lockState.changingPassword = true;
+        } else {
+            input.placeholder = '输入通行令';
+        }
+        setTimeout(function() { input.focus(); }, 300);
+    }
+}
+
+function hideLockPanel() {
+    var panel = document.getElementById('lockInputPanel');
+    if (panel) panel.classList.remove('show');
+}
+
+function submitLockPassword() {
+    var input = document.getElementById('lockPasswordInput');
+    if (!input) return;
+    var val = input.value.trim();
+
+    if (!lockState.password) {
+        if (val.length !== 6 || !/^\d{6}$/.test(val)) { shakeLockPanel(); return; }
+        lockState.password = val;
+        sessionStorage.setItem('lockPassword', val);
+        lockState.unlocked = true;
+        sessionStorage.setItem('lockUnlocked', 'true');
+        hideLockPanel();
+        return;
+    }
+
+    if (lockState.unlocked && lockState.changingPassword) {
+        if (val === lockState.password) {
+            lockState.changingPassword = false;
+            lockState.password = null;
+            sessionStorage.removeItem('lockPassword');
+            input.value = '';
+            input.placeholder = '设置新通行令';
+            showToast('✅ 旧通行令正确，请输入新通行令');
+        } else {
+            shakeLockPanel();
+        }
+        return;
+    }
+
+    if (val === lockState.password) {
+        lockState.unlocked = true;
+        sessionStorage.setItem('lockUnlocked', 'true');
+        hideLockPanel();
+    } else {
+        shakeLockPanel();
+    }
+}
+
+function shakeLockPanel() {
+    var panel = document.getElementById('lockInputPanel');
+    if (!panel) return;
+    panel.classList.add('shake');
+    setTimeout(function() { panel.classList.remove('shake'); }, 300);
+}
+
+function lockNow() {
+    lockState.unlocked = false;
+    sessionStorage.setItem('lockUnlocked', 'false');
+    var footer = document.getElementById('homeFooter');
+    if (footer) {
+        footer.classList.add('lock-shrink');
+        setTimeout(function() { footer.classList.remove('lock-shrink'); }, 120);
+    }
+    if (navigator.vibrate) { navigator.vibrate(50); }
+}
+
+function isLocked() {
+    return !lockState.unlocked;
+}
+
+function checkLock(card, fn) {
+    if (isLocked()) {
+        card.classList.add('lock-denied');
+        setTimeout(function() { card.classList.remove('lock-denied'); }, 300);
+        return;
+    }
+    fn();
 }
 
 // ============ 消息菜单 ============
@@ -3109,7 +3298,8 @@ try {
 if (localStorage.getItem('homeLightText') === 'true') {
     document.body.classList.add('light-text');
 }
-        updateHome();
+initLock();        
+updateHome();
         startAutoSendIfNeeded();
         console.log('✅ 2.0 启动完成');
         
@@ -3270,9 +3460,18 @@ window.autoReplyToUser = autoReplyToUser;
 window.toggleHomeTextColor = toggleHomeTextColor;
 window.showMessageMenu = showMessageMenu;
 window.deleteMessage = deleteMessage;
+window.checkLock = checkLock;
+window.initLock = initLock;
+window.submitLockPassword = submitLockPassword;
+window.showLockPanel = showLockPanel;
+window.hideLockPanel = hideLockPanel;
+window.lockNow = lockNow;
 
 init();
 })();
 </script>
+<div id="lockInputPanel">
+    <input type="password" id="lockPasswordInput" maxlength="6" placeholder="通行令">
+</div>
 </body>
 </html>
