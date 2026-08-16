@@ -602,54 +602,207 @@ function triggerPat(name,text){const el=document.createElement('div');el.classNa
 function compressImage(file,maxWidth,maxHeight){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=function(e){const img=new Image();img.onload=function(){const canvas=document.createElement('canvas');let width=img.width;let height=img.height;if(width>maxWidth||height>maxHeight){const ratio=Math.min(maxWidth/width,maxHeight/height);width=Math.floor(width*ratio);height=Math.floor(height*ratio);}canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,width,height);resolve(canvas.toDataURL('image/jpeg',0.6));};img.onerror=reject;img.src=e.target.result;};reader.onerror=reject;reader.readAsDataURL(file);});}
 
 // ============ 聊天 ============
-async function openChatPage(){showPage('chatPage');document.getElementById('chatTopQuote').textContent=S.topQuote;await loadMessages();loadEmojiPanel();applyBubbleStyle();startAutoSendIfNeeded();}
-async function loadMessages(){const msgs=await dbGetAll('messages');msgs.sort((a,b)=>a.timestamp-b.timestamp);const ca=document.getElementById('chatArea');ca.innerHTML='';if(msgs.length===0){ca.innerHTML='<div style="text-align:center;color:#ccc;padding:40px;">💬 开始你们的对话吧</div>';return;}msgs.forEach(m=>renderMsg(m));scrollBottom();setTimeout(()=>applyBubbleStyle(),100);}
-function renderMsg(m){const ca=document.getElementById('chatArea');if(m.type==='system'){const s=document.createElement('div');s.className='system-msg';s.textContent=m.content;ca.appendChild(s);return;}const w=document.createElement('div');w.className='message-wrapper '+(m.sender==='me'?'right':'left');const av=document.createElement('img');av.className='message-avatar';av.src=m.sender==='me'?getAvatar('me'):getAvatar('contact');if(m.sender==='other')av.onclick=function(){openProfile();};const b=document.createElement('div');b.className='bubble';const preset=BUBBLE_PRESETS.find(p=>p.id===S.bubbleStyle)||BUBBLE_PRESETS[0];if(m.sender==='me'){b.style.background=preset.myBg;b.style.color=preset.myText;}else{b.style.background=preset.otherBg;b.style.color=preset.otherText;}if(m.type==='pat'){b.classList.add('pat-bubble');b.innerHTML='<span>👋 <b>'+(m.sender==='me'?S.myName:S.contactName)+'</b> '+m.content+'</span>';}else if(m.type==='emoji'||m.type==='image'){const img=document.createElement('img');img.src=m.content;img.style.maxWidth='150px';img.style.maxHeight='150px';img.style.objectFit='contain';img.style.borderRadius='6px';b.appendChild(img);}else{b.textContent=m.content;}const t=document.createElement('div');t.className='message-time';t.textContent=fmtTime(m.timestamp);w.appendChild(av);w.appendChild(b);w.appendChild(t);
-// 长按收藏
-b.addEventListener('touchstart', function(e) {
-    var startTime = Date.now();
-    var bubble = this;
-    var timer = setTimeout(function() {
-        if (confirm('收藏这条消息？')) {
-            var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
-           collected.push({
-    id: Date.now(),
-    sender: m.sender,
-    content: m.type === 'pat' ? '👋 ' + m.content : m.content,
-    time: fmtTime(m.timestamp),
-    timestamp: m.timestamp,  // ← 加这行
-    collectedBy: 'me'
-});
-            localStorage.setItem('collectedMessages', JSON.stringify(collected));
-            showToast('✅ 已收藏到许愿页');
-        }
-    }, 600);
-    bubble.addEventListener('touchend', function() { clearTimeout(timer); }, { once: true });
-    bubble.addEventListener('touchmove', function() { clearTimeout(timer); }, { once: true });
-});
-// 电脑端右键收藏
-b.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-    if (confirm('收藏这条消息？')) {
-        var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
-        collected.push({
-    id: Date.now(),
-    sender: m.sender,
-    content: m.type === 'pat' ? '👋 ' + m.content : m.content,
-    time: fmtTime(m.timestamp),
-    timestamp: m.timestamp,  // ← 加这行
-    collectedBy: 'me'
-});
-        localStorage.setItem('collectedMessages', JSON.stringify(collected));
-        showToast('✅ 已收藏到许愿页');
+async function openChatPage(){
+    showPage('chatPage');
+    document.getElementById('chatTopQuote').textContent = S.topQuote;
+    await loadMessages();
+    loadEmojiPanel();
+    applyBubbleStyle();
+    startAutoSendIfNeeded();
+}
+
+async function loadMessages(){
+    const msgs = await dbGetAll('messages');
+    msgs.sort((a,b) => a.timestamp - b.timestamp);
+    const ca = document.getElementById('chatArea');
+    ca.innerHTML = '';
+    if(msgs.length === 0){
+        ca.innerHTML = '<div style="text-align:center;color:#ccc;padding:40px;">💬 开始你们的对话吧</div>';
+        return;
     }
-});
-ca.appendChild(w);scrollBottom();}
-async function sendMessage(){const input=document.getElementById('messageInput');const c=input.value.trim();if(!c)return;const msg={sender:'me',content:c,type:'text',timestamp:Date.now()};const id=await dbPut('messages',msg);msg.id=id;renderMsg(msg);scrollBottom();input.value='';autoReply();}
+    msgs.forEach(m => renderMsg(m));
+    scrollBottom();
+    setTimeout(() => applyBubbleStyle(), 100);
+}
+
+function renderMsg(m){
+    const ca = document.getElementById('chatArea');
+    if(m.type === 'system'){
+        const s = document.createElement('div');
+        s.className = 'system-msg';
+        s.textContent = m.content;
+        ca.appendChild(s);
+        return;
+    }
+    const w = document.createElement('div');
+    w.className = 'message-wrapper ' + (m.sender === 'me' ? 'right' : 'left');
+    const av = document.createElement('img');
+    av.className = 'message-avatar';
+    av.src = m.sender === 'me' ? getAvatar('me') : getAvatar('contact');
+    if(m.sender === 'other') av.onclick = function(){ openProfile(); };
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const preset = BUBBLE_PRESETS.find(p => p.id === S.bubbleStyle) || BUBBLE_PRESETS[0];
+    if(m.sender === 'me'){
+        b.style.background = preset.myBg;
+        b.style.color = preset.myText;
+    } else {
+        b.style.background = preset.otherBg;
+        b.style.color = preset.otherText;
+    }
+    if(m.type === 'pat'){
+        b.classList.add('pat-bubble');
+        b.innerHTML = '<span>👋 <b>' + (m.sender === 'me' ? S.myName : S.contactName) + '</b> ' + m.content + '</span>';
+    } else if(m.type === 'emoji' || m.type === 'image'){
+        const img = document.createElement('img');
+        img.src = m.content;
+        img.style.maxWidth = '150px';
+        img.style.maxHeight = '150px';
+        img.style.objectFit = 'contain';
+        img.style.borderRadius = '6px';
+        b.appendChild(img);
+    } else {
+        b.textContent = m.content;
+    }
+    const t = document.createElement('div');
+    t.className = 'message-time';
+    t.textContent = fmtTime(m.timestamp);
+    w.appendChild(av);
+    w.appendChild(b);
+    w.appendChild(t);
+
+    // 长按/右键菜单
+    b.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        showMessageMenu(m, b, e);
+    });
+    b.addEventListener('touchstart', function(e) {
+        var startTime = Date.now();
+        var bubble = this;
+        var timer = setTimeout(function() {
+            showMessageMenu(m, bubble, e);
+        }, 600);
+        bubble.addEventListener('touchend', function() { clearTimeout(timer); }, { once: true });
+        bubble.addEventListener('touchmove', function() { clearTimeout(timer); }, { once: true });
+    });
+
+    ca.appendChild(w);
+    scrollBottom();
+}
+
+// ============ 消息菜单 ============
+function showMessageMenu(m, bubble, e) {
+    var oldMenu = document.getElementById('msgContextMenu');
+    if (oldMenu) oldMenu.remove();
+
+    var menu = document.createElement('div');
+    menu.id = 'msgContextMenu';
+    menu.style.cssText = 'position:fixed;z-index:99999;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.2);padding:6px 0;min-width:120px;';
+
+    var withinTwoMin = (Date.now() - m.timestamp) < 120000;
+    var items;
+    if (m.sender === 'me' && withinTwoMin) {
+        items = [
+            { label: '📋 复制', action: 'copy' },
+            { label: '💬 收藏', action: 'collect' },
+            { label: '↩️ 撤回', action: 'recall' }
+        ];
+    } else {
+        items = [
+            { label: '📋 复制', action: 'copy' },
+            { label: '💬 收藏', action: 'collect' },
+            { label: '🗑 删除', action: 'delete' }
+        ];
+    }
+
+    items.forEach(function(item) {
+        var div = document.createElement('div');
+        div.textContent = item.label;
+        div.style.cssText = 'padding:10px 16px;font-size:14px;cursor:pointer;color:#333;';
+        div.onmouseover = function() { this.style.background = '#f5f5f5'; };
+        div.onmouseout = function() { this.style.background = 'transparent'; };
+        div.onclick = function() {
+            if (item.action === 'copy') {
+                navigator.clipboard.writeText(m.content).then(function() {
+                    showToast('✅ 已复制');
+                }).catch(function() {
+                    showToast('❌ 复制失败');
+                });
+            } else if (item.action === 'collect') {
+                var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
+                collected.push({
+                    id: Date.now(),
+                    sender: m.sender,
+                    content: m.type === 'pat' ? '👋 ' + m.content : m.content,
+                    time: fmtTime(m.timestamp),
+                    timestamp: m.timestamp,
+                    collectedBy: 'me'
+                });
+                localStorage.setItem('collectedMessages', JSON.stringify(collected));
+                showToast('✅ 已收藏到许愿页');
+            } else if (item.action === 'recall') {
+                if (confirm('撤回这条消息？')) {
+                    navigator.clipboard.writeText(m.content).then(function() {
+                        deleteMessage(m.id);
+                    }).catch(function() {
+                        deleteMessage(m.id);
+                    });
+                }
+            } else if (item.action === 'delete') {
+                if (confirm('确定删除这条消息？')) {
+                    deleteMessage(m.id);
+                }
+            }
+            menu.remove();
+        };
+        menu.appendChild(div);
+    });
+
+    var x = e.clientX || window.innerWidth / 2;
+    var y = e.clientY || window.innerHeight / 2;
+    menu.style.left = Math.min(x, window.innerWidth - 140) + 'px';
+    menu.style.top = Math.min(y, window.innerHeight - 150) + 'px';
+
+    document.body.appendChild(menu);
+
+    document.addEventListener('click', function closeMenu(ev) {
+        if (!menu.contains(ev.target)) {
+            menu.remove();
+            document.removeEventListener('click', closeMenu);
+        }
+    });
+}
+
+// ============ 删除消息 ============
+async function deleteMessage(msgId) {
+    var msgs = await dbGetAll('messages');
+    msgs = msgs.filter(function(x) { return String(x.id) !== String(msgId); });
+    await dbClear('messages');
+    for (var i = 0; i < msgs.length; i++) {
+        await dbPut('messages', msgs[i]);
+    }
+    loadMessages();
+    showToast('🗑 已删除');
+}
+
+// ============ 发送消息 ============
+async function sendMessage(){
+    const input = document.getElementById('messageInput');
+    const c = input.value.trim();
+    if(!c) return;
+    const msg = { sender:'me', content:c, type:'text', timestamp:Date.now() };
+    const id = await dbPut('messages', msg);
+    msg.id = id;
+    renderMsg(msg);
+    scrollBottom();
+    input.value = '';
+    autoReply();
+}
+
+// ============ 自动回复 ============
 async function autoReply(){
     const cs = S.chatSettings;
     
-    // 已读回执
     if (cs.readReceipt !== 'none') {
         setTimeout(() => {
             if (cs.readReceipt === 'graphic') {
@@ -669,15 +822,12 @@ async function autoReply(){
         }, 800 + Math.random() * 1200);
     }
     
-    // 已读不回（精简版）
     if (cs.readNotReply) {
         var roll = Math.random();
         if (roll < 0.5) {
-            // 50%：已读，沉默
             addSysMsg('📖 秦彻已读');
             return;
         } else if (roll < 0.7) {
-            // 20%：正在输入又删掉
             var ti = document.createElement('div');
             ti.className = 'typing-indicator';
             ti.textContent = '秦彻正在输入...';
@@ -689,7 +839,6 @@ async function autoReply(){
             }, 2000);
             return;
         }
-        // 30%：正常回复，继续往下走
     }
     
     const min = parseInt(S.minReplyTime) || 1,
@@ -712,30 +861,41 @@ async function autoReply(){
         if (ti) ti.remove();
         
         for (let i = 0; i < cnt; i++) {
-            let c = await smartComposeReply();
+let c = await smartComposeReply();
+if (cs.quoteReply && Math.random() < 0.01) {
+    var allMsgs = await dbGetAll('messages');
+    var myMsgs = allMsgs.filter(function(x) { return x.sender === 'me' && x.type === 'text'; });
+    if (myMsgs.length > 0) {
+        var randomMsg = myMsgs[Math.floor(Math.random() * myMsgs.length)];
+        if (randomMsg && randomMsg.content) {
+            c = '「' + randomMsg.content + '」\n' + c;
+        }
+    }
+}
             const m = { sender: 'other', content: c, type: 'text', timestamp: Date.now() };
             const id = await dbPut('messages', m);
             m.id = id;
             renderMsg(m);
             scrollBottom();
-// 秦彻随机收藏你说的话
-if (Math.random() < 0.05) {
-    var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
-    var allMsgs = await dbGetAll('messages');
-    var myMsgs = allMsgs.filter(function(x) { return x.sender === 'me' && x.type === 'text'; });
-    if (myMsgs.length > 0) {
-        var pick = myMsgs[Math.floor(Math.random() * myMsgs.length)];
-       collected.push({
-    id: Date.now(),
-    sender: 'me',
-    content: pick.content,
-    time: fmtTime(pick.timestamp),
-    timestamp: pick.timestamp,
-    collectedBy: 'qin'
-});
-        localStorage.setItem('collectedMessages', JSON.stringify(collected));
-    }
-}
+            
+            // 秦彻随机收藏你说的话
+            if (Math.random() < 0.05) {
+                var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
+                var allMsgs = await dbGetAll('messages');
+                var myMsgs = allMsgs.filter(function(x) { return x.sender === 'me' && x.type === 'text'; });
+                if (myMsgs.length > 0) {
+                    var pick = myMsgs[Math.floor(Math.random() * myMsgs.length)];
+                    collected.push({
+                        id: Date.now(),
+                        sender: 'me',
+                        content: pick.content,
+                        time: fmtTime(pick.timestamp),
+                        timestamp: pick.timestamp,
+                        collectedBy: 'qin'
+                    });
+                    localStorage.setItem('collectedMessages', JSON.stringify(collected));
+                }
+            }
             
             // 发表情
             if (cs.emojiMix && Math.random() < 0.01) {
@@ -752,23 +912,28 @@ if (Math.random() < 0.05) {
                 }
             }
             
-// 👇 新增：拍一拍
-if (Math.random() < 0.01 && patOptions.length > 0) {
-    var pat = patOptions[Math.floor(Math.random() * patOptions.length)];
-    var patMsg = { sender: 'other', content: pat, type: 'pat', timestamp: Date.now() };
-    var patId = await dbPut('messages', patMsg);
-    patMsg.id = patId;
-    renderMsg(patMsg);
-    scrollBottom();
-    triggerPat(S.contactName, pat);
+            // 拍一拍
+            if (Math.random() < 0.01 && patOptions.length > 0) {
+                var pat = patOptions[Math.floor(Math.random() * patOptions.length)];
+                var patMsg = { sender: 'other', content: pat, type: 'pat', timestamp: Date.now() };
+                var patId = await dbPut('messages', patMsg);
+                patMsg.id = patId;
+                renderMsg(patMsg);
+                scrollBottom();
+                triggerPat(S.contactName, pat);
+            }
+            
+            // 模拟来电
+            if (cs.simCall && Math.random() < 0.002 && callState === 'idle') {
+                setTimeout(function() { startCallFromQinChe(); }, 2000);
+            }
+            
+            if (i < cnt - 1) await new Promise(r => setTimeout(r, 800 + Math.random() * 3000));
+        }
+    }, delay);
 }
 
-// 👇 新增：模拟来电
-if (cs.simCall && Math.random() < 0.002 && callState === 'idle') {
-    setTimeout(function() { startCallFromQinChe(); }, 2000);
-}
-if(i<cnt-1)await new Promise(r=>setTimeout(r,800+Math.random()*3000));}},delay);}
-
+// ============ 获取随机回复（未使用） ============
 async function getRandomReply(){
     const sg = JSON.parse(await getCal('chatGroups','[]'));
     const cards = await dbGetAll('wordcards');
@@ -778,12 +943,20 @@ async function getRandomReply(){
         if(!c || !c.content || c.content === '__GROUP_PLACEHOLDER__' || c.content.length <= 1) return false;
         if(dids.has(String(c.id))) return false;
         if(sg.length > 0) return sg.includes(c.groupName) || sg.includes(c.groupId);
-        return false; // ← 改这里：没勾选任何分组时，不回复
+        return false;
     });
     if(valid.length === 0) return '😅 请先在模块设置里勾选聊天分组～';
     return valid[Math.floor(Math.random() * valid.length)].content;
 }
-async function addSysMsg(c){const m={type:'system',content:c,timestamp:Date.now()};await dbPut('messages',m);renderMsg(m);}
+
+// ============ 系统消息 ============
+async function addSysMsg(c){
+    const m = { type:'system', content:c, timestamp:Date.now() };
+    await dbPut('messages', m);
+    renderMsg(m);
+}
+
+// ============ 拼字卡回复 ============
 async function smartComposeReply(){
     const sg = JSON.parse(await getCal('chatGroups','[]'));
     const ac = await dbGetAll('wordcards');
@@ -801,26 +974,32 @@ async function smartComposeReply(){
     const shuffled = vc.sort(() => Math.random() - 0.5);
     var selected = shuffled.slice(0, count);
     
-    // 随机删一张
     if (selected.length > 1 && Math.random() < Math.random()) {
         var del = Math.floor(Math.random() * selected.length);
         selected.splice(del, 1);
     }
-    
-    // 随机重复一张
     if (selected.length > 0 && Math.random() < Math.random()) {
         var dup = selected[Math.floor(Math.random() * selected.length)];
         selected.push(dup);
     }
-    
     if (selected.length === 0) {
         selected.push(vc[Math.floor(Math.random() * vc.length)]);
     }
-    
     return selected.map(c => c.content).join(' ');
 }
-async function handleImageMessage(event){const f=event.target.files[0];if(!f)return;const d=await fileToDataUrl(f);const msg={sender:'me',content:d,type:'image',timestamp:Date.now()};const id=await dbPut('messages',msg);msg.id=id;renderMsg(msg);autoReply();event.target.value='';}
 
+// ============ 图片消息 ============
+async function handleImageMessage(event){
+    const f = event.target.files[0];
+    if(!f) return;
+    const d = await fileToDataUrl(f);
+    const msg = { sender:'me', content:d, type:'image', timestamp:Date.now() };
+    const id = await dbPut('messages', msg);
+    msg.id = id;
+    renderMsg(msg);
+    autoReply();
+    event.target.value = '';
+}
 // ============ 表情面板 ============
 async function getEmojiGroups() {
     const all = await idbGetAll('calendarSettings');
@@ -3088,6 +3267,8 @@ window.deleteCollected = deleteCollected;
 window.renderWishSubContent = renderWishSubContent;
 window.autoReplyToUser = autoReplyToUser;
 window.toggleHomeTextColor = toggleHomeTextColor;
+window.showMessageMenu = showMessageMenu;
+window.deleteMessage = deleteMessage;
 
 init();
 })();
