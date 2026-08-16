@@ -676,15 +676,16 @@ function renderMsg(m){
         e.preventDefault();
         showMessageMenu(m, b, e);
     });
-    b.addEventListener('touchstart', function(e) {
-        var startTime = Date.now();
-        var bubble = this;
-        var timer = setTimeout(function() {
-            showMessageMenu(m, bubble, e);
-        }, 600);
-        bubble.addEventListener('touchend', function() { clearTimeout(timer); }, { once: true });
-        bubble.addEventListener('touchmove', function() { clearTimeout(timer); }, { once: true });
-    });
+   b.addEventListener('touchstart', function(e) {
+    var startTime = Date.now();
+    var bubble = this;
+    var touch = e.touches[0];
+    var timer = setTimeout(function() {
+        showMessageMenu(m, bubble, touch);
+    }, 600);
+    bubble.addEventListener('touchend', function() { clearTimeout(timer); }, { once: true });
+    bubble.addEventListener('touchmove', function() { clearTimeout(timer); }, { once: true });
+});
 
     ca.appendChild(w);
     scrollBottom();
