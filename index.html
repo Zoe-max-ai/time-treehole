@@ -660,16 +660,35 @@ async function openChatPage(){
     startAutoSendIfNeeded();
 }
 
-async function loadMessages(){
+var chatLoadCount = 100; // 每次加载数量
+
+async function loadMessages() {
     const msgs = await dbGetAll('messages');
     msgs.sort((a,b) => a.timestamp - b.timestamp);
     const ca = document.getElementById('chatArea');
     ca.innerHTML = '';
-    if(msgs.length === 0){
+    
+    if (msgs.length === 0) {
         ca.innerHTML = '<div style="text-align:center;color:#ccc;padding:40px;">💬 开始你们的对话吧</div>';
         return;
     }
-    msgs.forEach(m => renderMsg(m));
+    
+    // 只取最后100条
+    var recent = msgs.slice(-chatLoadCount);
+    
+    // 如果还有更早的消息，顶部加"加载更多"按钮
+    if (msgs.length > 100) {
+        var moreBtn = document.createElement('div');
+        moreBtn.style.cssText = 'text-align:center;padding:10px;color:#d4a8b8;font-size:12px;cursor:pointer;';
+        moreBtn.textContent = '⬆ 加载更早的消息（还有 ' + (msgs.length - chatLoadCount) + ' 条）';
+        moreBtn.onclick = function() {
+            chatLoadCount += 100;
+            loadMessages();
+        };
+        ca.appendChild(moreBtn);
+    }
+    
+    recent.forEach(m => renderMsg(m));
     scrollBottom();
     setTimeout(() => applyBubbleStyle(), 100);
 }
