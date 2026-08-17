@@ -2259,31 +2259,31 @@ async function changeMonth(delta){const now=new Date();const cy=parseInt(await g
 function openChoicePage(){showPage('choicePage');renderChoicePage();}
 async function renderChoicePage() {
     const history = await dbGetAll('choiceHistory');
+    const savedResult = localStorage.getItem('choiceResult') || '';
+    
     let hh = '';
     if (history.length === 0) {
         hh = '<div style="color:#ccc;font-size:13px;text-align:center;padding:16px;">还没有记录</div>';
     } else {
         history.slice().reverse().forEach(function(item) {
-            hh += '<div style="padding:10px 0;border-bottom:1px solid #f5f0eb;">' +
-                '<div style="font-size:13px;color:#999;">💭 ' + item.question + '</div>' +
+            hh += '<div style="padding:10px 0;border-bottom:1px solid #f5f0eb;position:relative;">' +
+                '<div style="font-size:13px;color:#999;padding-right:24px;">💭 ' + item.question + '</div>' +
                 '<div style="font-size:15px;color:#d4a8b8;font-weight:500;">💗 ' + item.choice + '</div>' +
                 '<div style="font-size:10px;color:#ccc;">' + item.time + '</div>' +
+                '<span onclick="deleteChoiceHistory(' + item.id + ')" style="position:absolute;top:8px;right:0;cursor:pointer;color:#d4a8b8;font-size:14px;">✕</span>' +
                 '</div>';
         });
     }
-    
+
     let h = '<div style="padding:16px;background:#f8f5f0;min-height:100vh;">' +
         '<div style="max-width:400px;margin:0 auto;">' +
-        // 标题 + 副标题
         '<div style="text-align:center;margin-bottom:20px;">' +
-    '<div style="font-size:22px;font-weight:600;color:#d4a8b8;">如果你知道，请给我答案</div>' +
+        '<div style="font-size:22px;font-weight:600;color:#d4a8b8;">如果你知道，请给我答案</div>' +
         '</div>' +
-        // 问题输入
         '<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid #f0ece8;">' +
         '<div style="font-size:13px;color:#999;margin-bottom:8px;">✏️ 你在纠结什么？</div>' +
         '<input type="text" id="choiceQuestionInput" placeholder="输入你的问题..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
         '</div>' +
-        // 选项
         '<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid #f0ece8;">' +
         '<div style="font-size:13px;color:#999;margin-bottom:8px;">📋 选项</div>' +
         '<div id="choiceOptionsContainer">' +
@@ -2297,94 +2297,41 @@ async function renderChoicePage() {
         '<button onclick="addChoiceOption()" style="width:100%;padding:8px;border-radius:10px;border:2px dashed #e8e0d8;background:transparent;color:#999;font-size:13px;cursor:pointer;margin-bottom:10px;">➕ 添加更多选项</button>' +
         '<button onclick="makeChoice()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:15px;cursor:pointer;font-weight:500;">💗 让秦彻帮我选</button>' +
         '</div>' +
-        // 结果框
-        '<div id="choiceResultBox" style="display:none;padding:16px;background:#fdf5f7;border-radius:12px;border:2px solid #d4a8b8;text-align:center;margin-bottom:12px;">' +
-        '<div id="choiceResultText" style="font-size:20px;color:#d4a8b8;font-weight:600;"></div>' +
-        '</div>' +
-        // 历史记录
-        '<div style="background:#fff;border-radius:16px;padding:16px;border:1px solid #f0ece8;">' +
-        '<div style="font-size:13px;color:#999;margin-bottom:10px;">📜 历史记录</div>' +
-        hh +
-        '</div>' +
-        '</div>' +
-        '</div>';
-    
-    document.getElementById('choiceContent').innerHTML = h;
-}
-function addChoiceOption(){const container=document.getElementById('choiceOptionsContainer');const count=container.querySelectorAll('.choice-option-input').length;const label=String.fromCharCode(65+count);const row=document.createElement('div');row.style.cssText='display:flex;gap:6px;margin-bottom:6px;';row.innerHTML='<input type="text" class="choice-option-input" placeholder="选项'+label+'..." style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #e8e0d8;">';container.appendChild(row);row.querySelector('input').focus();}
-async function renderChoicePage() {
-    const history = await dbGetAll('choiceHistory');
-    
-    // 历史记录 HTML
-    let historyHtml = '';
-    if (history.length === 0) {
-        historyHtml = '<div style="color:#ccc;font-size:13px;text-align:center;padding:16px;">还没有记录</div>';
-    } else {
-        history.slice().reverse().forEach(function(item) {
-            historyHtml += '<div style="padding:10px 0;border-bottom:1px solid #f5f0eb;">' +
-                '<div style="font-size:13px;color:#999;">💭 ' + item.question + '</div>' +
-                '<div style="font-size:15px;color:#d4a8b8;font-weight:500;">💗 ' + item.choice + '</div>' +
-                '<div style="font-size:10px;color:#ccc;">' + item.time + '</div>' +
-                '</div>';
-        });
-    }
-
-    // 读取存储的结果文本（如果有）
-    const savedResult = localStorage.getItem('choiceResult') || '';
-
-    let html = '<div style="padding:16px;background:#f8f5f0;min-height:100vh;">' +
-        '<div style="max-width:400px;margin:0 auto;">' +
-        // 标题 + 副标题
-        '<div style="text-align:center;margin-bottom:20px;">' +
-     '<div style="font-size:22px;font-weight:600;color:#d4a8b8;">如果你知道，请给我答案</div>' +
-        '</div>' +
-        // 问题输入
-        '<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid #f0ece8;">' +
-        '<div style="font-size:13px;color:#999;margin-bottom:8px;">✏️ 你在纠结什么？</div>' +
-        '<input type="text" id="choiceQuestionInput" placeholder="输入你的问题..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
-        '</div>' +
-        // 选项
-        '<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid #f0ece8;">' +
-        '<div style="font-size:13px;color:#999;margin-bottom:8px;">📋 选项</div>' +
-        '<div id="choiceOptionsContainer">' +
-        '<div style="display:flex;gap:6px;margin-bottom:6px;width:100%;">' +
-        '<input type="text" class="choice-option-input" placeholder="选项A..." style="flex:1;width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
-        '</div>' +
-        '<div style="display:flex;gap:6px;margin-bottom:6px;width:100%;">' +
-        '<input type="text" class="choice-option-input" placeholder="选项B..." style="flex:1;width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
-        '</div>' +
-        '</div>' +
-        '<button onclick="addChoiceOption()" style="width:100%;padding:8px;border-radius:10px;border:2px dashed #e8e0d8;background:transparent;color:#999;font-size:13px;cursor:pointer;margin-bottom:10px;">➕ 添加更多选项</button>' +
-        '<button onclick="makeChoice()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:15px;cursor:pointer;font-weight:500;">💗 让秦彻帮我选</button>' +
-        '</div>' +
-        // 结果框
         '<div id="choiceResultBox" style="' + (savedResult ? 'display:block;' : 'display:none;') + 'padding:16px;background:#fdf5f7;border-radius:12px;border:2px solid #d4a8b8;text-align:center;margin-bottom:12px;">' +
         '<div style="font-size:13px;color:#999;margin-bottom:4px;">💗 秦彻的建议</div>' +
         '<div id="choiceResultText" style="font-size:20px;color:#d4a8b8;font-weight:600;">' + savedResult + '</div>' +
         '</div>' +
-        // 历史记录
         '<div style="background:#fff;border-radius:16px;padding:16px;border:1px solid #f0ece8;">' +
-        '<div style="font-size:13px;color:#999;margin-bottom:10px;">📜 历史记录</div>' +
-        historyHtml +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+        '<span style="font-size:13px;color:#999;">📜 历史记录</span>' +
+        '<button onclick="clearChoiceHistory()" style="padding:2px 12px;border-radius:12px;background:#f5f5f5;color:#999;border:none;font-size:11px;cursor:pointer;">清空</button>' +
+        '</div>' +
+        hh +
         '</div>' +
         '</div>' +
         '</div>';
 
-    document.getElementById('choiceContent').innerHTML = html;
-    
-    // 如果 savedResult 存在，确保显示
+    document.getElementById('choiceContent').innerHTML = h;
+
     if (savedResult) {
-        const rb = document.getElementById('choiceResultBox');
-        const rt = document.getElementById('choiceResultText');
-        if (rb) { rb.style.display = 'block'; }
-        if (rt) { rt.textContent = savedResult; }
+        var rb = document.getElementById('choiceResultBox');
+        var rt = document.getElementById('choiceResultText');
+        if (rb) rb.style.display = 'block';
+        if (rt) rt.textContent = savedResult;
     }
 }
+function addChoiceOption() {
+    const container = document.getElementById('choiceOptionsContainer');
+    const count = container.querySelectorAll('.choice-option-input').length;
+    const label = String.fromCharCode(65 + count);
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:6px;margin-bottom:6px;';
+    row.innerHTML = '<input type="text" class="choice-option-input" placeholder="选项' + label + '..." style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #e8e0d8;">';
+    container.appendChild(row);
+    row.querySelector('input').focus();
+}
 async function makeChoice() {
-    // 1. 获取问题
     const q = document.getElementById('choiceQuestionInput').value.trim();
-    
-    // 2. 获取选项
     const inputs = document.querySelectorAll('.choice-option-input');
     const opts = [];
     inputs.forEach(function(inp) {
@@ -2392,22 +2339,14 @@ async function makeChoice() {
         if (v) opts.push(v);
     });
 
-    // 3. 验证
-    if (!q) {
-        alert('请输入问题');
-        return;
-    }
-    if (opts.length < 2) {
-        alert('至少填写2个选项');
-        return;
-    }
+    if (!q) { alert('请输入问题'); return; }
+    if (opts.length < 2) { alert('至少填写2个选项'); return; }
 
-    // 4. 随机选择
     const choice = opts[Math.floor(Math.random() * opts.length)];
 
-    // 5. 保存到历史
     const history = await dbGetAll('choiceHistory');
     history.push({
+        id: Date.now() + Math.random() * 1000,
         question: q,
         choice: choice,
         time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
@@ -2415,34 +2354,36 @@ async function makeChoice() {
     await idbClear('choiceHistory');
     for (const h of history) await dbPut('choiceHistory', h);
 
-    // 6. 存储结果（用于渲染后恢复）
     localStorage.setItem('choiceResult', choice);
 
-    // 7. 清空输入框（在重新渲染前先清）
     document.getElementById('choiceQuestionInput').value = '';
-    document.querySelectorAll('.choice-option-input').forEach(function(inp) {
-        inp.value = '';
-    });
+    document.querySelectorAll('.choice-option-input').forEach(function(inp) { inp.value = ''; });
 
-    // 8. 重新渲染页面
     renderChoicePage();
 
-    // 9. 显示结果框
     const rb = document.getElementById('choiceResultBox');
     const rt = document.getElementById('choiceResultText');
     if (rb) {
         rb.style.display = 'block';
         rt.textContent = choice;
-    } else {
-        // 如果结果框没找到，直接写入历史记录区域上方
-        const historyDiv = document.querySelector('#choiceContent > div > div:last-child');
-        if (historyDiv) {
-            const resultDiv = document.createElement('div');
-            resultDiv.style.cssText = 'padding:16px;background:#fdf5f7;border-radius:12px;border:2px solid #d4a8b8;text-align:center;margin-bottom:12px;';
-            resultDiv.innerHTML = '<div style="font-size:13px;color:#999;margin-bottom:4px;">💗 秦彻的建议</div><div style="font-size:20px;color:#d4a8b8;font-weight:600;">' + choice + '</div>';
-            historyDiv.parentNode.insertBefore(resultDiv, historyDiv);
-        }
     }
+}
+async function deleteChoiceHistory(id) {
+    var history = await dbGetAll('choiceHistory');
+    history = history.filter(function(h) { return String(h.id) !== String(id); });
+    await idbClear('choiceHistory');
+    for (var i = 0; i < history.length; i++) {
+        await dbPut('choiceHistory', history[i]);
+    }
+    renderChoicePage();
+    showToast('🗑 已删除');
+}
+
+async function clearChoiceHistory() {
+    if (!confirm('确定清空所有记录？')) return;
+    await idbClear('choiceHistory');
+    renderChoicePage();
+    showToast('✅ 已清空');
 }
 // ============ 塔罗占卜（秦彻翻牌） ============
 var tarotState = 'idle';
@@ -2464,13 +2405,14 @@ if (recentHistory.length === 0) {
 } else {
     recentHistory.forEach(function(item) {
         var time = new Date(item.timestamp).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-        historyHtml += '<div style="padding:6px 0;border-bottom:1px solid #f5f0eb;font-size:13px;color:#555;">' +
-            '<div style="word-break:break-all;margin-bottom:4px;text-align:left;">' + item.question + '</div>' +
-            '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-                '<span style="color:#d4a8b8;font-weight:500;text-align:left;">🃏 ' + item.card + '</span>'+
-                '<span style="color:#ccc;font-size:11px;">' + time + '</span>' +
-            '</div>' +
-        '</div>';
+        historyHtml += '<div style="padding:6px 0;border-bottom:1px solid #f5f0eb;font-size:13px;color:#555;position:relative;">' +
+    '<div style="word-break:break-all;margin-bottom:4px;text-align:left;padding-right:24px;">' + item.question + '</div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+        '<span style="color:#d4a8b8;font-weight:500;text-align:left;">🃏 ' + item.card + '</span>' +
+        '<span style="color:#ccc;font-size:11px;">' + time + '</span>' +
+    '</div>' +
+    '<span onclick="deleteTarotHistory(' + item.id + ')" style="position:absolute;top:8px;right:0;cursor:pointer;color:#d4a8b8;font-size:14px;">✕</span>' +
+'</div>';
     });
 }
 
@@ -2697,15 +2639,26 @@ async function refreshTarotHistory() {
     var html = '';
 recent.forEach(function(item) {
     var time = new Date(item.timestamp).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-    html += '<div style="padding:6px 0;border-bottom:1px solid #f5f0eb;font-size:13px;color:#555;">' +
-        '<div style="word-break:break-all;margin-bottom:4px;text-align:left;">' + item.question + '</div>' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-          '<span style="color:#d4a8b8;font-weight:500;text-align:left;">🃏 ' + item.card + '</span>'+
-            '<span style="color:#ccc;font-size:11px;">' + time + '</span>' +
-        '</div>' +
-    '</div>';
+    html += '<div style="padding:6px 0;border-bottom:1px solid #f5f0eb;font-size:13px;color:#555;position:relative;">' +
+    '<div style="word-break:break-all;margin-bottom:4px;text-align:left;padding-right:24px;">' + item.question + '</div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+        '<span style="color:#d4a8b8;font-weight:500;text-align:left;">🃏 ' + item.card + '</span>' +
+        '<span style="color:#ccc;font-size:11px;">' + time + '</span>' +
+    '</div>' +
+    '<span onclick="deleteTarotHistory(' + item.id + ')" style="position:absolute;top:8px;right:0;cursor:pointer;color:#d4a8b8;font-size:14px;">✕</span>' +
+'</div>';
 });
     listDiv.innerHTML = html;
+}
+async function deleteTarotHistory(id) {
+    var history = await dbGetAll('tarotHistory');
+    history = history.filter(function(h) { return String(h.id) !== String(id); });
+    await dbClear('tarotHistory');
+    for (var i = 0; i < history.length; i++) {
+        await dbPut('tarotHistory', history[i]);
+    }
+    renderTarotPage();
+    showToast('🗑 已删除');
 }
 async function tarotClearHistory() {
     if (!confirm('确定清空所有翻牌历史记录吗？')) return;
@@ -3466,6 +3419,9 @@ window.submitLockPassword = submitLockPassword;
 window.showLockPanel = showLockPanel;
 window.hideLockPanel = hideLockPanel;
 window.lockNow = lockNow;
+window.deleteChoiceHistory = deleteChoiceHistory;
+window.clearChoiceHistory = clearChoiceHistory;
+window.deleteTarotHistory = deleteTarotHistory;
 
 init();
 })();
