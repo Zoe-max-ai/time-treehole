@@ -3055,9 +3055,9 @@ function openChatSettings(){
     '<div class="settings-row"><span>表情混入消息</span><div class="toggle-switch ' + (cs.emojiMix?'on':'') + '" onclick="toggleChatSetting(\'emojiMix\',this)"></div></div>' +
     probRow('表情概率', 'emojiMixProb', cs.emojiMixProb) +
     probRow('拍一拍概率', 'patProb', cs.patProb) +
-'<div class="settings-row"><span>来电概率</span>' +
-'<input type="range" min="0" max="1000" value="' + (Math.round(cs.simCallProb * 1000) || 10) + '" oninput="this.nextElementSibling.textContent=this.value+\'‰\';" onchange="S.chatSettings.simCallProb=parseInt(this.value)/1000;saveChatSettings();" style="width:120px;">' +
-'<span style="margin-left:8px;font-size:12px;color:#999;min-width:45px;">' + (Math.round(cs.simCallProb * 1000) || 10) + '‰</span></div>' +
+'<div class="settings-row"><span>来电概率（‰）</span>' +
+'<input type="number" min="0" max="1000" step="1" value="' + (Math.round(cs.simCallProb * 1000) || 10) + '" onchange="S.chatSettings.simCallProb=parseInt(this.value)/1000;saveChatSettings();this.nextElementSibling.textContent=this.value+\'‰\';" style="width:60px;text-align:center;border:1px solid #eee;border-radius:6px;padding:4px;">' +
+'<span style="margin-left:8px;font-size:12px;color:#999;">' + (Math.round(cs.simCallProb * 1000) || 10) + '‰</span></div>' +
     
     '<div class="settings-section"><h4>💬 收藏</h4>' +
     probRow('秦彻收藏概率', 'qinCollectProb', cs.qinCollectProb) +
