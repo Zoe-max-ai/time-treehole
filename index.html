@@ -1243,25 +1243,14 @@ async function autoReply(){
         }, 800 + Math.random() * 1200);
     }
     
-    if (cs.readNotReply) {
-        var roll = Math.random();
-        var noReplyProb = (cs.readNotReplyProb || 50) / 100;
-        if (roll < noReplyProb) {
-            addSysMsg('📖 秦彻已读');
-            return;
-        } else if (roll < noReplyProb + 0.2) {
-            var ti = document.createElement('div');
-            ti.className = 'typing-indicator';
-            ti.textContent = '秦彻正在输入...';
-            document.getElementById('chatArea').appendChild(ti);
-            scrollBottom();
-            setTimeout(function() {
-                var t = document.querySelector('.typing-indicator');
-                if (t) t.remove();
-            }, 2000);
-            return;
-        }
+ if (cs.readNotReply) {
+    var roll = Math.random();
+    var noReplyProb = (cs.readNotReplyProb || 50) / 100;
+    if (roll < noReplyProb) {
+        // 不回复，不显示任何消息
+        return;
     }
+}
     
     const min = parseInt(S.minReplyTime) || 1,
         max = parseInt(S.maxReplyTime) || 5,
