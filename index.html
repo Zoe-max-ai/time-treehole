@@ -363,6 +363,206 @@ body.light-text #themeToggleBtn {
     color: #555 !important;
     transition: transform 0.1s, color 0.12s;
 }
+
+/* 模块卡片 */
+.module-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(90, 74, 58, 0.04);
+}
+
+/* 模块标题 */
+.module-title {
+    font-size: 13px;
+    color: #a0a0a0;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+/* 选项列表 */
+.module-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* 自定义复选框容器 */
+.module-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #5a4a3a;
+}
+
+/* 隐藏原生 checkbox */
+.module-checkbox-label input[type="checkbox"] {
+    display: none;
+}
+
+/* 自定义 checkbox 外观 */
+.module-checkbox-custom {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 2px solid #e0d5c8;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* 选中态 */
+.module-checkbox-label input[type="checkbox"]:checked + .module-checkbox-custom {
+    background: #d4a8b8;
+    border-color: #d4a8b8;
+}
+
+.module-checkbox-label input[type="checkbox"]:checked + .module-checkbox-custom::after {
+    content: '✔';
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* 下拉框 */
+.module-select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1.5px solid #e8e0d8;
+    background: #fffaf5;
+    font-size: 14px;
+    color: #5a4a3a;
+    margin-bottom: 12px;
+}
+
+/* 保存按钮 */
+.module-save-btn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 10px 16px;
+    border-radius: 12px;
+    background: #fdf5f7;
+    color: #d4a8b8;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* ========== 通话全屏页 ========== */
+#callFullscreen {
+    background: #f8f5f0;
+}
+
+#callFullscreen .call-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: #ffffff;
+    border-radius: 24px;
+    margin: 60px auto 0;
+    width: 320px;
+    box-shadow: 0 8px 24px rgba(90, 74, 58, 0.06);
+}
+
+/* 头像 */
+#callAvatarLg {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    border: 4px solid #fdf5f7;
+    box-shadow: 0 4px 12px rgba(212, 168, 184, 0.2);
+}
+
+/* 名字 */
+#callNameLg {
+    margin-top: 16px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #5a4a3a;
+}
+
+/* 状态 */
+#callStatusLg {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #a0a0a0;
+}
+
+/* 计时器 */
+#callTimerLg {
+    margin-top: 12px;
+    font-size: 22px;
+    font-weight: 500;
+    color: #d4a8b8;
+    letter-spacing: 1px;
+}
+
+/* 按钮区 */
+#callFullscreen .call-btn-ring {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* 接听按钮 */
+#answerBtn {
+    background: #fdf5f7;
+    color: #d4a8b8;
+}
+
+/* 挂断 / 最小化按钮 */
+#callMinBtn {
+    background: #d4a8b8 !important;
+    color: #fff !important;
+    padding: 6px 16px !important;
+    border-radius: 20px !important;
+    font-size: 13px !important;
+    border: none !important;
+}
+
+/* 响铃动画（柔和版） */
+#callAvatarLg.ringing {
+    animation: ringSoft 1.8s infinite;
+}
+
+@keyframes ringSoft {
+    0% { box-shadow: 0 0 0 0 rgba(212,168,184,0.3); }
+    70% { box-shadow: 0 0 0 12px rgba(212,168,184,0); }
+    100% { box-shadow: 0 0 0 0 rgba(212,168,184,0); }
+}
+
+.tarot-card-refined-v2 {
+    width: 96px;
+    height: 150px;
+    border-radius: 12px;
+    background: linear-gradient(155deg, #fffafc 0%, #fdf5f7 60%, #f7e8ee 100%);
+    border: 2px solid #d4a8b8;
+    box-shadow: 0 6px 16px rgba(212,168,184,0.26), inset 0 0 0 4px #fffafc, inset 0 0 0 5.5px rgba(212,168,184,0.42);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+    overflow: hidden;
+    padding: 10px;
+    box-sizing: border-box;
+}
+.tarot-card-refined-v2 svg { width: 100%; height: 100%; display: block; }
+
     </style>
 </head>
 <body>
@@ -414,7 +614,7 @@ body.light-text #themeToggleBtn {
         <div class="home-card" onclick="checkLock(this, openChatPage)"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="card-title">聊天</div></div>
         <div class="home-card" onclick="openOurUniverse()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="card-title">我们的宇宙</div></div>
         <div class="home-card" onclick="openWordCardLibrary()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M4 4a2 2 0 0 1 2-2h10l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><polyline points="16 2 16 8 22 8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="14" y2="16"/></svg></div><div class="card-title">字卡库</div></div>
-         <div class="home-card" onclick="checkLock(this, openWishPage)"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M4 4a2 2 0 0 1 2-2h10l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><polyline points="16 2 16 8 22 8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="14" y2="16"/></svg></div><div class="card-title">许愿便利贴</div></div>
+        <div class="home-card" onclick="checkLock(this, openWishPage)" style="position:relative;"><span id="boardUnreadDot" style="display:none;position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#ff4757;"></span><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M4 4a2 2 0 0 1 2-2h10l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><polyline points="16 2 16 8 22 8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="14" y2="16"/></svg></div><div class="card-title">许愿便利贴</div></div>
         <div class="home-card" onclick="openAnniversaryPage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="card-title">纪念日</div></div>
         <div class="home-card" onclick="checkLock(this, openChoicePage)"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div class="card-title">如果你知道</div></div>
         <div class="home-card" onclick="openTarotPage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4" y1="4" x2="5.5" y2="5.5"/><line x1="18.5" y1="18.5" x2="20" y2="20"/><line x1="20" y1="4" x2="18.5" y2="5.5"/><line x1="5.5" y1="18.5" x2="4" y2="20"/><circle cx="12" cy="12" r="3"/></svg></div><div class="card-title">塔罗占卜</div></div>
@@ -440,13 +640,13 @@ body.light-text #themeToggleBtn {
 </div></div>
 
 <div class="call-fullscreen" id="callFullscreen">
-    <button id="callMinBtn" onclick="minimizeCall()" style="display:none;position:absolute;top:24px;right:20px;background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 18px;border-radius:20px;cursor:pointer;font-size:13px;">🔽 最小化</button>
+    <button id="callMinBtn" onclick="minimizeCall()" style="display:none;position:absolute;top:24px;right:20px;background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 18px;border-radius:20px;cursor:pointer;font-size:13px;">▼ 最小化</button>
     <img class="call-avatar-lg ringing" id="callAvatarLg" src=""><div id="callNameLg" style="font-size:24px;font-weight:600;margin-bottom:8px;">秦彻</div>
     <div id="callStatusLg" style="font-size:14px;color:rgba(255,255,255,0.7);margin-bottom:30px;">正在呼叫...</div>
     <div id="callTimerLg" style="font-size:40px;font-weight:300;font-family:monospace;letter-spacing:4px;margin-bottom:40px;">00:00:00</div>
     <div style="display:flex;gap:30px;">
-        <button id="answerBtn" onclick="answerCall()" style="display:none;width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;font-size:24px;background:#4cd964;color:#fff;display:flex;align-items:center;justify-content:center;line-height:1;">📞</button>
-        <button onclick="endCall()" style="width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;font-size:24px;background:#ff4757;color:#fff;">📞</button>
+        <button id="answerBtn" onclick="answerCall()" style="display:none;width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;font-size:24px;background:#a8d8c8;color:#fff;">📞</button>
+        <button onclick="endCall()" style="width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;font-size:24px;background:#d4a8b8;color:#fff;">📞</button>
     </div>
 </div>
 <div class="call-float-ball" id="callFloatBall"><img id="ballAvatar" src="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;"><div id="ballTimer" style="position:absolute;bottom:-8px;background:#4cd964;color:#fff;font-size:9px;padding:2px 8px;border-radius:10px;">00:00</div><div class="ball-end" onclick="event.stopPropagation();endCall()">✕</div></div>
@@ -465,9 +665,9 @@ body.light-text #themeToggleBtn {
         <div id="hisRoomActions" style="margin-top:16px;display:flex;gap:10px;justify-content:center;"></div>
     </div>
 </div>
-<div class="page" id="ourUniversePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">💫 我们的宇宙</span></div><div class="generic-content" id="ourUniverseContent"></div></div>
-<div class="page" id="wordcardLibraryPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📝 字卡库</span></div><div class="wordcard-content" id="wordcardContent"></div></div>
-<div class="page" id="emojiManagePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">😊 表情包管理</span></div><div class="generic-content" id="emojiManageContent"></div></div>
+<div class="page" id="ourUniversePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🌸 我们的宇宙</span></div><div class="generic-content" id="ourUniverseContent"></div></div>
+<div class="page" id="wordcardLibraryPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📇 字卡库</span></div><div class="wordcard-content" id="wordcardContent"></div></div>
+<div class="page" id="emojiManagePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🍬 表情包管理</span></div><div class="generic-content" id="emojiManageContent"></div></div>
 <div class="page" id="wishPage">
     <div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">✨ 许愿与留言</span></div>
     <div style="display:flex;border-bottom:1px solid #f0f0f0;background:#fff;">
@@ -477,9 +677,9 @@ body.light-text #themeToggleBtn {
     <div id="wishTabContent" style="flex:1;overflow-y:auto;padding:12px;background:#f8f5f0;"></div>
     <div id="boardTabContent" style="flex:1;overflow-y:auto;padding:12px;background:#f8f5f0;display:none;"></div>
 </div>
-<div class="page" id="anniversaryPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📅 纪念日</span></div><div class="generic-content" id="anniversaryContent"></div></div>
-<div class="page" id="choicePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">💭 如果你知道</span></div><div class="generic-content" id="choiceContent" style="padding:0;background:transparent;height:calc(100vh - 48px);"></div></div>
-<div class="page" id="tarotPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🔮 塔罗占卜</span></div><div id="tarotContent" style="flex:1;overflow-y:auto;"></div></div>
+<div class="page" id="anniversaryPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🎀 纪念日</span></div><div class="generic-content" id="anniversaryContent"></div></div>
+<div class="page" id="choicePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🩰 如果你知道</span></div><div class="generic-content" id="choiceContent" style="padding:0;background:transparent;height:calc(100vh - 48px);"></div></div>
+<div class="page" id="tarotPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🕯️ 塔罗占卜</span></div><div id="tarotContent" style="flex:1;overflow-y:auto;"></div></div>
 <div class="page" id="tarotChatPage">
     <div style="height:100%;display:flex;flex-direction:column;">
         <div class="chat-topbar">
@@ -496,10 +696,15 @@ body.light-text #themeToggleBtn {
         </div>
     </div>
 </div>
-
-<div class="page" id="callLogPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📞 通话记录</span></div><div id="callLogContent" style="flex:1;overflow-y:auto;padding:12px;"></div></div>
-<div class="page" id="moduleSettingsPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">⚙️ 模块设置</span></div><div class="generic-content" id="moduleSettingsContent"></div></div>
-<div class="page" id="dataManagePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">💾 数据管理</span></div><div class="generic-content" id="dataManageContent"></div></div>
+<div class="page" id="callLogPage">
+    <div class="navbar">
+        <button class="back-btn" onclick="goHome()">←</button>
+        <span class="title">📻 通话记录</span>  
+    </div>
+    <div id="callLogContent" style="flex:1;overflow-y:auto;padding:12px;"></div>
+</div>
+<div class="page" id="moduleSettingsPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🎪 模块设置</span></div><div class="generic-content" id="moduleSettingsContent"></div></div>
+<div class="page" id="dataManagePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">☁️ 数据管理</span></div><div class="generic-content" id="dataManageContent"></div></div>
 
 <input type="file" id="imageMsgInput" accept="image/*" onchange="handleImageMessage(event)">
 <input type="file" id="emojiInput" accept="image/*" onchange="handleEmojiUpload(event)" multiple>
@@ -644,7 +849,15 @@ function showToast(m){const e=document.querySelector('.toast');if(e)e.remove();c
 function fmtTime(ts){const d=new Date(ts),n=new Date();const h=d.getHours().toString().padStart(2,'0'),mi=d.getMinutes().toString().padStart(2,'0');if(d.toDateString()===n.toDateString())return'今天 '+h+':'+mi;const y=new Date(n);y.setDate(y.getDate()-1);if(d.toDateString()===y.toDateString())return'昨天 '+h+':'+mi;return(d.getMonth()+1)+'/'+d.getDate()+' '+h+':'+mi;}
 function scrollBottom(){requestAnimationFrame(()=>{const ca=document.getElementById('chatArea');if(ca)ca.scrollTop=ca.scrollHeight;});}
 function applyBubbleStyle(){const preset=BUBBLE_PRESETS.find(p=>p.id===S.bubbleStyle)||BUBBLE_PRESETS[0];const ca=document.getElementById('chatArea');if(ca){ca.querySelectorAll('.message-wrapper.right .bubble').forEach(el=>{el.style.background=preset.myBg;el.style.color=preset.myText;});ca.querySelectorAll('.message-wrapper.left .bubble').forEach(el=>{el.style.background=preset.otherBg;el.style.color=preset.otherText;});}}
-function updateHome(){document.getElementById('homeContactAvatar').src=getAvatar('contact');document.getElementById('homeMyAvatar').src=getAvatar('me');document.getElementById('homeContactName').textContent=S.contactName;document.getElementById('homeMyName').textContent=S.myName;document.getElementById('homeStatusText').textContent=S.contactStatus;document.getElementById('homeMoodPreview').textContent=S.contactMood||'';}
+function updateHome(){
+    document.getElementById('homeContactAvatar').src = getAvatar('contact');
+    document.getElementById('homeMyAvatar').src = getAvatar('me');
+    document.getElementById('homeContactName').textContent = S.contactName;
+    document.getElementById('homeMyName').textContent = S.myName;
+    document.getElementById('homeStatusText').textContent = S.contactStatus;
+    document.getElementById('homeMoodPreview').textContent = S.contactMood || '';
+    checkBoardUnread();
+}
 function fileToDataUrl(f){return new Promise(r=>{const rd=new FileReader();rd.onload=function(){r(rd.result);};rd.readAsDataURL(f);});}
 function downloadBlob(content,filename){const b=new Blob([content],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(b);const a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),500);}
 function triggerPat(name,text){const el=document.createElement('div');el.className='pat-effect';el.textContent='👋 '+name+' '+(text||'拍了拍你');document.body.appendChild(el);setTimeout(()=>el.remove(),1600);}
@@ -1335,7 +1548,23 @@ async function switchManageGroup(group){await setCal('manageEmojiGroup',group);r
 function openWordCardLibrary(){showPage('wordcardLibraryPage');renderWordCardLibrary();}
 async function getAllGroups(){const cards=await dbGetAll('wordcards');const dg=await dbGetAll('disabledGroups');const dgids=new Set(dg.map(d=>d.groupId));const gm=new Map();cards.forEach(c=>{const gid=c.groupId||'default';const gn=c.groupName||'默认分组';if(!gm.has(gid))gm.set(gid,{id:gid,name:gn,isSystem:false,disabled:dgids.has(gid),cardCount:0});});cards.forEach(c=>{if(c.content==='__GROUP_PLACEHOLDER__')return;const gid=c.groupId||'default';if(gm.has(gid))gm.get(gid).cardCount++;});return Array.from(gm.values());}
 async function getCardsByGroup(gid){const cards=await dbGetAll('wordcards');const dc=await dbGetAll('disabledCards');const dids=new Set(dc.map(d=>String(d.cardId)));return cards.filter(c=>{if(!c||!c.content||c.content==='__GROUP_PLACEHOLDER__')return false;const cg=c.groupId||'default';return cg===gid||c.groupName===gid;}).map(c=>({id:c.id,content:c.content,isSystem:false,disabled:dids.has(String(c.id)),groupId:c.groupId||'default'}));}
-async function renderWordCardLibrary(){document.getElementById('wordcardContent').innerHTML='<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;"><div style="width:100%;max-width:400px;"><div class="wordcard-top-bar"><button onclick="openBatchAdd()">📝 批量添加</button><button onclick="document.getElementById(\'importCardsInput\').click()">📥 导入</button><button onclick="exportCardsJSON()">📤 导出</button></div><input type="text" class="wordcard-global-search" id="wordcardGlobalSearch" placeholder="🔍 搜索全部字卡..." oninput="searchAllCardsAndDisplay()"><input type="text" class="wordcard-search" id="wordcardSearch" placeholder="🔍 搜索分组名称..." oninput="filterWordCards()"><div id="globalSearchResults" style="display:none;margin-bottom:8px;"></div><div class="wordcard-groups-section"><div style="font-weight:600;font-size:13px;color:#333;margin-bottom:8px;">📁 字卡分组管理</div><div id="groupList"></div><div class="add-group-row"><input type="text" id="newGroupInput" placeholder="新建分组..."><button onclick="createGroup()">+ 新建</button></div></div><div id="wordcardDetailArea"></div></div></div>';renderGroupList();}
+async function renderWordCardLibrary(){
+    document.getElementById('wordcardContent').innerHTML =
+    '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">' +
+    '<div style="width:100%;max-width:400px;">' +
+  '<div class="wordcard-top-bar" style="display:flex;gap:8px;margin-bottom:12px;">' +
+'<button onclick="openBatchAdd()" style="flex:1;padding:10px 8px;border-radius:12px;background:#fff;border:1px solid #d4a8b8;color:#d4a8b8;font-size:12px;cursor:pointer;">📝 批量添加</button>' +
+'<button onclick="document.getElementById(\'importCardsInput\').click()" style="flex:1;padding:10px 8px;border-radius:12px;background:#fff;border:1px solid #d4a8b8;color:#d4a8b8;font-size:12px;cursor:pointer;">📥 导入</button>' +
+'<button onclick="exportCardsJSON()" style="flex:1;padding:10px 8px;border-radius:12px;background:#fff;border:1px solid #d4a8b8;color:#d4a8b8;font-size:12px;cursor:pointer;">📤 导出</button>' +
+'</div>' +
+    '<input type="text" class="wordcard-global-search" id="wordcardGlobalSearch" placeholder="🔍 搜索全部字卡..." oninput="searchAllCardsAndDisplay()">' +
+    '<input type="text" class="wordcard-search" id="wordcardSearch" placeholder="🔍 搜索分组名称..." oninput="filterWordCards()">' +
+    '<div id="globalSearchResults" style="display:none;margin-bottom:8px;"></div>' +
+    '<div id="wordcardDetailArea"></div>' +
+    '<div class="wordcard-groups-section"><div style="font-weight:600;font-size:13px;color:#333;margin-bottom:8px;">📁 字卡分组管理</div><div id="groupList"></div><div class="add-group-row"><input type="text" id="newGroupInput" placeholder="新建分组..."><button onclick="createGroup()">+ 新建</button></div></div>' +
+    '</div></div>';
+    renderGroupList();
+}
 async function searchAllCardsAndDisplay(){
     const kw=document.getElementById('wordcardGlobalSearch').value.trim();
     const co=document.getElementById('globalSearchResults');
@@ -1358,24 +1587,46 @@ async function searchAllCardsAndDisplay(){
     h+='</div>';co.innerHTML=h;
 }
 async function searchAllCards(kw){const cards=await dbGetAll('wordcards');return cards.filter(c=>c.content&&c.content!=='__GROUP_PLACEHOLDER__'&&c.content.toLowerCase().includes(kw.toLowerCase()));}
-async function renderGroupList(filter){const groups=await getAllGroups();let fg=groups;if(filter)fg=groups.filter(g=>g.name.includes(filter)||g.id.includes(filter));const c=document.getElementById('groupList');c.innerHTML='';fg.forEach(g=>{const item=document.createElement('div');item.className='group-item';item.innerHTML='<div onclick="viewGroupCards(\''+g.id+'\',\''+g.name+'\')" style="opacity:'+(g.disabled?'0.5':'1')+';flex:1;"><span style="font-size:13px;font-weight:500;">'+g.name+'</span><span style="font-size:11px;color:#999;">'+(g.cardCount||0)+'条</span></div><div><span style="background:#e3f2fd;color:#1565c0;font-size:10px;padding:3px 7px;border-radius:8px;cursor:pointer;" onclick="viewGroupCards(\''+g.id+'\',\''+g.name+'\')">查看</span>'+(g.isSystem?'':'<span style="background:#ffebee;color:#c62828;font-size:10px;padding:3px 7px;border-radius:8px;cursor:pointer;" onclick="deleteGroup(\''+g.id+'\')">删除</span>')+'</div>';c.appendChild(item);});}
+async function renderGroupList(filter){
+    const groups = await getAllGroups();
+    let fg = groups;
+    if (filter) fg = groups.filter(g => g.name.includes(filter) || g.id.includes(filter));
+    const c = document.getElementById('groupList');
+    c.innerHTML = '';
+    fg.forEach(g => {
+        const item = document.createElement('div');
+        item.style.cssText = 'background:#fff;border:1px solid #f0ece8;border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;';
+        item.innerHTML =
+            '<div onclick="viewGroupCards(\'' + g.id + '\',\'' + g.name + '\')" style="flex:1;cursor:pointer;opacity:' + (g.disabled ? '0.5' : '1') + ';">' +
+            '<div style="font-size:14px;font-weight:500;color:#333;">' + g.name + '</div>' +
+            '<div style="font-size:11px;color:#999;margin-top:2px;">' + (g.cardCount || 0) + '条</div>' +
+            '</div>' +
+         
+            (g.isSystem ? '' : '<span onclick="deleteGroup(\'' + g.id + '\')" style="cursor:pointer;font-size:16px;padding:4px;" title="删除">🗑️</span>');
+        c.appendChild(item);
+    });
+}
 async function viewGroupCards(gid,gname){
     await setCal('currentGroupName',gname);
     let cards=await getCardsByGroup(gid);
     cards=cards.filter(c=>c&&c.id&&c.content);
     const dc=await dbGetAll('disabledCards');
     const dids=new Set(dc.map(d=>String(d.cardId)));
-    let h='<div style="padding:4px 0;margin-top:8px;"><h4>📋 '+gname+'</h4><div id="groupCardList" style="max-height:300px;overflow-y:auto;">';
-    if(cards.length===0)h+='<p style="color:#ccc;text-align:center;padding:20px;">暂无字卡</p>';
+    let h='<div style="padding:4px 0;margin-top:8px;">';
+    h+='<div style="background:#fff;border:1px solid #f0ece8;border-radius:14px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.04);"><span style="font-size:14px;font-weight:500;color:#333;">📋 '+gname+'</span><span style="font-size:12px;color:#999;">'+cards.length+'条</span></div>';
+    h+='<div id="groupCardList" style="max-height:300px;overflow-y:auto;">';
+    if(cards.length===0) h+='<p style="color:#ccc;text-align:center;padding:20px;">暂无字卡</p>';
     else cards.forEach(c=>{
         const is=dids.has(String(c.id));
-        h+='<div class="wordcard-list-item" style="'+(is?'opacity:0.5;':'')+'"><span style="flex:1;">'+c.content+'</span><div style="display:flex;gap:4px;">';
-        h+='<span style="background:'+(is?'#e8f5e9':'#fff8e1')+';color:'+(is?'#2e7d32':'#f57f17')+';font-size:10px;padding:2px 6px;border-radius:6px;cursor:pointer;" onclick="toggleCardDisable(\''+c.id+'\',\''+gid+'\','+(c.isSystem||false)+')">'+(is?'启用':'禁用')+'</span>';
-        h+='<span style="background:#e3f2fd;color:#1565c0;font-size:10px;padding:2px 6px;border-radius:6px;cursor:pointer;" onclick="moveCard(\''+c.id+'\',\''+gid+'\')">📁 移动</span>';
-        h+='<span style="background:#ffebee;color:#c62828;font-size:10px;padding:2px 6px;border-radius:6px;cursor:pointer;" onclick="deleteCard(\''+c.id+'\',\''+gid+'\','+(c.isSystem||false)+')">删除</span>';
+       h+='<div style="background:#fff;border:1px solid #f0ece8;border-radius:14px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.04);">';
+        h+='<span style="flex:1;font-size:14px;color:#333;word-break:break-all;">'+c.content+'</span>';
+        h+='<div style="display:flex;gap:8px;flex-shrink:0;">';
+        h+='<span style="font-size:16px;cursor:pointer;" title="'+(is?'启用':'禁用')+'" onclick="toggleCardDisable(\''+c.id+'\',\''+gid+'\','+(c.isSystem||false)+')">'+(is?'☑️':'🚫')+'</span>';
+        h+='<span style="font-size:16px;cursor:pointer;" title="移动" onclick="moveCard(\''+c.id+'\',\''+gid+'\')">🔀</span>';
+        h+='<span style="font-size:16px;cursor:pointer;" title="删除" onclick="deleteCard(\''+c.id+'\',\''+gid+'\','+(c.isSystem||false)+')">🗑️</span>';
         h+='</div></div>';
     });
-    h+='</div><button onclick="closeCardDetail()" style="margin-top:8px;padding:8px;border-radius:12px;background:#f0f0f0;border:none;cursor:pointer;width:100%;">关闭</button></div>';
+   h+='</div><button onclick="closeCardDetail()" style="margin-top:8px;padding:10px;border-radius:12px;background:#d4a8b8;border:1px solid #d4a8b8;cursor:pointer;width:100%;color:#fff;font-size:14px;">关闭</button></div>';
     document.getElementById('wordcardDetailArea').innerHTML=h;
 }
 function closeCardDetail(){document.getElementById('wordcardDetailArea').innerHTML='';}
@@ -1467,7 +1718,7 @@ async function renderOurUniverse(){
     // 秦彻想说
     h += '<div class="settings-section"><h4>💭 秦彻想说</h4>';
     h += '<div style="background:#fdf8ff;border-radius:10px;padding:12px;margin-bottom:8px;font-size:14px;color:#555;font-style:italic;text-align:center;">' + mood + '</div>';
-    h += '<button onclick="refreshMood()" style="width:100%;padding:8px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:12px;">🔄 换一句</button></div>';
+    h += '<button onclick="refreshMood()" style="width:100%;padding:8px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:12px;">⟳ 换一句</button></div>';
     
     // 聊天气泡样式
     h += '<div class="settings-section"><h4>💬 聊天气泡样式</h4>';
@@ -1481,29 +1732,32 @@ async function renderOurUniverse(){
     });
     h += '</div></div>';
     
-    // 更换主页背景
-    h += '<div class="settings-section"><h4>🏠 更换主页背景</h4>';
-    h += '<div class="bg-preset-grid">';
-    [{id:'default',icon:'🌸',color:'#fff5f7'},{id:'sunset',icon:'🌅',color:'#ffecd2'},{id:'ocean',icon:'🌊',color:'#e0f7fa'},{id:'lavender',icon:'💜',color:'#f3e5f5'}].forEach(p => {
-        h += '<div class="bg-preset-item ' + (S.homeBg === p.id ? 'selected' : '') + '" style="background:' + p.color + ';" onclick="setHomeBg(\'' + p.id + '\')">' + p.icon + '</div>';
-    });
-    h += '</div>';
-    h += '<button style="width:100%;margin-top:8px;padding:10px;border-radius:16px;background:#f5f5f5;border:none;cursor:pointer;font-size:13px;" onclick="document.getElementById(\'homeBgInput\').click()">🖼️ 从相册选择首页背景</button></div>';
-    
-    // 更换聊天背景
-    h += '<div class="settings-section"><h4>💬 更换聊天背景</h4>';
-    h += '<div class="bg-preset-grid">';
-    [{id:'default',icon:'⬜',color:'#f8f8f8'},{id:'warm',icon:'💛',color:'#fffdf5'},{id:'cool',icon:'💙',color:'#f5f8ff'},{id:'pink',icon:'💗',color:'#fff5f7'}].forEach(p => {
-        h += '<div class="bg-preset-item ' + (S.chatBg === p.id ? 'selected' : '') + '" style="background:' + p.color + ';" onclick="setChatBg(\'' + p.id + '\')">' + p.icon + '</div>';
-    });
-    h += '</div>';
-    h += '<button style="width:100%;margin-top:8px;padding:10px;border-radius:16px;background:#f5f5f5;border:none;cursor:pointer;font-size:13px;" onclick="document.getElementById(\'chatBgInput\').click()">🖼️ 从相册选择聊天背景</button></div>';
-    
-    h += '</div></div>';
-    document.getElementById('ourUniverseContent').innerHTML = h;
-    loadAvatarHistory('me');
-    loadAvatarHistory('contact');
+// 更换主页背景
+h += '<div class="settings-section"><h4>🏠 更换主页背景</h4>';
+h += '<div class="bg-preset-grid">';
+[{id:'default',icon:'🌸',color:'#fff5f7'},{id:'sunset',icon:'🌅',color:'#ffecd2'},{id:'ocean',icon:'🌊',color:'#e0f7fa'},{id:'lavender',icon:'💜',color:'#f3e5f5'}].forEach(p => {
+    h += '<div class="bg-preset-item ' + (S.homeBg === p.id ? 'selected' : '') + '" style="background:' + p.color + ';" onclick="setHomeBg(\'' + p.id + '\')">' + p.icon + '</div>';
+});
+h += '</div>';
+h += '<button style="width:100%;margin-top:8px;padding:10px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;cursor:pointer;font-size:13px;" onclick="document.getElementById(\'homeBgInput\').click()">❋ 从相册选择首页背景</button>'
+h += '<div class="settings-row"><span>背景透明度</span><input type="range" min="20" max="100" value="' + (S.homeBgOpacity || 100) + '" oninput="this.nextElementSibling.textContent=this.value+\'%\';" onchange="S.homeBgOpacity=parseInt(this.value);saveHomeBgOpacity();" style="width:120px;"><span style="margin-left:8px;font-size:12px;color:#999;">' + (S.homeBgOpacity || 100) + '%</span></div></div>';
+
+// 更换聊天背景
+h += '<div class="settings-section"><h4>💬 更换聊天背景</h4>';
+h += '<div class="bg-preset-grid">';
+[{id:'default',icon:'⬜',color:'#f8f8f8'},{id:'warm',icon:'💛',color:'#fffdf5'},{id:'cool',icon:'💙',color:'#f5f8ff'},{id:'pink',icon:'💗',color:'#fff5f7'}].forEach(p => {
+    h += '<div class="bg-preset-item ' + (S.chatBg === p.id ? 'selected' : '') + '" style="background:' + p.color + ';" onclick="setChatBg(\'' + p.id + '\')">' + p.icon + '</div>';
+});
+h += '</div>';
+h += '<button style="width:100%;margin-top:8px;padding:10px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;cursor:pointer;font-size:13px;" onclick="document.getElementById(\'chatBgInput\').click()">⊹ 从相册选择聊天背景</button>'
+h += '<div class="settings-row"><span>背景透明度</span><input type="range" min="20" max="100" value="' + (S.chatBgOpacity || 100) + '" oninput="this.nextElementSibling.textContent=this.value+\'%\';" onchange="S.chatBgOpacity=parseInt(this.value);saveChatBgOpacity();" style="width:120px;"><span style="margin-left:8px;font-size:12px;color:#999;">' + (S.chatBgOpacity || 100) + '%</span></div></div>';
+
+h += '</div></div>';
+document.getElementById('ourUniverseContent').innerHTML = h;
+loadAvatarHistory('me');
+loadAvatarHistory('contact');
 }
+
 function selectBubblePreset(id) {
     S.bubbleStyle = id;
     applyBubbleStyle();
@@ -1697,22 +1951,26 @@ console.log('✅ 存储层补丁已加载');
 
 async function renderCallLogs() {
     var c = document.getElementById('callLogContent');
-    if (!c) {
-        console.log('❌ callLogContent 元素不存在');
-        return;
-    }
-    
+    if (!c) return;
+
     var logs = await dbGetAll('callLogs');
-    console.log('📞 通话记录数据:', logs);
+
+    var html = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">';
+    html += '<div style="width:100%;max-width:400px;">';
     
+    html += '<div style="text-align:center;margin-bottom:16px;">';
+html += '<div style="font-size:20px;font-weight:600;color:#d4a8b8;letter-spacing:1px;">一次没有声音的链接</div>';
+    html += '</div>';
+
     if (!logs || logs.length === 0) {
-        c.innerHTML = '<div style="padding:20px;text-align:center;color:#ccc;">📞 暂无通话记录</div>';
+        html += '<div style="padding:40px 20px;text-align:center;color:#ccc;background:#fff;border-radius:16px;border:1px solid #f0ece8;">📞 暂无通话记录</div>';
+        html += '</div></div>';
+        c.innerHTML = html;
         return;
     }
-    
+
     logs.sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
-    
-    var html = '';
+
     logs.forEach(function(log) {
         var d = new Date(log.timestamp || Date.now());
         var dateStr = d.toLocaleDateString('zh-CN');
@@ -1721,27 +1979,55 @@ async function renderCallLogs() {
         var min = Math.floor(dur / 60);
         var sec = dur % 60;
         var durStr = (min > 0 ? min + '分' : '') + sec + '秒';
-        
-        html += '<div style="background:#fff;border-radius:12px;padding:12px 16px;margin-bottom:8px;border:1px solid #f0ece8;display:flex;justify-content:space-between;align-items:center;">' +
-            '<div>' +
-            '<div style="font-size:14px;font-weight:500;">' + (log.contactName || '秦彻') + '</div>' +
-            '<div style="font-size:11px;color:#999;">' + dateStr + ' ' + timeStr + '</div>' +
+
+        var typeIcon = '📞';
+        var typeLabel = '通话';
+        var iconBg = '#f5f0eb';
+        if (log.type === 'incoming') {
+            typeIcon = '📲';
+            typeLabel = '来电';
+            iconBg = '#fdf5f7';
+        } else if (log.type === 'outgoing') {
+            typeIcon = '📤';
+            typeLabel = '呼出';
+            iconBg = '#f0f7f4';
+        } else if (log.type === 'missed') {
+            typeIcon = '📵';
+            typeLabel = '未接';
+            iconBg = '#fef0f0';
+        }
+
+        html += '<div style="background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:8px;border:1px solid #f0ece8;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">' +
+            '<div style="width:40px;height:40px;border-radius:50%;background:' + iconBg + ';display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">' + typeIcon + '</div>' +
+            '<div style="flex:1;">' +
+            '<div style="font-size:14px;font-weight:500;color:#333;">' + (log.contactName || '秦彻') + '</div>' +
+            '<div style="font-size:11px;color:#999;margin-top:2px;">' + dateStr + ' ' + timeStr + ' · ' + typeLabel + '</div>' +
             '</div>' +
-            '<div style="text-align:right;">' +
+            '<div style="text-align:right;flex-shrink:0;">' +
             '<div style="font-size:13px;color:#d4a8b8;">' + durStr + '</div>' +
-            '<div style="font-size:10px;color:#ccc;">' + (log.type === 'incoming' ? '📞 来电' : '📤 呼出') + '</div>' +
+            '<span onclick="deleteCallLog(' + log.id + ')" style="cursor:pointer;font-size:14px;color:#d4a8b8;margin-top:2px;display:inline-block;">✕</span>' +
             '</div>' +
             '</div>';
     });
-    
+
+    html += '</div></div>';
     c.innerHTML = html;
 }
 
+async function deleteCallLog(id) {
+    var logs = await dbGetAll('callLogs');
+    logs = logs.filter(function(l) { return String(l.id) !== String(id); });
+    await dbClear('callLogs');
+    for (var i = 0; i < logs.length; i++) {
+        await dbPut('callLogs', logs[i]);
+    }
+    renderCallLogs();
+    showToast('🗑 已删除');
+}
 function openCallLogPage() {
     showPage('callLogPage');
     renderCallLogs();
 }
-async function renderCallLogs(){const logs=await dbGetAll('callLogs');logs.sort((a,b)=>b.timestamp-a.timestamp);const c=document.getElementById('callLogContent');let h='<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;"><div style="width:100%;max-width:400px;">';if(logs.length===0)h+='<div style="background:#fff;border-radius:16px;padding:40px;text-align:center;"><div style="font-size:48px;">📞</div><div style="font-size:14px;color:#ccc;">暂无通话记录</div></div>';else{const g={};logs.forEach(l=>{const d=new Date(l.timestamp).toLocaleDateString('zh-CN');if(!g[d])g[d]=[];g[d].push(l);});for(let[d,ls]of Object.entries(g)){h+='<div style="margin-bottom:14px;"><div style="font-size:12px;color:#aaa;margin-bottom:8px;">'+d+'</div>';ls.forEach(l=>{const mi=Math.floor(l.duration/60),s=l.duration%60;h+='<div style="background:#fff;border-radius:16px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;"><div style="font-size:24px;">📞</div><div style="flex:1;"><div style="font-size:14px;font-weight:500;">'+l.contactName+'</div><div style="font-size:11px;color:#aaa;">'+(l.type==='incoming'?'来电':'呼出')+'</div></div><div style="text-align:right;"><div>'+mi+'分'+s+'秒</div><div style="font-size:10px;color:#ccc;">'+new Date(l.timestamp).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})+'</div></div></div>';});h+='</div>';}}h+='</div></div>';c.innerHTML=h;}
 // ============ 许愿与留言 ============
 var wishSubTab = 'wish'; // 许愿子标签：wish / collection
 
@@ -1771,6 +2057,8 @@ function switchWishTab(tab) {
         wb.style.borderBottom = '2px solid transparent';
         bc.style.display = 'block';
         wc.style.display = 'none';
+        localStorage.setItem('boardReadTime', Date.now());
+        checkBoardUnread();
         renderBoardPage();
     }
 }
@@ -2166,6 +2454,16 @@ pendingReplies.forEach(async function(msg) {
     document.getElementById('boardTabContent').innerHTML = h;
 }
 
+async function checkBoardUnread() {
+    var msgs = await dbGetAll('boardMessages');
+    var lastRead = localStorage.getItem('boardReadTime');
+    var hasUnread = msgs.some(function(m) {
+        return m.sender === 'qin' && (!lastRead || m.timestamp > parseInt(lastRead));
+    });
+    var dot = document.getElementById('boardUnreadDot');
+    if (dot) dot.style.display = hasUnread ? 'block' : 'none';
+}
+
 async function addBoardMessage() {
     var input = document.getElementById('boardInput');
     var c = input.value.trim();
@@ -2498,8 +2796,10 @@ if (recentHistory.length === 0) {
 
     var html = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">' +
         '<div style="width:100%;max-width:400px;text-align:center;">' +
-        '<div style="font-size:44px;margin-bottom:4px;">🔮</div>' +
-        '<div style="font-size:20px;font-weight:600;color:#333;margin-bottom:16px;">我们来通过塔罗沟通吧</div>' +
+
+'<div class="tarot-card-refined-v2">' + getTarotCardSVG() + '</div>'+
+
+        '<div style="font-size:14px;font-weight:600;color:#333;margin-bottom:16px;">以光为引  ·   链接你我</div>' +
         // 呼唤区域
         '<div id="tarotCallArea" style="background:#fff;border-radius:16px;padding:20px;border:1px solid #f0ece8;margin-bottom:12px;">' +
         '<div id="tarotCallStatus" style="font-size:14px;color:#999;margin-bottom:12px;">💬 呼唤秦彻，让他为你翻牌</div>' +
@@ -2540,6 +2840,19 @@ if (recentHistory.length === 0) {
 
     document.getElementById('tarotContent').innerHTML = html;
     tarotState = 'idle';
+}
+
+function getTarotCardSVG() {
+    return '<svg viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">' +
+        '<defs><linearGradient id="cardPatternColor" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#e8c4d4"/><stop offset="100%" stop-color="#c98a9e"/></linearGradient>' +
+        '<filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>' +
+        '<g transform="translate(50, 30)"><path d="M -30 -10 Q 0 -30 30 -10" fill="none" stroke="url(#cardPatternColor)" stroke-width="1.5" opacity="0.8"/><path d="M -25 -5 Q 0 -20 25 -5" fill="none" stroke="url(#cardPatternColor)" stroke-width="1" opacity="0.6"/><polygon points="-35,-15 -30,-5 -38,-10" fill="url(#cardPatternColor)" opacity="0.9"/><polygon points="35,-15 30,-5 42,-10" fill="url(#cardPatternColor)" opacity="0.9"/><polygon points="0,-35 5,-20 -5,-20" fill="url(#cardPatternColor)"/><line x1="0" y1="-35" x2="0" y2="-20" stroke="url(#cardPatternColor)" stroke-width="1"/></g>' +
+        '<g transform="translate(50, 75)"><g stroke="url(#cardPatternColor)" stroke-width="0.6" opacity="0.6"><line x1="0" y1="-30" x2="0" y2="-45"/><line x1="0" y1="30" x2="0" y2="45"/><line x1="-30" y1="0" x2="-45" y2="0"/><line x1="30" y1="0" x2="45" y2="0"/><line x1="-21" y1="-21" x2="-30" y2="-30"/><line x1="21" y1="-21" x2="30" y2="-30"/><line x1="-21" y1="21" x2="-30" y2="30"/><line x1="21" y1="21" x2="30" y2="30"/></g>' +
+        '<circle cx="0" cy="0" r="22" fill="none" stroke="url(#cardPatternColor)" stroke-width="1"/><circle cx="0" cy="0" r="15" fill="none" stroke="url(#cardPatternColor)" stroke-width="0.8"/>' +
+        '<polygon points="0,-12 3,-3 12,0 3,3 0,12 -3,3 -12,0 -3,-3" fill="url(#cardPatternColor)" opacity="0.9" filter="url(#glow)"/>' +
+        '<path d="M 0 -4 A 4 4 0 1 1 0 4 A 3 3 0 1 0 0 -4 Z" fill="#fffafc"/></g>' +
+        '<g transform="translate(50, 125)" fill="none" stroke="url(#cardPatternColor)" stroke-width="1"><path d="M -25 0 L -20 15 L 0 25 L 20 15 L 25 0" fill="url(#cardPatternColor)" opacity="0.1" stroke-opacity="0.8"/><line x1="-15" y1="5" x2="-10" y2="15"/><line x1="15" y1="5" x2="10" y2="15"/><line x1="0" y1="5" x2="0" y2="20"/><g transform="translate(-15, 25)"><line x1="0" y1="0" x2="0" y2="10" stroke-width="0.8"/><circle cx="0" cy="3" r="1.5" fill="url(#cardPatternColor)"/><circle cx="0" cy="8" r="1" fill="url(#cardPatternColor)" opacity="0.8"/><polygon points="0,12 -3,15 0,18 3,15" fill="url(#cardPatternColor)" opacity="0.8"/></g><g transform="translate(15, 25)"><line x1="0" y1="0" x2="0" y2="10" stroke-width="0.8"/><circle cx="0" cy="3" r="1.5" fill="url(#cardPatternColor)"/><circle cx="0" cy="8" r="1" fill="url(#cardPatternColor)" opacity="0.8"/><polygon points="0,12 -3,15 0,18 3,15" fill="url(#cardPatternColor)" opacity="0.8"/></g></g>' +
+        '<g fill="url(#cardPatternColor)" opacity="0.7"><polygon points="10,10 11,13 14,13 11.5,15 12.5,18 10,16 7.5,18 8.5,15 6,13 9,13"/><polygon points="90,10 91,13 94,13 91.5,15 92.5,18 90,16 87.5,18 88.5,15 86,13 89,13"/><polygon points="10,140 11,143 14,143 11.5,145 12.5,148 10,146 7.5,148 8.5,145 6,143 9,143"/><polygon points="90,140 91,143 94,143 91.5,145 92.5,148 90,146 87.5,148 88.5,145 86,143 89,143"/></g></svg>';
 }
 
 // ============ 塔罗交互函数（全部从字卡取） ============
@@ -2921,36 +3234,82 @@ async function renderModuleSettings() {
     const groups = await getAllGroups();
     const go = groups.map(g => g.name);
     const cg = JSON.parse(await getCal('chatGroups', '[]'));
-console.log('🔍 renderModuleSettings 读取 chatGroups:', cg);
+    console.log('🔍 renderModuleSettings 读取 chatGroups:', cg);
     const mg = JSON.parse(await getCal('mailboxGroups', '[]'));
     const tg = await getCal('tarotGroup', '');
     const hg = await getCal('hisRoomGroup', '');
 
-    let h = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;"><div style="width:100%;max-width:400px;">';
+    let h = `
+    <div style="
+        padding:16px;
+        background:#f8f5f0;
+        min-height:100vh;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+    ">
+        <div style="width:100%;max-width:420px;display:flex;flex-direction:column;gap:16px;">
+    `;
 
-    // 聊天混用
-    h += '<div class="settings-section"><h4>💬 聊天混用</h4>' +
-        go.map(g => '<label style="display:flex;align-items:center;gap:8px;padding:4px 0;"><input type="checkbox" class="chat-group-checkbox" value="' + g + '" ' + (cg.includes(g) ? 'checked' : '') + '>' + g + '</label>').join('') +
-        '<button onclick="saveChatGroups()" style="margin-top:10px;padding:6px 16px;border-radius:12px;background:#f5f0eb;border:none;">保存聊天分组</button></div>';
+    // ===== 聊天混用 =====
+    h += `
+    <div class="module-card">
+        <div class="module-title">💬 聊天混用</div>
+        <div class="module-options">
+            ${go.map(g => `
+                <label class="module-checkbox-label">
+                    <input type="checkbox" class="chat-group-checkbox" value="${g}" ${cg.includes(g) ? 'checked' : ''}>
+                    <span class="module-checkbox-custom"></span>
+                    <span class="module-label-text">${g}</span>
+                </label>
+            `).join('')}
+        </div>
+        <button onclick="saveChatGroups()" style="margin-top:10px;padding:10px 16px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;width:100%;">保存聊天分组</button>
+    </div>
+    `;
 
-    // 留言板
-    h += '<div class="settings-section"><h4>📮 留言板</h4>' +
-        go.map(g => '<label style="display:flex;align-items:center;gap:8px;padding:4px 0;"><input type="checkbox" class="mailbox-group-checkbox" value="' + g + '" ' + (mg.includes(g) ? 'checked' : '') + '>' + g + '</label>').join('') +
-        '<button onclick="saveMailboxGroups()" style="margin-top:10px;padding:6px 16px;border-radius:12px;background:#f5f0eb;border:none;">保存留言板分组</button></div>';
+    // ===== 留言板 =====
+    h += `
+    <div class="module-card">
+        <div class="module-title">📮 留言板</div>
+        <div class="module-options">
+            ${go.map(g => `
+                <label class="module-checkbox-label">
+                    <input type="checkbox" class="mailbox-group-checkbox" value="${g}" ${mg.includes(g) ? 'checked' : ''}>
+                    <span class="module-checkbox-custom"></span>
+                    <span class="module-label-text">${g}</span>
+                </label>
+            `).join('')}
+        </div>
+        <button onclick="saveMailboxGroups()" style="margin-top:10px;padding:10px 16px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;width:100%;">保存留言板分组</button>
+    </div>
+    `;
 
-    // 秦彻翻牌
-    h += '<div class="settings-section"><h4>🔮 秦彻翻牌</h4>' +
-        '<select id="tarotGroupSelect" style="width:100%;padding:10px;border-radius:12px;border:1.5px solid #e8e0d8;"><option value="">-- 请选择 --</option>' +
-        go.map(g => '<option value="' + g + '" ' + (g === tg ? 'selected' : '') + '>' + g + '</option>').join('') +
-        '</select><button onclick="saveTarotGroup()" style="margin-top:10px;padding:6px 16px;border-radius:12px;background:#f5f0eb;border:none;">保存翻牌分组</button></div>';
+    // ===== 秦彻翻牌 =====
+    h += `
+    <div class="module-card">
+        <div class="module-title">🔮 秦彻翻牌</div>
+        <select id="tarotGroupSelect" class="module-select">
+            <option value="">-- 请选择 --</option>
+            ${go.map(g => `<option value="${g}" ${g === tg ? 'selected' : ''}>${g}</option>`).join('')}
+        </select>
+        <button onclick="saveTarotGroup()" style="margin-top:10px;padding:10px 16px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;width:100%;">保存翻牌分组</button>
+    </div>
+    `;
 
-    // 他的房间（新增）
-    h += '<div class="settings-section"><h4>🚪 他的房间</h4>' +
-        '<select id="hisRoomGroupSelect" style="width:100%;padding:10px;border-radius:12px;border:1.5px solid #e8e0d8;"><option value="">-- 请选择 --</option>' +
-        go.map(g => '<option value="' + g + '" ' + (g === hg ? 'selected' : '') + '>' + g + '</option>').join('') +
-        '</select><button onclick="saveHisRoomGroup()" style="margin-top:10px;padding:6px 16px;border-radius:12px;background:#f5f0eb;border:none;">保存房间分组</button></div>';
+    // ===== 他的房间 =====
+    h += `
+    <div class="module-card">
+        <div class="module-title">🚪 他的房间</div>
+        <select id="hisRoomGroupSelect" class="module-select">
+            <option value="">-- 请选择 --</option>
+            ${go.map(g => `<option value="${g}" ${g === hg ? 'selected' : ''}>${g}</option>`).join('')}
+        </select>
+        <button onclick="saveHisRoomGroup()" style="margin-top:10px;padding:10px 16px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;width:100%;">保存房间分组</button>
+    </div>
+    `;
 
-    h += '</div></div>';
+    h += `</div></div>`;
     document.getElementById('moduleSettingsContent').innerHTML = h;
 }
 async function saveChatGroups() {
@@ -3010,6 +3369,17 @@ async function renderDataManage() {
         '</div>' +
         '</div>' +
         '</div>' +
+
+'<div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:14px;">' +
+'<div style="font-size:15px;font-weight:500;color:#333;margin-bottom:10px;">📤 聊天记录导出</div>' +
+'<div style="display:flex;gap:8px;margin-bottom:8px;">' +
+'<input type="date" id="exportStartDate" style="flex:1;padding:8px;border-radius:8px;border:1px solid #eee;font-size:13px;">' +
+'<span style="font-size:12px;color:#999;align-self:center;">至</span>' +
+'<input type="date" id="exportEndDate" style="flex:1;padding:8px;border-radius:8px;border:1px solid #eee;font-size:13px;">' +
+'</div>' +
+'<button onclick="exportChatByDate()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;">📤 导出并复制</button>' +
+'</div>' +
+
         // 操作按钮
         '<div style="display:flex;flex-direction:column;gap:10px;">' +
         '<button onclick="exportChat()" style="padding:12px 16px;border-radius:12px;background:#fff;border:1px solid #f0ece8;color:#333;font-size:14px;cursor:pointer;text-align:center;transition:all 0.2s;" onmouseover="this.style.background=\'#f8f5f0\'" onmouseout="this.style.background=\'#fff\'">📤 导出聊天记录</button>' +
@@ -3023,10 +3393,56 @@ async function renderDataManage() {
     document.getElementById('dataManageContent').innerHTML = html;
 }
 async function exportChat(){const msgs=await dbGetAll('messages');msgs.sort((a,b)=>a.timestamp-b.timestamp);let t='秦彻和笑笑的时光树洞 2.0\n'+'='.repeat(30)+'\n\n';msgs.forEach(m=>{const s=m.sender==='me'?S.myName:S.contactName;const c=m.type==='text'?m.content:(m.type==='emoji'?'[表情]':'[图片]');t+='['+new Date(m.timestamp).toLocaleString('zh-CN')+'] '+s+': '+c+'\n';});downloadBlob(t,'聊天记录.txt');}
-async function exportAll(){const data={messages:await dbGetAll('messages'),settings:await dbGetAll('settings'),wordcards:await dbGetAll('wordcards'),emojis:await dbGetAll('emojis'),avatars:await dbGetAll('avatars'),callLogs:await dbGetAll('callLogs'),exportTime:new Date().toISOString(),version:'2.0'};downloadBlob(JSON.stringify(data,null,2),'时光树洞_2.0_'+new Date().toLocaleDateString().replace(/\//g,'-')+'.json');}
+
+async function exportAll(){
+    const data = {
+        messages: await dbGetAll('messages'),
+        settings: await dbGetAll('settings'),
+        wordcards: await dbGetAll('wordcards'),
+        emojis: await dbGetAll('emojis'),
+        avatars: await dbGetAll('avatars'),
+        callLogs: await dbGetAll('callLogs'),
+        exportTime: new Date().toISOString(),
+        version: '2.0'
+    };
+    downloadBlob(JSON.stringify(data, null, 2), '时光树洞_2.0_' + new Date().toLocaleDateString().replace(/\//g, '-') + '.json');
+    localStorage.setItem('lastBackupTime', Date.now());
+}
 async function importAllData(event){const f=event.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!confirm('导入将覆盖当前数据，确定？')){event.target.value='';return;}for(const s of ['messages','settings','wordcards','emojis','avatars','callLogs']){await dbClear(s);if(d[s])for(const item of d[s])await dbPut(s,item);}showToast('✅ 导入成功');}catch(e){showToast('导入失败');}event.target.value='';}
 async function clearChat(){await dbClear('messages');showToast('已清空');}
+async function exportChatByDate() {
+    var start = document.getElementById('exportStartDate').value;
+    var end = document.getElementById('exportEndDate').value;
+    if (!start || !end) { showToast('请选择日期范围'); return; }
 
+    var startTs = new Date(start + 'T00:00:00').getTime();
+    var endTs = new Date(end + 'T23:59:59').getTime();
+
+    var msgs = await dbGetAll('messages');
+    var filtered = msgs.filter(function(m) {
+        return m.timestamp >= startTs && m.timestamp <= endTs;
+    });
+    filtered.sort(function(a,b) { return a.timestamp - b.timestamp; });
+
+    if (filtered.length === 0) { showToast('该时间段没有消息'); return; }
+
+    var text = '秦彻和笑笑的时光树洞\n' + '导出时间: ' + start + ' 至 ' + end + '\n' + '='.repeat(30) + '\n\n';
+    filtered.forEach(function(m) {
+        var sender = m.sender === 'me' ? S.myName : S.contactName;
+        var content = m.type === 'text' ? m.content : (m.type === 'emoji' ? '[表情]' : (m.type === 'pat' ? '[拍一拍]' : '[图片]'));
+        text += '[' + fmtTime(m.timestamp) + '] ' + sender + ': ' + content + '\n';
+    });
+
+    // 复制到剪贴板
+    navigator.clipboard.writeText(text).then(function() {
+        showToast('✅ 已复制到剪贴板');
+    }).catch(function() {
+        // 降级：下载文件
+        downloadBlob(text, '聊天记录_' + start + '_' + end + '.txt');
+    });
+
+    localStorage.setItem('lastBackupTime', Date.now());
+}
 // ============ 聊天设置 ============
 function openChatSettings(){
     const cs = S.chatSettings;
@@ -3082,7 +3498,7 @@ function openChatSettings(){
 
 function probRow(label, key, val) {
     var v = parseInt(val) || 0;
-    return '<div class="settings-row"><span>' + label + '</span>' +
+    return '<div class="settings-row"><span style="display:inline-block;width:100px;text-align:right;margin-right:8px;">' + label + '</span>' +
         '<input type="range" min="0" max="100" value="' + v + '" oninput="this.nextElementSibling.textContent=this.value+\'%\';" onchange="S.chatSettings.' + key + '=parseInt(this.value);saveChatSettings();" style="width:120px;">' +
         '<span style="margin-left:8px;font-size:12px;color:#999;min-width:35px;">' + v + '%</span></div>';
 }
@@ -3137,6 +3553,24 @@ function setHomeBg(id) {
     renderOurUniverse(); // 立即刷新页面
     showToast('✅ 首页背景已更新');
 }
+
+async function saveHomeBgOpacity() {
+    await setCal('homeBgOpacity', S.homeBgOpacity);
+    applyHomeBgOpacity();
+}
+async function saveChatBgOpacity() {
+    await setCal('chatBgOpacity', S.chatBgOpacity);
+    applyChatBgOpacity();
+}
+function applyHomeBgOpacity() {
+    var el = document.getElementById('homeInner');
+    if (el) el.style.opacity = (S.homeBgOpacity || 100) / 100;
+}
+function applyChatBgOpacity() {
+    var el = document.getElementById('chatArea');
+    if (el) el.style.opacity = (S.chatBgOpacity || 100) / 100;
+}
+
 function setChatBg(id) {
     S.chatBg = id;
     S.chatBgImage = '';
@@ -3403,6 +3837,27 @@ if (savedMood) {
     S.contactMood = await getRandomMood2();
     await setCal('contactMood', S.contactMood);
 }
+S.homeBgOpacity = await getCal('homeBgOpacity', 100);
+S.chatBgOpacity = await getCal('chatBgOpacity', 100);
+
+// 备份提醒
+var lastBackup = localStorage.getItem('lastBackupTime');
+if (lastBackup) {
+    var days = (Date.now() - parseInt(lastBackup)) / (1000 * 60 * 60 * 24);
+    if (days > 7) {
+        showToast('⚠️ 已' + Math.floor(days) + '天未备份，建议去数据管理备份');
+    }
+} else {
+    localStorage.setItem('lastBackupTime', Date.now());
+}
+
+var lastBackup = localStorage.getItem('lastBackupTime');
+if (lastBackup) {
+    var days = (Date.now() - parseInt(lastBackup)) / (1000 * 60 * 60 * 24);
+    if (days > 7) showToast('⚠️ 已' + Math.floor(days) + '天未备份');
+} else {
+    localStorage.setItem('lastBackupTime', Date.now());
+}
 
 updateHome();
 scheduleStatusUpdate(); 
@@ -3581,6 +4036,13 @@ window.saveChatSettings = saveChatSettings;
 window.scheduleStatusUpdate = scheduleStatusUpdate;
 window.deleteStatusOpt = deleteStatusOpt;
 window.scheduleMoodUpdate = scheduleMoodUpdate;
+window.saveHomeBgOpacity = saveHomeBgOpacity;
+window.saveChatBgOpacity = saveChatBgOpacity;
+window.applyHomeBgOpacity = applyHomeBgOpacity;
+window.applyChatBgOpacity = applyChatBgOpacity;
+window.exportChatByDate = exportChatByDate;
+window.deleteCallLog = deleteCallLog;
+window.getTarotCardSVG = getTarotCardSVG;
 
 init();
 })();
