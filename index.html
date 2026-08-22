@@ -3467,7 +3467,8 @@ function openChatSettings(){
     probRow('已读不回概率', 'readNotReplyProb', cs.readNotReplyProb) +
     '<div class="settings-row"><span>正在输入</span><div class="toggle-switch ' + (cs.typing?'on':'') + '" onclick="toggleChatSetting(\'typing\',this)"></div></div>' +
     '<div class="settings-row"><span>主动发消息</span><div class="toggle-switch ' + (cs.autoSend?'on':'') + '" onclick="toggleChatSetting(\'autoSend\',this)"></div></div>' +
-    (cs.autoSend ? '<div class="settings-row"><span>间隔(分)</span><input type="number" value="' + cs.autoSendInterval + '" onchange="S.chatSettings.autoSendInterval=this.value;saveChatSettings();restartAutoSend();" style="width:60px;text-align:center;border:1px solid #eee;border-radius:6px;padding:4px;"></div>' : '') +
+    (cs.autoSend ? '<div class="settings-row"><span style="display:inline-block;width:100px;text-align:right;margin-right:8px;">间隔(分)</span><input type="range" min="1" max="120" value="' + (cs.autoSendInterval || 10) + '" oninput="this.nextElementSibling.textContent=this.value+\'分\';" onchange="S.chatSettings.autoSendInterval=parseInt(this.value);saveChatSettings();restartAutoSend();" style="width:120px;"><span style="margin-left:8px;font-size:12px;color:#999;min-width:35px;">' + (cs.autoSendInterval || 10) + '分</span></div>' +
+'<div class="settings-row"><span style="display:inline-block;width:100px;text-align:right;margin-right:8px;">每次发几条</span><input type="number" min="1" max="5" value="' + (cs.autoSendCount || 1) + '" onchange="S.chatSettings.autoSendCount=parseInt(this.value);saveChatSettings();restartAutoSend();" style="width:60px;text-align:center;border:1px solid #eee;border-radius:6px;padding:4px;"></div>' : '') +
     '<div class="settings-row"><span>表情混入消息</span><div class="toggle-switch ' + (cs.emojiMix?'on':'') + '" onclick="toggleChatSetting(\'emojiMix\',this)"></div></div>' +
     probRow('表情概率', 'emojiMixProb', cs.emojiMixProb) +
     probRow('拍一拍概率', 'patProb', cs.patProb) +
@@ -3535,8 +3536,26 @@ async function saveAllChatSettings(){
     showToast('✅ 已保存');
 }
 function editTopQuote(){const n=prompt('修改顶部文案：',S.topQuote);if(n&&n.trim()){S.topQuote=n.trim();document.getElementById('chatTopQuote').textContent=S.topQuote;dbPut('settings',{key:'topQuote',value:S.topQuote});}}
-function startAutoSendIfNeeded(){if(autoSendTimer)clearInterval(autoSendTimer);if(S.chatSettings.autoSend){const i=parseInt(S.chatSettings.autoSendInterval)||10;autoSendTimer=setInterval(async()=>{if(callState!=='idle')return;const c=await smartComposeReply();const m={sender:'other',content:c,type:'text',timestamp:Date.now()};const id=await dbPut('messages',m);m.id=id;renderMsg(m);},i*60000);}}
-
+function startAutoSendIfNeeded(){
+    if(autoSendTimer) clearInterval(autoSendTimer);
+    if(S.chatSettings.autoSend){
+        const i = parseInt(S.chatSettings.autoSendInterval) || 10;
+        const cnt = parseInt(S.chatSettings.autoSendCount) || 1;
+        autoSendTimer = setInterval(async () => {
+            if(callState !== 'idle') return;
+            for (let n = 0; n < cnt; n++) {
+                const c = await smartComposeReply();
+                const m = {sender:'other', content:c, type:'text', timestamp:Date.now()};
+                const id = await dbPut('messages', m);
+                m.id = id;
+                renderMsg(m);
+                scrollBottom();
+               var perMsgGap = Math.floor(Math.random() * i * 5000) + i * 1000; // i分钟间隔 → 条间隔 i~6i 秒
+if (n < cnt - 1) await new Promise(r => setTimeout(r, perMsgGap));
+            }
+        }, i * 60000);
+    }
+}
 // ============ 背景设置 ============
 function setHomeBg(id) {
     S.homeBg = id;
@@ -3636,12 +3655,14 @@ async function init() {
                 S[x.key] = x.value;
             }
         });
+if (S.chatSettings.autoSendCount === undefined) S.chatSettings.autoSendCount = 1;
 
 // 旧数据补全新参数
 var csDefaults = {
     quoteReplyProb: 10, readNotReplyProb: 50, emojiMixProb: 5,
     simCallProb: 1, patProb: 5, qinCollectProb: 5,
-    cardMin: 1, cardMax: 4, cardRepeatProb: 30, cardDeleteProb: 50
+    cardMin: 1, cardMax: 4, cardRepeatProb: 30, cardDeleteProb: 50,
+    autoSendCount: 1
 };
 for (var k in csDefaults) {
     if (S.chatSettings[k] === undefined) S.chatSettings[k] = csDefaults[k];
