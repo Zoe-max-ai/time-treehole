@@ -629,7 +629,7 @@ async function migrateFromLocalStorage() {
 }
 
 // ============ 全局状态 ============
-let S={contactName:'秦彻',contactStatus:'在线',myName:'笑笑',minReplyTime:'1',maxReplyTime:'5',replyCount:'1',myAvatar:'',contactAvatar:'',contactMood:'',chatBgImage:'',homeBgImage:'',homeBg:'default',chatBg:'default',bubbleStyle:'default',topQuote:'✨ 在所有物是人非的景色里，我最喜欢你 ✨',chatSettings:{quoteReply:true,readReceipt:'none',readNotReply:false,typing:true,autoSend:false,autoSendInterval:'10',emojiMix:true,simCall:true}};
+let S={contactName:'秦彻',contactStatus:'在线',myName:'笑笑',minReplyTime:'1',maxReplyTime:'5',replyCount:'1',myAvatar:'',contactAvatar:'',contactMood:'',chatBgImage:'',homeBgImage:'',homeBg:'default',chatBg:'default',bubbleStyle:'default',topQuote:'✨ 在所有物是人非的景色里，我最喜欢你 ✨',chatSettings:{quoteReply:true,quoteReplyProb:10,readReceipt:'none',readNotReply:false,readNotReplyProb:50,typing:true,autoSend:false,autoSendInterval:'10',emojiMix:true,emojiMixProb:5,simCall:true,simCallProb:1,patProb:5,qinCollectProb:5,cardMin:1,cardMax:4,cardRepeatProb:30,cardDeleteProb:50}};
 let patOptions=['拍了拍你的小脑袋','戳了戳你的脸颊','轻轻地拍了拍你'];
 let callInterval=null,callSeconds=0,callStartTime=null,callState='idle',callDirection='out';
 let autoSendTimer=null,currentWishTab='wish',selectedSpread=1;
@@ -1008,7 +1008,6 @@ async function sendMessage(){
     autoReply();
 }
 
-// ============ 自动回复 ============
 async function autoReply(){
     const cs = S.chatSettings;
     
@@ -1033,10 +1032,11 @@ async function autoReply(){
     
     if (cs.readNotReply) {
         var roll = Math.random();
-        if (roll < 0.5) {
+        var noReplyProb = (cs.readNotReplyProb || 50) / 100;
+        if (roll < noReplyProb) {
             addSysMsg('📖 秦彻已读');
             return;
-        } else if (roll < 0.7) {
+        } else if (roll < noReplyProb + 0.2) {
             var ti = document.createElement('div');
             ti.className = 'typing-indicator';
             ti.textContent = '秦彻正在输入...';
@@ -1070,25 +1070,25 @@ async function autoReply(){
         if (ti) ti.remove();
         
         for (let i = 0; i < cnt; i++) {
-let c = await smartComposeReply();
-if (cs.quoteReply && Math.random() < 0.01) {
-    var allMsgs = await dbGetAll('messages');
-    var myMsgs = allMsgs.filter(function(x) { return x.sender === 'me' && x.type === 'text'; });
-    if (myMsgs.length > 0) {
-        var randomMsg = myMsgs[Math.floor(Math.random() * myMsgs.length)];
-        if (randomMsg && randomMsg.content) {
-            c = '「' + randomMsg.content + '」\n' + c;
-        }
-    }
-}
+            let c = await smartComposeReply();
+            if (cs.quoteReply && Math.random() < ((cs.quoteReplyProb || 10) / 100)) {
+                var allMsgs = await dbGetAll('messages');
+                var myMsgs = allMsgs.filter(function(x) { return x.sender === 'me' && x.type === 'text'; });
+                if (myMsgs.length > 0) {
+                    var randomMsg = myMsgs[Math.floor(Math.random() * myMsgs.length)];
+                    if (randomMsg && randomMsg.content) {
+                        c = '「' + randomMsg.content + '」\n' + c;
+                    }
+                }
+            }
             const m = { sender: 'other', content: c, type: 'text', timestamp: Date.now() };
             const id = await dbPut('messages', m);
             m.id = id;
             renderMsg(m);
             scrollBottom();
             
-            // 秦彻随机收藏你说的话
-            if (Math.random() < 0.05) {
+            // 秦彻随机收藏
+            if (Math.random() < ((cs.qinCollectProb || 5) / 100)) {
                 var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
                 var allMsgs = await dbGetAll('messages');
                 var myMsgs = allMsgs.filter(function(x) { return x.sender === 'me' && x.type === 'text'; });
@@ -1107,7 +1107,7 @@ if (cs.quoteReply && Math.random() < 0.01) {
             }
             
             // 发表情
-            if (cs.emojiMix && Math.random() < 0.01) {
+            if (cs.emojiMix && Math.random() < ((cs.emojiMixProb || 5) / 100)) {
                 var emojiList = await dbGetAll('emojis');
                 if (emojiList && emojiList.length > 0) {
                     var emoji = emojiList[Math.floor(Math.random() * emojiList.length)];
@@ -1122,7 +1122,7 @@ if (cs.quoteReply && Math.random() < 0.01) {
             }
             
             // 拍一拍
-            if (Math.random() < 0.01 && patOptions.length > 0) {
+            if (Math.random() < ((cs.patProb || 5) / 100) && patOptions.length > 0) {
                 var pat = patOptions[Math.floor(Math.random() * patOptions.length)];
                 var patMsg = { sender: 'other', content: pat, type: 'pat', timestamp: Date.now() };
                 var patId = await dbPut('messages', patMsg);
@@ -1133,7 +1133,7 @@ if (cs.quoteReply && Math.random() < 0.01) {
             }
             
             // 模拟来电
-            if (cs.simCall && Math.random() < 0.002 && callState === 'idle') {
+            if (cs.simCall && Math.random() < ((cs.simCallProb || 1) / 100) && callState === 'idle') {
                 setTimeout(function() { startCallFromQinChe(); }, 2000);
             }
             
@@ -1179,15 +1179,22 @@ async function smartComposeReply(){
     });
     if(vc.length === 0) return '😅 请先在模块设置里勾选聊天分组～';
     
-    const count = Math.min(Math.floor(Math.random() * 4) + 1, vc.length);
+    const cs = S.chatSettings;
+    var cardMin = parseInt(cs.cardMin || 1);
+    var cardMax = parseInt(cs.cardMax || 4);
+    var count = Math.min(Math.floor(Math.random() * (cardMax - cardMin + 1)) + cardMin, vc.length);
+    if (count < 1) count = 1;
+    
     const shuffled = vc.sort(() => Math.random() - 0.5);
     var selected = shuffled.slice(0, count);
     
-    if (selected.length > 1 && Math.random() < Math.random()) {
+    // 随机删一张（概率可调）
+    if (selected.length > 1 && Math.random() < ((cs.cardDeleteProb || 50) / 100)) {
         var del = Math.floor(Math.random() * selected.length);
         selected.splice(del, 1);
     }
-    if (selected.length > 0 && Math.random() < Math.random()) {
+    // 随机重复一张（概率可调）
+    if (selected.length > 0 && Math.random() < ((cs.cardRepeatProb || 30) / 100)) {
         var dup = selected[Math.floor(Math.random() * selected.length)];
         selected.push(dup);
     }
@@ -1453,7 +1460,7 @@ async function renderOurUniverse(){
     h += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">';
     const statusOpts = await dbGetAll('statusOptions');
     statusOpts.forEach(s => {
-        h += '<span style="padding:5px 12px;border-radius:14px;font-size:12px;border:1.5px solid #eee;background:#fafafa;">' + s.content + '</span>';
+        h += '<span style="padding:5px 12px;border-radius:14px;font-size:12px;border:1.5px solid #eee;background:#fafafa;display:inline-flex;align-items:center;gap:4px;">' + s.content + '<span onclick="deleteStatusOpt(' + s.id + ')" style="cursor:pointer;color:#d4a8b8;font-size:12px;">✕</span></span>';
     });
     h += '</div><div style="display:flex;gap:6px;"><input type="text" id="newStatusInput" placeholder="添加状态..." style="flex:1;padding:8px 12px;border-radius:12px;border:1.5px solid #e8e0d8;font-size:12px;"><button onclick="addStatusOpt()" style="padding:6px 14px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:12px;">添加</button></div></div>';
     
@@ -1511,9 +1518,63 @@ function selectBubblePreset(id) {
 async function getRandomMood2(){const cards=await dbGetAll('wordcards');const valid=cards.filter(c=>c.content&&c.content!=='__GROUP_PLACEHOLDER__'&&c.content.length>2);return valid.length>0?valid[Math.floor(Math.random()*valid.length)].content:'今天天气真好';}
 async function editNick(type){const cur=type==='me'?S.myName:S.contactName;const n=prompt('输入昵称：',cur);if(n&&n.trim()){if(type==='me'){S.myName=n.trim();await setCal('myName',S.myName);}else{S.contactName=n.trim();await setCal('contactName',S.contactName);}renderOurUniverse();updateHome();}}
 async function refreshMood(){S.contactMood=await getRandomMood2();await setCal('contactMood',S.contactMood);renderOurUniverse();updateHome();showToast('已更换');}
+async function scheduleStatusUpdate() {
+    var delay = Math.floor(Math.random() * 7 + 1) * 3600 * 1000; // 1~8 小时
+    setTimeout(async function() {
+        if (Math.random() < 0.7) { // 70% 概率更新
+            var saved = await dbGetAll('statusOptions');
+            var statuses = saved.map(function(s) { return s.content; });
+            if (statuses.length > 0) {
+                var newStatus = statuses[Math.floor(Math.random() * statuses.length)];
+                if (newStatus !== S.contactStatus) {
+                    S.contactStatus = newStatus;
+                    await setCal('contactStatus', newStatus);
+                    updateHome();
+                }
+            }
+        }
+        scheduleStatusUpdate(); // 递归，继续下一次检查
+    }, delay);
+}
+async function scheduleMoodUpdate() {
+    var delay = Math.floor(Math.random() * 7 + 1) * 3600 * 1000; // 1~8 小时
+    setTimeout(async function() {
+        if (Math.random() < 0.7) { // 70% 概率更新
+            var newMood = await getRandomMood2();
+            if (newMood && newMood !== S.contactMood) {
+                S.contactMood = newMood;
+                await setCal('contactMood', newMood);
+                updateHome();
+            }
+        }
+        scheduleMoodUpdate(); // 递归，继续下一次检查
+    }, delay);
+}
 async function addPat(){const v=document.getElementById('patTextInput').value.trim();if(!v)return;if(patOptions.includes(v)){showToast('已存在');return;}patOptions.push(v);await dbPut('patOptions',{content:v,timestamp:Date.now()});renderOurUniverse();}
 function delPat(i){patOptions.splice(i,1);renderOurUniverse();}
 async function addStatusOpt(){const v=document.getElementById('newStatusInput').value.trim();if(!v)return;await dbPut('statusOptions',{content:v,timestamp:Date.now()});renderOurUniverse();}
+async function deleteStatusOpt(id) {
+    await dbDelete('statusOptions', id);
+    var saved = await dbGetAll('statusOptions');
+    var statuses = saved.map(function(s) { return s.content; });
+    
+    // 如果有剩余状态，且当前状态不在剩余状态里，随机换一个
+    if (statuses.length > 0) {
+        if (!statuses.includes(S.contactStatus)) {
+            S.contactStatus = statuses[Math.floor(Math.random() * statuses.length)];
+            await setCal('contactStatus', S.contactStatus);
+            updateHome();
+        }
+    } else {
+        // 如果全删光了，状态设为空字符串（不显示状态标签）
+        S.contactStatus = '';
+        await setCal('contactStatus', '');
+        updateHome();
+    }
+    
+    renderOurUniverse();
+    showToast('🗑 已删除');
+}
 async function loadAvatarHistory(type){const h=await dbGetAll('avatarHistory');const f=h.filter(x=>x.type===type).sort((a,b)=>b.timestamp-a.timestamp);const c=document.getElementById((type==='me'?'my':'contact')+'AvatarHistory');if(!c)return;const cur=type==='me'?S.myAvatar:S.contactAvatar;c.innerHTML=f.slice(0,8).map(x=>'<div class="avatar-history-item'+(x.data===cur?' selected':'')+'" onclick="selectHistoryAvatar(\''+type+'\','+x.id+')"><img src="'+x.data+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"><span class="ah-del" onclick="event.stopPropagation();deleteHistoryAvatar('+x.id+',\''+type+'\')">×</span></div>').join('');}
 async function selectHistoryAvatar(type,hid){const h=await dbGetAll('avatarHistory');const item=h.find(x=>x.id===parseInt(hid));if(!item)return;if(type==='me'){S.myAvatar=item.data;await dbPut('avatars',{key:'myAvatar',data:item.data});}else{S.contactAvatar=item.data;await dbPut('avatars',{key:'contactAvatar',data:item.data});}updateHome();renderOurUniverse();}
 async function deleteHistoryAvatar(hid,type){await dbDelete('avatarHistory',parseInt(hid));loadAvatarHistory(type);}
@@ -2688,8 +2749,8 @@ async function tarotClearHistory() {
 // ============ 他的房间（PNG 版） ============
 
 let hisRoomState = 'idle';
-const IMG_BASE = 'https://cdn.jsdelivr.net/gh/Zoe-max-ai/time-treehole/';
-const IMG_VERSION = '?v=2';
+const IMG_BASE = './';
+const IMG_VERSION = '';
 
 function openHisRoom() {
     var overlay = document.getElementById('hisRoomOverlay');
@@ -2726,7 +2787,7 @@ console.log('🦅 startWingFlap 找到乌鸦:', crow);
     if (wingTimer) clearInterval(wingTimer);
     wingTimer = setInterval(function() {
         wingOpen = !wingOpen;
-        crow.src = wingOpen ? IMG_BASE + '乌鸦_张开翅膀.png' + IMG_VERSION : IMG_BASE + '乌鸦_收拢翅膀.png' + IMG_VERSION;
+        crow.src = wingOpen ? IMG_BASE + '乌鸦_张开翅膀.png'  : IMG_BASE + '乌鸦_收拢翅膀.png' ;
     }, 150);
 }
 
@@ -2738,7 +2799,7 @@ function stopWingFlap() {
     // 停在张开状态
     var crow = document.getElementById('hisRoomCrow');
     if (crow) {
-        crow.src = IMG_BASE + '乌鸦_张开翅膀.png'+ IMG_VERSION;
+        crow.src = IMG_BASE + '乌鸦_张开翅膀.png';
     }
 }
 
@@ -2757,7 +2818,7 @@ if (modalTitle) modalTitle.innerHTML = randomTitle;
         container.innerHTML = `
     <div style="text-align:center;padding:0;overflow:hidden;">
         <div style="position:relative;display:inline-block;">
-            <img src="${IMG_BASE}门_关着.png${IMG_VERSION}" style="width:220px;height:auto;display:block;margin:0 auto;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+            <img src="${IMG_BASE}门_关着.png" style="width:220px;height:auto;display:block;margin:0 auto;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
             <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:14px;color:#333;white-space:nowrap;">门关着，里面很安静…</div>
         </div>
     </div>
@@ -2786,12 +2847,12 @@ async function knockHisRoom() {
         container.innerHTML = `
     <div style="text-align:center;padding:0;height:280px;overflow:hidden;position:relative;">
                 <!-- 门打开 -->
-                <img src="${IMG_BASE}门_开着.png${IMG_VERSION}" style="width:220px;height:auto;display:block;margin:0 auto;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">                
+                <img src="${IMG_BASE}门_开着.png" style="width:220px;height:auto;display:block;margin:0 auto;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">                
                 <!-- 乌鸦（初始隐藏，从门位置飞出） -->
-                <img id="hisRoomCrow" src="${IMG_BASE}乌鸦_张开翅膀.png${IMG_VERSION}" style="position:absolute;top:120px;left:50%;transform:translateX(-80%) scale(0.2);width:100px;height:auto;opacity:0;transition:all 1s ease-out;pointer-events:none;">
+                <img id="hisRoomCrow" src="${IMG_BASE}乌鸦_张开翅膀.png" style="position:absolute;top:120px;left:50%;transform:translateX(-80%) scale(0.2);width:100px;height:auto;opacity:0;transition:all 1s ease-out;pointer-events:none;">
                 <!-- 纸条（初始隐藏） -->
                 <div id="hisRoomPaperContainer" style="position:absolute;top:220px;left:50%;transform:translateX(-50%);opacity:0;transition:opacity 0.6s ease;pointer-events:none;width:180px;">
-                    <img src="${IMG_BASE}纸条.png${IMG_VERSION}" style="width:100%;height:auto;display:block;">
+                    <img src="${IMG_BASE}纸条.png" style="width:100%;height:auto;display:block;">
                     <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:75%;text-align:center;font-family:cursive;font-size:14px;color:#4a3a2a;line-height:1.4;padding:4px;">
                         ${card}
                     </div>
@@ -2971,36 +3032,59 @@ function openChatSettings(){
     const cs = S.chatSettings;
     document.getElementById('chatSettingsPanel').innerHTML = 
     '<h4 style="text-align:center;margin-bottom:16px;">🐱 聊天设置</h4>' +
-    '<div class="settings-section">' +
-    '<h4>📝 顶部文案</h4>' +
+    
+    '<div class="settings-section"><h4>📝 顶部文案</h4>' +
     '<div style="display:flex;gap:6px;">' +
     '<input type="text" id="setTopQuote" value="' + (S.topQuote||'').replace(/"/g,'&quot;') + '" style="flex:1;padding:7px 10px;border-radius:12px;border:1.5px solid #eee;font-size:12px;">' +
     '<button onclick="saveTopQuoteFromPanel()" style="padding:7px 12px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:12px;">保存</button>' +
     '</div></div>' +
-    '<div class="settings-section">' +
-    '<h4>💬 消息交互</h4>' +
+    
+    '<div class="settings-section"><h4>💬 消息交互</h4>' +
     '<div class="settings-row"><span>引用回复</span><div class="toggle-switch ' + (cs.quoteReply?'on':'') + '" onclick="toggleChatSetting(\'quoteReply\',this)"></div></div>' +
+    probRow('引用回复概率', 'quoteReplyProb', cs.quoteReplyProb) +
     '<div class="settings-row"><span>已读回执</span><select onchange="S.chatSettings.readReceipt=this.value;saveChatSettings();" style="padding:6px;border-radius:8px;border:1px solid #eee;">' +
     '<option value="none" ' + (cs.readReceipt==='none'?'selected':'') + '>关闭</option>' +
     '<option value="text" ' + (cs.readReceipt==='text'?'selected':'') + '>文字提示</option>' +
     '<option value="graphic" ' + (cs.readReceipt==='graphic'?'selected':'') + '>图形提示</option>' +
     '</select></div>' +
     '<div class="settings-row"><span>已读不回</span><div class="toggle-switch ' + (cs.readNotReply?'on':'') + '" onclick="toggleChatSetting(\'readNotReply\',this)"></div></div>' +
+    probRow('已读不回概率', 'readNotReplyProb', cs.readNotReplyProb) +
     '<div class="settings-row"><span>正在输入</span><div class="toggle-switch ' + (cs.typing?'on':'') + '" onclick="toggleChatSetting(\'typing\',this)"></div></div>' +
     '<div class="settings-row"><span>主动发消息</span><div class="toggle-switch ' + (cs.autoSend?'on':'') + '" onclick="toggleChatSetting(\'autoSend\',this)"></div></div>' +
     (cs.autoSend ? '<div class="settings-row"><span>间隔(分)</span><input type="number" value="' + cs.autoSendInterval + '" onchange="S.chatSettings.autoSendInterval=this.value;saveChatSettings();restartAutoSend();" style="width:60px;text-align:center;border:1px solid #eee;border-radius:6px;padding:4px;"></div>' : '') +
     '<div class="settings-row"><span>表情混入消息</span><div class="toggle-switch ' + (cs.emojiMix?'on':'') + '" onclick="toggleChatSetting(\'emojiMix\',this)"></div></div>' +
-    '<div class="settings-row"><span>模拟通话</span><div class="toggle-switch ' + (cs.simCall?'on':'') + '" onclick="toggleChatSetting(\'simCall\',this)"></div></div>' +
+    probRow('表情概率', 'emojiMixProb', cs.emojiMixProb) +
+    probRow('拍一拍概率', 'patProb', cs.patProb) +
+'<div class="settings-row"><span>来电概率</span>' +
+'<input type="range" min="0" max="1000" value="' + (Math.round(cs.simCallProb * 1000) || 10) + '" oninput="this.nextElementSibling.textContent=this.value+\'‰\';" onchange="S.chatSettings.simCallProb=parseInt(this.value)/1000;saveChatSettings();" style="width:120px;">' +
+'<span style="margin-left:8px;font-size:12px;color:#999;min-width:45px;">' + (Math.round(cs.simCallProb * 1000) || 10) + '‰</span></div>' +
+    
+    '<div class="settings-section"><h4>💬 收藏</h4>' +
+    probRow('秦彻收藏概率', 'qinCollectProb', cs.qinCollectProb) +
     '</div>' +
-    '<div class="settings-section">' +
-    '<h4>🤖 自动回复</h4>' +
+    
+    '<div class="settings-section"><h4>🤖 拼字卡</h4>' +
+    '<div class="settings-row"><span>拼几条</span><input type="number" id="setCardMin" value="' + (cs.cardMin||1) + '" style="width:45px;text-align:center;border:1px solid #eee;border-radius:6px;padding:4px;"> ~ <input type="number" id="setCardMax" value="' + (cs.cardMax||4) + '" style="width:45px;text-align:center;border:1px solid #eee;border-radius:6px;padding:4px;"></div>' +
+    probRow('重复概率', 'cardRepeatProb', cs.cardRepeatProb) +
+    probRow('删除概率', 'cardDeleteProb', cs.cardDeleteProb) +
+    '</div>' +
+    
+    '<div class="settings-section"><h4>🤖 自动回复</h4>' +
     '<div class="settings-row"><span>最快回复（秒）</span><input type="number" id="setMin" value="' + S.minReplyTime + '" style="width:60px;text-align:center;border:1px solid #eee;border-radius:6px;padding:4px;"></div>' +
     '<div class="settings-row"><span>最慢回复（分钟）</span><input type="number" id="setMax" value="' + S.maxReplyTime + '" style="width:60px;text-align:center;border:1px solid #eee;border-radius:6px;padding:4px;"></div>' +
     '<div class="settings-row"><span>回复次数</span><input type="number" id="setCnt" value="' + S.replyCount + '" style="width:60px;text-align:center;border:1px solid #eee;border-radius:6px;padding:4px;"></div>' +
     '</div>' +
+    
     '<button style="width:100%;padding:12px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:15px;cursor:pointer;" onclick="saveAllChatSettings()">💾 保存聊天设置</button>' +
     '<button style="width:100%;padding:10px;margin-top:6px;border-radius:12px;background:#f0f0f0;border:none;cursor:pointer;" onclick="closeChatSettings()">关闭</button>';
     document.getElementById('chatSettingsOverlay').classList.add('show');
+}
+
+function probRow(label, key, val) {
+    var v = parseInt(val) || 0;
+    return '<div class="settings-row"><span>' + label + '</span>' +
+        '<input type="range" min="0" max="100" value="' + v + '" oninput="this.nextElementSibling.textContent=this.value+\'%\';" onchange="S.chatSettings.' + key + '=parseInt(this.value);saveChatSettings();" style="width:120px;">' +
+        '<span style="margin-left:8px;font-size:12px;color:#999;min-width:35px;">' + v + '%</span></div>';
 }
 function toggleChatSetting(key, el) {
     S.chatSettings[key] = !S.chatSettings[key];
@@ -3020,7 +3104,20 @@ function restartAutoSend() {
 }
 function closeChatSettings(){document.getElementById('chatSettingsOverlay').classList.remove('show');}
 function saveTopQuoteFromPanel(){const v=document.getElementById('setTopQuote').value.trim();if(v){S.topQuote=v;document.getElementById('chatTopQuote').textContent=S.topQuote;dbPut('settings',{key:'topQuote',value:S.topQuote});}}
-async function saveAllChatSettings(){S.minReplyTime=document.getElementById('setMin').value;S.maxReplyTime=document.getElementById('setMax').value;S.replyCount=document.getElementById('setCnt').value;await dbPut('settings',{key:'minReplyTime',value:S.minReplyTime});await dbPut('settings',{key:'maxReplyTime',value:S.maxReplyTime});await dbPut('settings',{key:'replyCount',value:S.replyCount});saveTopQuoteFromPanel();closeChatSettings();showToast('✅ 已保存');}
+async function saveAllChatSettings(){
+    S.minReplyTime = document.getElementById('setMin').value;
+    S.maxReplyTime = document.getElementById('setMax').value;
+    S.replyCount = document.getElementById('setCnt').value;
+    if (document.getElementById('setCardMin')) S.chatSettings.cardMin = parseInt(document.getElementById('setCardMin').value);
+    if (document.getElementById('setCardMax')) S.chatSettings.cardMax = parseInt(document.getElementById('setCardMax').value);
+    await dbPut('settings',{key:'minReplyTime',value:S.minReplyTime});
+    await dbPut('settings',{key:'maxReplyTime',value:S.maxReplyTime});
+    await dbPut('settings',{key:'replyCount',value:S.replyCount});
+    await saveChatSettings();
+    saveTopQuoteFromPanel();
+    closeChatSettings();
+    showToast('✅ 已保存');
+}
 function editTopQuote(){const n=prompt('修改顶部文案：',S.topQuote);if(n&&n.trim()){S.topQuote=n.trim();document.getElementById('chatTopQuote').textContent=S.topQuote;dbPut('settings',{key:'topQuote',value:S.topQuote});}}
 function startAutoSendIfNeeded(){if(autoSendTimer)clearInterval(autoSendTimer);if(S.chatSettings.autoSend){const i=parseInt(S.chatSettings.autoSendInterval)||10;autoSendTimer=setInterval(async()=>{if(callState!=='idle')return;const c=await smartComposeReply();const m={sender:'other',content:c,type:'text',timestamp:Date.now()};const id=await dbPut('messages',m);m.id=id;renderMsg(m);},i*60000);}}
 
@@ -3105,6 +3202,16 @@ async function init() {
                 S[x.key] = x.value;
             }
         });
+
+// 旧数据补全新参数
+var csDefaults = {
+    quoteReplyProb: 10, readNotReplyProb: 50, emojiMixProb: 5,
+    simCallProb: 1, patProb: 5, qinCollectProb: 5,
+    cardMin: 1, cardMax: 4, cardRepeatProb: 30, cardDeleteProb: 50
+};
+for (var k in csDefaults) {
+    if (S.chatSettings[k] === undefined) S.chatSettings[k] = csDefaults[k];
+}
         
         const avatars = await window.idbGetAll('avatars');
         avatars.forEach(function(x) {
@@ -3271,9 +3378,37 @@ if (localStorage.getItem('homeLightText') === 'true') {
     document.body.classList.add('light-text');
 }
 initLock();        
+// 恢复状态
+var savedStatus = await getCal('contactStatus', '');
+var saved = await dbGetAll('statusOptions');
+var statuses = saved.map(function(s) { return s.content; });
+
+if (statuses.length > 0) {
+    if (savedStatus && statuses.includes(savedStatus)) {
+        S.contactStatus = savedStatus;
+    } else {
+        S.contactStatus = statuses[Math.floor(Math.random() * statuses.length)];
+        await setCal('contactStatus', S.contactStatus);
+    }
+} else {
+    S.contactStatus = '';
+    await setCal('contactStatus', '');
+}
+// 加载秦彻想说
+var savedMood = await getCal('contactMood', '');
+if (savedMood) {
+    S.contactMood = savedMood;
+} else {
+    // 如果还没有保存过，随机取一句
+    S.contactMood = await getRandomMood2();
+    await setCal('contactMood', S.contactMood);
+}
+
 updateHome();
-        startAutoSendIfNeeded();
-        console.log('✅ 2.0 启动完成');
+scheduleStatusUpdate(); 
+scheduleMoodUpdate();
+startAutoSendIfNeeded();
+console.log('✅ 2.0 启动完成');
         
     } catch(e) {
         console.error('❌ 初始化失败:', e);
@@ -3441,6 +3576,11 @@ window.lockNow = lockNow;
 window.deleteChoiceHistory = deleteChoiceHistory;
 window.clearChoiceHistory = clearChoiceHistory;
 window.deleteTarotHistory = deleteTarotHistory;
+window.S = S;
+window.saveChatSettings = saveChatSettings;
+window.scheduleStatusUpdate = scheduleStatusUpdate;
+window.deleteStatusOpt = deleteStatusOpt;
+window.scheduleMoodUpdate = scheduleMoodUpdate;
 
 init();
 })();
