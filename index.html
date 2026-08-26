@@ -999,7 +999,7 @@ const TAROT_ALLOW_DENY = {
 
 // ============ IndexedDB 存储层 ============
 const DB_NAME = 'TimeTreeDB';
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 let db = null;
 
 function openDB() {
@@ -2249,7 +2249,7 @@ window.db = null;
 
 window.openDB = function() {
     return new Promise(function(resolve, reject) {
-        var req = indexedDB.open('TimeTreeDB', 5);
+        var req = indexedDB.open('TimeTreeDB', 6);
         req.onupgradeneeded = function(e) {
             var d = e.target.result;
            var stores = ['messages', 'settings', 'wordcards', 'emojis', 'avatars',
