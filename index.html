@@ -3107,9 +3107,10 @@ var saved = await getCal('mailState', '');
             mailState.cooldownUntil = parsed.cooldownUntil || 0;
         } catch(e) {}
     }
-    var letters = await dbGetAll('mailLetters') || [];
-    letters.sort(function(a,b) { return b.timestamp - a.timestamp; });
-    
+   var letters = await dbGetAll('mailLetters');
+if (!letters) letters = [];
+letters.sort(function(a,b) { return b.timestamp - a.timestamp; });
+
     var filter = mailFilter || 'all';
 
 var today = new Date().toDateString();
