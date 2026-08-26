@@ -563,6 +563,35 @@ body.light-text #themeToggleBtn {
 }
 .tarot-card-refined-v2 svg { width: 100%; height: 100%; display: block; }
 
+/* ===== 塔罗新样式 ===== */
+.tarot-deck-area { position:relative; width:260px; height:440px; margin:12px auto 8px; }
+.tarot-deck-shadow { position:absolute; width:260px; height:440px; border-radius:10px 12px 9px 11px; background:#F2EBDD; border:1px solid rgba(120,100,80,.12); box-shadow:0 2px 8px rgba(60,50,40,.08); }
+.tarot-deck-shadow.s1 { transform:translate(-5px,4px) rotate(-1.5deg); opacity:.55; }
+.tarot-deck-shadow.s2 { transform:translate(-9px,8px) rotate(-2.5deg); opacity:.32; }
+.tarot-deck-shadow.s3 { transform:translate(-13px,12px) rotate(-3.5deg); opacity:.16; }
+.tarot-deck-top { position:absolute; inset:0; border-radius:10px 12px 9px 11px; background:#F2EBDD; border:1px solid rgba(120,100,80,.18); box-shadow:0 6px 18px rgba(60,50,40,.14),0 1px 0 rgba(255,255,255,.4) inset; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .25s ease; }
+.tarot-deck-top:active { transform:scale(.98); }
+.tarot-orient-badge { position:absolute; top:10px; right:10px; font-size:8px; letter-spacing:2px; color:#8C4433; border:1px solid rgba(140,68,51,.45); padding:2px 6px; border-radius:2px; background:rgba(140,68,51,.04); z-index:5; }
+.tarot-card-wrapper { flex:0 0 260px; scroll-snap-align:center; display:flex; flex-direction:column; align-items:center; gap:10px; }
+.tarot-card-front { background:#F2EBDD; border-radius:10px 12px 9px 11px; border:1px solid rgba(120,100,80,.12); }
+.tarot-strip { background:rgba(242,235,221,.55); border:1px dashed rgba(140,100,80,.22); border-radius:8px; }
+
+/* 见字如晤 */
+.mailbox-tabs { display:flex; border-bottom:1px solid #f0ece8; background:#fff; }
+.mailbox-tab { flex:1; padding:12px; text-align:center; font-size:14px; cursor:pointer; border:none; background:transparent; color:#999; }
+.mailbox-tab.active { color:#d4a8b8; border-bottom:2px solid #d4a8b8; font-weight:600; }
+.letter-paper {
+    background:#fff;
+    border:1px solid #f0ece8;
+    border-radius:14px;
+    padding:22px;
+    position:relative;
+    overflow:hidden;
+}
+.letter-paper::before { content:""; position:absolute; top:14px; bottom:14px; left:8px; width:2px; background:linear-gradient(to bottom,transparent,#b55252,transparent); opacity:.35; }
+.postmark { position:absolute; bottom:12px; right:14px; width:46px; height:46px; border:1.5px solid #8b3a3a; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#8b3a3a; font-size:8px; letter-spacing:1px; text-align:center; line-height:1.2; opacity:.5; }
+
+
     </style>
 </head>
 <body>
@@ -614,9 +643,9 @@ body.light-text #themeToggleBtn {
         <div class="home-card" onclick="checkLock(this, openChatPage)"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="card-title">聊天</div></div>
         <div class="home-card" onclick="openOurUniverse()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="card-title">我们的宇宙</div></div>
         <div class="home-card" onclick="openWordCardLibrary()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M4 4a2 2 0 0 1 2-2h10l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><polyline points="16 2 16 8 22 8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="14" y2="16"/></svg></div><div class="card-title">字卡库</div></div>
-        <div class="home-card" onclick="checkLock(this, openWishPage)" style="position:relative;"><span id="boardUnreadDot" style="display:none;position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#ff4757;"></span><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M4 4a2 2 0 0 1 2-2h10l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><polyline points="16 2 16 8 22 8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="14" y2="16"/></svg></div><div class="card-title">许愿便利贴</div></div>
+        <div class="home-card" onclick="checkLock(this, openWishPage)"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M4 4a2 2 0 0 1 2-2h10l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><polyline points="16 2 16 8 22 8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="14" y2="16"/></svg></div><div class="card-title">许愿便利贴</div></div>
         <div class="home-card" onclick="openAnniversaryPage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="card-title">纪念日</div></div>
-        <div class="home-card" onclick="checkLock(this, openChoicePage)"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div class="card-title">如果你知道</div></div>
+        <div class="home-card" onclick="checkLock(this, openMailboxPage)"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div class="card-title">见字如晤</div></div>
         <div class="home-card" onclick="openTarotPage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4" y1="4" x2="5.5" y2="5.5"/><line x1="18.5" y1="18.5" x2="20" y2="20"/><line x1="20" y1="4" x2="18.5" y2="5.5"/><line x1="5.5" y1="18.5" x2="4" y2="20"/><circle cx="12" cy="12" r="3"/></svg></div><div class="card-title">塔罗占卜</div></div>
        <div class="home-card" onclick="openEmojiManage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div><div class="card-title">表情包管理</div></div>
                <div class="home-card" onclick="openCallLogPage()"><div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d4a8b8" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div><div class="card-title">通话记录</div></div>
@@ -630,13 +659,17 @@ body.light-text #themeToggleBtn {
     <div class="chat-topbar"><button class="back-arrow" onclick="goHome()">←</button><div class="romantic-quote" id="chatTopQuote" onclick="editTopQuote()">✨ 在所有物是人非的景色里，我最喜欢你 ✨</div><span class="chat-settings-cat" onclick="openChatSettings()">😸</span></div>
     <div class="chat-area" id="chatArea"><div style="text-align:center;color:#ccc;padding:40px;">💬 开始你们的对话吧</div></div>
     <div class="emoji-panel" id="emojiPanel"><div class="emoji-tabs"><button class="emoji-tab active" onclick="switchEmojiTab('emoji')">😊 表情包</button><button class="emoji-tab" onclick="switchEmojiTab('pat')">👋 拍一拍</button></div><div class="tab-content" id="emojiTabContent"></div></div>
-    <div class="bottombar">
-        <button class="icon-btn" onclick="startCall()" title="通话"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4a90d9" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"></path></svg></button>
-        <button class="icon-btn" id="emojiToggleBtn" onclick="toggleEmojiPanel()" title="表情"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f5a623" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg></button>
-        <button class="icon-btn" onclick="document.getElementById('imageMsgInput').click()" title="图片"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7ed321" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></button>
-        <input type="text" id="messageInput" placeholder="说点什么..." onkeydown="if(event.key==='Enter'){sendMessage();}">
-        <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
-    </div>
+    <div class="bottombar" style="position:relative;">
+    <button class="icon-btn" id="btnMore" onclick="toggleMorePanel()" style="font-size:22px;">＋</button>
+    <input type="text" id="messageInput" placeholder="说点什么..." onkeydown="if(event.key==='Enter'){sendMessage();}">
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+</div>
+<div id="morePanel" style="display:none;position:absolute;bottom:60px;left:12px;background:#fff;border:1px solid #f0d9dc;border-radius:12px;padding:10px;z-index:100;flex-direction:column;gap:12px;">
+    <button onclick="startCall();hideMorePanel();" style="padding:8px 14px;border:1px solid #d4a8b8;background:#fff;border-radius:20px;cursor:pointer;font-size:13px;color:#d4a8b8;display:flex;align-items:center;gap:8px;">📞 通话</button>
+    <button onclick="toggleEmojiPanel();hideMorePanel();" style="padding:8px 14px;border:1px solid #d4a8b8;background:#fff;border-radius:20px;cursor:pointer;font-size:13px;color:#d4a8b8;display:flex;align-items:center;gap:8px;">😊 表情</button>
+    <button onclick="document.getElementById('imageMsgInput').click();hideMorePanel();" style="padding:8px 14px;border:1px solid #d4a8b8;background:#fff;border-radius:20px;cursor:pointer;font-size:13px;color:#d4a8b8;display:flex;align-items:center;gap:8px;">🖼️ 图片</button>
+    <button onclick="openDeliverEditor();" style="padding:8px 14px;border:1px solid #d4a8b8;background:#fff;border-radius:20px;cursor:pointer;font-size:13px;color:#d4a8b8;display:flex;align-items:center;gap:8px;">✉️ 递话</button>
+</div>
 </div></div>
 
 <div class="call-fullscreen" id="callFullscreen">
@@ -671,14 +704,14 @@ body.light-text #themeToggleBtn {
 <div class="page" id="wishPage">
     <div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">✨ 许愿与留言</span></div>
     <div style="display:flex;border-bottom:1px solid #f0f0f0;background:#fff;">
-        <button onclick="switchWishTab('wish')" id="wishTabBtn" style="flex:1;padding:10px;border:none;background:transparent;font-size:14px;font-weight:600;color:var(--primary);border-bottom:2px solid var(--primary);cursor:pointer;">📝 许愿</button>
-        <button onclick="switchWishTab('board')" id="boardTabBtn" style="flex:1;padding:10px;border:none;background:transparent;font-size:14px;font-weight:600;color:#999;border-bottom:2px solid transparent;cursor:pointer;">💬 留言板</button>
+        <button onclick="switchWishTab('wish')" id="wishTabBtn" style="flex:1;padding:10px;border:none;background:transparent;font-size:14px;font-weight:600;color:#d4a8b8;border-bottom:2px solid #d4a8b8;cursor:pointer;"> 许愿</button>
+<button onclick="switchWishTab('board')" id="boardTabBtn" style="flex:1;padding:10px;border:none;background:transparent;font-size:14px;font-weight:600;color:#999;border-bottom:2px solid transparent;cursor:pointer;"> 留言</button>
     </div>
     <div id="wishTabContent" style="flex:1;overflow-y:auto;padding:12px;background:#f8f5f0;"></div>
     <div id="boardTabContent" style="flex:1;overflow-y:auto;padding:12px;background:#f8f5f0;display:none;"></div>
 </div>
 <div class="page" id="anniversaryPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🎀 纪念日</span></div><div class="generic-content" id="anniversaryContent"></div></div>
-<div class="page" id="choicePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🩰 如果你知道</span></div><div class="generic-content" id="choiceContent" style="padding:0;background:transparent;height:calc(100vh - 48px);"></div></div>
+<div class="page" id="choicePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📬 见字如晤</span></div><div class="generic-content" id="choiceContent" style="padding:0;background:transparent;height:calc(100vh - 48px);"></div></div>
 <div class="page" id="tarotPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🕯️ 塔罗占卜</span></div><div id="tarotContent" style="flex:1;overflow-y:auto;"></div></div>
 <div class="page" id="tarotChatPage">
     <div style="height:100%;display:flex;flex-direction:column;">
@@ -720,9 +753,253 @@ body.light-text #themeToggleBtn {
 // ============ 完整2.0代码 ============
 // 由于完整代码超过5000行，这里我用一个自执行函数包裹，确保所有功能都在
 (async function() {
+
+// ===== 塔罗牌SVG生成函数 =====
+const TAROT_INK = "#3A342D";
+const TAROT_G = `<g fill="none" stroke="${TAROT_INK}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">`;
+const TAROT_C_END = `</g>`;
+
+// 宝剑
+function tarotSword(x,yTop,yBot){
+  return `<line x1="${x}" y1="${yTop}" x2="${x}" y2="${yBot}"/><line x1="${x-7}" y1="${yBot}" x2="${x+7}" y2="${yBot}" stroke-width="2.4"/><line x1="${x}" y1="${yBot}" x2="${x}" y2="${yBot+10}" stroke-width="2.4"/><circle cx="${x}" cy="${yBot+12}" r="2.6" fill="${TAROT_INK}" stroke="none"/>`;
+}
+function tarotSwordsGroup(n,x0,x1,yTop,len){
+  let s="";const yBot=yTop+len;
+  if(n===1){return tarotSword((x0+x1)/2,yTop,yBot);}
+  for(let i=0;i<n;i++){const x=Math.round(x0+(x1-x0)*i/(n-1));s+=tarotSword(x,yTop,yBot);}
+  return s;
+}
+function tarotSvgSword(num){
+  const g=TAROT_G,c=TAROT_C_END;
+  if(num==="ACE") return g+tarotSword(100,28,118)+`<line x1="100" y1="24" x2="100" y2="10"/><line x1="100" y1="24" x2="86" y2="12"/><line x1="100" y1="24" x2="114" y2="12"/><line x1="94" y1="100" x2="106" y2="100"/><line x1="94" y1="108" x2="106" y2="108"/>`+c;
+  if(num==="II") return g+tarotSword(86,40,118)+tarotSword(114,40,118)+`<line x1="86" y1="80" x2="114" y2="80"/><path d="M92 120 Q100 100 108 120"/><line x1="92" y1="120" x2="86" y2="138"/><line x1="108" y1="120" x2="114" y2="138"/><path d="M86 90 Q100 78 114 90"/>`+c;
+  if(num==="III") return g+tarotSword(86,30,96)+tarotSword(100,24,96)+tarotSword(114,30,96)+`<path d="M100 100 Q88 112 92 126 Q100 138 108 126 Q112 112 100 100 Z"/><line x1="92" y1="118" x2="108" y2="118" stroke-width="1.6"/>`+c;
+  if(num==="IV") return g+tarotSwordsGroup(2,52,92,30,70)+tarotSwordsGroup(2,108,148,30,70)+`<path d="M100 118 L100 138"/><path d="M84 116 Q100 108 116 116"/>`+c;
+  if(num==="V") return g+tarotSwordsGroup(4,34,118,90,46)+tarotSword(150,40,118)+`<path d="M140 118 Q150 100 160 118"/><line x1="150" y1="118" x2="156" y2="138"/>`+c;
+  if(num==="VI") return g+tarotSwordsGroup(3,70,118,72,50)+tarotSwordsGroup(3,82,130,100,40)+`<path d="M60 138 Q100 152 140 138 Q130 146 100 148 Q70 146 60 138 Z"/><path d="M100 118 L100 138"/>`+c;
+  if(num==="VII") return g+tarotSwordsGroup(6,40,130,40,70)+tarotSword(150,90,140)+`<path d="M142 140 Q150 124 158 140"/>`+c;
+  if(num==="VIII") return g+tarotSwordsGroup(4,40,98,40,80)+tarotSwordsGroup(4,102,160,40,80)+`<path d="M86 128 Q100 116 114 128"/><line x1="86" y1="128" x2="80" y2="144"/><line x1="114" y1="128" x2="120" y2="144"/><path d="M80 96 Q100 84 120 96"/>`+c;
+  if(num==="IX") return g+tarotSwordsGroup(9,34,166,34,80)+`<path d="M86 128 Q100 116 114 128"/><line x1="86" y1="128" x2="80" y2="144"/><line x1="114" y1="128" x2="120" y2="144"/><path d="M92 118 Q100 108 108 118"/>`+c;
+  if(num==="X") return g+tarotSwordsGroup(10,30,170,40,80)+`<line x1="100" y1="120" x2="78" y2="144"/><circle cx="86" cy="130" r="4"/><line x1="78" y1="144" x2="66" y2="150"/><line x1="122" y1="144" x2="134" y2="150"/>`+c;
+  if(num==="P") return g+tarotSword(100,40,118)+`<line x1="100" y1="34" x2="100" y2="20"/><line x1="100" y1="34" x2="88" y2="22"/><line x1="100" y1="34" x2="112" y2="22"/><path d="M86 130 Q100 112 114 130"/><circle cx="100" cy="122" r="4"/>`+c;
+  if(num==="KN") return g+tarotSword(120,40,118)+`<path d="M60 120 Q72 92 96 92 Q118 92 126 120"/><line x1="78" y1="120" x2="78" y2="138"/><line x1="114" y1="120" x2="114" y2="138"/><circle cx="96" cy="80" r="5"/><path d="M120 92 Q132 80 140 70"/>`+c;
+  if(num==="Q") return g+tarotSword(118,50,118)+`<path d="M70 100 Q100 82 130 100"/><line x1="70" y1="100" x2="70" y2="130"/><line x1="130" y1="100" x2="130" y2="130"/><line x1="68" y1="130" x2="132" y2="130"/><circle cx="100" cy="92" r="5"/><path d="M94 86 L97 80 L100 86 L103 80 L106 86"/>`+c;
+  if(num==="KG") return g+tarotSword(118,46,118)+`<path d="M50 110 Q100 82 150 110"/><line x1="70" y1="110" x2="70" y2="132"/><line x1="130" y1="110" x2="130" y2="132"/><line x1="68" y1="132" x2="132" y2="132"/><circle cx="100" cy="100" r="6"/><path d="M86 92 L89 80 L93 92 L97 78 L100 92 L103 78 L107 92 L111 80 L114 92"/>`+c;
+  return "";
+}
+
+// 圣杯
+function tarotCupSvg(){
+  return `<path d="M0 0 Q0 26 -8 36 L8 36 Q0 26 0 0 Z"/><path d="M-8 36 Q0 42 8 36"/>`;
+}
+function tarotCupsGroup(positions){
+  let s=TAROT_G;
+  positions.forEach(p=>{s+=`<g transform="translate(${p.x},${p.y}) scale(${p.s||1})">${tarotCupSvg()}</g>`;});
+  s+=TAROT_C_END;return s;
+}
+function tarotSvgCup(name){
+  const g=`fill="none" stroke="${TAROT_INK}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"`;
+  const wrap=(inner)=>`<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+  if(name==="圣杯一") return wrap(`<g ${g}><path d="M84 40 Q84 96 70 124 L98 124 Q84 96 84 40 Z"/><path d="M70 124 Q84 136 98 124"/><path d="M74 44 Q84 34 94 44"/><path d="M84 40 Q68 22 78 10"/><path d="M84 40 Q84 22 84 10"/><path d="M84 40 Q100 22 92 10"/><path d="M78 10 Q84 2 90 10"/><path d="M66 30 Q60 44 68 56"/><path d="M102 30 Q108 44 100 56"/><path d="M72 62 Q84 74 96 62"/></g>`);
+  if(name==="圣杯二") return wrap(`<g ${g}><path d="M58 44 Q58 92 44 120 L72 120 Q58 92 58 44 Z"/><path d="M44 120 Q58 132 72 120"/><path d="M142 44 Q142 92 156 120 L128 120 Q142 92 142 44 Z"/><path d="M128 120 Q142 132 156 120"/><path d="M48 48 Q58 40 68 48"/><path d="M132 48 Q142 40 152 48"/><path d="M80 82 Q100 62 120 82"/><path d="M80 94 Q100 114 120 94"/><circle cx="100" cy="88" r="2.4" fill="${TAROT_INK}"/></g>`);
+  if(name==="圣杯三") return wrap(`${tarotCupsGroup([{x:60,y:100},{x:100,y:78},{x:140,y:100}])}<g ${g}><path d="M52 78 Q60 66 68 78"/><path d="M92 56 Q100 44 108 56"/><path d="M132 78 Q140 66 148 78"/><path d="M60 92 Q100 64 140 92"/></g>`);
+  if(name==="圣杯四") return wrap(`${tarotCupsGroup([{x:70,y:118},{x:100,y:118},{x:130,y:118},{x:150,y:74}])}<g ${g}><path d="M46 130 Q66 92 86 130"/><path d="M54 130 L54 148"/><path d="M78 130 L78 148"/><path d="M46 130 L86 130"/><circle cx="66" cy="120" r="5"/><path d="M140 56 Q136 70 142 80"/><path d="M142 80 Q148 74 148 66"/><path d="M134 66 Q142 60 150 66"/></g>`);
+  if(name==="圣杯五") return wrap(`${tarotCupsGroup([{x:78,y:108},{x:106,y:108},{x:134,y:128},{x:150,y:132},{x:118,y:132}])}<g ${g}><path d="M90 66 Q78 84 84 108"/><path d="M84 108 Q90 116 96 108"/><circle cx="90" cy="60" r="7"/><path d="M84 52 Q90 40 96 52"/><path d="M128 124 Q122 136 128 144"/><path d="M142 128 Q136 140 142 148"/><path d="M118 128 Q112 138 116 146"/><path d="M134 134 Q132 142 130 148"/><path d="M150 136 Q146 144 144 150"/><path d="M122 134 Q120 142 118 148"/></g>`);
+  if(name==="圣杯六") return wrap(`${tarotCupsGroup([{x:90,y:96},{x:116,y:96},{x:142,y:96},{x:78,y:120},{x:104,y:120},{x:130,y:120}])}<g ${g}><path d="M60 118 Q74 106 88 114"/><circle cx="66" cy="110" r="4"/><path d="M56 116 Q60 104 64 116"/><path d="M62 122 Q68 130 74 128"/></g>`);
+  if(name==="圣杯七") return wrap(`${tarotCupsGroup([{x:46,y:72},{x:74,y:52},{x:102,y:46},{x:130,y:56},{x:156,y:74},{x:88,y:90},{x:120,y:96}])}<g ${g}><path d="M40 82 Q56 74 72 82"/><path d="M96 70 Q112 62 128 70"/><path d="M60 44 Q100 30 140 44"/></g>`);
+  if(name==="圣杯八") return wrap(`${tarotCupsGroup([{x:44,y:128},{x:70,y:128},{x:96,y:128},{x:122,y:128},{x:56,y:144},{x:82,y:144},{x:108,y:144},{x:134,y:144}])}<g ${g}><path d="M92 110 Q106 88 120 100"/><circle cx="114" cy="94" r="5"/><path d="M120 100 Q134 90 148 96"/><path d="M96 110 L96 148"/><path d="M92 110 L100 110"/><path d="M60 150 Q100 158 140 150"/></g>`);
+  if(name==="圣杯九") return wrap(`${tarotCupsGroup([{x:34,y:58},{x:52,y:52},{x:70,y:48},{x:88,y:46},{x:106,y:46},{x:124,y:48},{x:142,y:52},{x:160,y:58},{x:100,y:66}])}<g ${g}><path d="M84 84 Q100 96 116 84"/><path d="M84 84 L84 120"/><path d="M116 84 L116 120"/><path d="M84 120 L116 120"/><circle cx="100" cy="78" r="6"/><path d="M94 72 Q100 60 106 72"/><path d="M92 78 Q100 88 108 78"/></g>`);
+  if(name==="圣杯十") return wrap(`${tarotCupsGroup([{x:42,y:96},{x:60,y:84},{x:80,y:74},{x:100,y:70},{x:120,y:74},{x:140,y:84},{x:158,y:96},{x:100,y:88},{x:118,y:92},{x:134,y:92}])}<g ${g}><path d="M28 108 Q60 56 100 76 Q140 56 172 108"/><path d="M34 110 Q64 62 100 82 Q136 62 166 110"/><path d="M64 130 Q64 144 70 148"/><path d="M70 148 Q76 144 76 130"/><circle cx="70" cy="124" r="4"/><path d="M120 130 Q120 144 126 148"/><path d="M126 148 Q132 144 132 130"/><circle cx="126" cy="124" r="4"/><path d="M70 130 Q98 122 126 130"/></g>`);
+  if(name==="圣杯侍从") return wrap(`<g ${g}><path d="M86 130 Q100 100 114 130"/><path d="M100 100 L100 70"/><path d="M100 70 Q92 56 96 48"/><path d="M100 70 Q108 56 104 48"/><path d="M100 70 Q100 82 106 86"/><path d="M100 70 Q94 82 98 86"/><circle cx="100" cy="44" r="4"/><path d="M96 40 Q100 30 104 40"/><path d="M100 100 Q84 112 80 130"/><path d="M100 100 Q116 112 120 130"/><path d="M80 130 L120 130"/></g>`);
+  if(name==="圣杯骑士") return wrap(`<g ${g}><path d="M50 120 Q66 86 90 90 Q114 86 130 120"/><path d="M68 120 L68 140"/><path d="M112 120 L112 140"/><path d="M90 90 L90 70"/><path d="M90 70 Q82 56 86 48"/><path d="M90 70 Q98 56 94 48"/><circle cx="90" cy="62" r="6"/><path d="M84 56 Q90 44 96 56"/><path d="M90 70 L90 90"/><path d="M86 48 Q80 38 84 30"/><path d="M94 48 Q100 38 96 30"/><path d="M84 30 Q90 22 96 30"/><path d="M68 140 Q90 134 112 140"/></g>`);
+  if(name==="圣杯王后") return wrap(`<g ${g}><path d="M70 100 Q100 78 130 100"/><path d="M70 100 L70 132"/><path d="M130 100 L130 132"/><path d="M68 132 L132 132"/><circle cx="100" cy="92" r="6"/><path d="M94 86 L97 80 L100 86 L103 80 L106 86"/><path d="M100 92 L100 70"/><path d="M100 70 Q92 56 96 48"/><path d="M100 70 Q108 56 104 48"/><path d="M96 48 Q100 40 104 48"/><path d="M76 138 Q82 134 88 138"/><path d="M112 138 Q118 134 124 138"/><path d="M88 140 Q100 146 112 140"/></g>`);
+  if(name==="圣杯国王") return wrap(`<g ${g}><path d="M50 108 Q100 78 150 108"/><path d="M70 108 L70 134"/><path d="M130 108 L130 134"/><path d="M68 134 L132 134"/><circle cx="100" cy="100" r="7"/><path d="M86 92 L89 80 L93 92 L97 78 L100 92 L103 78 L107 92 L111 80 L114 92"/><path d="M100 100 L100 76"/><path d="M100 76 Q92 62 96 54"/><path d="M100 76 Q108 62 104 54"/><path d="M96 54 Q100 46 104 54"/><path d="M60 120 Q80 112 100 120 Q120 112 140 120"/><path d="M64 128 Q84 122 100 128 Q116 122 136 128"/></g>`);
+  return wrap(`<g ${g}><circle cx="100" cy="80" r="20"/></g>`);
+}
+
+// 权杖
+function tarotWand(x){
+  return `<line x1="${x}" y1="130" x2="${x}" y2="55"/><path d="M${x} 55 Q${x-6} 43 ${x-2} 37"/><path d="M${x} 55 Q${x+6} 43 ${x+2} 37"/>`;
+}
+function tarotSvgWand(num){
+  const g=TAROT_G,c=TAROT_C_END;
+  if(num==="ACE") return g+`<line x1="100" y1="130" x2="100" y2="30"/><path d="M100 30 Q84 16 90 8"/><path d="M100 30 Q116 16 110 8"/><line x1="94" y1="110" x2="106" y2="110"/><line x1="94" y1="120" x2="106" y2="120"/>`+c;
+  if(num==="II") return g+tarotWand(78)+tarotWand(122)+`<path d="M60 130 Q60 100 70 92"/><path d="M140 130 Q140 100 130 92"/><line x1="55" y1="145" x2="145" y2="145"/><path d="M78 92 Q100 80 122 92"/>`+c;
+  if(num==="III") return g+tarotWand(64)+tarotWand(100)+tarotWand(136)+`<path d="M54 130 Q54 112 60 104"/><path d="M100 130 Q100 112 100 104"/><path d="M146 130 Q146 112 140 104"/><line x1="55" y1="130" x2="145" y2="130"/>`+c;
+  if(num==="IV") return g+tarotWand(46)+tarotWand(84)+tarotWand(116)+tarotWand(154)+`<path d="M46 60 Q84 96 84 60"/><path d="M84 60 Q116 96 116 60"/><path d="M116 60 Q154 96 154 60"/><path d="M52 78 Q84 102 116 78"/><path d="M116 78 Q148 102 148 78"/>`+c;
+  if(num==="V") return g+`<line x1="50" y1="30" x2="115" y2="130"/><line x1="150" y1="30" x2="85" y2="130"/><line x1="100" y1="20" x2="100" y2="135"/><line x1="58" y1="38" x2="122" y2="128"/><line x1="65" y1="40" x2="135" y2="120"/>`+c;
+  if(num==="VI") return g+tarotWand(40)+tarotWand(58)+tarotWand(76)+tarotWand(148)+tarotWand(164)+`<line x1="100" y1="130" x2="100" y2="55"/><path d="M82 120 Q94 96 100 90 Q106 96 118 120"/><circle cx="100" cy="84" r="6"/><path d="M94 76 Q100 64 106 76"/><line x1="100" y1="90" x2="100" y2="120"/><path d="M88 120 L88 136"/><path d="M112 120 L112 136"/>`+c;
+  if(num==="VII") return g+`<line x1="100" y1="130" x2="100" y2="88"/><circle cx="96" cy="84" r="5"/><line x1="76" y1="30" x2="76" y2="90"/><line x1="90" y1="26" x2="90" y2="88"/><line x1="104" y1="22" x2="104" y2="86"/><line x1="118" y1="22" x2="118" y2="86"/><line x1="132" y1="26" x2="132" y2="88"/><line x1="146" y1="30" x2="146" y2="90"/>`+c;
+  if(num==="VIII") return g+`<line x1="40" y1="120" x2="90" y2="30"/><line x1="56" y1="125" x2="106" y2="35"/><line x1="72" y1="130" x2="122" y2="40"/><line x1="88" y1="130" x2="138" y2="42"/><line x1="100" y1="128" x2="150" y2="44"/><line x1="48" y1="100" x2="98" y2="20"/><line x1="64" y1="105" x2="114" y2="25"/><line x1="80" y1="108" x2="130" y2="28"/>`+c;
+  if(num==="IX") return g+tarotWand(44)+tarotWand(60)+tarotWand(76)+tarotWand(92)+tarotWand(108)+tarotWand(124)+tarotWand(140)+tarotWand(156)+`<line x1="100" y1="130" x2="100" y2="70"/><path d="M100 130 Q112 110 120 100"/><circle cx="116" cy="96" r="5"/>`+c;
+  if(num==="X") return g+tarotWand(52)+tarotWand(66)+tarotWand(80)+tarotWand(94)+tarotWand(108)+tarotWand(122)+tarotWand(136)+tarotWand(150)+`<line x1="100" y1="96" x2="78" y2="140"/><circle cx="86" cy="118" r="5"/><path d="M78 140 Q100 132 122 140"/><line x1="78" y1="140" x2="66" y2="148"/><line x1="122" y1="140" x2="134" y2="148"/>`+c;
+  if(num==="P") return g+`<line x1="100" y1="130" x2="100" y2="30"/><path d="M100 30 Q84 16 90 8"/><path d="M100 30 Q116 16 110 8"/><path d="M80 130 Q90 110 100 130"/><circle cx="100" cy="120" r="5"/><line x1="100" y1="130" x2="100" y2="145"/>`+c;
+  if(num==="KN") return g+`<line x1="100" y1="130" x2="100" y2="30"/><path d="M100 30 Q84 16 90 8"/><path d="M100 30 Q116 16 110 8"/><path d="M60 120 Q70 90 90 90 Q110 90 120 120"/><path d="M75 120 L75 138"/><path d="M105 120 L105 138"/><circle cx="90" cy="78" r="6"/><path d="M84 72 Q90 60 96 72"/><path d="M90 90 Q100 100 110 90"/><path d="M120 90 Q132 78 140 70"/>`+c;
+  if(num==="Q") return g+`<line x1="100" y1="130" x2="100" y2="30"/><path d="M100 30 Q84 16 90 8"/><path d="M100 30 Q116 16 110 8"/><path d="M70 100 Q100 80 130 100"/><path d="M70 100 L70 130"/><path d="M130 100 L130 130"/><line x1="68" y1="130" x2="132" y2="130"/><circle cx="100" cy="92" r="6"/><path d="M94 86 L97 80 L100 86 L103 80 L106 86"/><path d="M60 138 Q66 132 72 138"/><path d="M128 138 Q134 132 140 138"/><path d="M80 138 Q84 132 88 138"/><path d="M112 138 Q116 132 120 138"/>`+c;
+  if(num==="KG") return g+`<line x1="100" y1="130" x2="100" y2="30"/><path d="M100 30 Q84 16 90 8"/><path d="M100 30 Q116 16 110 8"/><path d="M50 110 Q100 80 150 110"/><path d="M70 110 L70 135"/><path d="M130 110 L130 135"/><line x1="68" y1="135" x2="132" y2="135"/><circle cx="100" cy="100" r="7"/><path d="M86 92 L89 80 L93 92 L97 78 L100 92 L103 78 L107 92 L111 80 L114 92"/><path d="M40 120 Q100 100 160 120"/>`+c;
+  return "";
+}
+
+// 星币
+function tarotCoin(cx,cy,r){
+  const a=[];
+  for(let i=0;i<5;i++){const ang=-Math.PI/2+i*Math.PI*2/5;a.push([cx+r*Math.cos(ang),cy+r*Math.sin(ang)]);}
+  return `<circle cx="${cx}" cy="${cy}" r="${r}"/><path d="M${a[0][0].toFixed(1)} ${a[0][1].toFixed(1)} L${a[2][0].toFixed(1)} ${a[2][1].toFixed(1)} L${a[4][0].toFixed(1)} ${a[4][1].toFixed(1)} L${a[1][0].toFixed(1)} ${a[1][1].toFixed(1)} L${a[3][0].toFixed(1)} ${a[3][1].toFixed(1)} Z" stroke-width="1.7"/>`;
+}
+function tarotCoinsGroup(n,x0,x1,cy,r){
+  let s="";if(n===1){return tarotCoin((x0+x1)/2,cy,r);}
+  for(let i=0;i<n;i++){const x=Math.round(x0+(x1-x0)*i/(n-1));s+=tarotCoin(x,cy,r);}
+  return s;
+}
+function tarotSvgPent(num){
+  const g=TAROT_G,c=TAROT_C_END;
+  if(num==="ACE") return g+tarotCoin(100,56,22)+`<path d="M86 104 Q100 96 114 104"/><line x1="100" y1="30" x2="100" y2="14"/><line x1="100" y1="30" x2="86" y2="16"/><line x1="100" y1="30" x2="114" y2="16"/>`+c;
+  if(num==="II") return g+tarotCoin(78,52,16)+tarotCoin(122,78,16)+`<path d="M78 70 Q100 90 122 66"/><path d="M70 120 Q100 100 130 120"/><line x1="78" y1="70" x2="70" y2="120"/><line x1="122" y1="66" x2="130" y2="120"/>`+c;
+  if(num==="III") return g+tarotCoin(100,46,15)+tarotCoin(78,82,15)+tarotCoin(122,82,15)+`<path d="M70 118 Q100 100 130 118"/><line x1="78" y1="82" x2="70" y2="118"/><line x1="122" y1="82" x2="130" y2="118"/>`+c;
+  if(num==="IV") return g+tarotCoin(62,52,14)+tarotCoin(138,52,14)+tarotCoin(62,108,14)+tarotCoin(138,108,14)+`<path d="M100 80 Q92 96 100 110 Q108 96 100 80 Z"/><circle cx="100" cy="92" r="3" fill="${TAROT_INK}" stroke="none"/>`+c;
+  if(num==="V") return g+tarotCoin(52,52,13)+tarotCoin(100,40,13)+tarotCoin(148,52,13)+tarotCoin(76,100,13)+`<g transform="rotate(-18 124 100)">${tarotCoin(124,100,13)}</g><path d="M90 120 Q100 110 110 120"/>`+c;
+  if(num==="VI") return g+tarotCoin(64,50,13)+tarotCoin(100,42,13)+tarotCoin(136,50,13)+tarotCoin(76,98,13)+tarotCoin(100,92,13)+tarotCoin(124,98,13)+`<path d="M92 118 Q100 108 108 118"/>`+c;
+  if(num==="VII") return g+tarotCoin(52,48,12)+tarotCoin(86,42,12)+tarotCoin(120,48,12)+tarotCoin(154,42,12)+tarotCoin(70,100,12)+tarotCoin(100,94,12)+tarotCoin(130,100,12)+`<path d="M88 120 Q100 110 112 120"/>`+c;
+  if(num==="VIII") return g+tarotCoin(58,48,12)+tarotCoin(90,42,12)+tarotCoin(122,48,12)+tarotCoin(154,42,12)+tarotCoin(70,100,12)+tarotCoin(100,94,12)+tarotCoin(130,100,12)+tarotCoin(160,94,12)+`<path d="M92 120 Q100 112 108 120"/><line x1="92" y1="120" x2="86" y2="136"/><line x1="108" y1="120" x2="114" y2="136"/>`+c;
+  if(num==="IX") return g+tarotCoin(100,40,20)+tarotCoin(58,78,12)+tarotCoin(100,92,12)+tarotCoin(142,78,12)+tarotCoin(46,112,11)+tarotCoin(82,116,11)+tarotCoin(100,108,11)+tarotCoin(118,116,11)+tarotCoin(154,112,11)+`<path d="M90 132 Q100 124 110 132"/>`+c;
+  if(num==="X") return g+tarotCoin(46,60,11)+tarotCoin(70,42,11)+tarotCoin(100,34,11)+tarotCoin(130,42,11)+tarotCoin(154,60,11)+tarotCoin(58,92,11)+tarotCoin(88,100,11)+tarotCoin(100,92,11)+tarotCoin(112,100,11)+tarotCoin(142,92,11)+`<path d="M88 130 Q100 122 112 130"/><line x1="88" y1="130" x2="82" y2="144"/><line x1="112" y1="130" x2="118" y2="144"/>`+c;
+  if(num==="P") return g+tarotCoin(100,56,20)+`<path d="M100 36 Q94 26 98 18"/><path d="M100 36 Q106 26 102 18"/><path d="M84 120 Q100 102 116 120"/><circle cx="100" cy="112" r="4"/>`+c;
+  if(num==="KN") return g+tarotCoin(132,52,16)+`<path d="M60 118 Q74 90 98 90 Q122 90 132 118"/><line x1="80" y1="118" x2="80" y2="136"/><line x1="116" y1="118" x2="116" y2="136"/><circle cx="98" cy="78" r="5"/>`+c;
+  if(num==="Q") return g+tarotCoin(124,56,16)+`<path d="M70 98 Q100 80 130 98"/><line x1="70" y1="98" x2="70" y2="128"/><line x1="130" y1="98" x2="130" y2="128"/><line x1="68" y1="128" x2="132" y2="128"/><circle cx="100" cy="90" r="5"/><path d="M94 84 L97 78 L100 84 L103 78 L106 84"/>`+c;
+  if(num==="KG") return g+tarotCoin(124,52,16)+`<path d="M50 108 Q100 80 150 108"/><line x1="70" y1="108" x2="70" y2="132"/><line x1="130" y1="108" x2="130" y2="132"/><line x1="68" y1="132" x2="132" y2="132"/><circle cx="100" cy="98" r="6"/><path d="M86 90 L89 78 L93 90 L97 76 L100 90 L103 76 L107 90 L111 78 L114 90"/>`+c;
+  return "";
+}
+
+// 大阿卡纳
+const TAROT_MAJOR_DRAWERS = [
+  function(){return TAROT_G+`<line x1="40" y1="120" x2="160" y2="120"/><path d="M70 120 Q80 90 92 100 Q104 110 116 92 Q128 78 138 100"/><circle cx="92" cy="78" r="6"/><line x1="86" y1="72" x2="80" y2="62"/><line x1="98" y1="72" x2="104" y2="62"/><circle cx="92" cy="58" r="5"/><path d="M118 92 Q130 84 134 96"/><path d="M60 116 Q66 108 72 116"/><line x1="66" y1="116" x2="62" y2="124"/><line x1="72" y1="116" x2="76" y2="124"/><path d="M44 120 L44 150 L156 150 L156 120"/><path d="M150 120 Q156 132 150 144"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<line x1="100" y1="30" x2="100" y2="80"/><line x1="100" y1="30" x2="92" y2="20"/><line x1="100" y1="30" x2="108" y2="20"/><circle cx="100" cy="80" r="5"/><path d="M92 86 L92 118 L108 118 L108 86 Z"/><line x1="60" y1="118" x2="140" y2="118"/><circle cx="72" cy="112" r="4"/><line x1="100" y1="106" x2="100" y2="116"/><circle cx="128" cy="112" r="4"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<line x1="56" y1="30" x2="56" y2="130"/><line x1="144" y1="30" x2="144" y2="130"/><path d="M56 60 Q100 44 144 60"/><circle cx="100" cy="78" r="5"/><path d="M92 84 L92 120 L108 120 L108 84 Z"/><path d="M84 100 Q100 92 116 100"/><path d="M100 68 Q94 58 100 52 Q106 58 100 68"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<path d="M60 130 Q100 96 140 130"/><line x1="70" y1="130" x2="70" y2="100"/><line x1="130" y1="130" x2="130" y2="100"/><circle cx="100" cy="74" r="6"/><path d="M90 82 L90 118 L110 118 L110 82 Z"/><path d="M80 92 Q70 78 76 68"/><path d="M120 96 Q132 82 124 70"/><circle cx="100" cy="104" r="6"/><path d="M100 100 Q96 108 100 112 Q104 108 100 100"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<path d="M50 130 L70 100 L100 130 L130 100 L150 130 Z"/><line x1="72" y1="130" x2="72" y2="98"/><line x1="128" y1="130" x2="128" y2="98"/><line x1="72" y1="98" x2="128" y2="98"/><circle cx="100" cy="78" r="6"/><path d="M90 86 L90 120 L110 120 L110 86 Z"/><line x1="118" y1="84" x2="118" y2="40"/><line x1="114" y1="44" x2="122" y2="44"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<path d="M70 130 Q100 100 130 130"/><circle cx="100" cy="76" r="6"/><path d="M90 84 L90 120 L110 120 L110 84 Z"/><path d="M94 66 L97 56 L100 66 L103 56 L106 66"/><line x1="84" y1="100" x2="72" y2="92"/><line x1="116" y1="100" x2="128" y2="92"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<path d="M100 30 Q92 46 100 56 Q108 46 100 30"/><circle cx="100" cy="60" r="4"/><line x1="100" y1="64" x2="100" y2="80"/><circle cx="78" cy="100" r="5"/><path d="M72 106 L72 130 L84 130 L84 106 Z"/><circle cx="122" cy="100" r="5"/><path d="M116 106 L116 130 L128 130 L128 106 Z"/><path d="M100 96 Q94 108 100 114 Q106 108 100 96"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<line x1="40" y1="118" x2="160" y2="118"/><path d="M60 118 L60 88 L140 88 L140 118 Z"/><circle cx="78" cy="80" r="8"/><path d="M70 80 L64 70"/><circle cx="122" cy="80" r="8"/><path d="M130 80 L136 70"/><line x1="78" y1="88" x2="78" y2="60"/><line x1="122" y1="88" x2="122" y2="60"/><circle cx="100" cy="72" r="5"/><line x1="100" y1="68" x2="100" y2="40"/><line x1="100" y1="44" x2="112" y2="34"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<circle cx="100" cy="96" r="22"/><circle cx="100" cy="76" r="10"/><path d="M92 70 Q88 60 92 56"/><path d="M108 70 Q112 60 108 56"/><line x1="96" y1="74" x2="96" y2="68"/><line x1="104" y1="74" x2="104" y2="68"/><path d="M96 80 Q100 84 104 80"/><path d="M82 96 Q72 92 70 104"/><path d="M118 96 Q128 92 130 104"/><path d="M88 116 Q86 126 90 132"/><path d="M112 116 Q114 126 110 132"/><circle cx="100" cy="44" r="5"/><line x1="94" y1="48" x2="92" y2="68"/><line x1="106" y1="48" x2="108" y2="68"/><path d="M92 50 L92 60 L108 60 L108 50 Z"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<path d="M40 130 L100 80 L160 130 Z"/><line x1="100" y1="80" x2="100" y2="118"/><circle cx="100" cy="68" r="6"/><path d="M94 62 L94 54 L100 48 L106 54 L106 62"/><line x1="100" y1="118" x2="112" y2="130"/><path d="M88 118 Q80 110 86 102"/><circle cx="82" cy="100" r="4"/><line x1="82" y1="96" x2="82" y2="92"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<circle cx="100" cy="90" r="44"/><circle cx="100" cy="90" r="32"/><line x1="56" y1="90" x2="144" y2="90"/><line x1="100" y1="46" x2="100" y2="134"/><line x1="72" y1="68" x2="128" y2="112"/><line x1="72" y1="112" x2="128" y2="68"/><circle cx="100" cy="46" r="5"/><path d="M96 50 L96 58 L104 58 L104 50 Z"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<line x1="70" y1="130" x2="130" y2="130"/><line x1="80" y1="130" x2="80" y2="100"/><line x1="120" y1="130" x2="120" y2="100"/><circle cx="100" cy="76" r="6"/><path d="M90 84 L90 118 L110 118 L110 84 Z"/><line x1="84" y1="94" x2="68" y2="78"/><line x1="68" y1="78" x2="60" y2="94"/><line x1="68" y1="78" x2="76" y2="94"/><path d="M60 94 Q68 100 76 94 Z"/><line x1="116" y1="92" x2="116" y2="50"/><line x1="112" y1="54" x2="120" y2="54"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<line x1="60" y1="34" x2="140" y2="34"/><line x1="100" y1="34" x2="100" y2="56"/><line x1="130" y1="34" x2="118" y2="60"/><line x1="118" y1="60" x2="108" y2="84"/><line x1="100" y1="34" x2="96" y2="58"/><line x1="96" y1="58" x2="92" y2="82"/><line x1="100" y1="86" x2="94" y2="110"/><circle cx="92" cy="124" r="6"/><line x1="94" y1="110" x2="84" y2="126"/><line x1="94" y1="110" x2="102" y2="126"/><path d="M86 132 Q92 138 98 132"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<ellipse cx="100" cy="58" rx="16" ry="14"/><circle cx="94" cy="56" r="3" fill="${TAROT_INK}" stroke="none"/><circle cx="106" cy="56" r="3" fill="${TAROT_INK}" stroke="none"/><path d="M100 66 L97 72 L103 72 Z" fill="${TAROT_INK}" stroke="none"/><line x1="100" y1="72" x2="100" y2="82"/><line x1="100" y1="82" x2="84" y2="118"/><line x1="118" y1="50" x2="118" y2="100"/><path d="M118 50 Q132 44 134 60 Q130 70 118 66"/><path d="M60 120 L63 112 L66 120 L69 112 L72 120"/><line x1="68" y1="116" x2="56" y2="128"/><circle cx="56" cy="130" r="4"/><path d="M82 118 Q96 108 112 118 L112 130 L82 130 Z"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<circle cx="100" cy="78" r="6"/><path d="M90 86 L90 120 L110 120 L110 86 Z"/><path d="M70 50 L78 50 L78 70 L74 74 L70 70 Z"/><line x1="74" y1="46" x2="74" y2="50"/><path d="M122 60 L130 60 L130 80 L126 84 L122 80 Z"/><line x1="126" y1="56" x2="126" y2="60"/><path d="M78 68 Q100 82 122 72"/><path d="M82 72 Q100 86 118 76"/><path d="M90 92 Q80 86 74 96"/><path d="M110 92 Q120 86 126 96"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<path d="M70 130 Q100 100 130 130"/><circle cx="100" cy="70" r="7"/><path d="M94 64 Q86 52 92 44 Q96 52 96 60"/><path d="M106 64 Q114 52 108 44 Q104 52 104 60"/><path d="M94 76 L94 84 L100 88 L106 84 L106 76 Z"/><line x1="94" y1="84" x2="80" y2="118"/><line x1="106" y1="84" x2="120" y2="118"/><line x1="80" y1="118" x2="68" y2="130"/><line x1="120" y1="118" x2="132" y2="130"/><circle cx="68" cy="132" r="3"/><circle cx="132" cy="132" r="3"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<line x1="84" y1="30" x2="84" y2="130"/><line x1="116" y1="30" x2="116" y2="130"/><line x1="84" y1="60" x2="116" y2="60"/><line x1="84" y1="95" x2="116" y2="95"/><path d="M96 24 L98 16 L100 24 L102 16 L104 24"/><path d="M70 20 L78 34 L74 40 L84 52"/><circle cx="132" cy="80" r="4"/><line x1="132" y1="84" x2="128" y2="96"/><circle cx="140" cy="104" r="4"/><line x1="140" y1="108" x2="136" y2="120"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<circle cx="100" cy="34" r="10"/><circle cx="100" cy="34" r="4" fill="${TAROT_INK}" stroke="none"/><circle cx="78" cy="26" r="3"/><circle cx="122" cy="26" r="3"/><circle cx="68" cy="44" r="2"/><circle cx="132" cy="44" r="2"/><circle cx="100" cy="86" r="6"/><path d="M94 92 L94 116 L106 116 L106 92 Z"/><line x1="94" y1="116" x2="84" y2="130"/><line x1="106" y1="116" x2="116" y2="130"/><path d="M82 78 L88 78 L88 92 L85 96 L82 92 Z"/><path d="M112 78 L118 78 L118 92 L115 96 L112 92 Z"/><path d="M85 96 Q80 110 78 124"/><path d="M115 96 Q120 110 122 124"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<circle cx="100" cy="42" r="16"/><path d="M100 30 Q94 42 100 54 Q106 42 100 30"/><line x1="44" y1="80" x2="44" y2="130"/><line x1="56" y1="80" x2="56" y2="130"/><line x1="144" y1="80" x2="144" y2="130"/><line x1="156" y1="80" x2="156" y2="130"/><path d="M44 80 L50 70 L56 80 Z"/><path d="M144 80 L150 70 L156 80 Z"/><line x1="30" y1="130" x2="170" y2="130"/><path d="M60 124 Q66 114 72 124 Z"/><circle cx="66" cy="120" r="2"/><path d="M128 124 Q134 112 140 124 Z"/><circle cx="134" cy="118" r="2"/><path d="M90 138 Q96 132 102 138 Q108 134 112 138"/><path d="M96 138 Q94 144 98 146"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<circle cx="100" cy="34" r="16"/><line x1="100" y1="16" x2="100" y2="20"/><line x1="84" y1="24" x2="88" y2="26"/><line x1="116" y1="24" x2="112" y2="26"/><line x1="76" y1="34" x2="80" y2="34"/><line x1="120" y1="34" x2="124" y2="34"/><path d="M80 110 Q92 92 108 110 L108 130 L80 130 Z"/><line x1="86" y1="130" x2="84" y2="138"/><line x1="102" y1="130" x2="104" y2="138"/><circle cx="100" cy="84" r="6"/><line x1="94" y1="90" x2="94" y2="112"/><line x1="106" y1="90" x2="106" y2="112"/><circle cx="140" cy="120" r="8"/><line x1="140" y1="112" x2="140" y2="100"/><path d="M132 118 Q128 124 132 130"/><path d="M148 118 Q152 124 148 130"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<circle cx="100" cy="40" r="8"/><path d="M92 46 L92 56 L108 56 L108 46 Z"/><line x1="108" y1="50" x2="130" y2="70"/><path d="M126 66 L134 62 L136 70 L128 74 Z"/><path d="M132 76 Q140 84 132 92"/><path d="M136 82 Q146 92 136 100"/><line x1="40" y1="120" x2="160" y2="120"/><line x1="70" y1="120" x2="66" y2="100"/><circle cx="66" cy="96" r="4"/><line x1="66" y1="100" x2="74" y2="108"/><path d="M110 120 L110 100 L130 100 L130 120 Z"/>`+TAROT_C_END;},
+  function(){return TAROT_G+`<ellipse cx="100" cy="84" rx="60" ry="40"/><circle cx="100" cy="80" r="6"/><path d="M94 86 L94 110 L100 116 L106 110 L106 86 Z"/><line x1="94" y1="92" x2="80" y2="70"/><line x1="80" y1="70" x2="76" y2="62"/><line x1="106" y1="92" x2="120" y2="70"/><line x1="120" y1="70" x2="124" y2="62"/><line x1="100" y1="116" x2="92" y2="130"/><line x1="106" y1="110" x2="116" y2="126"/><circle cx="46" cy="48" r="3"/><circle cx="154" cy="48" r="3"/><circle cx="46" cy="120" r="3"/><circle cx="154" cy="120" r="3"/>`+TAROT_C_END;}
+];
+
+const TAROT_MAJOR_NAMES = ['愚人','魔术师','女祭司','皇后','皇帝','教皇','恋人','战车','力量','隐士','命运之轮','正义','倒吊人','死神','节制','恶魔','塔','星星','月亮','太阳','审判','世界'];
+
+// ===== 78张塔罗牌数据 =====
+const TAROT_CARDS = [
+  // —— 大阿卡纳 ——
+  {id:'major-0',name:'愚人',suit:'major',rank:'0',upright:{summary:'全新开端，局势充满未知，缺少周密规划',love:'可以勇敢开启新关系，保留边界',career:'适合尝试新项目新方向，不必顾虑太多',self:'接纳未知，体验新鲜事物'},reversed:{summary:'行动鲁莽，准备不足，容易脱离现实',love:'不要冲动投入关系',career:'暂缓新项目，补齐准备',self:'避免不计后果的冒险'}},
+  {id:'major-1',name:'魔术师',suit:'major',rank:'I',upright:{summary:'资源条件齐备，具备落地的基础',love:'主动表达，靠行动推进关系',career:'手上资源足够，大胆执行计划',self:'善用现有条件解决现实麻烦'},reversed:{summary:'能力、资源错位，计划难以落地',love:'不要伪装自己去迎合',career:'梳理资源，不要硬撑任务',self:'认清能力边界，不要勉强行事'}},
+  {id:'major-2',name:'女祭司',suit:'major',rank:'II',upright:{summary:'真相藏于表象之下，适合观察与倾听',love:'多观察少表态，相信直觉',career:'重在思考调研，不急着输出',self:'向内沉淀，静待答案浮现'},reversed:{summary:'信息混杂，关键细节被忽略',love:'别听信流言，看清对方真实模样',career:'重要信息容易遗漏，反复核对',self:'避免主观臆断，核实事实'}},
+  {id:'major-3',name:'皇后',suit:'major',rank:'III',upright:{summary:'处在生长积累周期，滋养、产出条件向好',love:'温柔经营，关系会慢慢升温',career:'沉淀积累，静待成果产出',self:'善待自己，注重身心滋养'},reversed:{summary:'发展停滞，消耗大于收获',love:'停止单方面付出',career:'内耗严重，效率低下',self:'减少透支，优先保全自身状态'}},
+  {id:'major-4',name:'皇帝',suit:'major',rank:'IV',upright:{summary:'拥有清晰规则与框架，局面可控',love:'建立相处边界，把握相处节奏',career:'做好规划，按秩序推进事务',self:'梳理秩序，稳住现实局面'},reversed:{summary:'规则僵化或是体系松散，缺少约束',love:'不要强势管控伴侣',career:'制度混乱，需要重新梳理',self:'不要固执己见，留出变通余地'}},
+  {id:'major-5',name:'教皇',suit:'major',rank:'V',upright:{summary:'可参考既有经验、前辈的建议',love:'可以听取长辈朋友的建议',career:'借鉴前人经验，少走弯路',self:'参考传统经验，但不全盘照搬'},reversed:{summary:'旧规则不再适配，外部指引无效',love:'不必被世俗标准绑架',career:'不要盲从旧方法，自主思考',self:'遵从自己内心，拒绝他人说教'}},
+  {id:'major-6',name:'恋人',suit:'major',rank:'VI',upright:{summary:'面临关键抉择，存在价值契合的联结',love:'迎来重要选择，重视价值观契合',career:'面临方向抉择，遵从本心',self:'在多个选项之间慎重取舍'},reversed:{summary:'价值分歧，选择与关系出现错位',love:'双方理念不合，慎重妥协',career:'选择偏差，容易后悔',self:'避免一时冲动做出重大决定'}},
+  {id:'major-7',name:'战车',suit:'major',rank:'VII',upright:{summary:'意志充足，局面可以人为推进',love:'主动争取，把握关系走向',career:'意志力驱动，适合冲刺目标',self:'稳住内心，掌控现实节奏'},reversed:{summary:'内外力量冲突，局势失控',love:'情绪争吵，矛盾激化',career:'精力分散，计划受阻',self:'先停下，重整内心秩序'}},
+  {id:'major-8',name:'力量',suit:'major',rank:'VIII',upright:{summary:'内在韧性充足，可以柔性化解冲突',love:'以包容耐心化解矛盾，不硬碰硬',career:'靠坚持韧性攻克难题',self:'克服恐惧，用柔和方式处理困境'},reversed:{summary:'内心怯懦，被恐惧牵制',love:'害怕冲突一味退让',career:'畏惧困难，容易退缩',self:'找回底气，不要被内心恐惧困住'}},
+  {id:'major-9',name:'隐士',suit:'major',rank:'IX',upright:{summary:'适合独处内省，外部行动收缩',love:'需要个人空间，暂缓亲密推进',career:'适合独自钻研思考',self:'减少社交，向内找寻答案'},reversed:{summary:'过度封闭，脱离现实环境',love:'刻意疏远，拒绝沟通',career:'闭门造车，缺少外界信息',self:'不要独自钻牛角尖，适度对外交流'}},
+  {id:'major-10',name:'命运之轮',suit:'major',rank:'X',upright:{summary:'周期轮转，外部境遇发生改变',love:'关系迎来机遇或阶段转变',career:'外部运势变动，机遇来临',self:'顺势接纳境遇起伏'},reversed:{summary:'处于周期低谷，事态停滞',love:'关系陷入低潮，强求无用',career:'外部环境不利，不宜强行突破',self:'接纳低谷，抗拒改变只会徒增烦恼'}},
+  {id:'major-11',name:'正义',suit:'major',rank:'XI',upright:{summary:'因果对应，事实清晰，需要承担责任',love:'感情里的付出与结果互为因果',career:'公平对待事务，承担自己的责任',self:'客观看待得失，直面后果'},reversed:{summary:'利弊失衡，责任划分模糊',love:'关系得失不对等',career:'权责混乱，推诿责任',self:'不要逃避属于自己的责任'}},
+  {id:'major-12',name:'倒吊人',suit:'major',rank:'XII',upright:{summary:'行动被迫暂停，需要转换视角',love:'关系进入停滞期，换角度理解对方',career:'计划搁置，不妨换思路',self:'不必强求推进，静待时机'},reversed:{summary:'无意义的牺牲，停滞没有回报',love:'单方面委屈妥协没有意义',career:'无效消耗，及时止损',self:'停止无回报的等待'}},
+  {id:'major-13',name:'死神',suit:'major',rank:'XIII',upright:{summary:'旧周期不可逆的终结',love:'旧关系彻底落幕，放下过往',career:'旧模式结束，开启新阶段',self:'坦然告别，迎接新生'},reversed:{summary:'抗拒结束，旧状态持续苟延',love:'纠缠已经结束的关系',career:'固守过时的方法不肯改变',self:'紧抓过往不放，阻碍向前'}},
+  {id:'major-14',name:'节制',suit:'major',rank:'XIV',upright:{summary:'多方调和，节奏循序渐进趋于平衡',love:'温和磨合，循序渐进相处',career:'平衡多方事务，稳步推进',self:'把握分寸，调和生活各个部分'},reversed:{summary:'节奏极端，各方难以兼容',love:'相处模式两极化，忽冷忽热',career:'劳逸失衡，节奏混乱',self:'收敛极端的状态，重新寻找平衡点'}},
+  {id:'major-15',name:'恶魔',suit:'major',rank:'XV',upright:{summary:'被执念、欲望、现实枷锁束缚',love:'被执念、占有欲困住关系',career:'被功利欲望裹挟',self:'看清牵绊你的现实枷锁'},reversed:{summary:'枷锁松动，拥有脱离的条件',love:'有能力离开消耗型关系',career:'摆脱不良环境束缚',self:'主动挣脱困住自己的执念'}},
+  {id:'major-16',name:'塔',suit:'major',rank:'XVI',upright:{summary:'旧结构突发崩塌，遭遇剧烈变故',love:'关系突发裂痕，直面变故',career:'计划突然崩坏',self:'接纳突如其来的现实变动'},reversed:{summary:'隐患积压，危机被延后掩盖',love:'矛盾被刻意掩盖，迟早爆发',career:'隐患堆积，回避问题',self:'不要忽视裂痕，尽早处理'}},
+  {id:'major-17',name:'星星',suit:'major',rank:'XVII',upright:{summary:'存有希望，拥有修复重建的基础',love:'对关系抱有合理期待',career:'目标可行，稳步向前',self:'心怀期许，慢慢修复现状'},reversed:{summary:'愿景脱离现实，期待落空',love:'幻想理想化的恋人与关系',career:'目标不切实际',self:'调低幻想，回归现实层面考量'}},
+  {id:'major-18',name:'月亮',suit:'major',rank:'XVIII',upright:{summary:'表象迷惑，潜藏不安，真相尚未显露',love:'关系存有隐瞒，不要轻信表象',career:'局势模糊，暗藏隐患',self:'暂缓重大决定，分辨不安来源'},reversed:{summary:'迷雾散去，问题逐步浮出水面',love:'谎言、误会慢慢揭开',career:'谜团解开，看清局势',self:'困惑消散，真相显现'}},
+  {id:'major-19',name:'太阳',suit:'major',rank:'XIX',upright:{summary:'局面明朗，阻碍消退，事态舒展',love:'关系明朗愉快，相处轻松',career:'进展顺利，收获正向反馈',self:'顺势享受当下的顺遂'},reversed:{summary:'表面光鲜，内部藏有隐患',love:'看似美好，内里暗藏问题',career:'外在好看，实际漏洞不少',self:'不要只看表面，留意潜藏问题'}},
+  {id:'major-20',name:'审判',suit:'major',rank:'XX',upright:{summary:'过往结果显现，迎来复盘觉醒',love:'旧的感情课题重新浮现',career:'复盘过往，迎来新机会',self:'直面遗留问题，完成自我复盘'},reversed:{summary:'回避复盘，旧循环不断重复',love:'重复踩相同感情的坑',career:'回避过往失误，反复犯错',self:'逃避该面对的功课'}},
+  {id:'major-21',name:'世界',suit:'major',rank:'XXI',upright:{summary:'完整周期闭环，阶段目标完成',love:'关系走到圆满阶段',career:'项目学业阶段性收尾完成',self:'接纳圆满，准备开启下一段旅程'},reversed:{summary:'环节残缺，收尾尚未完成',love:'关系差最后一步，难以闭环',career:'项目收尾残缺，仓促结束',self:'不要草草收尾，补齐缺失部分'}},
+  // —— 权杖 ——
+  {id:'wands-1',name:'权杖一',suit:'wands',rank:'ACE',upright:{summary:'新的行动契机出现',love:'萌生心动，有开启新关系的冲动',career:'新项目新机会到来',self:'迎来新的生活开端'},reversed:{summary:'动力消散，启动受阻',love:'心动转瞬即逝，难以推进',career:'缺少干劲，新项目搁置',self:'提不起兴致，暂缓新计划'}},
+  {id:'wands-2',name:'权杖二',suit:'wands',rank:'II',upright:{summary:'手握多个选项，观望未来方向',love:'面临感情方向的抉择',career:'多条发展路径可供挑选',self:'权衡不同生活选择'},reversed:{summary:'犹豫徘徊，迟迟无法定方向',love:'在感情里反复纠结内耗',career:'选择困难，迟迟不动',self:'不要过度思虑，选定方向行动'}},
+  {id:'wands-3',name:'权杖三',suit:'wands',rank:'III',upright:{summary:'前期铺垫完毕，静待事态发展',love:'观望关系走向，等待反馈',career:'前期准备做完，静待结果',self:'耐心等待现实反馈'},reversed:{summary:'进度延迟，预期和现实不符',love:'关系发展慢，期待落空',career:'进度滞后，不要坐等结果自动发生',self:'调整自身心理预期'}},
+  {id:'wands-4',name:'权杖四',suit:'wands',rank:'IV',upright:{summary:'阶段性安稳，局面暂时稳固',love:'关系稳定和睦，适合聚会相处',career:'项目阶段性完成，可以休整',self:'享受短暂安稳时光'},reversed:{summary:'根基不稳，安稳容易被打破',love:'表面和睦，暗藏矛盾',career:'成果不稳定，容易变动',self:'不要过度乐观，留意隐患'}},
+  {id:'wands-5',name:'权杖五',suit:'wands',rank:'V',upright:{summary:'竞争、冲突客观发生',love:'争吵摩擦，观念冲突',career:'竞争激烈，多方博弈',self:'身边存在争执纠纷'},reversed:{summary:'无谓争斗，对抗没有实质收益',love:'无意义吵架，消耗感情',career:'恶性竞争，得不偿失',self:'放下对抗，不必事事争输赢'}},
+  {id:'wands-6',name:'权杖六',suit:'wands',rank:'VI',upright:{summary:'阶段性胜利，收获外界认可',love:'关系得到周围人的祝福',career:'取得成果，获得肯定',self:'接纳阶段性的荣光'},reversed:{summary:'成果不稳，遭遇挫败或是虚名',love:'感情光环是假象',career:'虚名大于实际能力',self:'看清现实，不要被虚荣迷惑'}},
+  {id:'wands-7',name:'权杖七',suit:'wands',rank:'VII',upright:{summary:'需要抵御外界压力，处于防守状态',love:'对抗外界对关系的干扰',career:'顶住压力守住成果',self:'坚守立场，但量力而行'},reversed:{summary:'负荷过载，无力继续坚守',love:'扛不住外界压力想放弃',career:'任务过重，无力维持',self:'适当舍弃部分战线，不必硬扛'}},
+  {id:'wands-8',name:'权杖八',suit:'wands',rank:'VIII',upright:{summary:'事件快速推进，消息迅速到来',love:'关系快速升温，消息传来',career:'事务快速推进，效率很高',self:'顺应节奏，把握时机'},reversed:{summary:'流程混乱，计划行程延误',love:'沟通混乱，误会频发',career:'计划延误，节奏打乱',self:'做好预案接纳变动'}},
+  {id:'wands-9',name:'权杖九',suit:'wands',rank:'IX',upright:{summary:'经历损耗，保持戒备防御',love:'受过伤害，内心保持防备',career:'历经磨难，谨慎守护成果',self:'保护自己，但不必时刻紧绷'},reversed:{summary:'过度戒备，精神耗竭',love:'防备过重，难以信任他人',career:'精神紧绷，身心疲惫',self:'放下多余的警惕'}},
+  {id:'wands-10',name:'权杖十',suit:'wands',rank:'X',upright:{summary:'承担沉重责任与负担',love:'感情中独自背负太多压力',career:'任务繁重，责任巨大',self:'认清肩上的担子'},reversed:{summary:'负担过载，难以为继',love:'不要独自承担感情全部压力',career:'任务过载，学会减负',self:'主动卸下不必要的重担'}},
+  {id:'wands-page',name:'权杖侍从',suit:'wands',rank:'PAGE',upright:{summary:'满怀热忱，愿意探索新事物',love:'新鲜悸动，勇敢体验',career:'乐于尝试新领域',self:'保持好奇，体验新鲜事物'},reversed:{summary:'热度短暂，做事浮于表面',love:'新鲜感褪去就失去兴趣',career:'三分钟热度，难以深耕',self:'避免浅尝辄止'}},
+  {id:'wands-knight',name:'权杖骑士',suit:'wands',rank:'KNIGHT',upright:{summary:'行动力旺盛，主动向前推进',love:'热烈主动奔赴感情',career:'执行力强，快速推进任务',self:'敢闯敢试，留意风险'},reversed:{summary:'行事急躁冲动，制造麻烦',love:'冲动表白、冲动吵架',career:'鲁莽行事，容易出错',self:'放缓节奏，减少冲动决策'}},
+  {id:'wands-queen',name:'权杖王后',suit:'wands',rank:'QUEEN',upright:{summary:'自信外放，可以带动事态发展',love:'自信主动经营感情',career:'充满活力带动团队',self:'发挥自身热情，把握生活'},reversed:{summary:'情绪急躁，行事容易过火',love:'脾气急躁，容易伤害伴侣',career:'急躁冒进，激化矛盾',self:'管理自身火爆情绪'}},
+  {id:'wands-king',name:'权杖国王',suit:'wands',rank:'KING',upright:{summary:'远见充足，可以主导事态',love:'成熟主导感情走向',career:'规划全局，推动项目',self:'设立目标，稳步向前'},reversed:{summary:'独断专行，缺少耐心',love:'强势控制对方',career:'一意孤行，听不进建议',self:'适当听取他人意见'}},
+  // —— 圣杯 ——
+  {id:'cups-1',name:'圣杯一',suit:'cups',rank:'ACE',upright:{summary:'新情感萌生，内心打开',love:'新的心动，爱意萌发',career:'对事物重燃热情',self:'内心柔软，接纳新感受'},reversed:{summary:'情感封闭，感受难以流动',love:'心门紧闭，难以投入',career:'丧失热情，提不起兴趣',self:'允许情绪流动，不要封闭自我'}},
+  {id:'cups-2',name:'圣杯二',suit:'cups',rank:'II',upright:{summary:'双向对等的共鸣互动',love:'双向奔赴，同频契合',career:'良好合作，搭档合拍',self:'拥有平等舒服的人际关系'},reversed:{summary:'供需错位，双方无法同频',love:'付出不对等，精神不同频',career:'合作理念不合',self:'人际相处存在落差'}},
+  {id:'cups-3',name:'圣杯三',suit:'cups',rank:'III',upright:{summary:'多人欢聚，氛围融洽',love:'多人聚会，社交愉快',career:'团队协作氛围好',self:'享受朋友相聚的时光'},reversed:{summary:'表面热闹，内在存有隔阂',love:'社交客套，没有真心',career:'团队表面和睦私下矛盾',self:'分辨真心与虚假应酬'}},
+  {id:'cups-4',name:'圣杯四',suit:'cups',rank:'IV',upright:{summary:'对外界倦怠，提不起兴致',love:'对现有关系感到乏味',career:'对现状提不起动力',self:'允许放空，不必强迫积极'},reversed:{summary:'麻木解除，机会重新显现',love:'重新看见关系里的美好',career:'新机会进入视野',self:'走出倦怠，看见身边机遇'}},
+  {id:'cups-5',name:'圣杯五',suit:'cups',rank:'V',upright:{summary:'注意力聚焦于已经失去的事物',love:'沉溺感情的遗憾伤痛',career:'纠结已经失去的机会',self:'接纳失去，不要紧盯遗憾'},reversed:{summary:'接受损失，看见手中尚存的温暖',love:'放下失恋遗憾，看见身边陪伴',career:'看见自己手上尚存的资源',self:'把目光转向所拥有的'}},
+  {id:'cups-6',name:'圣杯六',suit:'cups',rank:'VI',upright:{summary:'怀旧，过往善意与旧人重现',love:'旧人重现，怀念过去',career:'得到前辈、旧同事的帮助',self:'感受旧日温情'},reversed:{summary:'困在旧时光，拿旧标准衡量当下',love:'拿回忆对比现在的伴侣',career:'固守老一套经验',self:'不要活在回忆里'}},
+  {id:'cups-7',name:'圣杯七',suit:'cups',rank:'VII',upright:{summary:'大量幻想与可能性摆在眼前',love:'幻想理想化爱情',career:'很多诱人但是虚幻的机会',self:'分清幻想与现实'},reversed:{summary:'幻想褪去，回归现实处境',love:'看清感情现实，丢掉幻想',career:'舍弃虚浮机会落地现实',self:'舍弃不切实际的想象'}},
+  {id:'cups-8',name:'圣杯八',suit:'cups',rank:'VIII',upright:{summary:'主动离开不再满足的处境',love:'主动离开消耗自己的关系',career:'离开没有成长的环境',self:'敢于舍弃无法满足自己的现状'},reversed:{summary:'畏惧改变，死守消耗你的环境',love:'明知不合适却不敢离开',career:'困在没有前景的岗位',self:'不要惧怕变动'}},
+  {id:'cups-9',name:'圣杯九',suit:'cups',rank:'IX',upright:{summary:'主观内心获得满足',love:'感情内心知足',career:'收获内心的成就感',self:'享受当下内心富足'},reversed:{summary:'欲望难以填补，内在空虚',love:'得到依旧觉得不满足',career:'达成目标依旧空虚',self:'向内求索，不要一味向外索取'}},
+  {id:'cups-10',name:'圣杯十',suit:'cups',rank:'X',upright:{summary:'群体情感和睦，羁绊稳定',love:'亲密关系、家庭和睦幸福',career:'团队氛围融洽',self:'珍惜安稳温暖的羁绊'},reversed:{summary:'关系裂痕，情感共识破裂',love:'家庭、亲密关系矛盾显现',career:'团队情感失和',self:'正视矛盾，不要假装安好'}},
+  {id:'cups-page',name:'圣杯侍从',suit:'cups',rank:'PAGE',upright:{summary:'情绪感知细腻敏锐',love:'敏感细腻，容易动心',career:'共情力强，适合创意类事务',self:'接纳自己柔软的情绪'},reversed:{summary:'多愁善感，被情绪裹挟',love:'情绪内耗，胡思乱想',career:'情绪干扰判断',self:'不要让情绪完全支配自己'}},
+  {id:'cups-knight',name:'圣杯骑士',suit:'cups',rank:'KNIGHT',upright:{summary:'感性投入，主动流露情感',love:'浪漫真诚地表达心意',career:'带着热忱投入事务',self:'真诚表达感受，保留自我边界'},reversed:{summary:'情绪化行事，判断被感情左右',love:'被恋爱脑影响判断',career:'凭心情做事',self:'重大决定不要只依靠感性'}},
+  {id:'cups-queen',name:'圣杯王后',suit:'cups',rank:'QUEEN',upright:{summary:'共情包容，情绪成熟',love:'温柔包容，懂得共情伴侣',career:'善于体察团队情绪',self:'善待自己，体谅他人'},reversed:{summary:'情绪泛滥，共情中丢失自我',love:'一味牺牲讨好对方',career:'过度共情忽略自身利益',self:'不要为了别人耗尽自己'}},
+  {id:'cups-king',name:'圣杯国王',suit:'cups',rank:'KING',upright:{summary:'情绪稳定，感性理性兼顾',love:'感情成熟，情绪稳定',career:'兼顾人情与现实',self:'平衡感受与现实'},reversed:{summary:'压抑内心感受，回避情感问题',love:'压抑情绪，回避感情矛盾',career:'回避情绪相关冲突',self:'正视内心情绪，不要一味压抑'}},
+  // —— 宝剑 ——
+  {id:'swords-1',name:'宝剑一',suit:'swords',rank:'ACE',upright:{summary:'真相浮现，获得清醒判断',love:'看清感情真相',career:'思路清晰，适合决断',self:'抓住真相，做出判断'},reversed:{summary:'认知混乱，被谎言误导',love:'被甜言蜜语蒙蔽',career:'信息虚假，判断出错',self:'先核实信息，暂缓下定论'}},
+  {id:'swords-2',name:'宝剑二',suit:'swords',rank:'II',upright:{summary:'主动回避现实，拒绝接收信息',love:'刻意回避感情矛盾',career:'拒绝看见问题',self:'看清自己在逃避什么'},reversed:{summary:'蒙蔽解除，被迫面对现实',love:'不得不直面感情问题',career:'无法继续回避难题',self:'逃避解决不了问题'}},
+  {id:'swords-3',name:'宝剑三',suit:'swords',rank:'III',upright:{summary:'心碎伤痛客观发生',love:'经历伤心、失望',career:'受到言语、现实打击',self:'允许伤痛，不必强迫立刻痊愈'},reversed:{summary:'伤痛逐步愈合，停止反复回味伤害',love:'走出情伤，不再回想痛苦',career:'心理创伤慢慢平复',self:'放下反复咀嚼的伤口'}},
+  {id:'swords-4',name:'宝剑四',suit:'swords',rank:'IV',upright:{summary:'精神暂停，进入休养静止',love:'关系需要冷静休整',career:'停下忙碌，休养精神',self:'停下来休息恢复精力'},reversed:{summary:'一味逃避现实，不愿回归事务',love:'用冷暴力逃避感情问题',career:'摆烂逃避任务',self:'休息要有边界，不能长久逃避'}},
+  {id:'swords-5',name:'宝剑五',suit:'swords',rank:'V',upright:{summary:'赢得争执，但关系受损',love:'吵架赢了道理输掉感情',career:'争执取胜却破坏合作',self:'赢口舌不等于赢局面'},reversed:{summary:'停止对抗，争斗没有实际收益',love:'放下争吵，不争输赢',career:'放弃无意义的博弈',self:'放下胜负执念'}},
+  {id:'swords-6',name:'宝剑六',suit:'swords',rank:'VI',upright:{summary:'缓慢脱离伤痛处境，逐步过渡',love:'慢慢走出受伤的感情',career:'逐步脱离糟糕环境',self:'给时间，慢慢走出困境'},reversed:{summary:'无法脱身，旧伤害循环往复',love:'反复重蹈感情旧伤',career:'不断踩相同的坑',self:'找到根源，避免循环伤害'}},
+  {id:'swords-7',name:'宝剑七',suit:'swords',rank:'VII',upright:{summary:'投机取巧，存在隐瞒算计',love:'存在欺骗、隐瞒',career:'投机取巧走捷径',self:'心存侥幸容易踩坑'},reversed:{summary:'放弃投机，问题需要直面',love:'停止在关系里耍小聪明',career:'拒绝投机，踏实处理',self:'坦荡面对问题'}},
+  {id:'swords-8',name:'宝剑八',suit:'swords',rank:'VIII',upright:{summary:'被主观认知自我设限',love:'内心枷锁困住亲密关系',career:'自我否定限制发展',self:'很多束缚来自自己的想法'},reversed:{summary:'破除固有认知，枷锁解除',love:'解开内心心结',career:'打破固有思维局限',self:'跳出固有想法'}},
+  {id:'swords-9',name:'宝剑九',suit:'swords',rank:'IX',upright:{summary:'焦虑思虑带来精神煎熬',love:'为感情胡思乱想彻夜焦虑',career:'过度担忧考试项目',self:'区分现实与想象的恐惧'},reversed:{summary:'焦虑缓解，噩梦式的思绪消散',love:'感情的内耗慢慢平息',career:'过度担心的事并未发生',self:'放下预支的烦恼'}},
+  {id:'swords-10',name:'宝剑十',suit:'swords',rank:'X',upright:{summary:'局面彻底崩盘，伤害抵达终点',love:'关系彻底破裂结束',career:'项目彻底失败',self:'接纳彻底落幕，旧阶段完结'},reversed:{summary:'残留创伤，旧模式重复上演',love:'伤口还在，警惕重蹈覆辙',career:'失败阴影还在',self:'警惕再次掉入相同困境'}},
+  {id:'swords-page',name:'宝剑侍从',suit:'swords',rank:'PAGE',upright:{summary:'收集信息，客观思辨',love:'多方观察，收集关系信息',career:'搜集资料，理性分析',self:'多收集事实再下判断'},reversed:{summary:'言语刻薄，认知片面',love:'说话伤人，猜忌对方',career:'想法片面，输出错误观点',self:'管住口舌，不要片面评判'}},
+  {id:'swords-knight',name:'宝剑骑士',suit:'swords',rank:'KNIGHT',upright:{summary:'思路果决，沟通推进迅速',love:'沟通干脆利落',career:'高效推进沟通谈判',self:'果断表达同时顾及他人'},reversed:{summary:'言语伤人，冲动制造冲突',love:'口不择言吵架',career:'冲动发言引发矛盾',self:'说话之前稍作停顿'}},
+  {id:'swords-queen',name:'宝剑王后',suit:'swords',rank:'QUEEN',upright:{summary:'头脑清醒，忠于事实',love:'理智看待感情，不自我欺骗',career:'判断客观公正',self:'保持清醒独立判断'},reversed:{summary:'态度冷硬，完全忽略情绪',love:'太过尖锐，缺少温情',career:'只讲道理不顾人情',self:'理性之外顾及感受'}},
+  {id:'swords-king',name:'宝剑国王',suit:'swords',rank:'KING',upright:{summary:'理性客观，逻辑优先',love:'理性处理感情矛盾',career:'逻辑剖析问题',self:'依靠逻辑看待事物'},reversed:{summary:'过度理智，无视人情现实',love:'完全用道理衡量亲密关系',career:'冰冷刻板，忽略人情',self:'兼顾道理与人情'}},
+  // —— 星币 ——
+  {id:'pentacles-1',name:'星币一',suit:'pentacles',rank:'ACE',upright:{summary:'现实层面新机遇，资源出现',love:'现实条件良好的新缘分',career:'新工作、新机会到来',self:'现实层面迎来利好'},reversed:{summary:'机会流失，现实基础不足',love:'缘分缺少现实根基',career:'错失机会，底子不足',self:'先夯实现实基础，不要急于求成'}},
+  {id:'pentacles-2',name:'星币二',suit:'pentacles',rank:'II',upright:{summary:'多件事务之间周旋权衡',love:'平衡感情与现实生活',career:'同时处理多项任务',self:'接纳生活起伏，学着平衡'},reversed:{summary:'顾此失彼，现实节奏失衡',love:'感情和生活无法兼顾',career:'任务太多手忙脚乱',self:'精简事务，不要硬扛太多'}},
+  {id:'pentacles-3',name:'星币三',suit:'pentacles',rank:'III',upright:{summary:'务实协作，实干积累成果',love:'两个人务实经营关系',career:'团队合作，踏实干活出成果',self:'依靠实干积累收获'},reversed:{summary:'敷衍应付，做工缺少打磨',love:'对待关系敷衍不走心',career:'做事潦草应付',self:'拒绝敷衍，沉下心打磨'}},
+  {id:'pentacles-4',name:'星币四',suit:'pentacles',rank:'IV',upright:{summary:'守住现有资源，看重安全感',love:'看重感情安全感，不愿放手',career:'守护现有成果',self:'守护属于自己的东西'},reversed:{summary:'过度紧抓占有，反被资源困住',love:'占有欲太强困住双方',career:'死守现有不愿变通',self:'学会适度放手'}},
+  {id:'pentacles-5',name:'星币五',suit:'pentacles',rank:'V',upright:{summary:'现实匮乏，处境艰难',love:'关系遭遇现实层面困境',career:'物质、资源陷入窘迫',self:'正视当下困境不必美化'},reversed:{summary:'境遇改善，走出困顿处境',love:'感情现实难题慢慢好转',career:'资源条件逐步回暖',self:'给自己时间走出低谷'}},
+  {id:'pentacles-6',name:'星币六',suit:'pentacles',rank:'VI',upright:{summary:'给予和接收处于相对平衡',love:'互相扶持，付出索取均衡',career:'资源分配公平',self:'坦然给予也坦然接受帮助'},reversed:{summary:'施舍附带条件，双方地位不对等',love:'关系带有施舍与交换',career:'资源分配不公',self:'警惕附带条件的馈赠'}},
+  {id:'pentacles-7',name:'星币七',suit:'pentacles',rank:'VII',upright:{summary:'投入之后等待现实回报',love:'经营感情，静待结果',career:'付出之后等待产出',self:'评估投入是否值得继续'},reversed:{summary:'付出未见产出，收益不及预期',love:'感情付出得不到回馈',career:'投入产出不成正比',self:'思考要不要继续坚持'}},
+  {id:'pentacles-8',name:'星币八',suit:'pentacles',rank:'VIII',upright:{summary:'专注打磨技能，踏实深耕',love:'用心打磨经营感情',career:'打磨技能，沉淀实力',self:'真正收获来自持续积累'},reversed:{summary:'浮躁敷衍，不愿踏实积累',love:'对待感情急于求成',career:'幻想捷径不愿深耕',self:'拒绝浮躁，脚踏实地'}},
+  {id:'pentacles-9',name:'星币九',suit:'pentacles',rank:'IX',upright:{summary:'依靠自身获得富足独立',love:'精神物质独立，享受单身',career:'凭自己能力获得回报',self:'享受自给自足的状态'},reversed:{summary:'透支消耗，外在光鲜内里空虚',love:'靠物质伪装感情',career:'透支换取表面成绩',self:'不要透支换取表面风光'}},
+  {id:'pentacles-10',name:'星币十',suit:'pentacles',rank:'X',upright:{summary:'长期积累，物质与羁绊局面稳固',love:'家庭、长期关系安稳富足',career:'事业根基稳固',self:'珍惜长久沉淀的成果'},reversed:{summary:'根基动摇，财富传承出现裂痕',love:'家庭、长期关系现实矛盾爆发',career:'事业根基暗藏隐患',self:'留意现实层面潜藏问题'}},
+  {id:'pentacles-page',name:'星币侍从',suit:'pentacles',rank:'PAGE',upright:{summary:'务实学习，从零积累资本',love:'慢慢学习如何爱人',career:'踏实学习积累技能',self:'一步一步积攒实力'},reversed:{summary:'贪图捷径，缺少实际行动',love:'幻想完美爱情不愿付出',career:'妄想一步登天',self:'摒弃捷径，行动才有收获'}},
+  {id:'pentacles-knight',name:'星币骑士',suit:'pentacles',rank:'KNIGHT',upright:{summary:'勤恳踏实，稳步落地事务',love:'稳重慢热，务实对待感情',career:'稳扎稳打推进项目',self:'不求速成，循序渐进'},reversed:{summary:'节奏拖沓，保守固执停滞',love:'感情进展过于迟缓固执',career:'做事拖沓不肯变通',self:'适度接纳改变'}},
+  {id:'pentacles-queen',name:'星币王后',suit:'pentacles',rank:'QUEEN',upright:{summary:'务实经营，照料现实生活',love:'务实细心经营亲密关系',career:'妥善打理现实事务',self:'用心经营自己的生活'},reversed:{summary:'被物质欲望裹挟，看重得失',love:'把物质当作感情的全部',career:'凡事只看利益得失',self:'不要以物质作为唯一标尺'}},
+  {id:'pentacles-king',name:'星币国王',suit:'pentacles',rank:'KING',upright:{summary:'掌握现实资源，局面稳固',love:'成熟稳重，能提供现实支撑',career:'手握资源稳健布局',self:'善用自身资源达成目标'},reversed:{summary:'功利至上，被利益捆绑',love:'感情全部权衡利弊',career:'唯利益论',self:'不要凡事只用得失衡量'}},
+];
+
+// ===== 角色回应词库 =====
+const TAROT_RESPONSE_POOL = {
+  shared: ['遵从心底最初的回响。','暂且搁置，静待时序流转。','不妨奔赴这场未知冒险。','时光会铺展属于你的答案。','安于当下，不必急于改变。','选择那条荆棘却明亮的路途。','莫被旁人的喧嚣左右航向。','两条归途，皆有风月可赏。','时机尚浅，不必仓促落笔。','不必逼迫自己即刻抉择。','值得倾尽勇气奋力一试。','重新丈量得失，再赴远方。','顺着命运的潮汐缓缓而行。','克制冲动，静观事态演变。','过往的痕迹将予你启示。','勇敢开启这一段新的篇章。','世间选择，本无绝对对错。','随境遇流转，不必强行扭转。','将这份念想暂且收藏心底。','静候片刻，再做往后决断。','岁月自会拆解所有谜题。','不必困囿于一人的星河。','主动一步，便会逢见春风。','保持疏离，方能保全温柔。','你们的缘分尚未抵达终点。','两两放过，亦是一种成全。','收起过高期许，少些执念。','赤诚心意终会被时光看见。','就此挥别，放过这段羁绊。','予对方一片独处的月色。','别在关系里耗尽自身微光。','爱意从来需要双向的回响。','往后山海，会遇更好相逢。','层层误会终将随雾霭消散。','不必勉强维系破碎的羁绊。','再守候一程，静待花开时分。','别沉溺于旧梦的残碎余温。','你的赤诚，从未被辜负。','褪去期待，减少内心煎熬。','情谊需要彼此慢慢磨合。','所有耕耘，终有繁花相报。','沉下心，积蓄沉淀自身力量。','此刻，大可奋力奔赴所求。','不惧暂时落败，风雨皆阅历。','改换航道，会遇见万顷星光。','稳住步履，莫被浮躁裹挟。','机遇正穿越人海向你赶来。','仍需打磨，积淀足够的力量。','值得沉下心深耕这方天地。','放低期许，从容面对得失。','纵然归零，亦可重新启程。','现下不宜贸然掀起波澜。','机遇藏在每一寸努力之中。','接纳他人援手，不必独自硬扛。','将这份计划暂且归于沉寂。','坚守下去，终能冲破桎梏。','挣脱外界施加的重重枷锁。','守好眼前，便是步步进阶。','此事前路，少有余地可期。','做好准备迎接世事的更迭。','接纳自身所有不完整的模样。','停止与自我无休止的拉扯。','你的力量远比想象更辽阔。','允许自己短暂地迷失雾中。','把目光收回，安放于自身。','不必急着寻得世间所有谜底。','和心底的遗憾温柔握手言和。','请予自己多一分宽厚怜悯。','万般焦虑，解不开世间困局。','你的心绪，永远值得被重视。','不必为迎合世俗磨平棱角。','步履缓慢，亦不算辜负时光。','先安抚好心底翻涌的情绪。','别频频回望逝去的旧时光。','请信任属于自己的判断力。','有些困惑，本就无需破译。','放下反复的自我怀疑内耗。','你本就值得世间万般温柔。','坦然接纳世间一切的发生。','先好好善待独一无二的自己。','属于你的，终将奔赴而来。','及时抽身，亦是清醒的智慧。','万千空想，不及一步奔赴。','不要站在原地苦苦盼曙光。','一切正在无声地悄然蜕变。','该舍弃的，便痛快挥手作别。','好运从不会凭空降临肩头。','结局会赠予你意料之外惊喜。','耐住性子，再等候一段流年。','故事到此，便该画上句点。','想要的光景，要亲手去缔造。','不必死死攥住某一种结局。','变局之中，藏着新生转机。','放下过往，方能奔赴前路。','不必畏惧前路茫茫的未知。','世间诸多事，终究不可强求。','付诸行动，自有答案落定。','美好的事物正在向你靠近。','落幕，是另一场盛大开篇。','万般际遇，皆为最好的安排。'],
+  qinche: ['别犹豫，顺着你的心意去做。','时机未到，再沉住气等一等。','没必要听旁人的闲言，你自己说了算。','这条路很难，但值得你闯一次。','维持现状，不必急着打破平衡。','别被情绪裹挟，冷静重新权衡利弊。','两种选择都有代价，做好心理准备。','不必强迫自己立刻给出答复。','有些事，强求只会徒增麻烦。','与其空想，不如直接动手验证结果。','趁早抽身，继续耗下去没有意义。','可以主动一点，僵局会被打破。','保持距离，反而能保全彼此。','别困在旧的过往里原地打转。','不必抱有过高期待，避免失望。','你的真心没有错，只是对象不对。','再坚持一阵，转机就会出现。','别独自硬扛，你大可以依靠我。','沉淀自己，现在还不是出手的时候。','眼下可以放手一搏，我站在你这边。','不必畏惧失败，输了也不算什么。','现有方向走不通，就换一条航道。','停止内耗，你的能力远比你以为的强。','接受不完美，不必事事逼自己圆满。','不必讨好任何人，优先顾好你自己。','该来的会来，不必焦灼地苦苦等候。','结局会超出你的预料，耐心观望。','就算一切倾覆，我会替你兜底。'],
+};
+
+// ===== 角色 allow/deny 话术 =====
+const TAROT_ALLOW_DENY = {
+  qinche: {allow:['可以，那就开始吧，我会在这里陪着你。','准你翻开，无论牌面是什么，别忘了，我才是能左右结局的人。','既然你想占卜，那就随你，我倒要看看这些纸牌会说出什么。','允许，把牌翻开，我很想知道它会如何描述我们。'],deny:['不行，不必借纸牌窥探，你想要的答案直接问我就够了。','我不同意，关于你我的事，不该交由几张牌定义。','暂且不许，有些预兆，没必要急着去窥见。','别依赖这些纸牌，它给不了你真正的庇护，我才可以。']},
+};
+
+
 // ============ IndexedDB 存储层 ============
 const DB_NAME = 'TimeTreeDB';
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 let db = null;
 
 function openDB() {
@@ -856,7 +1133,6 @@ function updateHome(){
     document.getElementById('homeMyName').textContent = S.myName;
     document.getElementById('homeStatusText').textContent = S.contactStatus;
     document.getElementById('homeMoodPreview').textContent = S.contactMood || '';
-    checkBoardUnread();
 }
 function fileToDataUrl(f){return new Promise(r=>{const rd=new FileReader();rd.onload=function(){r(rd.result);};rd.readAsDataURL(f);});}
 function downloadBlob(content,filename){const b=new Blob([content],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(b);const a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),500);}
@@ -871,6 +1147,126 @@ async function openChatPage(){
     loadEmojiPanel();
     applyBubbleStyle();
     startAutoSendIfNeeded();
+}
+function toggleMorePanel() {
+    var panel = document.getElementById('morePanel');
+    if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+function hideMorePanel() {
+    var panel = document.getElementById('morePanel');
+    if (panel) panel.style.display = 'none';
+}
+function openDeliverEditor() {
+    hideMorePanel();
+    var editor = document.getElementById('deliverEditor');
+    if (!editor) {
+        var inputBar = document.querySelector('#chatPage .bottombar');
+        if (!inputBar) return;
+        var ed = document.createElement('div');
+        ed.id = 'deliverEditor';
+        ed.style.cssText = 'background:#fff;border:1px solid #f0ece8;border-radius:16px;padding:16px;margin:8px 12px;box-shadow:0 4px 12px rgba(0,0,0,0.04);';
+        ed.innerHTML = '<input id="deliverQuestion" placeholder="你想问一句什么…" style="width:100%;border:1.5px solid #e8e0d8;border-radius:10px;padding:10px 12px;font-size:14px;background:#f8f5f0;color:#333;margin-bottom:10px;box-sizing:border-box;outline:none;">' +
+           '<div class="editor-option" style="position:relative;margin-bottom:8px;"><input id="deliverOpt1" placeholder="选项 1" style="width:100%;border:1.5px solid #e8e0d8;border-radius:10px;padding:9px 32px 9px 12px;font-size:13px;background:#f8f5f0;color:#333;box-sizing:border-box;outline:none;"><span class="opt-del" onclick="deliverRemoveOption(this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:14px;color:#d4a8b8;cursor:pointer;">✕</span></div>' +
+'<div class="editor-option" style="position:relative;margin-bottom:8px;"><input id="deliverOpt2" placeholder="选项 2" style="width:100%;border:1.5px solid #e8e0d8;border-radius:10px;padding:9px 32px 9px 12px;font-size:13px;background:#f8f5f0;color:#333;box-sizing:border-box;outline:none;"><span class="opt-del" onclick="deliverRemoveOption(this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:14px;color:#d4a8b8;cursor:pointer;">✕</span></div>' +
+'<div onclick="deliverAddOption()" style="font-size:12px;color:#999;cursor:pointer;padding:4px 0;">＋ 添加选项</div>' +
+'<div style="display:flex;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid #f0ece8;">' +
+'<button onclick="closeDeliverEditor()" style="font-size:13px;color:#999;background:none;border:none;padding:6px 10px;cursor:pointer;">取消</button>' +
+'<button id="sendDeliver" onclick="sendDeliver()" disabled style="font-size:13px;color:#fff;background:#d4a8b8;border:none;border-radius:20px;padding:8px 20px;cursor:pointer;">递过去 →</button>' +
+            '</div>';
+        inputBar.insertAdjacentElement('afterend', ed);
+        editor = ed;
+    }
+    editor.style.display = 'block';
+    document.querySelector('#chatPage .bottombar').style.display = 'none';
+    
+    document.querySelectorAll('#deliverEditor input').forEach(function(inp) {
+        inp.addEventListener('input', deliverCheckSendable);
+    });
+}
+
+function closeDeliverEditor() {
+    var editor = document.getElementById('deliverEditor');
+    if (editor) editor.style.display = 'none';
+    var bar = document.querySelector('#chatPage .bottombar');
+    if (bar) bar.style.display = 'flex';
+}
+
+function deliverAddOption() {
+    var editor = document.getElementById('deliverEditor');
+    if (!editor) return;
+    var count = editor.querySelectorAll('.editor-option').length;
+    if (count >= 6) return;
+    var label = String.fromCharCode(65 + count);
+    var optDiv = document.createElement('div');
+    optDiv.className = 'editor-option';
+    optDiv.style.cssText = 'position:relative;margin-bottom:8px;';
+    optDiv.innerHTML = '<input placeholder="选项 ' + label + '" style="width:100%;border:1px solid #f0d9dc;border-radius:8px;padding:7px 32px 7px 12px;font-size:13px;background:#fff;box-sizing:border-box;">' +
+        '<span class="opt-del" onclick="deliverRemoveOption(this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:14px;color:#b59a9e;cursor:pointer;">✕</span>';
+    var addBtn = editor.querySelector('[onclick="deliverAddOption()"]');
+    addBtn.insertAdjacentElement('beforebegin', optDiv);
+    optDiv.querySelector('input').addEventListener('input', deliverCheckSendable);
+}
+
+function deliverRemoveOption(btn) {
+    var opts = document.querySelectorAll('#deliverEditor .editor-option');
+    if (opts.length <= 2) return;
+    btn.closest('.editor-option').remove();
+    deliverCheckSendable();
+}
+
+function deliverCheckSendable() {
+    var q = document.getElementById('deliverQuestion');
+    var question = q ? q.value.trim() : '';
+    var opts = [];
+    document.querySelectorAll('#deliverEditor .editor-option input').forEach(function(inp) {
+        var v = inp.value.trim();
+        if (v) opts.push(v);
+    });
+    var sendBtn = document.getElementById('sendDeliver');
+    if (sendBtn) sendBtn.disabled = !(question && opts.length >= 2);
+}
+
+function sendDeliver() {
+    var q = document.getElementById('deliverQuestion');
+    var question = q ? q.value.trim() : '';
+    var opts = [];
+    document.querySelectorAll('#deliverEditor .editor-option input').forEach(function(inp) {
+        var v = inp.value.trim();
+        if (v) opts.push(v);
+    });
+    if (!question || opts.length < 2) return;
+    
+    var msg = { sender:'me', type:'deliver', content:JSON.stringify({question:question,options:opts}), timestamp:Date.now() };
+    dbPut('messages', msg).then(function(id) {
+        msg.id = id;
+        renderMsg(msg);
+        scrollBottom();
+        closeDeliverEditor();
+        deliverAutoReply(question, opts);
+    });
+}
+
+async function deliverAutoReply(question, opts) {
+    var delay = Math.floor(Math.random() * (parseInt(S.maxReplyTime) * 60000 - parseInt(S.minReplyTime) * 1000 + 1)) + parseInt(S.minReplyTime) * 1000;
+    setTimeout(async function() {
+        var reply = doDeliverReply('qinche', opts);
+        var m = { sender:'other', type:'deliver_reply', content:reply, timestamp:Date.now() };
+        var id = await dbPut('messages', m);
+        m.id = id;
+        renderMsg(m);
+        scrollBottom();
+    }, delay);
+}
+
+function doDeliverReply(roleKey, userOptions) {
+    var shouldPick = Math.random() < 0.6;
+    var tails = ['选是选了，但这些选项概括不了我。','姑且选这个，别靠题目揣测我。','答案勾好了，想知道真心话直接问我。','就这个，纸上写不出全部。','按你的规则选了，我更愿意用行动说明。'];
+    var declines = ['我不想选，这里没有合适答案。','不做，我不喜欢被限定答案。','没必要选，心意不是勾选就能说清。','拒绝作答，想问就直接开口。','没兴趣做测验，这些选择不适合我们。'];
+    if (shouldPick && userOptions && userOptions.length > 0) {
+        var chosen = userOptions[Math.floor(Math.random() * userOptions.length)];
+        return chosen + tails[Math.floor(Math.random() * tails.length)];
+    }
+    return declines[Math.floor(Math.random() * declines.length)];
 }
 
 var chatLoadCount = 100; // 每次加载数量
@@ -931,20 +1327,32 @@ function renderMsg(m){
         b.style.background = preset.otherBg;
         b.style.color = preset.otherText;
     }
-    if(m.type === 'pat'){
-        b.classList.add('pat-bubble');
-        b.innerHTML = '<span>👋 <b>' + (m.sender === 'me' ? S.myName : S.contactName) + '</b> ' + m.content + '</span>';
-    } else if(m.type === 'emoji' || m.type === 'image'){
-        const img = document.createElement('img');
-        img.src = m.content;
-        img.style.maxWidth = '150px';
-        img.style.maxHeight = '150px';
-        img.style.objectFit = 'contain';
-        img.style.borderRadius = '6px';
-        b.appendChild(img);
-    } else {
-        b.textContent = m.content;
-    }
+   if(m.type === 'pat'){
+    b.classList.add('pat-bubble');
+    b.innerHTML = '<span>👋 <b>' + (m.sender === 'me' ? S.myName : S.contactName) + '</b> ' + m.content + '</span>';
+} else if (m.type === 'deliver') {
+    var dData = JSON.parse(m.content || '{}');
+    var dOpts = dData.options || [];
+    var optHtml = dOpts.map(function(o, i) {
+        return '<div style="font-size:13px;color:#d4a8b8;padding:4px 0;">' + (i+1) + '. ' + o + '</div>';
+    }).join('');
+    b.innerHTML = '<div style="font-size:11px;color:#b59a9e;margin-bottom:6px;">✉️ 你递了句话</div>' +
+        '<div style="font-size:14px;line-height:1.6;">' + (dData.question || '') + '</div>' +
+        '<div style="font-size:11px;color:#b59a9e;margin-top:6px;">期待你的选择</div>';
+} else if (m.type === 'deliver_reply') {
+    b.innerHTML = '<div style="font-size:11px;color:#b59a9e;margin-bottom:6px;">✉️ 秦彻的回话</div>' +
+        '<div style="font-size:14px;line-height:1.6;">' + m.content + '</div>';
+} else if(m.type === 'emoji' || m.type === 'image'){
+    const img = document.createElement('img');
+    img.src = m.content;
+    img.style.maxWidth = '150px';
+    img.style.maxHeight = '150px';
+    img.style.objectFit = 'contain';
+    img.style.borderRadius = '6px';
+    b.appendChild(img);
+} else {
+    b.textContent = m.content;
+}
     const t = document.createElement('div');
     t.className = 'message-time';
     t.textContent = fmtTime(m.timestamp);
@@ -1841,14 +2249,15 @@ window.db = null;
 
 window.openDB = function() {
     return new Promise(function(resolve, reject) {
-        var req = indexedDB.open('TimeTreeDB', 4);
+        var req = indexedDB.open('TimeTreeDB', 5);
         req.onupgradeneeded = function(e) {
             var d = e.target.result;
-            var stores = ['messages', 'settings', 'wordcards', 'emojis', 'avatars',
+           var stores = ['messages', 'settings', 'wordcards', 'emojis', 'avatars',
     'callLogs', 'patOptions', 'statusOptions', 'disabledCards',
     'disabledGroups', 'avatarHistory', 'bgSettings', 'boardMessages',
     'wishes', 'anniversaries', 'answerBookHistory', 'choiceHistory',
-    'tarotMessages', 'calendarSettings', 'tarotSettings', 'tarotHistory'];
+    'tarotMessages', 'calendarSettings', 'tarotSettings', 'tarotHistory',
+    'mailLetters'];
             stores.forEach(function(s) {
                 if (!d.objectStoreNames.contains(s)) {
                     if (s === 'settings' || s === 'bgSettings' || s === 'tarotSettings') {
@@ -2032,22 +2441,21 @@ function switchWishTab(tab) {
     var wc = document.getElementById('wishTabContent');
     var bc = document.getElementById('boardTabContent');
     if (tab === 'wish') {
-        wb.style.color = 'var(--primary)';
-        wb.style.borderBottom = '2px solid var(--primary)';
+        wb.style.color = '#d4a8b8';
+        wb.style.borderBottom = '2px solid #d4a8b8';
         bb.style.color = '#999';
         bb.style.borderBottom = '2px solid transparent';
         wc.style.display = 'block';
         bc.style.display = 'none';
         renderWishPage();
     } else {
-        bb.style.color = 'var(--primary)';
-        bb.style.borderBottom = '2px solid var(--primary)';
+        bb.style.color = '#d4a8b8';
+        bb.style.borderBottom = '2px solid #d4a8b8';
         wb.style.color = '#999';
         wb.style.borderBottom = '2px solid transparent';
         bc.style.display = 'block';
         wc.style.display = 'none';
         localStorage.setItem('boardReadTime', Date.now());
-        checkBoardUnread();
         renderBoardPage();
     }
 }
@@ -2068,6 +2476,15 @@ function switchWishSubTab(tab) {
 }
 
 async function renderWishPage() {
+    var msgs = await dbGetAll('boardMessages');
+    var lastRead = localStorage.getItem('boardReadTime');
+    var hasUnread = msgs.some(function(m) {
+        return m.sender === 'qin' && (!lastRead || m.timestamp > parseInt(lastRead));
+    });
+    var boardTab = document.getElementById('boardTabBtn');
+    if (boardTab) {
+        boardTab.textContent = hasUnread ? ' 留言 · NEW' : ' 留言';
+    }
     var h = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;">' +
         '<div style="width:100%;max-width:400px;">' +
         // 子标签：两个大卡片并排
@@ -2443,15 +2860,6 @@ pendingReplies.forEach(async function(msg) {
     document.getElementById('boardTabContent').innerHTML = h;
 }
 
-async function checkBoardUnread() {
-    var msgs = await dbGetAll('boardMessages');
-    var lastRead = localStorage.getItem('boardReadTime');
-    var hasUnread = msgs.some(function(m) {
-        return m.sender === 'qin' && (!lastRead || m.timestamp > parseInt(lastRead));
-    });
-    var dot = document.getElementById('boardUnreadDot');
-    if (dot) dot.style.display = hasUnread ? 'block' : 'none';
-}
 
 async function addBoardMessage() {
     var input = document.getElementById('boardInput');
@@ -2482,8 +2890,24 @@ async function addBoardMessage() {
 
 
 async function deleteBoardMsg(id) {
-    await dbDelete('boardMessages', id);
-    renderBoardPage();
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = '<div style="background:#fff;border-radius:16px;padding:24px;width:280px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.2);">' +
+        '<div style="font-size:16px;font-weight:600;color:#333;margin-bottom:8px;">删除留言</div>' +
+        '<div style="font-size:14px;color:#666;margin-bottom:20px;">确定删除这条留言吗？</div>' +
+        '<div style="display:flex;gap:10px;">' +
+        '<button id="delBoardCancel" style="flex:1;padding:10px;border-radius:10px;border:1px solid #ddd;background:#f5f5f5;color:#666;font-size:14px;cursor:pointer;">取消</button>' +
+        '<button id="delBoardConfirm" style="flex:1;padding:10px;border-radius:10px;border:none;background:#d4a8b8;color:#fff;font-size:14px;cursor:pointer;">删除</button>' +
+        '</div></div>';
+    document.body.appendChild(overlay);
+    
+    document.getElementById('delBoardCancel').onclick = function() { overlay.remove(); };
+    document.getElementById('delBoardConfirm').onclick = async function() {
+        overlay.remove();
+        await dbDelete('boardMessages', id);
+        renderBoardPage();
+        showToast('🗑 已删除');
+    };
 }
 
 async function replyBoardMsg(id) {
@@ -2621,433 +3045,734 @@ async function addAnniversary(){const date=document.getElementById('anniversaryD
 async function deleteAnniversary(index){const a=await dbGetAll('anniversaries');a.splice(index,1);await idbClear('anniversaries');for(const x of a)await dbPut('anniversaries',x);renderAnniversaryPage();}
 async function changeMonth(delta){const now=new Date();const cy=parseInt(await getCal('calendarYear',String(now.getFullYear())));const cm=parseInt(await getCal('calendarMonth',String(now.getMonth())));let nm=cm+delta,ny=cy;if(nm>11){nm=0;ny++;}if(nm<0){nm=11;ny--;}await setCal('calendarYear',String(ny));await setCal('calendarMonth',String(nm));renderAnniversaryPage();}
 
+// ============ 见字如晤（树心邮筒） ============
+var mailboxTab = 'mailbox'; // mailbox | diary
+var mailState = {
+    status: 'idle',       // idle | waiting | ready
+    replyAt: 0,
+    accelerated: false,
+    cooldownUntil: 0
+};
 
-// ============ 如果你知道 ============
-function openChoicePage(){showPage('choicePage');renderChoicePage();}
-async function renderChoicePage() {
-    const history = await dbGetAll('choiceHistory');
-    const savedResult = localStorage.getItem('choiceResult') || '';
-    
-    let hh = '';
-    if (history.length === 0) {
-        hh = '<div style="color:#ccc;font-size:13px;text-align:center;padding:16px;">还没有记录</div>';
+function openMailboxPage() {
+    showPage('choicePage');
+    renderMailboxPage();
+}
+
+function switchMailboxTab(tab) {
+    mailboxTab = tab;
+    var mb = document.getElementById('mailboxTabMail');
+    var db = document.getElementById('mailboxTabDiary');
+    if (tab === 'mailbox') {
+        mb.classList.add('active');
+        db.classList.remove('active');
+        renderMailboxMain();
     } else {
-        history.slice().reverse().forEach(function(item) {
-            hh += '<div style="padding:10px 0;border-bottom:1px solid #f5f0eb;position:relative;">' +
-                '<div style="font-size:13px;color:#999;padding-right:24px;">💭 ' + item.question + '</div>' +
-                '<div style="font-size:15px;color:#d4a8b8;font-weight:500;">💗 ' + item.choice + '</div>' +
-                '<div style="font-size:10px;color:#ccc;">' + item.time + '</div>' +
-                '<span onclick="deleteChoiceHistory(' + item.id + ')" style="position:absolute;top:8px;right:0;cursor:pointer;color:#d4a8b8;font-size:14px;">✕</span>' +
-                '</div>';
+        db.classList.add('active');
+        mb.classList.remove('active');
+        renderDiaryPlaceholder();
+    }
+}
+
+async function renderMailboxPage() {
+    var letters = await dbGetAll('mailLetters') || [];
+    var hasUnread = letters.some(function(l) { return l.direction === 'received' && !l.read; });
+    var tabLabel = hasUnread ? '树心邮筒 · NEW' : '树心邮筒';
+    
+    document.getElementById('choiceContent').innerHTML =
+    '<div style="height:100%;display:flex;flex-direction:column;background:#f8f5f0;">' +
+    '<div class="mailbox-tabs">' +
+    '<button class="mailbox-tab active" id="mailboxTabMail" onclick="switchMailboxTab(\'mailbox\')">' + tabLabel + '</button>' +
+    '<button class="mailbox-tab" id="mailboxTabDiary" onclick="switchMailboxTab(\'diary\')">交换日记</button>' +
+    '</div>' +
+    '<div id="mailboxContent" style="flex:1;overflow-y:auto;"></div>' +
+    '</div>';
+    renderMailboxMain();
+}
+
+function renderDiaryPlaceholder() {
+    document.getElementById('mailboxContent').innerHTML =
+    '<div style="padding:60px 20px;text-align:center;color:#999;font-size:14px;">交换日记，还没想好</div>';
+}
+
+// ===== 树心邮筒主页 =====
+async function renderMailboxMain() {
+var saved = await getCal('mailState', '');
+    if (saved) {
+        try {
+            var parsed = JSON.parse(saved);
+            mailState.status = parsed.status || 'idle';
+            mailState.replyAt = parsed.replyAt || 0;
+            mailState.accelerated = parsed.accelerated || false;
+            mailState.cooldownUntil = parsed.cooldownUntil || 0;
+        } catch(e) {}
+    }
+    var letters = await dbGetAll('mailLetters') || [];
+    letters.sort(function(a,b) { return b.timestamp - a.timestamp; });
+    
+    var filter = mailFilter || 'all';
+
+var today = new Date().toDateString();
+var sentToday = letters.filter(function(l) {
+    return l.direction === 'sent' && new Date(l.timestamp).toDateString() === today;
+});
+var canWrite = sentToday.length === 0;
+    
+    var html = '<div style="padding:16px;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">' +
+    '<div style="font-size:17px;font-weight:600;color:#3a3c3f;letter-spacing:2px;">树心邮筒<span style="font-size:10px;color:#9a9da2;letter-spacing:3px;display:block;font-weight:400;margin-top:2px;">TREE · HEART · POST</span></div>' +
+    '<button onclick="' + (canWrite ? 'openWriteLetter()' : '') + '" style="font-size:13px;color:#fff;background:' + (canWrite ? '#d4a8b8' : '#ccc') + ';border:none;border-radius:20px;padding:8px 18px;cursor:' + (canWrite ? 'pointer' : 'not-allowed') + ';letter-spacing:1px;">' + (canWrite ? '写一封' : '今日已寄') + '</button>' +
+    '</div>' +
+    
+    '<div style="display:flex;gap:6px;margin-bottom:12px;">' +
+    '<button onclick="setMailFilter(\'all\')" style="flex:1;padding:8px;border-radius:16px;border:1px solid ' + (filter==='all' ? '#d4a8b8' : '#d9dadd') + ';background:' + (filter==='all' ? '#d4a8b8' : '#fff') + ';color:' + (filter==='all' ? '#fff' : '#9a9da2') + ';font-size:12px;cursor:pointer;">全部</button>' +
+    '<button onclick="setMailFilter(\'sent\')" style="flex:1;padding:8px;border-radius:16px;border:1px solid ' + (filter==='sent' ? '#d4a8b8' : '#d9dadd') + ';background:' + (filter==='sent' ? '#d4a8b8' : '#fff') + ';color:' + (filter==='sent' ? '#fff' : '#9a9da2') + ';font-size:12px;cursor:pointer;">寄出</button>' +
+    '<button onclick="setMailFilter(\'received\')" style="flex:1;padding:8px;border-radius:16px;border:1px solid ' + (filter==='received' ? '#d4a8b8' : '#d9dadd') + ';background:' + (filter==='received' ? '#d4a8b8' : '#fff') + ';color:' + (filter==='received' ? '#fff' : '#9a9da2') + ';font-size:12px;cursor:pointer;">收到</button>' +
+    '</div>' +
+    
+    '<div id="btnExpect" onclick="accelerateReply()" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #f0ece8;border-radius:12px;padding:12px 14px;cursor:pointer;margin-bottom:10px;">' +
+    '<div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #d9dadd;font-size:16px;">💌</div>' +
+    '<div style="flex:1;"><div style="font-size:14px;font-weight:500;color:#3a3c3f;">期待你的来信</div>' +
+    '<div style="font-size:11px;color:#999;margin-top:2px;">' + getExpectHint() + '</div></div></div>';
+    
+    if (mailState.status === 'waiting') {
+        var replyDate = new Date(mailState.replyAt);
+        var dateStr = (replyDate.getMonth()+1) + '月' + replyDate.getDate() + '日 ' + String(replyDate.getHours()).padStart(2,'0') + ':' + String(replyDate.getMinutes()).padStart(2,'0');
+        html += '<div style="margin:0 0 14px;background:#fff;border:1px dashed #d4a8b8;border-radius:10px;padding:10px 14px;font-size:12px;color:#d4a8b8;line-height:1.7;display:flex;align-items:flex-start;gap:8px;">' +
+        '<span>🕊️</span><span>回信翻山越岭中，预计 ' + dateStr + ' 送达…</span></div>';
+    }
+    
+    var filteredLetters = letters;
+    if (filter === 'sent') filteredLetters = letters.filter(function(l) { return l.direction === 'sent'; });
+    if (filter === 'received') filteredLetters = letters.filter(function(l) { return l.direction === 'received'; });
+    
+    html += '<div style="font-size:13px;color:#9a9da2;letter-spacing:1px;margin:6px 0 10px;">信件</div>';
+    if (filteredLetters.length === 0) {
+        html += '<div style="font-size:12px;color:#ccc;text-align:center;padding:20px;">暂无信件</div>';
+    } else {
+        filteredLetters.forEach(function(l) {
+            var isSent = l.direction === 'sent';
+           html += '<div onclick="openLetter(\'' + l.id + '\')" style="background:#fff;border:1px solid #f0ece8;border-radius:12px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;position:relative;cursor:pointer;">' +
+        (isSent ? '' : (l.read ? '' : '<div style="position:absolute;top:10px;right:56px;background:#8b3a3a;color:#fff;font-size:9px;padding:2px 7px;border-radius:10px;letter-spacing:1px;">NEW</div>')) +
+        '<div style="flex:1;min-width:0;"><div style="font-size:13px;color:#333;line-height:1.5;margin-bottom:4px;white-space:normal;word-break:break-all;">' + l.content.substring(0, 40) + (l.content.length > 40 ? '...' : '') + '</div>' +
+        '<div style="font-size:10px;color:#999;">' + l.dateStr + ' · ' + (isSent ? '致秦彻' : '秦彻') + '</div></div>' +
+        '<div style="font-size:10px;color:' + (isSent ? '#8b3a3a' : (l.read ? '#999' : '#8b3a3a')) + ';flex-shrink:0;white-space:nowrap;">' + (isSent ? '邮资已付' : (l.read ? '已阅' : 'NEW')) + '</div>' +
+        '</div>';
         });
     }
+    
+    html += '</div>';
+    document.getElementById('mailboxContent').innerHTML = html;
+}
 
-    let h = '<div style="padding:16px;background:#f8f5f0;min-height:100vh;">' +
-        '<div style="max-width:400px;margin:0 auto;">' +
-        '<div style="text-align:center;margin-bottom:20px;">' +
-        '<div style="font-size:22px;font-weight:600;color:#d4a8b8;">如果你知道，请给我答案</div>' +
-        '</div>' +
-        '<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid #f0ece8;">' +
-        '<div style="font-size:13px;color:#999;margin-bottom:8px;">✏️ 你在纠结什么？</div>' +
-        '<input type="text" id="choiceQuestionInput" placeholder="输入你的问题..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
-        '</div>' +
-        '<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;border:1px solid #f0ece8;">' +
-        '<div style="font-size:13px;color:#999;margin-bottom:8px;">📋 选项</div>' +
-        '<div id="choiceOptionsContainer">' +
-        '<div style="display:flex;gap:6px;margin-bottom:6px;width:100%;">' +
-        '<input type="text" class="choice-option-input" placeholder="选项A..." style="flex:1;width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
-        '</div>' +
-        '<div style="display:flex;gap:6px;margin-bottom:6px;width:100%;">' +
-        '<input type="text" class="choice-option-input" placeholder="选项B..." style="flex:1;width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;box-sizing:border-box;">' +
-        '</div>' +
-        '</div>' +
-        '<button onclick="addChoiceOption()" style="width:100%;padding:8px;border-radius:10px;border:2px dashed #e8e0d8;background:transparent;color:#999;font-size:13px;cursor:pointer;margin-bottom:10px;">➕ 添加更多选项</button>' +
-        '<button onclick="makeChoice()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:15px;cursor:pointer;font-weight:500;">💗 让秦彻帮我选</button>' +
-        '</div>' +
-        '<div id="choiceResultBox" style="' + (savedResult ? 'display:block;' : 'display:none;') + 'padding:16px;background:#fdf5f7;border-radius:12px;border:2px solid #d4a8b8;text-align:center;margin-bottom:12px;">' +
-        '<div style="font-size:13px;color:#999;margin-bottom:4px;">💗 秦彻的建议</div>' +
-        '<div id="choiceResultText" style="font-size:20px;color:#d4a8b8;font-weight:600;">' + savedResult + '</div>' +
-        '</div>' +
-        '<div style="background:#fff;border-radius:16px;padding:16px;border:1px solid #f0ece8;">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
-        '<span style="font-size:13px;color:#999;">📜 历史记录</span>' +
-        '<button onclick="clearChoiceHistory()" style="padding:2px 12px;border-radius:12px;background:#f5f5f5;color:#999;border:none;font-size:11px;cursor:pointer;">清空</button>' +
-        '</div>' +
-        hh +
-        '</div>' +
-        '</div>' +
+var mailFilter = 'all';
+function setMailFilter(f) {
+    mailFilter = f;
+    renderMailboxMain();
+}
+
+function getExpectHint() {
+    if (mailState.status === 'waiting') {
+        return '他在回信路上时：压缩为 2–4 小时 · 你未写信时：他隔天主动来一封';
+    }
+    if (mailState.accelerated) {
+        return '冷却中，明天再来';
+    }
+    return '点击催他，回信从 12–24 小时缩到 2–4 小时';
+}
+
+// ===== 写信 =====
+function openWriteLetter() {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = '<div style="background:#fff;border-radius:16px;padding:20px;width:90%;max-width:380px;max-height:80vh;display:flex;flex-direction:column;">' +
+    '<div style="font-size:16px;font-weight:600;color:#333;margin-bottom:4px;">写一封</div>' +
+    '<div style="font-size:11px;color:#999;margin-bottom:12px;">见字如晤，开头已替你写好</div>' +
+    '<textarea id="letterTextarea" placeholder="写点什么…（300字以内）" maxlength="300" style="flex:1;border:1px solid #f0ece8;border-radius:12px;padding:12px;font-size:14px;line-height:1.8;resize:none;outline:none;box-sizing:border-box;min-height:150px;color:#333;"></textarea>' +
+    '<div style="display:flex;gap:10px;margin-top:16px;">' +
+    '<button id="letterCancel" style="flex:1;padding:10px;border-radius:10px;border:1px solid #ddd;background:#f5f5f5;color:#666;font-size:14px;cursor:pointer;">取消</button>' +
+    '<button id="letterSend" style="flex:1;padding:10px;border-radius:10px;border:none;background:#d4a8b8;color:#fff;font-size:14px;cursor:pointer;">寄出</button>' +
+    '</div></div>';
+    document.body.appendChild(overlay);
+    
+    document.getElementById('letterCancel').onclick = function() { overlay.remove(); };
+    document.getElementById('letterSend').onclick = async function() {
+        var text = document.getElementById('letterTextarea').value.trim();
+       if (!text) {
+    var emptyOverlay = document.createElement('div');
+    emptyOverlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    emptyOverlay.innerHTML = '<div style="background:#fff;border-radius:16px;padding:24px;width:280px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.2);">' +
+        '<div style="font-size:16px;font-weight:600;color:#333;margin-bottom:8px;">写点什么吧</div>' +
+        '<div style="font-size:14px;color:#666;margin-bottom:20px;">信件不能是空的</div>' +
+        '<button id="emptyOk" style="width:100%;padding:10px;border-radius:10px;border:none;background:#d4a8b8;color:#fff;font-size:14px;cursor:pointer;">知道了</button>' +
         '</div>';
-
-    document.getElementById('choiceContent').innerHTML = h;
-
-    if (savedResult) {
-        var rb = document.getElementById('choiceResultBox');
-        var rt = document.getElementById('choiceResultText');
-        if (rb) rb.style.display = 'block';
-        if (rt) rt.textContent = savedResult;
-    }
+    document.body.appendChild(emptyOverlay);
+    document.getElementById('emptyOk').onclick = function() { emptyOverlay.remove(); };
+    return;
 }
-function addChoiceOption() {
-    const container = document.getElementById('choiceOptionsContainer');
-    const count = container.querySelectorAll('.choice-option-input').length;
-    const label = String.fromCharCode(65 + count);
-    const row = document.createElement('div');
-    row.style.cssText = 'display:flex;gap:6px;margin-bottom:6px;';
-    row.innerHTML = '<input type="text" class="choice-option-input" placeholder="选项' + label + '..." style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #e8e0d8;">';
-    container.appendChild(row);
-    row.querySelector('input').focus();
+if (text.length > 300) {
+    var lenOverlay = document.createElement('div');
+    lenOverlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    lenOverlay.innerHTML = '<div style="background:#fff;border-radius:16px;padding:24px;width:280px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.2);">' +
+        '<div style="font-size:16px;font-weight:600;color:#333;margin-bottom:8px;">字数超限</div>' +
+        '<div style="font-size:14px;color:#666;margin-bottom:20px;">最多写300字哦</div>' +
+        '<button id="lenOk" style="width:100%;padding:10px;border-radius:10px;border:none;background:#d4a8b8;color:#fff;font-size:14px;cursor:pointer;">知道了</button>' +
+        '</div>';
+    document.body.appendChild(lenOverlay);
+    document.getElementById('lenOk').onclick = function() { lenOverlay.remove(); };
+    return;
 }
-async function makeChoice() {
-    const q = document.getElementById('choiceQuestionInput').value.trim();
-    const inputs = document.querySelectorAll('.choice-option-input');
-    const opts = [];
-    inputs.forEach(function(inp) {
-        const v = inp.value.trim();
-        if (v) opts.push(v);
-    });
 
-    if (!q) { alert('请输入问题'); return; }
-    if (opts.length < 2) { alert('至少填写2个选项'); return; }
-
-    const choice = opts[Math.floor(Math.random() * opts.length)];
-
-    const history = await dbGetAll('choiceHistory');
-    history.push({
-        id: Date.now() + Math.random() * 1000,
-        question: q,
-        choice: choice,
-        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-    });
-    await idbClear('choiceHistory');
-    for (const h of history) await dbPut('choiceHistory', h);
-
-    localStorage.setItem('choiceResult', choice);
-
-    document.getElementById('choiceQuestionInput').value = '';
-    document.querySelectorAll('.choice-option-input').forEach(function(inp) { inp.value = ''; });
-
-    renderChoicePage();
-
-    const rb = document.getElementById('choiceResultBox');
-    const rt = document.getElementById('choiceResultText');
-    if (rb) {
-        rb.style.display = 'block';
-        rt.textContent = choice;
-    }
+        
+        // 一天只能写一封
+        var letters = await dbGetAll('mailLetters');
+        var today = new Date().toDateString();
+        var sentToday = letters.filter(function(l) {
+            return l.direction === 'sent' && new Date(l.timestamp).toDateString() === today;
+        });
+        if (sentToday.length > 0) {
+    var warnOverlay = document.createElement('div');
+    warnOverlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    warnOverlay.innerHTML = '<div style="background:#fff;border-radius:16px;padding:24px;width:280px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.2);">' +
+        '<div style="font-size:16px;font-weight:600;color:#333;margin-bottom:8px;">明天再来</div>' +
+        '<div style="font-size:14px;color:#666;margin-bottom:20px;">今天已经写过了，明天再写吧</div>' +
+        '<button id="warnOk" style="width:100%;padding:10px;border-radius:10px;border:none;background:#d4a8b8;color:#fff;font-size:14px;cursor:pointer;">知道了</button>' +
+        '</div>';
+    document.body.appendChild(warnOverlay);
+    document.getElementById('warnOk').onclick = function() { warnOverlay.remove(); };
+    return;
 }
-async function deleteChoiceHistory(id) {
-    var history = await dbGetAll('choiceHistory');
-    history = history.filter(function(h) { return String(h.id) !== String(id); });
-    await idbClear('choiceHistory');
-    for (var i = 0; i < history.length; i++) {
-        await dbPut('choiceHistory', history[i]);
+        
+        var now = new Date();
+        var dateStr = now.getFullYear() + '.' + (now.getMonth()+1) + '.' + now.getDate();
+        
+        var newLetter = await dbPut('mailLetters', {
+            direction: 'sent',
+            content: text,
+            dateStr: dateStr,
+            timestamp: Date.now(),
+            read: true
+        });
+        
+        // 每封信独立等待回信
+        var pending = JSON.parse(await getCal('pendingReplies', '[]'));
+        pending.push({
+            letterId: newLetter,
+            replyAt: Date.now() + randHours(12, 24),
+            accelerated: false
+        });
+        await setCal('pendingReplies', JSON.stringify(pending));
+
+var verify = await getCal('pendingReplies', '[]');
+console.log('💾 写入后 pending:', verify);
+        
+        // 更新状态机（用于提示条显示最近的）
+        mailState.status = 'waiting';
+        mailState.replyAt = pending[pending.length - 1].replyAt;
+        await setCal('mailState', JSON.stringify(mailState));
+        
+        overlay.remove();
+        renderMailboxMain();
+        showToast(' 已寄出');
+    };
+}
+// ===== 打开信 =====
+async function openLetter(id) {
+    var letters = await dbGetAll('mailLetters') || [];
+    var letter = letters.find(function(l) { return String(l.id) === String(id); });
+    if (!letter) return;
+    
+    // 标记已读
+    if (letter.direction === 'received' && !letter.read) {
+        letter.read = true;
+        await dbPut('mailLetters', letter);
+        updateMailboxUnread();
     }
-    renderChoicePage();
+    
+    var isFromHim = letter.direction === 'received';
+    var toName = isFromHim ? '笑笑' : '秦彻';
+    var fromName = isFromHim ? '秦彻' : '笑笑';
+    
+    document.getElementById('mailboxContent').innerHTML =
+    '<div style="padding:16px;">' +
+    '<div style="font-size:11px;color:#9a9da2;letter-spacing:2px;margin-bottom:8px;">' + (isFromHim ? '收 · 来自秦彻' : '寄 · 致秦彻') + '</div>' +
+    '<div class="letter-paper">' +
+    '<div style="font-size:14px;color:#3a3c3f;margin-bottom:14px;padding-left:6px;">' + toName + '：</div>' +
+    '<div style="font-size:14px;line-height:2;color:#3a3c3f;padding-left:6px;white-space:pre-line;">见字如晤。\n\n' + letter.content + '</div>' +
+    '<div style="margin-top:20px;font-size:11px;color:#9a9da2;text-align:right;letter-spacing:.5px;">' + letter.dateStr + '　' + fromName + '</div>' +
+    '<div class="postmark">树心<br>邮筒</div>' +
+    '</div>' +
+ '<div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">' +
+'<button onclick="deleteMailLetter(\'' + letter.id + '\')" style="font-size:13px;color:#d4a8b8;background:#fff;border:1px solid #d4a8b8;border-radius:20px;padding:8px 22px;cursor:pointer;">删除</button>' +
+'<button onclick="renderMailboxMain()" style="font-size:13px;color:#fff;background:#d4a8b8;border:none;border-radius:20px;padding:8px 22px;cursor:pointer;">返回</button>' +
+'</div>' +
+'</div>';
+}
+
+async function deleteMailLetter(id) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = '<div style="background:#fff;border-radius:16px;padding:24px;width:280px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.2);">' +
+        '<div style="font-size:16px;font-weight:600;color:#333;margin-bottom:8px;">删除信件</div>' +
+        '<div style="font-size:14px;color:#666;margin-bottom:20px;">确定删除这封信吗？</div>' +
+        '<div style="display:flex;gap:10px;">' +
+        '<button id="delMailCancel" style="flex:1;padding:10px;border-radius:10px;border:1px solid #ddd;background:#f5f5f5;color:#666;font-size:14px;cursor:pointer;">取消</button>' +
+        '<button id="delMailConfirm" style="flex:1;padding:10px;border-radius:10px;border:none;background:#d4a8b8;color:#fff;font-size:14px;cursor:pointer;">删除</button>' +
+        '</div></div>';
+    document.body.appendChild(overlay);
+    
+    document.getElementById('delMailCancel').onclick = function() { overlay.remove(); };
+  document.getElementById('delMailConfirm').onclick = async function() {
+    overlay.remove();
+    var letters = await dbGetAll('mailLetters');
+    letters = letters.filter(function(l) { return String(l.id) !== String(id); });
+    await dbClear('mailLetters');
+    for (var i = 0; i < letters.length; i++) {
+        await dbPut('mailLetters', letters[i]);
+    }
+    renderMailboxMain();
     showToast('🗑 已删除');
+};
 }
 
-async function clearChoiceHistory() {
-    if (!confirm('确定清空所有记录？')) return;
-    await idbClear('choiceHistory');
-    renderChoicePage();
-    showToast('✅ 已清空');
+// ===== 加速回信 =====
+async function accelerateReply() {
+    var pending = JSON.parse(await getCal('pendingReplies', '[]'));
+    
+    if (pending.length > 0) {
+        if (mailState.accelerated) { showToast('冷却中，明天再来'); return; }
+        if (Date.now() < mailState.cooldownUntil) { showToast('冷却中'); return; }
+        
+        pending.forEach(function(p) {
+            p.replyAt = Date.now() + randHours(2, 4);
+            p.accelerated = true;
+        });
+        await setCal('pendingReplies', JSON.stringify(pending));
+        
+        mailState.accelerated = true;
+        mailState.cooldownUntil = Date.now() + 24 * 3600 * 1000;
+        mailState.status = 'waiting';
+        mailState.replyAt = pending[pending.length - 1].replyAt;
+        await setCal('mailState', JSON.stringify(mailState));
+        
+        renderMailboxMain();
+        showToast(' 他提笔回信了');
+        return;
+    }
+    
+    // 没信在路上：触发主动来信
+    var lastTrigger = parseInt(await getCal('lastActiveMailDate', '0'));
+    var today = new Date().toDateString();
+    if (new Date(parseInt(lastTrigger)).toDateString() === today) {
+        showToast('今天已经期待过了，明天再来');
+        return;
+    }
+    
+    var now = new Date();
+    var hour = now.getHours();
+    if (hour < 9 || hour > 21) {
+        showToast('现在太晚了，他睡了');
+        return;
+    }
+    
+    // 隔天 9-21 点随机触发
+    var triggerTime = new Date(now);
+    triggerTime.setDate(triggerTime.getDate() + 1);
+    triggerTime.setHours(9 + Math.floor(Math.random() * 12), Math.floor(Math.random() * 60), 0, 0);
+    
+    await setCal('lastActiveMailDate', String(Date.now()));
+    
+    showToast(' 他会在明天想起你');
 }
-// ============ 塔罗占卜（秦彻翻牌） ============
-var tarotState = 'idle';
+
+function randHours(min, max) {
+    return (min + Math.random() * (max - min)) * 3600 * 1000; // 正式：小时级
+}
+
+// ===== 检查回信 =====
+async function checkMailReply() {
+    var pending = JSON.parse(await getCal('pendingReplies', '[]'));
+    if (pending.length === 0) return;
+    
+    var groupStr = await getCal('mailGroups', '[]');
+    var groups = JSON.parse(groupStr);
+    if (!groups || groups.length === 0) return;
+    
+    var cards = await dbGetAll('wordcards');
+    var pool = cards.filter(function(c) {
+        return groups.some(function(g) { return c.groupName === g || c.groupId === g; }) &&
+            c.content && c.content !== '__GROUP_PLACEHOLDER__' && c.content.length > 1;
+    });
+    if (pool.length === 0) return;
+    
+    var newPending = [];
+    var hasNew = false;
+    
+    for (var i = 0; i < pending.length; i++) {
+        var p = pending[i];
+        if (Date.now() >= p.replyAt) {
+            var count = Math.min(Math.floor(Math.random() * 29) + 2, pool.length);
+            var shuffled = pool.sort(function() { return Math.random() - 0.5; });
+            var selected = shuffled.slice(0, count);
+            var body = selected.map(function(c) { return c.content; }).join('\n');
+            
+            var now = new Date();
+            var dateStr = now.getFullYear() + '.' + (now.getMonth()+1) + '.' + now.getDate();
+            
+            await dbPut('mailLetters', {
+                direction: 'received',
+                content: body,
+                dateStr: dateStr,
+                timestamp: Date.now(),
+                read: false
+            });
+            hasNew = true;
+        } else {
+            newPending.push(p);
+        }
+    }
+    
+    await setCal('pendingReplies', JSON.stringify(newPending));
+    
+    if (newPending.length === 0) {
+        mailState.status = 'idle';
+        mailState.accelerated = false;
+        await setCal('mailState', JSON.stringify(mailState));
+    } else {
+        mailState.status = 'waiting';
+        mailState.replyAt = newPending[newPending.length - 1].replyAt;
+        await setCal('mailState', JSON.stringify(mailState));
+    }
+    
+    if (hasNew) {
+        updateMailboxUnread();
+        showToast(' 有一封新来信');
+    }
+}
+
+// ===== 未读红点 =====
+async function updateMailboxUnread() {
+    var letters = await dbGetAll('mailLetters') || [];
+    var hasUnread = letters.some(function(l) { return l.direction === 'received' && !l.read; });
+    var dot = document.getElementById('mailUnreadDot');
+    if (dot) dot.style.display = hasUnread ? 'block' : 'none';
+}
+
+
+// ============ 塔罗占卜（新版完整流程） ============
+var tarotState = {
+    context: 'love',
+    spreadCount: 1,
+    question: '',
+    cards: [],
+    response: '',
+    isAllow: false
+};
 
 function openTarotPage() {
     showPage('tarotPage');
-    renderTarotPage();
+    renderTarotMain();
 }
 
-async function renderTarotPage() {
-    // ===== 读取历史记录 =====
-    var history = await dbGetAll('tarotHistory') || [];
-    history.sort(function(a, b) { return b.timestamp - a.timestamp; });
-    var recentHistory = history.slice(0, 10);
-
-   var historyHtml = '';
-if (recentHistory.length === 0) {
-    historyHtml = '<div style="color:#ccc;text-align:center;padding:12px 0;font-size:13px;">暂无占卜记录</div>';
-} else {
-    recentHistory.forEach(function(item) {
-        var time = new Date(item.timestamp).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-        historyHtml += '<div style="padding:6px 0;border-bottom:1px solid #f5f0eb;font-size:13px;color:#555;position:relative;">' +
-    '<div style="word-break:break-all;margin-bottom:4px;text-align:left;padding-right:24px;">' + item.question + '</div>' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-        '<span style="color:#d4a8b8;font-weight:500;text-align:left;">🃏 ' + item.card + '</span>' +
-        '<span style="color:#ccc;font-size:11px;">' + time + '</span>' +
+// 塔罗主页：两个入口
+function renderTarotMain() {
+    document.getElementById('tarotContent').innerHTML =
+    '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">' +
+    '<div style="width:100%;max-width:400px;">' +
+   '<div style="font-size:20px;font-weight:600;color:#333;margin:20px 0 28px;text-align:center;letter-spacing:1px;">以光为引 · 链接你我</div>' +
+    '<div style="display:flex;flex-direction:column;gap:12px;">' +
+    '<div onclick="showTarotAllowDeny()" style="background:#fff;border:1px solid #f0ece8;border-radius:16px;padding:20px 16px;cursor:pointer;text-align:center;">' +
+    '<div style="font-size:15px;font-weight:500;">占卜</div>' +
+    '<div style="font-size:11px;color:#999;margin-top:4px;">征求秦彻的意见</div>' +
     '</div>' +
-    '<span onclick="deleteTarotHistory(' + item.id + ')" style="position:absolute;top:8px;right:0;cursor:pointer;color:#d4a8b8;font-size:14px;">✕</span>' +
-'</div>';
+    '<div onclick="renderTarotQuotes()" style="background:#fff;border:1px solid #f0ece8;border-radius:16px;padding:20px 16px;cursor:pointer;text-align:center;">' +
+    '<div style="font-size:15px;font-weight:500;">语录</div>' +
+    '<div style="font-size:11px;color:#999;margin-top:4px;">翻牌后存下的记录</div>' +
+    '</div></div></div></div>';
+}
+
+// 征求秦彻意见
+function showTarotAllowDeny() {
+    var pool = TAROT_ALLOW_DENY.qinche;
+    tarotState.isAllow = Math.random() < 0.5;
+    var response = tarotState.isAllow ? pool.allow[Math.floor(Math.random() * pool.allow.length)] : pool.deny[Math.floor(Math.random() * pool.deny.length)];
+    tarotState.response = response;
+    
+    document.getElementById('tarotContent').innerHTML =
+    '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">' +
+    '<div style="width:100%;max-width:400px;text-align:center;">' +
+    '<div style="font-size:20px;font-weight:600;color:#333;margin:20px 0 28px;text-align:center;letter-spacing:1px;">以光为引 · 链接你我</div>' +
+    '<div style="background:#fff;border:1px solid #f0ece8;border-radius:16px;padding:24px;margin-bottom:20px;">' +
+    '<div style="font-size:15px;color:#d4a8b8;line-height:2;font-style:italic;">秦彻：“' + response + '”</div>' +
+    '</div>' +
+    (tarotState.isAllow ?
+    '<button onclick="showTarotContext()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:15px;cursor:pointer;">进入占卜</button>' :
+    '<button onclick="renderTarotMain()" style="width:100%;padding:12px;border-radius:12px;background:#f5f0eb;color:#666;border:none;font-size:15px;cursor:pointer;">返回</button>') +
+    '</div></div>';
+}
+
+// 占卜设置：分区+牌阵+问题
+function showTarotContext() {
+    document.getElementById('tarotContent').innerHTML =
+    '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">' +
+    '<div style="width:100%;max-width:400px;">' +
+    '<div style="font-size:20px;font-weight:600;color:#333;margin:20px 0 28px;text-align:center;letter-spacing:1px;">选择你关心的方向</div>' +
+    '<div style="display:flex;gap:8px;margin-bottom:20px;">' +
+    '<div onclick="selectTarotContext(\'love\')" data-ctx="love" style="flex:1;padding:14px 6px;background:#fff;border:2px solid #d4a8b8;border-radius:12px;text-align:center;cursor:pointer;">' +
+    '<div style="font-size:10px;color:#999;letter-spacing:2px;">AFFECTION</div>' +
+    '<div style="font-size:14px;font-weight:500;margin-top:4px;">感情人际</div></div>' +
+    '<div onclick="selectTarotContext(\'career\')" data-ctx="career" style="flex:1;padding:14px 6px;background:#fff;border:1px solid #f0ece8;border-radius:12px;text-align:center;cursor:pointer;">' +
+    '<div style="font-size:10px;color:#999;letter-spacing:2px;">REALITY</div>' +
+    '<div style="font-size:14px;font-weight:500;margin-top:4px;">现实发展</div></div>' +
+    '<div onclick="selectTarotContext(\'self\')" data-ctx="self" style="flex:1;padding:14px 6px;background:#fff;border:1px solid #f0ece8;border-radius:12px;text-align:center;cursor:pointer;">' +
+    '<div style="font-size:10px;color:#999;letter-spacing:2px;">WITHIN</div>' +
+    '<div style="font-size:14px;font-weight:500;margin-top:4px;">内心日常</div></div>' +
+    '</div>' +
+    '<div style="font-size:18px;font-weight:600;color:#333;margin-bottom:16px;">选择牌阵</div>' +
+    '<div style="display:flex;gap:8px;margin-bottom:20px;">' +
+    '<div onclick="selectTarotSpread(1)" data-spread="1" style="flex:1;padding:14px 6px;background:#fff;border:2px solid #d4a8b8;border-radius:12px;text-align:center;cursor:pointer;">' +
+    '<div style="font-size:14px;font-weight:500;">单张</div></div>' +
+    '<div onclick="selectTarotSpread(3)" data-spread="3" style="flex:1;padding:14px 6px;background:#fff;border:1px solid #f0ece8;border-radius:12px;text-align:center;cursor:pointer;">' +
+    '<div style="font-size:14px;font-weight:500;">三张</div></div>' +
+    '</div>' +
+    '<textarea id="tarotQuestionInput" placeholder="想问什么？（可不填）" style="width:100%;height:60px;padding:10px;border:1px solid #f0ece8;border-radius:10px;font-size:13px;background:#fff;resize:vertical;box-sizing:border-box;margin-bottom:20px;"></textarea>' +
+    '<button onclick="renderTarotDeck()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:15px;cursor:pointer;">🃏 翻牌</button>' +
+    '</div></div>';
+}
+
+function selectTarotContext(context) {
+    tarotState.context = context;
+    document.querySelectorAll('[data-ctx]').forEach(function(b) {
+        b.style.border = b.dataset.ctx === context ? '2px solid #d4a8b8' : '1px solid #f0ece8';
     });
 }
 
-    var html = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">' +
-        '<div style="width:100%;max-width:400px;text-align:center;">' +
-
-'<div class="tarot-card-refined-v2">' + getTarotCardSVG() + '</div>'+
-
-        '<div style="font-size:14px;font-weight:600;color:#333;margin-bottom:16px;">以光为引  ·   链接你我</div>' +
-        // 呼唤区域
-        '<div id="tarotCallArea" style="background:#fff;border-radius:16px;padding:20px;border:1px solid #f0ece8;margin-bottom:12px;">' +
-        '<div id="tarotCallStatus" style="font-size:14px;color:#999;margin-bottom:12px;">💬 呼唤秦彻，让他为你翻牌</div>' +
-        '<button id="tarotCallBtn" onclick="tarotCall()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:15px;cursor:pointer;font-weight:500;">🌟 呼唤秦彻</button>' +
-        '<div id="tarotResponseArea" style="display:none;margin-top:12px;">' +
-        '<div id="tarotResponseText" style="font-size:15px;color:#d4a8b8;font-weight:500;padding:8px 0;font-style:italic;"></div>' +
-        '<div style="display:flex;gap:8px;margin-top:8px;">' +
-        '<button id="tarotAskBtn" onclick="tarotShowQuestion()" style="flex:1;padding:10px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;">💬 提问</button>' +
-        '<button onclick="tarotEnd()" style="flex:1;padding:10px;border-radius:12px;background:#f0f0f0;color:#666;border:none;font-size:14px;cursor:pointer;">结束</button>' +
-        '</div>' +
-        '</div>' +
-        '</div>' +
-        // 提问区域（默认隐藏）
-        '<div id="tarotQuestionArea" style="display:none;background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-bottom:12px;">' +
-        '<textarea id="tarotQuestionInput" placeholder="输入你想问的问题..." style="width:100%;padding:10px;border-radius:10px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;min-height:60px;resize:none;outline:none;box-sizing:border-box;"></textarea>' +
-        '<button onclick="tarotDraw()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:15px;cursor:pointer;font-weight:500;margin-top:8px;">🃏 翻牌</button>' +
-        '<button onclick="tarotBackToCall()" style="width:100%;padding:8px;border-radius:12px;background:transparent;color:#999;border:none;font-size:13px;cursor:pointer;margin-top:4px;">← 返回</button>' +
-        '</div>' +
-        // 翻牌结果区域
-        '<div id="tarotResultArea" style="display:none;background:#fff;border-radius:16px;padding:20px;border:2px solid #d4a8b8;margin-bottom:12px;min-height:150px;">' +
-        '<div style="font-size:13px;color:#999;margin-bottom:8px;">🃏 翻牌结果</div>' +
-        '<div id="tarotCardDisplay" style="font-size:24px;font-weight:600;color:#d4a8b8;padding:12px 0;"></div>' +
-        '<div style="display:flex;gap:8px;margin-top:12px;">' +
-        '<button onclick="tarotAgain()" style="flex:1;padding:10px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;">🔄 再问一次</button>' +
-        '<button onclick="tarotEnd()" style="flex:1;padding:10px;border-radius:12px;background:#f0f0f0;color:#666;border:none;font-size:14px;cursor:pointer;">结束</button>' +
-        '</div>' +
-        '</div>' +
-        // 历史记录
-        '<div style="background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #f0ece8;margin-top:12px;width:100%;">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
-        '<div style="font-size:13px;color:#999;">📜 历史记录</div>' +
-        '<button onclick="tarotClearHistory()" style="padding:2px 12px;border-radius:12px;background:#f5f5f5;color:#999;border:none;font-size:11px;cursor:pointer;">清空</button>' +
-        '</div>' +
-        '<div id="tarotHistoryList">' + historyHtml + '</div>' +
-        '</div>' +
-        '</div>' +
-        '</div>';
-
-    document.getElementById('tarotContent').innerHTML = html;
-    tarotState = 'idle';
+function selectTarotSpread(count) {
+    tarotState.spreadCount = count;
+    document.querySelectorAll('[data-spread]').forEach(function(b) {
+        b.style.border = b.dataset.spread == count ? '2px solid #d4a8b8' : '1px solid #f0ece8';
+    });
 }
 
-function getTarotCardSVG() {
-    return '<svg viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">' +
-        '<defs><linearGradient id="cardPatternColor" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#e8c4d4"/><stop offset="100%" stop-color="#c98a9e"/></linearGradient>' +
-        '<filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>' +
-        '<g transform="translate(50, 30)"><path d="M -30 -10 Q 0 -30 30 -10" fill="none" stroke="url(#cardPatternColor)" stroke-width="1.5" opacity="0.8"/><path d="M -25 -5 Q 0 -20 25 -5" fill="none" stroke="url(#cardPatternColor)" stroke-width="1" opacity="0.6"/><polygon points="-35,-15 -30,-5 -38,-10" fill="url(#cardPatternColor)" opacity="0.9"/><polygon points="35,-15 30,-5 42,-10" fill="url(#cardPatternColor)" opacity="0.9"/><polygon points="0,-35 5,-20 -5,-20" fill="url(#cardPatternColor)"/><line x1="0" y1="-35" x2="0" y2="-20" stroke="url(#cardPatternColor)" stroke-width="1"/></g>' +
-        '<g transform="translate(50, 75)"><g stroke="url(#cardPatternColor)" stroke-width="0.6" opacity="0.6"><line x1="0" y1="-30" x2="0" y2="-45"/><line x1="0" y1="30" x2="0" y2="45"/><line x1="-30" y1="0" x2="-45" y2="0"/><line x1="30" y1="0" x2="45" y2="0"/><line x1="-21" y1="-21" x2="-30" y2="-30"/><line x1="21" y1="-21" x2="30" y2="-30"/><line x1="-21" y1="21" x2="-30" y2="30"/><line x1="21" y1="21" x2="30" y2="30"/></g>' +
-        '<circle cx="0" cy="0" r="22" fill="none" stroke="url(#cardPatternColor)" stroke-width="1"/><circle cx="0" cy="0" r="15" fill="none" stroke="url(#cardPatternColor)" stroke-width="0.8"/>' +
-        '<polygon points="0,-12 3,-3 12,0 3,3 0,12 -3,3 -12,0 -3,-3" fill="url(#cardPatternColor)" opacity="0.9" filter="url(#glow)"/>' +
-        '<path d="M 0 -4 A 4 4 0 1 1 0 4 A 3 3 0 1 0 0 -4 Z" fill="#fffafc"/></g>' +
-        '<g transform="translate(50, 125)" fill="none" stroke="url(#cardPatternColor)" stroke-width="1"><path d="M -25 0 L -20 15 L 0 25 L 20 15 L 25 0" fill="url(#cardPatternColor)" opacity="0.1" stroke-opacity="0.8"/><line x1="-15" y1="5" x2="-10" y2="15"/><line x1="15" y1="5" x2="10" y2="15"/><line x1="0" y1="5" x2="0" y2="20"/><g transform="translate(-15, 25)"><line x1="0" y1="0" x2="0" y2="10" stroke-width="0.8"/><circle cx="0" cy="3" r="1.5" fill="url(#cardPatternColor)"/><circle cx="0" cy="8" r="1" fill="url(#cardPatternColor)" opacity="0.8"/><polygon points="0,12 -3,15 0,18 3,15" fill="url(#cardPatternColor)" opacity="0.8"/></g><g transform="translate(15, 25)"><line x1="0" y1="0" x2="0" y2="10" stroke-width="0.8"/><circle cx="0" cy="3" r="1.5" fill="url(#cardPatternColor)"/><circle cx="0" cy="8" r="1" fill="url(#cardPatternColor)" opacity="0.8"/><polygon points="0,12 -3,15 0,18 3,15" fill="url(#cardPatternColor)" opacity="0.8"/></g></g>' +
-        '<g fill="url(#cardPatternColor)" opacity="0.7"><polygon points="10,10 11,13 14,13 11.5,15 12.5,18 10,16 7.5,18 8.5,15 6,13 9,13"/><polygon points="90,10 91,13 94,13 91.5,15 92.5,18 90,16 87.5,18 88.5,15 86,13 89,13"/><polygon points="10,140 11,143 14,143 11.5,145 12.5,148 10,146 7.5,148 8.5,145 6,143 9,143"/><polygon points="90,140 91,143 94,143 91.5,145 92.5,148 90,146 87.5,148 88.5,145 86,143 89,143"/></g></svg>';
+// 牌堆背面
+function renderTarotDeck() {
+    tarotState.question = document.getElementById('tarotQuestionInput')?.value?.trim() || '';
+    document.getElementById('tarotContent').innerHTML =
+    '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">' +
+    '<div style="width:100%;max-width:400px;text-align:center;">' +
+    '<div class="tarot-deck-area">' +
+    '<div class="tarot-deck-shadow s3"></div>' +
+    '<div class="tarot-deck-shadow s2"></div>' +
+    '<div class="tarot-deck-shadow s1"></div>' +
+    '<div class="tarot-deck-top" onclick="doTarotFlip()">' +
+    '<div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;">' +
+    '<svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#3A342D" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="width:56px;height:56px;opacity:.3;">' +
+    '<path d="M26 8 L40 20 L40 42 L12 42 L12 20 Z"/>' +
+    '<path d="M18 42 L18 30 L34 30 L34 42"/>' +
+    '<path d="M22 30 L22 24 L30 24 L30 30"/>' +
+    '</svg>' +
+    '<span style="font-size:34px;font-weight:600;color:#3A342D;opacity:.32;line-height:1;">sylus</span>' +
+    '<span style="font-size:8px;letter-spacing:4px;color:#8C8273;opacity:.5;">TAROT</span>' +
+    '</div></div></div>' +
+    '<div style="font-size:11px;color:#999;margin-top:8px;">点击牌堆翻开命运</div>' +
+    '</div></div>';
 }
 
-// ============ 塔罗交互函数（全部从字卡取） ============
-
-async function tarotCall() {
-    var groupName = await getCal('tarotGroup', '');
-    if (!groupName) {
-        showToast('⚠️ 请先在「模块设置」中选择翻牌分组');
-        return;
-    }
-
-    var btn = document.getElementById('tarotCallBtn');
-    if (btn) {
-        btn.disabled = true;
-        btn.textContent = '稍等...';
-    }
-
-    var statusDiv = document.getElementById('tarotCallStatus');
-    if (statusDiv) {
-        statusDiv.textContent = '🔮 秦彻正在赶来...';
-    }
-
-    await new Promise(function(r) { setTimeout(r, 2000); });
-
-    var response = await getRandomFromGroup(groupName);
-    if (!response) {
-        showToast('⚠️ 字卡分组为空，请先添加字卡');
-        if (btn) {
-            btn.disabled = false;
-            btn.textContent = '🌟 呼唤秦彻';
-        }
-        if (statusDiv) statusDiv.textContent = '💬 字卡分组是空的…';
-        return;
-    }
-
-    var responseText = document.getElementById('tarotResponseText');
-    var responseArea = document.getElementById('tarotResponseArea');
-    var callBtn = document.getElementById('tarotCallBtn');
-
-    if (responseText) responseText.textContent = '💬 ' + response;
-    if (responseArea) responseArea.style.display = 'block';
-    if (callBtn) callBtn.style.display = 'none';
-    if (statusDiv) statusDiv.textContent = '✨ 秦彻回应了';
-
-    if (btn) {
-        btn.disabled = false;
-        btn.textContent = '🌟 呼唤秦彻';
-    }
-
-    tarotState = 'called';
-}
-
-function tarotShowQuestion() {
-    var area = document.getElementById('tarotQuestionArea');
-    if (area) area.style.display = 'block';
-    var input = document.getElementById('tarotQuestionInput');
-    if (input) input.focus();
-    tarotState = 'asking';
-}
-
-function tarotBackToCall() {
-    var area = document.getElementById('tarotQuestionArea');
-    if (area) area.style.display = 'none';
-    var input = document.getElementById('tarotQuestionInput');
-    if (input) input.value = '';
-    tarotState = 'called';
-}
-
-async function tarotDraw() {
-    var groupName = await getCal('tarotGroup', '');
-    if (!groupName) {
-        showToast('⚠️ 请先在「模块设置」中选择翻牌分组');
-        return;
-    }
-
-    var input = document.getElementById('tarotQuestionInput');
-    var question = input ? input.value.trim() : '';
-    if (!question) {
-        showToast('请输入问题');
-        return;
-    }
-
-    var questionArea = document.getElementById('tarotQuestionArea');
-    var resultArea = document.getElementById('tarotResultArea');
-    var cardDisplay = document.getElementById('tarotCardDisplay');
-
-    if (questionArea) questionArea.style.display = 'none';
-    if (resultArea) resultArea.style.display = 'block';
-    if (cardDisplay) cardDisplay.textContent = '🃏 翻牌中...';
-
-    await new Promise(function(r) { setTimeout(r, 1500); });
-
-    // 随机 1~3 张牌
-    var cardCount = Math.floor(Math.random() * 3) + 1;
+// 执行翻牌
+function doTarotFlip() {
+    var count = tarotState.spreadCount;
     var cards = [];
-    for (var i = 0; i < cardCount; i++) {
-        var card = await getRandomFromGroup(groupName);
-        if (card) cards.push(card);
+    var used = new Set();
+    for (var i = 0; i < count; i++) {
+        var card;
+        do {
+            card = TAROT_CARDS[Math.floor(Math.random() * TAROT_CARDS.length)];
+        } while (used.has(card.id) && used.size < TAROT_CARDS.length);
+        used.add(card.id);
+        cards.push({ card: card, isReversed: Math.random() < 0.3 });
     }
+    tarotState.cards = cards;
+    renderTarotResult();
+}
+// 翻牌结果
+function renderTarotResult() {
+    var ctxLabels = {love:'感情人际', career:'现实发展', self:'内心日常'};
+    var ctx = ctxLabels[tarotState.context] || '感情人际';
+    var positions = tarotState.spreadCount === 3 ? ['过去','现在','未来'] : [''];
     
-    if (cards.length === 0) {
-        showToast('⚠️ 字卡分组为空，请先添加字卡');
-        if (cardDisplay) cardDisplay.textContent = '🃏 暂无字卡';
-        return;
-    }
+    var cardsHtml = tarotState.cards.map(function(item, idx) {
+        var card = item.card;
+        var isRev = item.isReversed;
+        var data = isRev ? card.reversed : card.upright;
+        var contextText = data[tarotState.context] || data.summary;
+        var badge = isRev ? '<div class="tarot-orient-badge">逆位</div>' : '';
+        
+        return '<div class="tarot-card-wrapper" style="flex:0 0 260px;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;">' +
+            (positions[idx] ? '<div style="font-size:10px;color:#999;letter-spacing:2px;">' + positions[idx] + '</div>' : '') +
+            '<div style="width:260px;height:440px;position:relative;background:#F2EBDD;border-radius:10px 12px 9px 11px;border:1px solid rgba(120,100,80,.12);box-shadow:0 4px 14px rgba(60,50,40,.12);display:flex;flex-direction:column;overflow:hidden;">' +
+            '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 16px;position:relative;border-bottom:1px solid rgba(120,100,80,.18);">' +
+            '<div style="position:absolute;top:12px;left:14px;font-size:10px;letter-spacing:2px;color:#8C8273;">' + card.rank + ' · ' + card.suit.toUpperCase() + '</div>' +
+            badge +
+            '<div style="width:78%;">' + getTarotCardSvg(card) + '</div>' +
+            '<div style="margin-top:8px;font-size:15px;font-weight:600;letter-spacing:4px;color:#3A342D;">' + card.name + '</div>' +
+            '</div>' +
+            '<div style="height:64px;display:flex;align-items:center;justify-content:center;padding:0 18px;text-align:center;font-size:12px;line-height:1.5;color:#5C5448;">' + data.summary + '</div>' +
+            '</div>' +
+            '<div class="tarot-strip" style="width:260px;padding:10px 16px 12px;text-align:center;background:rgba(242,235,221,.55);border:1px dashed rgba(140,100,80,.22);border-radius:8px;">' +
+            '<div style="font-size:8px;letter-spacing:3px;color:#8C8273;">' + ctx + '</div>' +
+            '<div style="font-size:13px;color:#3A342D;line-height:1.6;margin-top:4px;">' + contextText + '</div>' +
+            '</div></div>';
+    }).join('');
+    
+    var spreadHtml = tarotState.spreadCount > 1 ?
+        '<div style="display:flex;overflow-x:auto;gap:16px;padding:8px 0;scroll-snap-type:x mandatory;">' + cardsHtml + '</div>' :
+        '<div style="display:flex;flex-direction:column;align-items:center;">' + cardsHtml + '</div>';
+    
+    document.getElementById('tarotContent').innerHTML =
+    '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">' +
+    '<div style="width:100%;max-width:400px;">' +
+    spreadHtml +
+    '<div style="text-align:center;margin-top:16px;">' +
+    '<button onclick="submitTarotToRole()" style="padding:12px 36px;border-radius:24px;font-size:14px;background:#d4a8b8;color:#fff;border:none;cursor:pointer;">递给他看</button>' +
+    '</div></div></div>';
+}
 
-    if (cardDisplay) cardDisplay.textContent = '🃏 ' + cards.join('  ');
+// 递给他看 → 回应页
+async function submitTarotToRole() {
+    var pool = TAROT_RESPONSE_POOL.qinche.concat(TAROT_RESPONSE_POOL.shared);
+    tarotState.response = pool[Math.floor(Math.random() * pool.length)];
+    
+    var ctxLabels = {love:'感情人际', career:'现实发展', self:'内心日常'};
+    var ctx = ctxLabels[tarotState.context] || '感情人际';
+    
+    var cardsText = tarotState.cards.map(function(item, idx) {
+        var card = item.card;
+        var isRev = item.isReversed;
+        var data = isRev ? card.reversed : card.upright;
+        var position = tarotState.spreadCount === 3 ? ['过去','现在','未来'][idx] : '';
+        return (position ? position + '：' : '') + card.name + ' · ' + (isRev ? '逆位' : '正位') + '｜' + data.summary + '｜【' + ctx + '】' + (data[tarotState.context] || data.summary);
+    }).join('\n');
+    
+    document.getElementById('tarotContent').innerHTML =
+    '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">' +
+    '<div style="width:100%;max-width:400px;">' +
+    '<div style="background:#fff;border:1px solid #f0ece8;border-radius:16px;padding:16px;margin-bottom:16px;">' +
+    '<div style="font-size:11px;color:#999;margin-bottom:8px;">' + new Date().toLocaleDateString('zh-CN') + ' ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + '</div>' +
+    (tarotState.question ? '<div style="font-size:13px;color:#333;margin-bottom:8px;">问题：' + tarotState.question + '</div>' : '') +
+    '<div style="font-size:13px;color:#555;white-space:pre-wrap;line-height:1.8;">' + cardsText + '</div>' +
+    '</div>' +
+    '<div style="text-align:center;padding:16px;">' +
+    '<div style="font-size:15px;color:#d4a8b8;line-height:2;font-style:italic;">秦彻：“' + tarotState.response + '”</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:10px;justify-content:center;margin-top:16px;">' +
+    '<button onclick="saveTarotQuote()" style="padding:10px 24px;border-radius:20px;font-size:13px;background:#d4a8b8;color:#fff;border:none;cursor:pointer;">存为语录</button>' +
+    '<button onclick="renderTarotMain()" style="padding:10px 24px;border-radius:20px;font-size:13px;border:1px solid #f0ece8;color:#999;background:#fff;cursor:pointer;">不存，再次占卜</button>' +
+    '</div></div></div>';
+}
 
+// 存语录
+async function saveTarotQuote() {
+    var cardNames = tarotState.cards.map(function(item) {
+        return item.card.name + (item.isReversed ? '（逆）' : '');
+    }).join('、');
+    
     await dbPut('tarotHistory', {
-        question: question,
-        card: cards.join('  '),
+        question: tarotState.question || '未写问题',
+        card: cardNames,
+        response: tarotState.response,
+        context: tarotState.context,
+        spreadCount: tarotState.spreadCount,
         timestamp: Date.now()
     });
-
-    refreshTarotHistory();
-    tarotState = 'result';
+    
+    showToast('✅ 已存入语录');
+    renderTarotQuotes();
 }
 
-function tarotAgain() {
-    var resultArea = document.getElementById('tarotResultArea');
-    var questionArea = document.getElementById('tarotQuestionArea');
-    var input = document.getElementById('tarotQuestionInput');
-
-    if (resultArea) resultArea.style.display = 'none';
-    if (questionArea) questionArea.style.display = 'block';
-    if (input) {
-        input.value = '';
-        input.focus();
+// 语录页
+async function renderTarotQuotes() {
+    var quotes = await dbGetAll('tarotHistory') || [];
+    quotes.sort(function(a,b) { return b.timestamp - a.timestamp; });
+    
+    var html = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">' +
+    '<div style="width:100%;max-width:400px;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
+  '<div style="font-size:18px;font-weight:600;color:#333;">语录</div>' +
+'<button onclick="renderTarotMain()" style="padding:8px 20px;border-radius:20px;background:#d4a8b8;color:#fff;border:none;font-size:13px;cursor:pointer;">← 返回</button>' +
+    '</div>';
+    
+    if (quotes.length === 0) {
+        html += '<div style="text-align:center;color:#ccc;padding:60px;">暂无语录</div>';
+    } else {
+        quotes.forEach(function(q) {
+            var ctxLabels = {love:'感情人际', career:'现实发展', self:'内心日常'};
+            var ctx = ctxLabels[q.context] || '';
+            var dateStr = new Date(q.timestamp).toLocaleDateString('zh-CN') + ' ' + new Date(q.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+            
+            html += '<div style="background:#fff;border:1px solid #f0ece8;border-radius:16px;padding:14px;margin-bottom:12px;">' +
+            '<div style="display:flex;justify-content:space-between;font-size:10px;color:#999;margin-bottom:6px;">' +
+            '<span>' + dateStr + '</span>' +
+            '<span>' + ctx + '</span>' +
+            '</div>' +
+            (q.question ? '<div style="font-size:13px;color:#333;margin-bottom:4px;">问题：' + q.question + '</div>' : '') +
+            '<div style="font-size:12px;color:#555;margin-bottom:4px;">🃏 ' + q.card + '</div>' +
+            '<div style="font-size:13px;color:#d4a8b8;font-style:italic;">回应：“' + q.response + '”</div>' +
+            '<div style="text-align:right;margin-top:8px;">' +
+            '<span onclick="deleteTarotQuote(\'' + q.id + '\')" style="font-size:11px;color:#d4a8b8;cursor:pointer;">删除</span>' +
+            '</div></div>';
+        });
     }
-    tarotState = 'asking';
+    
+    html += '</div></div>';
+    document.getElementById('tarotContent').innerHTML = html;
 }
 
-async function tarotEnd() {
-    // 不弹任何话，直接重置页面
-    var callBtn = document.getElementById('tarotCallBtn');
-    var responseArea = document.getElementById('tarotResponseArea');
-    var questionArea = document.getElementById('tarotQuestionArea');
-    var resultArea = document.getElementById('tarotResultArea');
-    var statusDiv = document.getElementById('tarotCallStatus');
-    var input = document.getElementById('tarotQuestionInput');
-
-    if (callBtn) callBtn.style.display = 'block';
-    if (responseArea) responseArea.style.display = 'none';
-    if (questionArea) questionArea.style.display = 'none';
-    if (resultArea) resultArea.style.display = 'none';
-    if (statusDiv) statusDiv.textContent = '💬 呼唤秦彻，让他为你翻牌';
-    if (input) input.value = '';
-
-    tarotState = 'idle';
-}
-
-async function getRandomFromGroup(groupName) {
-    var allCards = await dbGetAll('wordcards');
-    var cards = allCards.filter(function(c) {
-        return (c.groupName === groupName || c.groupId === groupName) &&
-               c.content &&
-               c.content !== '__GROUP_PLACEHOLDER__' &&
-               c.content.length > 1;
-    });
-    if (cards.length === 0) return null;
-    return cards[Math.floor(Math.random() * cards.length)].content;
-}
-
-async function refreshTarotHistory() {
-    var history = await dbGetAll('tarotHistory') || [];
-    history.sort(function(a, b) { return b.timestamp - a.timestamp; });
-    var recent = history.slice(0, 10);
-
-    var listDiv = document.getElementById('tarotHistoryList');
-    if (!listDiv) return;
-
-    if (recent.length === 0) {
-        listDiv.innerHTML = '<div style="color:#ccc;font-size:13px;text-align:center;padding:12px 0;">暂无占卜记录</div>';
-        return;
-    }
-
-    var html = '';
-recent.forEach(function(item) {
-    var time = new Date(item.timestamp).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-    html += '<div style="padding:6px 0;border-bottom:1px solid #f5f0eb;font-size:13px;color:#555;position:relative;">' +
-    '<div style="word-break:break-all;margin-bottom:4px;text-align:left;padding-right:24px;">' + item.question + '</div>' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-        '<span style="color:#d4a8b8;font-weight:500;text-align:left;">🃏 ' + item.card + '</span>' +
-        '<span style="color:#ccc;font-size:11px;">' + time + '</span>' +
-    '</div>' +
-    '<span onclick="deleteTarotHistory(' + item.id + ')" style="position:absolute;top:8px;right:0;cursor:pointer;color:#d4a8b8;font-size:14px;">✕</span>' +
-'</div>';
-});
-    listDiv.innerHTML = html;
-}
-async function deleteTarotHistory(id) {
-    var history = await dbGetAll('tarotHistory');
-    history = history.filter(function(h) { return String(h.id) !== String(id); });
+async function deleteTarotQuote(id) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = '<div style="background:#fff;border-radius:16px;padding:24px;width:280px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.2);">' +
+        '<div style="font-size:16px;font-weight:600;color:#333;margin-bottom:8px;">删除语录</div>' +
+        '<div style="font-size:14px;color:#666;margin-bottom:20px;">确定删除这条语录吗？</div>' +
+        '<div style="display:flex;gap:10px;">' +
+        '<button id="delQuoteCancel" style="flex:1;padding:10px;border-radius:10px;border:1px solid #ddd;background:#f5f5f5;color:#666;font-size:14px;cursor:pointer;">取消</button>' +
+        '<button id="delQuoteConfirm" style="flex:1;padding:10px;border-radius:10px;border:none;background:#d4a8b8;color:#fff;font-size:14px;cursor:pointer;">删除</button>' +
+        '</div></div>';
+    document.body.appendChild(overlay);
+    
+    document.getElementById('delQuoteCancel').onclick = function() { overlay.remove(); };
+    document.getElementById('delQuoteConfirm').onclick = async function() {
+    overlay.remove();
+    var quotes = await dbGetAll('tarotHistory');
+    quotes = quotes.filter(function(q) { return String(q.id) !== String(id); });
     await dbClear('tarotHistory');
-    for (var i = 0; i < history.length; i++) {
-        await dbPut('tarotHistory', history[i]);
+    for (var i = 0; i < quotes.length; i++) {
+        await dbPut('tarotHistory', quotes[i]);
     }
-    renderTarotPage();
+    renderTarotQuotes();
     showToast('🗑 已删除');
+};
 }
-async function tarotClearHistory() {
-    if (!confirm('确定清空所有翻牌历史记录吗？')) return;
-    await dbClear('tarotHistory');
-    renderTarotPage();
-    showToast('✅ 已清空历史记录');
+
+// 获取牌面 SVG
+function getTarotCardSvg(card) {
+    if (card.suit === 'major') {
+        var idx = TAROT_MAJOR_NAMES.indexOf(card.name);
+        if (idx >= 0 && TAROT_MAJOR_DRAWERS[idx]) {
+            return '<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">' + TAROT_MAJOR_DRAWERS[idx]() + '</svg>';
+        }
+    }
+    var rankMap = {ACE:'ACE',II:'II',III:'III',IV:'IV',V:'V',VI:'VI',VII:'VII',VIII:'VIII',IX:'IX',X:'X',PAGE:'P',KNIGHT:'KN',QUEEN:'Q',KING:'KG'};
+    var r = rankMap[card.rank] || card.rank;
+    if (card.suit === 'swords') return '<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">' + tarotSvgSword(r) + '</svg>';
+    if (card.suit === 'wands') return '<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">' + tarotSvgWand(r) + '</svg>';
+    if (card.suit === 'pentacles') return '<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">' + tarotSvgPent(r) + '</svg>';
+    if (card.suit === 'cups') {
+        var cupMap = {ACE:'圣杯一',II:'圣杯二',III:'圣杯三',IV:'圣杯四',V:'圣杯五',VI:'圣杯六',VII:'圣杯七',VIII:'圣杯八',IX:'圣杯九',X:'圣杯十',PAGE:'圣杯侍从',KNIGHT:'圣杯骑士',QUEEN:'圣杯王后',KING:'圣杯国王'};
+        return tarotSvgCup(cupMap[card.rank] || card.name);
+    }
+    return '';
 }
+
 // ============ 他的房间（PNG 版） ============
 
 let hisRoomState = 'idle';
@@ -3219,6 +3944,7 @@ async function openModuleSettings() {
     await renderModuleSettings();
 }
 
+const mailGroups = JSON.parse(await getCal('mailGroups', '[]'));
 async function renderModuleSettings() {
     const groups = await getAllGroups();
     const go = groups.map(g => g.name);
@@ -3227,6 +3953,7 @@ async function renderModuleSettings() {
     const mg = JSON.parse(await getCal('mailboxGroups', '[]'));
     const tg = await getCal('tarotGroup', '');
     const hg = await getCal('hisRoomGroup', '');
+const mailGroups = JSON.parse(await getCal('mailGroups', '[]'));
 
     let h = `
     <div style="
@@ -3274,17 +4001,22 @@ async function renderModuleSettings() {
     </div>
     `;
 
-    // ===== 秦彻翻牌 =====
-    h += `
-    <div class="module-card">
-        <div class="module-title">🔮 秦彻翻牌</div>
-        <select id="tarotGroupSelect" class="module-select">
-            <option value="">-- 请选择 --</option>
-            ${go.map(g => `<option value="${g}" ${g === tg ? 'selected' : ''}>${g}</option>`).join('')}
-        </select>
-        <button onclick="saveTarotGroup()" style="margin-top:10px;padding:10px 16px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;width:100%;">保存翻牌分组</button>
+// ===== 信箱拼信 =====
+h += `
+<div class="module-card">
+    <div class="module-title">✉️见字如晤</div>
+    <div class="module-options">
+        ${go.map(g => `
+            <label class="module-checkbox-label">
+                <input type="checkbox" class="mail-group-checkbox" value="${g}" ${mailGroups.includes(g) ? 'checked' : ''}>
+                <span class="module-checkbox-custom"></span>
+                <span class="module-label-text">${g}</span>
+            </label>
+        `).join('')}
     </div>
-    `;
+    <button onclick="saveMailGroups()" style="margin-top:10px;padding:10px 16px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;width:100%;">保存信箱分组</button>
+</div>
+`;
 
     // ===== 他的房间 =====
     h += `
@@ -3317,6 +4049,12 @@ console.log('🚀 saveChatGroups 被调用了');
     showToast('✅ 聊天分组已保存（已选 ' + s.length + ' 个）');
 }
 async function saveMailboxGroups(){const cbs=document.querySelectorAll('.mailbox-group-checkbox:checked');const s=Array.from(cbs).map(cb=>cb.value);await setCal('mailboxGroups',JSON.stringify(s));showToast('✅ 已保存');}
+async function saveMailGroups() {
+    var cbs = document.querySelectorAll('.mail-group-checkbox:checked');
+    var s = Array.from(cbs).map(cb => cb.value);
+    await setCal('mailGroups', JSON.stringify(s));
+    showToast('✅ 已保存');
+}
 async function saveTarotGroup(){const v=document.getElementById('tarotGroupSelect').value;await setCal('tarotGroup',v);showToast('✅ 已保存');}
 
 // ============ 数据管理 ============
@@ -3869,6 +4607,11 @@ if (lastBackup) {
     localStorage.setItem('lastBackupTime', Date.now());
 }
 
+checkMailReply();
+setInterval(checkMailReply, 10 * 60 * 1000); // 每10分钟检查
+
+checkQinDailyMessage();
+
 updateHome();
 scheduleStatusUpdate(); 
 scheduleMoodUpdate();
@@ -3909,11 +4652,9 @@ window.openChatPage = openChatPage;
 window.openOurUniverse = openOurUniverse;
 window.openWordCardLibrary = openWordCardLibrary;
 window.openEmojiManage = openEmojiManage;
-window.openTarotPage = openTarotPage;
 window.openCallLogPage = openCallLogPage;
 window.openWishPage = openWishPage;
 window.openAnniversaryPage = openAnniversaryPage;
-window.openChoicePage = openChoicePage;
 window.openModuleSettings = openModuleSettings;
 window.openDataManage = openDataManage;
 window.goHome = goHome;
@@ -3967,8 +4708,6 @@ window.replyToQin = replyToQin;
 window.addAnniversary = addAnniversary;
 window.deleteAnniversary = deleteAnniversary;
 window.changeMonth = changeMonth;
-window.addChoiceOption = addChoiceOption;
-window.makeChoice = makeChoice;
 window.saveChatGroups = saveChatGroups;
 window.saveMailboxGroups = saveMailboxGroups;
 window.saveTarotGroup = saveTarotGroup;
@@ -4001,18 +4740,6 @@ window.moveCard = moveCard;
 window.confirmMoveCard = confirmMoveCard;
 window.renderCallLogs = renderCallLogs;
 window.openCallLogPage = openCallLogPage;
-window.renderChoicePage = renderChoicePage;
-window.tarotCall = tarotCall;
-window.tarotShowQuestion = tarotShowQuestion;
-window.tarotBackToCall = tarotBackToCall;
-window.tarotDraw = tarotDraw;
-window.tarotAgain = tarotAgain;
-window.tarotEnd = tarotEnd;
-window.renderTarotPage = renderTarotPage;
-window.openTarotPage = openTarotPage;
-window.getRandomFromGroup = getRandomFromGroup;
-window.refreshTarotHistory = refreshTarotHistory;
-window.tarotClearHistory = tarotClearHistory;
 window.openHisRoom = openHisRoom;
 window.closeHisRoom = closeHisRoom;
 window.knockHisRoom = knockHisRoom;
@@ -4038,9 +4765,6 @@ window.submitLockPassword = submitLockPassword;
 window.showLockPanel = showLockPanel;
 window.hideLockPanel = hideLockPanel;
 window.lockNow = lockNow;
-window.deleteChoiceHistory = deleteChoiceHistory;
-window.clearChoiceHistory = clearChoiceHistory;
-window.deleteTarotHistory = deleteTarotHistory;
 window.S = S;
 window.saveChatSettings = saveChatSettings;
 window.scheduleStatusUpdate = scheduleStatusUpdate;
@@ -4052,10 +4776,43 @@ window.applyHomeBgOpacity = applyHomeBgOpacity;
 window.applyChatBgOpacity = applyChatBgOpacity;
 window.exportChatByDate = exportChatByDate;
 window.deleteCallLog = deleteCallLog;
-window.getTarotCardSVG = getTarotCardSVG;
+window.toggleMorePanel = toggleMorePanel;
+window.hideMorePanel = hideMorePanel;
+window.openDeliverEditor = openDeliverEditor;
+window.closeDeliverEditor = closeDeliverEditor;
+window.deliverAddOption = deliverAddOption;
+window.deliverRemoveOption = deliverRemoveOption;
+window.deliverCheckSendable = deliverCheckSendable;
+window.sendDeliver = sendDeliver;
+window.openTarotPage = openTarotPage;
+window.renderTarotMain = renderTarotMain;
+window.showTarotAllowDeny = showTarotAllowDeny;
+window.showTarotContext = showTarotContext;
+window.selectTarotContext = selectTarotContext;
+window.selectTarotSpread = selectTarotSpread;
+window.renderTarotDeck = renderTarotDeck;
+window.doTarotFlip = doTarotFlip;
+window.submitTarotToRole = submitTarotToRole;
+window.saveTarotQuote = saveTarotQuote;
+window.renderTarotQuotes = renderTarotQuotes;
+window.deleteTarotQuote = deleteTarotQuote;
+window.getTarotCardSvg = getTarotCardSvg;
+window.openMailboxPage = openMailboxPage;
+window.switchMailboxTab = switchMailboxTab;
+window.renderMailboxMain = renderMailboxMain;
+window.openWriteLetter = openWriteLetter;
+window.openLetter = openLetter;
+window.accelerateReply = accelerateReply;
+window.checkMailReply = checkMailReply;
+window.saveMailGroups = saveMailGroups;
+window.deleteMailLetter = deleteMailLetter;
+window.setMailFilter = setMailFilter;
+window.deleteMailLetter = deleteMailLetter;
+
 
 init();
 })();
+
 </script>
 <div id="lockInputPanel">
     <input type="password" id="lockPasswordInput" maxlength="6" placeholder="通行令">
