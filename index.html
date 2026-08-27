@@ -698,16 +698,16 @@ body.light-text #themeToggleBtn {
         <div id="hisRoomActions" style="margin-top:16px;display:flex;gap:10px;justify-content:center;"></div>
     </div>
 </div>
-<div class="page" id="ourUniversePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🌸 此间万象</span></div><div class="generic-content" id="ourUniverseContent"></div></div>
-<div class="page" id="wordcardLibraryPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📇 笺语成册</span></div><div class="wordcard-content" id="wordcardContent"></div></div>
-<div class="page" id="emojiManagePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🍬 表情包辑</span></div><div class="generic-content" id="emojiManageContent"></div></div>
+<div class="page" id="ourUniversePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">此间万象</span></div><div class="generic-content" id="ourUniverseContent"></div></div>
+<div class="page" id="wordcardLibraryPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">笺语成册</span></div><div class="wordcard-content" id="wordcardContent"></div></div>
+<div class="page" id="emojiManagePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">表情包辑</span></div><div class="generic-content" id="emojiManageContent"></div></div>
 <div class="page" id="wishPage">
     <div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">许愿珍藏</span></div>
     <div id="wishTabContent" style="flex:1;overflow-y:auto;background:#f8f5f0;"></div>
 </div>
-<div class="page" id="anniversaryPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🎀 朝夕纪念</span></div><div class="generic-content" id="anniversaryContent"></div></div>
-<div class="page" id="choicePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">📬 见字如晤</span></div><div class="generic-content" id="choiceContent" style="padding:0;background:transparent;height:calc(100vh - 48px);"></div></div>
-<div class="page" id="tarotPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🕯️ 观牌叙言</span></div><div id="tarotContent" style="flex:1;overflow-y:auto;"></div></div>
+<div class="page" id="anniversaryPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">朝夕纪念</span></div><div id="anniversaryContent" style="flex:1;overflow-y:auto;background:#f8f5f0;"></div></div>
+<div class="page" id="choicePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">见字如晤</span></div><div class="generic-content" id="choiceContent" style="padding:0;background:transparent;height:calc(100vh - 48px);"></div></div>
+<div class="page" id="tarotPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">观牌叙言</span></div><div id="tarotContent" style="flex:1;overflow-y:auto;"></div></div>
 <div class="page" id="tarotChatPage">
     <div style="height:100%;display:flex;flex-direction:column;">
         <div class="chat-topbar">
@@ -731,8 +731,8 @@ body.light-text #themeToggleBtn {
     </div>
     <div id="callLogContent" style="flex:1;overflow-y:auto;padding:12px;"></div>
 </div>
-<div class="page" id="moduleSettingsPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">🎪 模块管理</span></div><div class="generic-content" id="moduleSettingsContent"></div></div>
-<div class="page" id="dataManagePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">☁️ 数据备份</span></div><div class="generic-content" id="dataManageContent"></div></div>
+<div class="page" id="moduleSettingsPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">模块管理</span></div><div class="generic-content" id="moduleSettingsContent"></div></div>
+<div class="page" id="dataManagePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">数据备份</span></div><div class="generic-content" id="dataManageContent"></div></div>
 
 <input type="file" id="imageMsgInput" accept="image/*" onchange="handleImageMessage(event)">
 <input type="file" id="emojiInput" accept="image/*" onchange="handleEmojiUpload(event)" multiple>
@@ -2027,7 +2027,6 @@ async function viewGroupCards(gid,gname){
     var detail = document.getElementById('groupDetail_' + gid);
     if (!detail) return;
     
-    // 切换展开/收起
     if (detail.style.display === 'block') {
         detail.style.display = 'none';
         detail.innerHTML = '';
@@ -2043,9 +2042,14 @@ async function viewGroupCards(gid,gname){
     if (cards.length === 0) {
         h += '<p style="color:#ccc;text-align:center;padding:20px;">暂无字卡</p>';
     } else {
+        h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">' +
+            '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#999;cursor:pointer;"><input type="checkbox" id="selectAllCards" onchange="toggleSelectAllCards()" style="width:16px;height:16px;accent-color:#d4a8b8;">全选</label>' +
+            '</div>';
+        
         cards.forEach(c => {
             const is = dids.has(String(c.id));
-            h += '<div style="background:#fff;border:1px solid #f0ece8;border-radius:14px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.04);">' +
+            h += '<div style="background:#fff;border:1px solid #f0ece8;border-radius:14px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">' +
+                '<input type="checkbox" class="card-checkbox" value="' + c.id + '" style="width:16px;height:16px;accent-color:#d4a8b8;flex-shrink:0;">' +
                 '<span style="flex:1;font-size:14px;color:#333;word-break:break-all;">' + c.content + '</span>' +
                 '<div style="display:flex;gap:8px;flex-shrink:0;">' +
                 '<span style="font-size:16px;cursor:pointer;" title="' + (is ? '启用' : '禁用') + '" onclick="toggleCardDisable(\'' + c.id + '\',\'' + gid + '\',' + (c.isSystem || false) + ')">' + (is ? '☑️' : '🚫') + '</span>' +
@@ -2053,11 +2057,118 @@ async function viewGroupCards(gid,gname){
                 '<span style="font-size:16px;cursor:pointer;" title="删除" onclick="deleteCard(\'' + c.id + '\',\'' + gid + '\',' + (c.isSystem || false) + ')">🗑️</span>' +
                 '</div></div>';
         });
+        
+        h += '<div style="display:flex;gap:8px;margin-top:12px;">' +
+            '<button onclick="batchDeleteCards(\'' + gid + '\')" style="flex:1;padding:10px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;">批量删除</button>' +
+            '<button onclick="batchMoveCards(\'' + gid + '\')" style="flex:1;padding:10px;border-radius:12px;background:#fff;border:1px solid #d4a8b8;color:#d4a8b8;font-size:14px;cursor:pointer;">批量移动</button>' +
+            '</div>';
     }
     
     detail.innerHTML = h;
     detail.style.display = 'block';
 }
+
+function toggleSelectAllCards() {
+    var checkAll = document.getElementById('selectAllCards');
+    var checkboxes = document.querySelectorAll('.card-checkbox');
+    checkboxes.forEach(function(cb) { cb.checked = checkAll.checked; });
+}
+
+function getSelectedCardIds() {
+    var ids = [];
+    document.querySelectorAll('.card-checkbox:checked').forEach(function(cb) {
+        ids.push(cb.value);
+    });
+    return ids;
+}
+
+async function batchDeleteCards(gid) {
+    var ids = getSelectedCardIds();
+    if (ids.length === 0) { showToast('请先勾选字卡'); return; }
+    
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = '<div style="background:#fff;border-radius:16px;padding:24px;width:280px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.2);">' +
+    '<div style="font-size:16px;font-weight:600;color:#333;margin-bottom:8px;">批量删除</div>' +
+    '<div style="font-size:14px;color:#666;margin-bottom:20px;">确定删除选中的 ' + ids.length + ' 条字卡吗？</div>' +
+    '<div style="display:flex;gap:10px;">' +
+    '<button id="batchDelCancel" style="flex:1;padding:10px;border-radius:10px;border:1px solid #ddd;background:#f5f5f5;color:#666;font-size:14px;cursor:pointer;">取消</button>' +
+    '<button id="batchDelConfirm" style="flex:1;padding:10px;border-radius:10px;border:none;background:#d4a8b8;color:#fff;font-size:14px;cursor:pointer;">删除</button>' +
+    '</div></div>';
+    document.body.appendChild(overlay);
+    
+    document.getElementById('batchDelCancel').onclick = function() { overlay.remove(); };
+    document.getElementById('batchDelConfirm').onclick = async function() {
+        overlay.remove();
+        let cards = await dbGetAll('wordcards');
+        cards = cards.filter(function(c) { return !ids.includes(String(c.id)); });
+        await idbClear('wordcards');
+        for (const c of cards) await dbPut('wordcards', c);
+        
+        var gn = await getCal('currentGroupName', '');
+        var detail = document.getElementById('groupDetail_' + gid);
+        if (detail) {
+            detail.style.display = 'none';
+            detail.innerHTML = '';
+            viewGroupCards(gid, gn);
+        }
+        showToast('已删除' + ids.length + '条');
+    };
+}
+
+async function batchMoveCards(gid) {
+    var ids = getSelectedCardIds();
+    if (ids.length === 0) { showToast('请先勾选字卡'); return; }
+    
+    var groups = await getAllGroups();
+    var groupListHtml = '';
+    groups.forEach(function(g) {
+        groupListHtml += '<div onclick="confirmBatchMove(\'' + gid + '\',\'' + g.id + '\',[' + ids.join(',') + '])" style="padding:10px 12px;border-bottom:1px solid #f0f0f0;cursor:pointer;font-size:14px;">' + g.name + '</div>';
+    });
+    
+    var overlay = document.createElement('div');
+    overlay.id = 'batchMoveModal';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = '<div style="background:#fff;border-radius:16px;padding:20px;width:85%;max-width:400px;max-height:70vh;overflow-y:auto;">' +
+    '<div style="font-size:16px;font-weight:600;color:#333;margin-bottom:12px;text-align:center;">移动 ' + ids.length + ' 条到</div>' +
+    groupListHtml +
+    '<button onclick="document.getElementById(\'batchMoveModal\').remove()" style="width:100%;margin-top:12px;padding:10px;border-radius:12px;background:#f0f0f0;border:none;cursor:pointer;font-size:14px;">取消</button>' +
+    '</div>';
+    document.body.appendChild(overlay);
+}
+
+async function confirmBatchMove(fromGid, targetGid, ids) {
+    // 移除批量移动的 modal
+    var modal = document.getElementById('batchMoveModal');
+    if (modal) modal.remove();
+    document.querySelectorAll('#batchMoveModal').forEach(function(m) { m.remove(); });
+    
+    var cards = await dbGetAll('wordcards');
+    var groups = await getAllGroups();
+    var tg = groups.find(function(g) { return g.id === targetGid; });
+    if (!tg) return;
+    
+    var strIds = ids.map(function(id) { return String(id); });
+    cards.forEach(function(c) {
+        if (strIds.includes(String(c.id))) {
+            c.groupId = targetGid;
+            c.groupName = tg.name;
+        }
+    });
+    await idbClear('wordcards');
+    for (const c of cards) await dbPut('wordcards', c);
+    
+    var gn = await getCal('currentGroupName', '');
+    var detail = document.getElementById('groupDetail_' + fromGid);
+    if (detail) {
+        detail.style.display = 'none';
+        detail.innerHTML = '';
+    }
+    showToast('已移动' + ids.length + '条');
+    // 不调 renderGroupList，只刷新当前分组
+    viewGroupCards(fromGid, gn);
+}
+
 function closeCardDetail(){document.getElementById('wordcardDetailArea').innerHTML='';}
 async function filterWordCards(){renderGroupList(document.getElementById('wordcardSearch').value.trim().toLowerCase());}
 async function toggleCardDisable(cid,gid,isSys){
@@ -2563,12 +2674,24 @@ async function renderWishSubContent() {
     } else {
         // 收藏部分
         var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
+// 筛选
+colFilter = colFilter || 'all';
+var filteredCollected = collected;
+if (colFilter === 'his') filteredCollected = collected.filter(function(c) { return c.sender === 'other'; });
+if (colFilter === 'mine') filteredCollected = collected.filter(function(c) { return c.sender === 'me'; });
         var h = '<div style="width:100%;max-width:400px;">';
-        if (collected.length === 0) {
+// 筛选按钮
+h += '<div style="display:flex;gap:6px;margin-bottom:12px;">' +
+'<button onclick="setColFilter(\'all\')" style="flex:1;padding:6px;border-radius:14px;border:1px solid ' + (colFilter==='all' ? '#d4a8b8' : '#f0ece8') + ';background:' + (colFilter==='all' ? '#d4a8b8' : '#fff') + ';color:' + (colFilter==='all' ? '#fff' : '#999') + ';font-size:11px;cursor:pointer;">全部</button>' +
+'<button onclick="setColFilter(\'his\')" style="flex:1;padding:6px;border-radius:14px;border:1px solid ' + (colFilter==='his' ? '#d4a8b8' : '#f0ece8') + ';background:' + (colFilter==='his' ? '#d4a8b8' : '#fff') + ';color:' + (colFilter==='his' ? '#fff' : '#999') + ';font-size:11px;cursor:pointer;">他的</button>' +
+'<button onclick="setColFilter(\'mine\')" style="flex:1;padding:6px;border-radius:14px;border:1px solid ' + (colFilter==='mine' ? '#d4a8b8' : '#f0ece8') + ';background:' + (colFilter==='mine' ? '#d4a8b8' : '#fff') + ';color:' + (colFilter==='mine' ? '#fff' : '#999') + ';font-size:11px;cursor:pointer;">我的</button>' +
+'</div>';
+
+        if (filteredCollected.length === 0){
             h += '<div style="background:#fff;border-radius:16px;padding:40px 20px;text-align:center;border:1px solid #f0ece8;color:#ccc;font-size:14px;">💬 还没有收藏，长按聊天消息可以收藏哦</div>';
         } else {
             var dayGroups = {};
-            collected.forEach(function(item) {
+            filteredCollected.forEach(function(item) {
                 var ts = item.timestamp || Date.now();
                 var d = new Date(ts);
                 var key = d.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
@@ -2595,6 +2718,13 @@ async function renderWishSubContent() {
         container.innerHTML = h;
     }
 }
+
+var colFilter = 'all';
+function setColFilter(f) {
+    colFilter = f;
+    renderWishSubContent();
+}
+
 async function deleteCollected(id) {
     var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
     collected = collected.filter(function(c) { return String(c.id) !== String(id); });
@@ -2996,16 +3126,35 @@ async function replyToQin(msgId) {
 }
 // ============ 纪念日 ============
 function openAnniversaryPage(){showPage('anniversaryPage');renderAnniversaryPage();}
+var tideTab = 'anniversary';
+var tideDays = JSON.parse(localStorage.getItem('tideDays') || '[]');
+var tideCycle = parseInt(localStorage.getItem('tideCycle') || '28');
+
 async function renderAnniversaryPage() {
+    var h = '<div class="mailbox-tabs">' +
+    '<button onclick="switchTideTab(\'anniversary\')" id="tideTabAnniversary" class="mailbox-tab ' + (tideTab === 'anniversary' ? 'active' : '') + '">🎀 纪念日</button>' +
+    '<button onclick="switchTideTab(\'tide\')" id="tideTabTide" class="mailbox-tab ' + (tideTab === 'tide' ? 'active' : '') + '">🌊 潮汐日</button>' +
+    '</div>' +
+    '<div id="anniversaryTabContent" style="padding:16px;">';
+    
+    if (tideTab === 'anniversary') {
+        h += await renderAnniversaryView();
+    } else {
+        h += await renderTideView();
+    }
+    
+    h += '</div>';
+    document.getElementById('anniversaryContent').innerHTML = h;
+}
+
+async function renderAnniversaryView() {
     const anniversaries = await dbGetAll('anniversaries');
     const now = new Date();
     const cy = parseInt(await getCal('calendarYear', String(now.getFullYear())));
     const cm = parseInt(await getCal('calendarMonth', String(now.getMonth())));
     
-    // 构建当天日期字符串
     const todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
     
-    // 构建纪念日日期集合（只取当前月份）
     const anniversaryDates = new Set();
     anniversaries.forEach(function(item) {
         const d = new Date(item.date);
@@ -3014,23 +3163,21 @@ async function renderAnniversaryPage() {
         }
     });
     
-    let h = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">' +
+    let h = '<div style="display:flex;flex-direction:column;align-items:center;">' +
         '<div style="width:100%;max-width:400px;">' +
-        // 输入区域（一行显示）
-        '<div style="margin-bottom:20px;display:flex;gap:8px;flex-wrap:nowrap;background:#fff;padding:16px;border-radius:16px;border:1px solid #f0ece8;align-items:center;">' +
-        '<input type="date" id="anniversaryDate" style="flex:1;min-width:0;padding:12px 16px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;">' +
-        '<input type="text" id="anniversaryName" placeholder="纪念日名称..." style="flex:2;min-width:0;padding:12px 16px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;">' +
-        '<button onclick="addAnniversary()" style="padding:12px 20px;border-radius:12px;background:#f5f0eb;border:1.5px solid #e8e0d8;color:#666;font-size:14px;cursor:pointer;white-space:nowrap;flex-shrink:0;">添加</button>' +
+        '<div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:nowrap;background:#fff;padding:14px;border-radius:16px;border:1px solid #f0ece8;align-items:center;">' +
+        '<input type="date" id="anniversaryDate" style="flex:1;min-width:0;padding:10px 14px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;">' +
+        '<input type="text" id="anniversaryName" placeholder="纪念日名称..." style="flex:2;min-width:0;padding:10px 14px;border-radius:12px;border:1.5px solid #e8e0d8;background:#fff;font-size:14px;outline:none;color:#333;">' +
+        '<button onclick="addAnniversary()" style="padding:10px 18px;border-radius:12px;background:#f5f0eb;border:1.5px solid #e8e0d8;color:#666;font-size:14px;cursor:pointer;white-space:nowrap;flex-shrink:0;">添加</button>' +
         '</div>' +
-        // 纪念日列表
-        '<div id="anniversaryList" style="margin-bottom:24px;">';
+        '<div id="anniversaryList" style="margin-bottom:12px;">';
     
     if (anniversaries.length === 0) {
-        h += '<p style="color:#ccc;text-align:center;padding:20px;">📅 还没有纪念日</p>';
+        h += '<p style="color:#ccc;text-align:center;padding:16px;font-size:13px;">📅 还没有纪念日</p>';
     } else {
         anniversaries.forEach(function(item, i) {
             const days = Math.floor((Date.now() - new Date(item.date)) / (1000 * 60 * 60 * 24));
-            h += '<div style="background:#fff;border-radius:16px;padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;border:1px solid #f0ece8;">' +
+            h += '<div style="background:#fff;border-radius:14px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;border:1px solid #f0ece8;">' +
                 '<span>📅</span>' +
                 '<div style="flex:1;">' +
                 '<div style="font-size:14px;color:#333;">' + item.name + '</div>' +
@@ -3043,11 +3190,10 @@ async function renderAnniversaryPage() {
     }
     
     h += '</div>' +
-        // 日历
-        '<div style="background:#fff;border-radius:16px;padding:20px;border:1px solid #f0ece8;">' +
-        '<div style="display:flex;justify-content:space-between;margin-bottom:14px;">' +
+        '<div style="background:#fff;border-radius:16px;padding:16px;border:1px solid #f0ece8;">' +
+        '<div style="display:flex;justify-content:space-between;margin-bottom:10px;">' +
         '<button onclick="changeMonth(-1)" style="padding:4px 12px;border-radius:8px;border:1px solid #e8e0d8;background:transparent;color:#666;cursor:pointer;font-size:14px;">‹</button>' +
-        '<span style="font-size:16px;font-weight:500;color:#333;">' + cy + '年 ' + (cm + 1) + '月</span>' +
+        '<span style="font-size:15px;font-weight:500;color:#333;">' + cy + '年 ' + (cm + 1) + '月</span>' +
         '<button onclick="changeMonth(1)" style="padding:4px 12px;border-radius:8px;border:1px solid #e8e0d8;background:transparent;color:#666;cursor:pointer;font-size:14px;">›</button>' +
         '</div>' +
         '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;">' +
@@ -3078,11 +3224,115 @@ async function renderAnniversaryPage() {
     }
     
     h += '</div></div></div></div>';
-    document.getElementById('anniversaryContent').innerHTML = h;
+    return h;
 }
 async function addAnniversary(){const date=document.getElementById('anniversaryDate').value;const name=document.getElementById('anniversaryName').value.trim();if(!date||!name){showToast('请填写日期和名称');return;}await dbPut('anniversaries',{date,name,timestamp:Date.now()});document.getElementById('anniversaryDate').value='';document.getElementById('anniversaryName').value='';renderAnniversaryPage();}
 async function deleteAnniversary(index){const a=await dbGetAll('anniversaries');a.splice(index,1);await idbClear('anniversaries');for(const x of a)await dbPut('anniversaries',x);renderAnniversaryPage();}
 async function changeMonth(delta){const now=new Date();const cy=parseInt(await getCal('calendarYear',String(now.getFullYear())));const cm=parseInt(await getCal('calendarMonth',String(now.getMonth())));let nm=cm+delta,ny=cy;if(nm>11){nm=0;ny++;}if(nm<0){nm=11;ny--;}await setCal('calendarYear',String(ny));await setCal('calendarMonth',String(nm));renderAnniversaryPage();}
+
+function switchTideTab(tab) {
+    tideTab = tab;
+    renderAnniversaryPage();
+}
+
+async function renderTideView() {
+    var now = new Date();
+    var cy = parseInt(await getCal('calendarYear', String(now.getFullYear())));
+    var cm = parseInt(await getCal('calendarMonth', String(now.getMonth())));
+    var todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+    
+    // 找上次来潮
+    var lastTide = null;
+    for (var i = tideDays.length - 1; i >= 0; i--) {
+        var td = new Date(tideDays[i]);
+        if (td.getTime() <= now.getTime()) {
+            lastTide = tideDays[i];
+            break;
+        }
+    }
+    
+    var nextTide = null;
+    var dayDiff = null;
+    if (lastTide) {
+        var nextDate = new Date(lastTide);
+        nextDate.setDate(nextDate.getDate() + tideCycle);
+        nextTide = nextDate.getFullYear() + '-' + String(nextDate.getMonth()+1).padStart(2,'0') + '-' + String(nextDate.getDate()).padStart(2,'0');
+        dayDiff = Math.ceil((nextDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    }
+    
+    var h = '<div style="font-size:11px;color:#999;margin-bottom:10px;text-align:center;">点日历里的日子，标为来潮第一天</div>' +
+    '<div style="background:#fff;border-radius:16px;padding:20px;border:1px solid #f0ece8;">' +
+    '<div style="display:flex;justify-content:space-between;margin-bottom:14px;">' +
+    '<button onclick="changeTideMonth(-1)" style="padding:4px 12px;border-radius:8px;border:1px solid #e8e0d8;background:transparent;color:#666;cursor:pointer;font-size:14px;">‹</button>' +
+    '<span style="font-size:16px;font-weight:500;color:#333;">' + cy + '年 ' + (cm + 1) + '月</span>' +
+    '<button onclick="changeTideMonth(1)" style="padding:4px 12px;border-radius:8px;border:1px solid #e8e0d8;background:transparent;color:#666;cursor:pointer;font-size:14px;">›</button>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;">' +
+    ['一','二','三','四','五','六','日'].map(function(d) { return '<div style="font-size:11px;color:#bbb;padding:4px 0;">' + d + '</div>'; }).join('');
+    
+    var firstDay = new Date(cy, cm, 1).getDay();
+    var daysInMonth = new Date(cy, cm + 1, 0).getDate();
+    var startOffset = firstDay === 0 ? 6 : firstDay - 1;
+    
+    for (var j = 0; j < startOffset; j++) {
+        h += '<div></div>';
+    }
+    
+    for (var d = 1; d <= daysInMonth; d++) {
+        var dateStr = cy + '-' + String(cm+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+        var isTide = tideDays.includes(dateStr);
+        var isToday = dateStr === todayStr;
+        
+        h += '<div style="display:flex;justify-content:center;">' +
+        '<div onclick="toggleTideDay(\'' + dateStr + '\')" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:14px;cursor:pointer;' +
+        'color:' + (isToday ? '#d4a8b8' : '#333') + ';' +
+        (isTide ? 'background:#fdf5f7;border:2px solid #d4a8b8;' : '') +
+        '">' + d + '</div></div>';
+    }
+    
+    h += '</div></div>' +
+    '<div style="background:#fff;border-radius:16px;padding:16px;margin-top:12px;border:1px solid #f0ece8;">' +
+    '<div style="font-size:14px;font-weight:600;color:#333;margin-bottom:8px;">🌊 潮汐日</div>' +
+    (lastTide ? '<div style="font-size:13px;color:#555;margin-bottom:4px;">上次来潮：' + lastTide + '</div>' : '') +
+    (nextTide ? '<div style="font-size:13px;color:#555;margin-bottom:4px;">预计下次：' + nextTide + ' 左右</div>' : '<div style="font-size:13px;color:#555;margin-bottom:4px;">还没有记录来潮日</div>') +
+    (dayDiff !== null ? '<div style="font-size:13px;color:#d4a8b8;">当前：' + (dayDiff > 0 ? '间歇期 · 还有 ' + dayDiff + ' 天' : '预计来潮期') + '</div>' : '') +
+    '<div style="display:flex;align-items:center;gap:8px;margin-top:10px;">' +
+    '<span style="font-size:12px;color:#999;">周期（天）</span>' +
+    '<input type="number" id="tideCycleInput" value="' + tideCycle + '" min="20" max="45" onchange="updateTideCycle(this.value)" style="width:60px;padding:6px;border-radius:8px;border:1px solid #e8e0d8;font-size:13px;text-align:center;outline:none;">' +
+    '</div></div>';
+    
+    return h;
+}
+
+function toggleTideDay(dateStr) {
+    var idx = tideDays.indexOf(dateStr);
+    if (idx >= 0) {
+        tideDays.splice(idx, 1);
+    } else {
+        tideDays.push(dateStr);
+    }
+    tideDays.sort();
+    localStorage.setItem('tideDays', JSON.stringify(tideDays));
+    renderAnniversaryPage();
+}
+
+function updateTideCycle(val) {
+    tideCycle = parseInt(val) || 28;
+    localStorage.setItem('tideCycle', String(tideCycle));
+    renderAnniversaryPage();
+}
+
+async function changeTideMonth(delta) {
+    var now = new Date();
+    var cy = parseInt(await getCal('calendarYear', String(now.getFullYear())));
+    var cm = parseInt(await getCal('calendarMonth', String(now.getMonth())));
+    var nm = cm + delta, ny = cy;
+    if (nm > 11) { nm = 0; ny++; }
+    if (nm < 0) { nm = 11; ny--; }
+    await setCal('calendarYear', String(ny));
+    await setCal('calendarMonth', String(nm));
+    renderAnniversaryPage();
+}
 
 // ============ 见字如晤（树心邮筒） ============
 var mailboxTab = 'mailbox'; // mailbox | diary
@@ -3159,35 +3409,44 @@ var sentToday = letters.filter(function(l) {
 });
 var canWrite = sentToday.length === 0;
     
-    var html = '<div style="padding:16px;">' +
+var html = '<div style="padding:16px;">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">' +
     '<div style="font-size:17px;font-weight:600;color:#3a3c3f;letter-spacing:2px;">树心邮筒<span style="font-size:10px;color:#9a9da2;letter-spacing:3px;display:block;font-weight:400;margin-top:2px;">TREE · HEART · POST</span></div>' +
     '<button onclick="' + (canWrite ? 'openWriteLetter()' : '') + '" style="font-size:13px;color:#fff;background:' + (canWrite ? '#d4a8b8' : '#ccc') + ';border:none;border-radius:20px;padding:8px 18px;cursor:' + (canWrite ? 'pointer' : 'not-allowed') + ';letter-spacing:1px;">' + (canWrite ? '写一封' : '今日已寄') + '</button>' +
     '</div>' +
     
+    // 期待你的来信
+    '<div id="btnExpect" onclick="accelerateReply()" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #f0ece8;border-radius:12px;padding:12px 14px;cursor:pointer;margin-bottom:10px;">' +
+    '<div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #d9dadd;font-size:16px;">💌</div>' +
+    '<div style="flex:1;"><div style="font-size:14px;font-weight:500;color:#3a3c3f;">期待你的来信</div>' +
+    '<div style="font-size:11px;color:#999;margin-top:2px;">' + getExpectHint() + '</div></div></div>' +
+    
+    // 提示条
+    (mailState.status === 'waiting' ?
+    (function() {
+        var replyDate = new Date(mailState.replyAt);
+        var dateStr = (replyDate.getMonth()+1) + '月' + replyDate.getDate() + '日 ' + String(replyDate.getHours()).padStart(2,'0') + ':' + String(replyDate.getMinutes()).padStart(2,'0');
+        return '<div style="margin:0 0 14px;background:#fff;border:1px dashed #d4a8b8;border-radius:10px;padding:10px 14px;font-size:12px;color:#d4a8b8;line-height:1.7;display:flex;align-items:flex-start;gap:8px;">' +
+        '<span>🕊️</span><span>回信翻山越岭中，预计 ' + dateStr + ' 送达…</span></div>';
+    })() : '') +
+    
+    // 筛选按钮
     '<div style="display:flex;gap:6px;margin-bottom:12px;">' +
     '<button onclick="setMailFilter(\'all\')" style="flex:1;padding:8px;border-radius:16px;border:1px solid ' + (filter==='all' ? '#d4a8b8' : '#d9dadd') + ';background:' + (filter==='all' ? '#d4a8b8' : '#fff') + ';color:' + (filter==='all' ? '#fff' : '#9a9da2') + ';font-size:12px;cursor:pointer;">全部</button>' +
     '<button onclick="setMailFilter(\'sent\')" style="flex:1;padding:8px;border-radius:16px;border:1px solid ' + (filter==='sent' ? '#d4a8b8' : '#d9dadd') + ';background:' + (filter==='sent' ? '#d4a8b8' : '#fff') + ';color:' + (filter==='sent' ? '#fff' : '#9a9da2') + ';font-size:12px;cursor:pointer;">寄出</button>' +
     '<button onclick="setMailFilter(\'received\')" style="flex:1;padding:8px;border-radius:16px;border:1px solid ' + (filter==='received' ? '#d4a8b8' : '#d9dadd') + ';background:' + (filter==='received' ? '#d4a8b8' : '#fff') + ';color:' + (filter==='received' ? '#fff' : '#9a9da2') + ';font-size:12px;cursor:pointer;">收到</button>' +
-    '</div>' +
-    
-    '<div id="btnExpect" onclick="accelerateReply()" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #f0ece8;border-radius:12px;padding:12px 14px;cursor:pointer;margin-bottom:10px;">' +
-    '<div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #d9dadd;font-size:16px;">💌</div>' +
-    '<div style="flex:1;"><div style="font-size:14px;font-weight:500;color:#3a3c3f;">期待你的来信</div>' +
-    '<div style="font-size:11px;color:#999;margin-top:2px;">' + getExpectHint() + '</div></div></div>';
-    
-    if (mailState.status === 'waiting') {
-        var replyDate = new Date(mailState.replyAt);
-        var dateStr = (replyDate.getMonth()+1) + '月' + replyDate.getDate() + '日 ' + String(replyDate.getHours()).padStart(2,'0') + ':' + String(replyDate.getMinutes()).padStart(2,'0');
-        html += '<div style="margin:0 0 14px;background:#fff;border:1px dashed #d4a8b8;border-radius:10px;padding:10px 14px;font-size:12px;color:#d4a8b8;line-height:1.7;display:flex;align-items:flex-start;gap:8px;">' +
-        '<span>🕊️</span><span>回信翻山越岭中，预计 ' + dateStr + ' 送达…</span></div>';
-    }
+    '</div>';
     
     var filteredLetters = letters;
     if (filter === 'sent') filteredLetters = letters.filter(function(l) { return l.direction === 'sent'; });
     if (filter === 'received') filteredLetters = letters.filter(function(l) { return l.direction === 'received'; });
     
-    html += '<div style="font-size:13px;color:#9a9da2;letter-spacing:1px;margin:6px 0 10px;">信件</div>';
+   html += '<div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 10px;">' +
+'<div style="font-size:13px;color:#999;letter-spacing:1px;">信件</div>' +
+'<div style="display:flex;gap:6px;">' +
+'<button onclick="exportMailLetters()" style="font-size:11px;color:#d4a8b8;background:#fff;border:1px solid #d4a8b8;border-radius:14px;padding:4px 12px;cursor:pointer;">导出</button>' +
+'<button onclick="clearMailLetters()" style="font-size:11px;color:#d4a8b8;background:#fff;border:1px solid #d4a8b8;border-radius:14px;padding:4px 12px;cursor:pointer;">清空</button>' +
+'</div></div>';
     if (filteredLetters.length === 0) {
         html += '<div style="font-size:12px;color:#ccc;text-align:center;padding:20px;">暂无信件</div>';
     } else {
@@ -3220,6 +3479,39 @@ function getExpectHint() {
         return '冷却中，明天再来';
     }
     return '点击催他，回信从 12–24 小时缩到 2–4 小时';
+}
+
+async function exportMailLetters() {
+    var letters = JSON.parse(localStorage.getItem('mailLetters') || '[]');
+    if (letters.length === 0) { showToast('暂无信件'); return; }
+    var text = '树心邮筒信件\n导出时间: ' + new Date().toLocaleString('zh-CN') + '\n' + '='.repeat(30) + '\n\n';
+    letters.forEach(function(l) {
+        text += (l.direction === 'sent' ? '寄 · 致秦彻' : '收 · 来自秦彻') + '\n';
+        text += l.dateStr + '\n';
+        text += l.content + '\n\n';
+    });
+    downloadBlob(text, '树心邮筒信件.txt');
+    showToast('✅ 已导出');
+}
+
+async function clearMailLetters() {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = '<div style="background:#fff;border-radius:16px;padding:24px;width:280px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.2);">' +
+    '<div style="font-size:16px;font-weight:600;color:#333;margin-bottom:8px;">清空信件</div>' +
+    '<div style="font-size:14px;color:#666;margin-bottom:20px;">确定清空所有信件吗？</div>' +
+    '<div style="display:flex;gap:10px;">' +
+    '<button id="clearMailCancel" style="flex:1;padding:10px;border-radius:10px;border:1px solid #ddd;background:#f5f5f5;color:#666;font-size:14px;cursor:pointer;">取消</button>' +
+    '<button id="clearMailConfirm" style="flex:1;padding:10px;border-radius:10px;border:none;background:#d4a8b8;color:#fff;font-size:14px;cursor:pointer;">清空</button>' +
+    '</div></div>';
+    document.body.appendChild(overlay);
+    document.getElementById('clearMailCancel').onclick = function() { overlay.remove(); };
+    document.getElementById('clearMailConfirm').onclick = function() {
+        overlay.remove();
+        localStorage.setItem('mailLetters', '[]');
+        renderMailboxMain();
+        showToast('已清空');
+    };
 }
 
 // ===== 写信 =====
@@ -3596,11 +3888,16 @@ async function renderEchoPage() {
         groups[key].push(m);
     });
     
-    var hasAny = pinned.length > 0;
+  var hasAny = pinned.length > 0;
     Object.keys(groups).forEach(function(key) {
         if (groups[key].length === 0) return;
         hasAny = true;
-        html += '<div style="text-align:center;color:#999;font-size:11px;margin:10px 0;">' + getEchoDateLabel(key) + '</div>';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;color:#999;font-size:11px;margin:10px 0;">' +
+        '<span>' + getEchoDateLabel(key) + '</span>' +
+        '<span style="display:flex;gap:6px;">' +
+        '<button onclick="exportEchoMessages()" style="font-size:10px;color:#d4a8b8;background:#fff;border:1px solid #d4a8b8;border-radius:12px;padding:3px 10px;cursor:pointer;">导出</button>' +
+        '<button onclick="clearEchoMessages()" style="font-size:10px;color:#d4a8b8;background:#fff;border:1px solid #d4a8b8;border-radius:12px;padding:3px 10px;cursor:pointer;">清空</button>' +
+        '</span></div>';
         groups[key].sort(function(a,b) { return b.timestamp - a.timestamp; }).forEach(function(m) {
             html += buildEchoCard(m);
         });
@@ -3612,6 +3909,41 @@ async function renderEchoPage() {
     
     html += '</div>';
     document.getElementById('mailboxContent').innerHTML = html;
+}
+
+async function exportEchoMessages() {
+    var msgs = JSON.parse(localStorage.getItem('echoMessages') || '[]');
+    if (msgs.length === 0) { showToast('暂无留言'); return; }
+    var text = '树洞回音\n导出时间: ' + new Date().toLocaleString('zh-CN') + '\n' + '='.repeat(30) + '\n\n';
+    msgs.forEach(function(m) {
+        var d = new Date(m.timestamp);
+        var dateStr = d.getFullYear() + '.' + (d.getMonth()+1) + '.' + d.getDate();
+        var timeStr = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+        text += (m.who === 'me' ? S.myName : S.contactName) + ' [' + dateStr + ' ' + timeStr + ']\n';
+        text += m.text + '\n\n';
+    });
+    downloadBlob(text, '树洞回音留言.txt');
+    showToast('✅ 已导出');
+}
+
+async function clearEchoMessages() {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = '<div style="background:#fff;border-radius:16px;padding:24px;width:280px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.2);">' +
+    '<div style="font-size:16px;font-weight:600;color:#333;margin-bottom:8px;">清空留言</div>' +
+    '<div style="font-size:14px;color:#666;margin-bottom:20px;">确定清空所有留言吗？</div>' +
+    '<div style="display:flex;gap:10px;">' +
+    '<button id="clearEchoCancel" style="flex:1;padding:10px;border-radius:10px;border:1px solid #ddd;background:#f5f5f5;color:#666;font-size:14px;cursor:pointer;">取消</button>' +
+    '<button id="clearEchoConfirm" style="flex:1;padding:10px;border-radius:10px;border:none;background:#d4a8b8;color:#fff;font-size:14px;cursor:pointer;">清空</button>' +
+    '</div></div>';
+    document.body.appendChild(overlay);
+    document.getElementById('clearEchoCancel').onclick = function() { overlay.remove(); };
+    document.getElementById('clearEchoConfirm').onclick = function() {
+        overlay.remove();
+        localStorage.setItem('echoMessages', '[]');
+        renderEchoPage();
+        showToast('已清空');
+    };
 }
 
 function buildEchoCard(m) {
@@ -3835,12 +4167,30 @@ function openTarotPage() {
     renderTarotMain();
 }
 
+function getTarotBackHTML() {
+    return '<div style="width:150px;height:230px;margin:0 auto 20px;position:relative;">' +
+    '<div style="position:absolute;width:150px;height:230px;border-radius:10px;background:#F2EBDD;border:1px solid rgba(120,100,80,.12);box-shadow:0 2px 8px rgba(60,50,40,.08);transform:translate(-4px,3px) rotate(-1.5deg);opacity:.55;"></div>' +
+    '<div style="position:absolute;width:150px;height:230px;border-radius:10px;background:#F2EBDD;border:1px solid rgba(120,100,80,.12);transform:translate(-7px,6px) rotate(-2.5deg);opacity:.32;"></div>' +
+    '<div style="position:absolute;width:150px;height:230px;border-radius:10px;background:#F2EBDD;border:1px solid rgba(120,100,80,.12);transform:translate(-10px,9px) rotate(-3.5deg);opacity:.16;"></div>' +
+    '<div style="position:absolute;top:0;left:0;width:150px;height:230px;border-radius:10px 12px 9px 11px;background:#F2EBDD;border:1px solid rgba(120,100,80,.18);box-shadow:0 4px 12px rgba(60,50,40,.14);display:flex;align-items:center;justify-content:center;">' +
+    '<div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;">' +
+    '<svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#3A342D" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px;opacity:.3;">' +
+    '<path d="M26 8 L40 20 L40 42 L12 42 L12 20 Z"/>' +
+    '<path d="M18 42 L18 30 L34 30 L34 42"/>' +
+    '<path d="M22 30 L22 24 L30 24 L30 30"/>' +
+    '</svg>' +
+    '<span style="font-size:20px;font-weight:600;color:#3A342D;opacity:.32;line-height:1;">sylus</span>' +
+    '<span style="font-size:7px;letter-spacing:3px;color:#8C8273;opacity:.5;">TAROT</span>' +
+    '</div></div></div>';
+}
+
 // 塔罗主页：两个入口
 function renderTarotMain() {
     document.getElementById('tarotContent').innerHTML =
     '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">' +
     '<div style="width:100%;max-width:400px;">' +
-   '<div style="font-size:20px;font-weight:600;color:#333;margin:20px 0 28px;text-align:center;letter-spacing:1px;">以光为引 · 链接你我</div>' +
+ getTarotBackHTML() +
+'<div style="font-size:20px;font-weight:600;color:#333;margin:0 0 28px;text-align:center;letter-spacing:1px;">以光为引 · 链接你我</div>' +
     '<div style="display:flex;flex-direction:column;gap:12px;">' +
     '<div onclick="showTarotAllowDeny()" style="background:#fff;border:1px solid #f0ece8;border-radius:16px;padding:20px 16px;cursor:pointer;text-align:center;">' +
     '<div style="font-size:15px;font-weight:500;">占卜</div>' +
@@ -5176,6 +5526,20 @@ window.pinEcho = pinEcho;
 window.deleteEcho = deleteEcho;
 window.setEchoTab = setEchoTab;
 window.autoReplyToEcho = autoReplyToEcho;
+window.setColFilter = setColFilter;
+window.exportMailLetters = exportMailLetters;
+window.clearMailLetters = clearMailLetters;
+window.exportEchoMessages = exportEchoMessages;
+window.clearEchoMessages = clearEchoMessages;
+window.toggleSelectAllCards = toggleSelectAllCards;
+window.batchDeleteCards = batchDeleteCards;
+window.batchMoveCards = batchMoveCards;
+window.confirmBatchMove = confirmBatchMove;
+window.switchTideTab = switchTideTab;
+window.toggleTideDay = toggleTideDay;
+window.updateTideCycle = updateTideCycle;
+window.changeTideMonth = changeTideMonth;
+window.getTarotBackHTML = getTarotBackHTML;
 
 
 init();
