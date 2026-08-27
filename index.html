@@ -999,7 +999,7 @@ const TAROT_ALLOW_DENY = {
 
 // ============ IndexedDB 存储层 ============
 const DB_NAME = 'TimeTreeDB';
-const DB_VERSION = 6;
+const DB_VERSION = 10;
 let db = null;
 
 function openDB() {
@@ -1176,8 +1176,22 @@ function openDeliverEditor() {
         inputBar.insertAdjacentElement('afterend', ed);
         editor = ed;
     }
-    editor.style.display = 'block';
+        editor.style.display = 'block';
     document.querySelector('#chatPage .bottombar').style.display = 'none';
+    
+    // 清空上次输入
+    var q = document.getElementById('deliverQuestion');
+    if (q) q.value = '';
+    document.querySelectorAll('#deliverEditor .editor-option input').forEach(function(inp) {
+        inp.value = '';
+    });
+    deliverCheckSendable();
+    
+    document.querySelectorAll('#deliverEditor input').forEach(function(inp) {
+        inp.addEventListener('input', deliverCheckSendable);
+    });
+
+
     
     document.querySelectorAll('#deliverEditor input').forEach(function(inp) {
         inp.addEventListener('input', deliverCheckSendable);
@@ -1264,7 +1278,7 @@ function doDeliverReply(roleKey, userOptions) {
     var declines = ['我不想选，这里没有合适答案。','不做，我不喜欢被限定答案。','没必要选，心意不是勾选就能说清。','拒绝作答，想问就直接开口。','没兴趣做测验，这些选择不适合我们。'];
     if (shouldPick && userOptions && userOptions.length > 0) {
         var chosen = userOptions[Math.floor(Math.random() * userOptions.length)];
-        return chosen + tails[Math.floor(Math.random() * tails.length)];
+        return chosen + '，' + tails[Math.floor(Math.random() * tails.length)];
     }
     return declines[Math.floor(Math.random() * declines.length)];
 }
@@ -2249,10 +2263,11 @@ window.db = null;
 
 window.openDB = function() {
     return new Promise(function(resolve, reject) {
-        var req = indexedDB.open('TimeTreeDB', 6);
+        var req = indexedDB.open('TimeTreeDB', 10);
         req.onupgradeneeded = function(e) {
+            console.log('🔄 数据库升级触发');
             var d = e.target.result;
-           var stores = ['messages', 'settings', 'wordcards', 'emojis', 'avatars',
+            var stores = ['messages', 'settings', 'wordcards', 'emojis', 'avatars',
     'callLogs', 'patOptions', 'statusOptions', 'disabledCards',
     'disabledGroups', 'avatarHistory', 'bgSettings', 'boardMessages',
     'wishes', 'anniversaries', 'answerBookHistory', 'choiceHistory',
@@ -2764,13 +2779,13 @@ async function autoReplyToUser(userMsg) {
     
     // 存入秦彻的回复
     await dbPut('boardMessages', {
-        sender: 'qin',
-        content: replyContent,
-        time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
-        replied: true,
-        replyTo: userMsg.content,
-        timestamp: Date.now()
-    });
+    sender: 'qin',
+    content: replyContent,
+    time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+    replied: true,
+    replyToId: userMsg.id,
+    timestamp: Date.now()
+});
     
     localStorage.removeItem('qinReplyPending_' + userMsg.id);
 }
@@ -2826,7 +2841,7 @@ pendingReplies.forEach(async function(msg) {
                 '<div style="font-size:14px;color:#444;margin-bottom:6px;word-break:break-word;padding-left:4px;">' + m.content + '</div>';
             
             // 找这条留言的回复
-            var replies = msgs.filter(function(r) { return r.replyTo && r.replyTo === m.content; });
+            var replies = msgs.filter(function(r) { return r.replyToId && String(r.replyToId) === String(m.id); });
             replies.forEach(function(reply) {
                 var rName = reply.sender === 'user' ? S.myName : S.contactName;
                 var rAvatar = reply.sender === 'user' ? getAvatar('me') : getAvatar('contact');
@@ -2912,7 +2927,7 @@ async function deleteBoardMsg(id) {
 
 async function replyBoardMsg(id) {
     var msgs = await dbGetAll('boardMessages');
-    var msg = msgs.find(function(m) { return m.id === id; });
+    var msg = msgs.find(function(m) { return String(m.id) === String(id); });
     if (!msg) return;
     var reply = prompt('输入回复：');
     if (!reply || !reply.trim()) return;
@@ -2923,6 +2938,7 @@ async function replyBoardMsg(id) {
         content: reply.trim(),
         time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
         replied: true,
+        replyToId: msg.id,
         timestamp: Date.now()
     });
     renderBoardPage();
@@ -2933,13 +2949,12 @@ async function replyToQin(msgId) {
     if (!reply || !reply.trim()) return;
     
     var msgs = await dbGetAll('boardMessages');
-    var target = msgs.find(function(m) { return m.id === msgId; });
+    var target = msgs.find(function(m) { return String(m.id) === String(msgId); });
     if (!target) {
         showToast('⚠️ 消息不存在');
         return;
     }
     
-    // 标记秦彻的留言为已回复
     target.replied = true;
     await dbPut('boardMessages', target);
     
@@ -2948,7 +2963,7 @@ async function replyToQin(msgId) {
         content: reply.trim(),
         time: new Date().toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
         replied: false,
-        replyTo: target.content,
+        replyToId: target.id,
         timestamp: Date.now()
     };
     await dbPut('boardMessages', newMsg);
@@ -3075,19 +3090,20 @@ function switchMailboxTab(tab) {
 }
 
 async function renderMailboxPage() {
-    var letters = await dbGetAll('mailLetters') || [];
-    var hasUnread = letters.some(function(l) { return l.direction === 'received' && !l.read; });
-    var tabLabel = hasUnread ? '树心邮筒 · NEW' : '树心邮筒';
-    
     document.getElementById('choiceContent').innerHTML =
     '<div style="height:100%;display:flex;flex-direction:column;background:#f8f5f0;">' +
     '<div class="mailbox-tabs">' +
-    '<button class="mailbox-tab active" id="mailboxTabMail" onclick="switchMailboxTab(\'mailbox\')">' + tabLabel + '</button>' +
+    '<button class="mailbox-tab active" id="mailboxTabMail" onclick="switchMailboxTab(\'mailbox\')">树心邮筒</button>' +
     '<button class="mailbox-tab" id="mailboxTabDiary" onclick="switchMailboxTab(\'diary\')">交换日记</button>' +
     '</div>' +
     '<div id="mailboxContent" style="flex:1;overflow-y:auto;"></div>' +
     '</div>';
-    renderMailboxMain();
+    
+    try {
+        await renderMailboxMain();
+    } catch(e) {
+        document.getElementById('mailboxContent').innerHTML = '<div style="padding:40px;text-align:center;color:#d4a8b8;font-size:14px;">加载失败: ' + e.message + '</div>';
+    }
 }
 
 function renderDiaryPlaceholder() {
@@ -3107,7 +3123,7 @@ var saved = await getCal('mailState', '');
             mailState.cooldownUntil = parsed.cooldownUntil || 0;
         } catch(e) {}
     }
-   var letters = await dbGetAll('mailLetters');
+   var letters = await JSON.parse(localStorage.getItem('mailLetters') || '[]');
 if (!letters) letters = [];
 letters.sort(function(a,b) { return b.timestamp - a.timestamp; });
 
@@ -3226,7 +3242,7 @@ if (text.length > 300) {
 
         
         // 一天只能写一封
-        var letters = await dbGetAll('mailLetters');
+        var letters = await JSON.parse(localStorage.getItem('mailLetters') || '[]');
         var today = new Date().toDateString();
         var sentToday = letters.filter(function(l) {
             return l.direction === 'sent' && new Date(l.timestamp).toDateString() === today;
@@ -3247,13 +3263,18 @@ if (text.length > 300) {
         var now = new Date();
         var dateStr = now.getFullYear() + '.' + (now.getMonth()+1) + '.' + now.getDate();
         
-        var newLetter = await dbPut('mailLetters', {
-            direction: 'sent',
-            content: text,
-            dateStr: dateStr,
-            timestamp: Date.now(),
-            read: true
-        });
+        var newId = Date.now() + Math.random() * 1000;
+var newLetter = {
+    id: newId,
+    direction: 'sent',
+    content: text,
+    dateStr: dateStr,
+    timestamp: Date.now(),
+    read: true
+};
+var mailList = JSON.parse(localStorage.getItem('mailLetters') || '[]');
+mailList.push(newLetter);
+localStorage.setItem('mailLetters', JSON.stringify(mailList));
         
         // 每封信独立等待回信
         var pending = JSON.parse(await getCal('pendingReplies', '[]'));
@@ -3279,14 +3300,17 @@ console.log('💾 写入后 pending:', verify);
 }
 // ===== 打开信 =====
 async function openLetter(id) {
-    var letters = await dbGetAll('mailLetters') || [];
+    var letters = JSON.parse(localStorage.getItem('mailLetters') || '[]');
     var letter = letters.find(function(l) { return String(l.id) === String(id); });
     if (!letter) return;
     
-    // 标记已读
     if (letter.direction === 'received' && !letter.read) {
         letter.read = true;
-        await dbPut('mailLetters', letter);
+        var idx = letters.findIndex(function(l) { return String(l.id) === String(letter.id); });
+        if (idx >= 0) {
+            letters[idx] = letter;
+            localStorage.setItem('mailLetters', JSON.stringify(letters));
+        }
         updateMailboxUnread();
     }
     
@@ -3299,15 +3323,14 @@ async function openLetter(id) {
     '<div style="font-size:11px;color:#9a9da2;letter-spacing:2px;margin-bottom:8px;">' + (isFromHim ? '收 · 来自秦彻' : '寄 · 致秦彻') + '</div>' +
     '<div class="letter-paper">' +
     '<div style="font-size:14px;color:#3a3c3f;margin-bottom:14px;padding-left:6px;">' + toName + '：</div>' +
-    '<div style="font-size:14px;line-height:2;color:#3a3c3f;padding-left:6px;white-space:pre-line;">见字如晤。\n\n' + letter.content + '</div>' +
+    '<div style="font-size:14px;line-height:2;color:#3a3c3f;padding-left:6px;white-space:pre-line;">见字如晤。\n' + letter.content + '</div>' +
     '<div style="margin-top:20px;font-size:11px;color:#9a9da2;text-align:right;letter-spacing:.5px;">' + letter.dateStr + '　' + fromName + '</div>' +
     '<div class="postmark">树心<br>邮筒</div>' +
     '</div>' +
- '<div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">' +
-'<button onclick="deleteMailLetter(\'' + letter.id + '\')" style="font-size:13px;color:#d4a8b8;background:#fff;border:1px solid #d4a8b8;border-radius:20px;padding:8px 22px;cursor:pointer;">删除</button>' +
-'<button onclick="renderMailboxMain()" style="font-size:13px;color:#fff;background:#d4a8b8;border:none;border-radius:20px;padding:8px 22px;cursor:pointer;">返回</button>' +
-'</div>' +
-'</div>';
+    '<div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">' +
+    '<button onclick="deleteMailLetter(\'' + letter.id + '\')" style="font-size:13px;color:#d4a8b8;background:#fff;border:1px solid #d4a8b8;border-radius:20px;padding:8px 22px;cursor:pointer;">删除</button>' +
+    '<button onclick="renderMailboxMain()" style="font-size:13px;color:#fff;background:#d4a8b8;border:none;border-radius:20px;padding:8px 22px;cursor:pointer;">返回</button>' +
+    '</div></div>';
 }
 
 async function deleteMailLetter(id) {
@@ -3323,19 +3346,15 @@ async function deleteMailLetter(id) {
     document.body.appendChild(overlay);
     
     document.getElementById('delMailCancel').onclick = function() { overlay.remove(); };
-  document.getElementById('delMailConfirm').onclick = async function() {
-    overlay.remove();
-    var letters = await dbGetAll('mailLetters');
-    letters = letters.filter(function(l) { return String(l.id) !== String(id); });
-    await dbClear('mailLetters');
-    for (var i = 0; i < letters.length; i++) {
-        await dbPut('mailLetters', letters[i]);
-    }
-    renderMailboxMain();
-    showToast('🗑 已删除');
-};
+    document.getElementById('delMailConfirm').onclick = function() {
+        overlay.remove();
+        var mailList = JSON.parse(localStorage.getItem('mailLetters') || '[]');
+        mailList = mailList.filter(function(l) { return String(l.id) !== String(id); });
+        localStorage.setItem('mailLetters', JSON.stringify(mailList));
+        renderMailboxMain();
+        showToast('🗑 已删除');
+    };
 }
-
 // ===== 加速回信 =====
 async function accelerateReply() {
     var pending = JSON.parse(await getCal('pendingReplies', '[]'));
@@ -3412,7 +3431,7 @@ async function checkMailReply() {
     for (var i = 0; i < pending.length; i++) {
         var p = pending[i];
         if (Date.now() >= p.replyAt) {
-            var count = Math.min(Math.floor(Math.random() * 29) + 2, pool.length);
+            var count = Math.min(Math.floor(Math.random() * 14) + 2, pool.length);
             var shuffled = pool.sort(function() { return Math.random() - 0.5; });
             var selected = shuffled.slice(0, count);
             var body = selected.map(function(c) { return c.content; }).join('\n');
@@ -3420,13 +3439,16 @@ async function checkMailReply() {
             var now = new Date();
             var dateStr = now.getFullYear() + '.' + (now.getMonth()+1) + '.' + now.getDate();
             
-            await dbPut('mailLetters', {
-                direction: 'received',
-                content: body,
-                dateStr: dateStr,
-                timestamp: Date.now(),
-                read: false
-            });
+            var mailList = JSON.parse(localStorage.getItem('mailLetters') || '[]');
+mailList.push({
+    id: Date.now() + Math.random() * 1000,
+    direction: 'received',
+    content: body,
+    dateStr: dateStr,
+    timestamp: Date.now(),
+    read: false
+});
+localStorage.setItem('mailLetters', JSON.stringify(mailList));
             hasNew = true;
         } else {
             newPending.push(p);
@@ -3453,7 +3475,7 @@ async function checkMailReply() {
 
 // ===== 未读红点 =====
 async function updateMailboxUnread() {
-    var letters = await dbGetAll('mailLetters') || [];
+    var letters = await JSON.parse(localStorage.getItem('mailLetters') || '[]');
     var hasUnread = letters.some(function(l) { return l.direction === 'received' && !l.read; });
     var dot = document.getElementById('mailUnreadDot');
     if (dot) dot.style.display = hasUnread ? 'block' : 'none';
