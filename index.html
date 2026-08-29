@@ -1637,7 +1637,7 @@ async function sendMessage(){
     autoReply();
 }
 
-async function autoReply(){
+async function autoReply() {
     const cs = S.chatSettings;
     
     if (cs.readReceipt !== 'none') {
@@ -1659,19 +1659,23 @@ async function autoReply(){
         }, 800 + Math.random() * 1200);
     }
     
- if (cs.readNotReply) {
-    var roll = Math.random();
-    var noReplyProb = (cs.readNotReplyProb || 50) / 100;
-    if (roll < noReplyProb) {
-        // 不回复，不显示任何消息
-        return;
+    if (cs.readNotReply) {
+        var roll = Math.random();
+        var noReplyProb = (cs.readNotReplyProb || 50) / 100;
+        if (roll < noReplyProb) {
+            return;
+        }
     }
-}
     
-    const min = parseInt(S.minReplyTime) || 1,
-        max = parseInt(S.maxReplyTime) || 5,
-        cnt = parseInt(S.replyCount) || 1;
+    const min = parseInt(S.minReplyTime) || 1;
+    const max = parseInt(S.maxReplyTime) || 5;
+    const cnt = parseInt(S.replyCount) || 1;
     const delay = Math.floor(Math.random() * (max * 60000 - min * 1000 + 1)) + min * 1000;
+    const replyAt = Date.now() + delay;
+    
+    // 存储待回复信息（用于补发）
+    localStorage.setItem('pendingReplyAt', String(replyAt));
+    localStorage.setItem('pendingReplyCount', String(cnt));
     
     if (cs.typing) {
         setTimeout(() => {
@@ -1680,86 +1684,107 @@ async function autoReply(){
             ti.textContent = '秦彻正在输入...';
             document.getElementById('chatArea').appendChild(ti);
             scrollBottom();
-        }, delay - 2000);
+        }, Math.max(delay - 2000, 0));
     }
     
+    // 正常定时触发
     setTimeout(async () => {
-        const ti = document.querySelector('.typing-indicator');
-        if (ti) ti.remove();
-        
-        for (let i = 0; i < cnt; i++) {
-            let c = await smartComposeReply();
-            if (cs.quoteReply && Math.random() < ((cs.quoteReplyProb || 10) / 100)) {
-                var allMsgs = await dbGetAll('messages');
-                var myMsgs = allMsgs.filter(function(x) { return x.sender === 'me' && x.type === 'text'; });
-                if (myMsgs.length > 0) {
-                    var randomMsg = myMsgs[Math.floor(Math.random() * myMsgs.length)];
-                    if (randomMsg && randomMsg.content) {
-                        c = '「' + randomMsg.content + '」\n' + c;
-                    }
-                }
-            }
-            const m = { sender: 'other', content: c, type: 'text', timestamp: Date.now() };
-            const id = await dbPut('messages', m);
-            m.id = id;
-            renderMsg(m);
-            scrollBottom();
-            
-            // 秦彻随机收藏
-            if (Math.random() < ((cs.qinCollectProb || 5) / 100)) {
-                var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
-                var allMsgs = await dbGetAll('messages');
-                var myMsgs = allMsgs.filter(function(x) { return x.sender === 'me' && x.type === 'text'; });
-                if (myMsgs.length > 0) {
-                    var pick = myMsgs[Math.floor(Math.random() * myMsgs.length)];
-                    collected.push({
-                        id: Date.now(),
-                        sender: 'me',
-                        content: pick.content,
-                        time: fmtTime(pick.timestamp),
-                        timestamp: pick.timestamp,
-                        collectedBy: 'qin'
-                    });
-                    localStorage.setItem('collectedMessages', JSON.stringify(collected));
-                }
-            }
-            
-            // 发表情
-            if (cs.emojiMix && Math.random() < ((cs.emojiMixProb || 5) / 100)) {
-                var emojiList = await dbGetAll('emojis');
-                if (emojiList && emojiList.length > 0) {
-                    var emoji = emojiList[Math.floor(Math.random() * emojiList.length)];
-                    if (emoji && emoji.data) {
-                        var emojiMsg = { sender: 'other', content: emoji.data, type: 'emoji', timestamp: Date.now() };
-                        var emojiId = await dbPut('messages', emojiMsg);
-                        emojiMsg.id = emojiId;
-                        renderMsg(emojiMsg);
-                        scrollBottom();
-                    }
-                }
-            }
-            
-            // 拍一拍
-            if (Math.random() < ((cs.patProb || 5) / 100) && patOptions.length > 0) {
-                var pat = patOptions[Math.floor(Math.random() * patOptions.length)];
-                var patMsg = { sender: 'other', content: pat, type: 'pat', timestamp: Date.now() };
-                var patId = await dbPut('messages', patMsg);
-                patMsg.id = patId;
-                renderMsg(patMsg);
-                scrollBottom();
-                triggerPat(S.contactName, pat);
-            }
-            
-            // 模拟来电
-            if (cs.simCall && Math.random() < ((cs.simCallProb || 1) / 100) && callState === 'idle') {
-                setTimeout(function() { startCallFromQinChe(); }, 2000);
-            }
-            
-            if (i < cnt - 1) await new Promise(r => setTimeout(r, 800 + Math.random() * 3000));
-        }
+        await executeReply(cnt, replyAt);
     }, delay);
 }
-
+async function executeReply(cnt, scheduledTime) {
+    // 移除"正在输入..."提示
+    var ti = document.querySelector('.typing-indicator');
+    if (ti) ti.remove();
+    
+    const cs = S.chatSettings;
+    
+    for (let i = 0; i < cnt; i++) {
+        let c = await smartComposeReply();
+        if (cs.quoteReply && Math.random() < ((cs.quoteReplyProb || 10) / 100)) {
+            var allMsgs = await dbGetAll('messages');
+            var myMsgs = allMsgs.filter(function(x) { return x.sender === 'me' && x.type === 'text'; });
+            if (myMsgs.length > 0) {
+                var randomMsg = myMsgs[Math.floor(Math.random() * myMsgs.length)];
+                if (randomMsg && randomMsg.content) {
+                    c = '「' + randomMsg.content + '」\n' + c;
+                }
+            }
+        }
+        const m = { sender: 'other', content: c, type: 'text', timestamp: scheduledTime || Date.now() };
+        const id = await dbPut('messages', m);
+        m.id = id;
+        renderMsg(m);
+        scrollBottom();
+        
+        // 秦彻随机收藏
+        if (Math.random() < ((cs.qinCollectProb || 5) / 100)) {
+            var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
+            var allMsgs = await dbGetAll('messages');
+            var myMsgs = allMsgs.filter(function(x) { return x.sender === 'me' && x.type === 'text'; });
+            if (myMsgs.length > 0) {
+                var pick = myMsgs[Math.floor(Math.random() * myMsgs.length)];
+                collected.push({
+                    id: Date.now(),
+                    sender: 'me',
+                    content: pick.content,
+                    time: fmtTime(pick.timestamp),
+                    timestamp: pick.timestamp,
+                    collectedBy: 'qin'
+                });
+                localStorage.setItem('collectedMessages', JSON.stringify(collected));
+            }
+        }
+        
+        // 发表情
+        if (cs.emojiMix && Math.random() < ((cs.emojiMixProb || 5) / 100)) {
+            var emojiList = await dbGetAll('emojis');
+            if (emojiList && emojiList.length > 0) {
+                var emoji = emojiList[Math.floor(Math.random() * emojiList.length)];
+                if (emoji && emoji.data) {
+                    var emojiMsg = { sender: 'other', content: emoji.data, type: 'emoji', timestamp: scheduledTime || Date.now() };
+                    var emojiId = await dbPut('messages', emojiMsg);
+                    emojiMsg.id = emojiId;
+                    renderMsg(emojiMsg);
+                    scrollBottom();
+                }
+            }
+        }
+        
+        // 拍一拍
+        if (Math.random() < ((cs.patProb || 5) / 100) && patOptions.length > 0) {
+            var pat = patOptions[Math.floor(Math.random() * patOptions.length)];
+            var patMsg = { sender: 'other', content: pat, type: 'pat', timestamp: scheduledTime || Date.now() };
+            var patId = await dbPut('messages', patMsg);
+            patMsg.id = patId;
+            renderMsg(patMsg);
+            scrollBottom();
+            triggerPat(S.contactName, pat);
+        }
+        
+        // 模拟来电
+        if (cs.simCall && Math.random() < ((cs.simCallProb || 1) / 100) && callState === 'idle') {
+            setTimeout(function() { startCallFromQinChe(); }, 2000);
+        }
+        
+        if (i < cnt - 1) await new Promise(r => setTimeout(r, 800 + Math.random() * 3000));
+    }
+    
+    // 清除待回复标记
+    localStorage.removeItem('pendingReplyAt');
+    localStorage.removeItem('pendingReplyCount');
+}
+function checkPendingReply() {
+    var replyAt = parseInt(localStorage.getItem('pendingReplyAt'));
+    var cnt = parseInt(localStorage.getItem('pendingReplyCount') || '1');
+    
+    if (replyAt && Date.now() >= replyAt) {
+        console.log('⏰ 检测到超时未回复，补发');
+        var ti = document.querySelector('.typing-indicator');
+        if (ti) ti.remove();
+        executeReply(cnt, replyAt);
+    }
+}
 // ============ 获取随机回复（未使用） ============
 async function getRandomReply(){
     const sg = JSON.parse(await getCal('chatGroups','[]'));
@@ -5485,10 +5510,34 @@ setInterval(function() {
     }
 }, 60 * 1000); // 每分钟检查一次
 
+// 页面加载时检查是否有漏掉的回复
+checkPendingReply();
+
+// 页面可见性变化时检查
+document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+        checkPendingReply();
+    }
+});
+
 updateHome();
 scheduleStatusUpdate(); 
 scheduleMoodUpdate();
 startAutoSendIfNeeded();
+
+// ===== 回音保底机制 =====
+try {
+    var today = new Date().toLocaleDateString('zh-CN');
+    var lastEchoDate = localStorage.getItem('lastQinMessageDate');
+    if (lastEchoDate !== today) {
+        console.log('🎐 保底：今天回音还没主动留言，触发');
+        await checkQinDailyMessage();
+    }
+} catch(e) {
+    console.warn('⚠️ 回音保底失败:', e.message);
+}
+// ===== 保底结束 =====
+
 console.log('✅ 2.0 启动完成');
         
     } catch(e) {
@@ -5689,6 +5738,9 @@ window.openCardCountSetting = openCardCountSetting;
 window.closeCardCountModal = closeCardCountModal;
 window.saveCardCountSetting = saveCardCountSetting;
 window.getRandomMood2 = getRandomMood2;
+window.executeReply = executeReply;
+window.checkPendingReply = checkPendingReply;
+
 
 
 init();
