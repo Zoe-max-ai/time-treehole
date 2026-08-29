@@ -129,6 +129,7 @@
         .emoji-group-tab{padding:4px 12px;border-radius:12px;font-size:12px;cursor:pointer;border:none;background:transparent;color:#999;transition:all 0.2s;}
         .emoji-group-tab.active{background:var(--primary);color:#fff;}
         .emoji-group-tab.add{background:#f0f0f0;color:#666;font-size:14px;padding:4px 10px;}
+
 /* ===== 乌鸦从门里飞出 ===== */
 @keyframes crowFlyIn {
     0% { 
@@ -313,6 +314,14 @@ body.light-text .home-footer {
 }
 body.light-text #themeToggleBtn {
     color: #fff !important;
+}
+
+.msg-time-label {
+    text-align: center;
+    font-size: 11px;
+    color: #999;
+    padding: 10px 0;
+    margin: 6px 0;
 }
 
 /* 私密锁 */
@@ -1305,10 +1314,51 @@ async function loadMessages() {
         ca.appendChild(moreBtn);
     }
     
-    recent.forEach(m => renderMsg(m));
+    // ===== 时间标签逻辑 =====
+    var lastTime = 0;
+    recent.forEach(function(m) {
+        // 如果距离上一条消息超过 5 分钟，插入时间标签
+        if (lastTime === 0 || m.timestamp - lastTime > 5 * 60 * 1000) {
+            var timeLabel = document.createElement('div');
+            timeLabel.className = 'msg-time-label';
+            timeLabel.textContent = formatTimeLabel(m.timestamp);
+            ca.appendChild(timeLabel);
+        }
+        renderMsg(m);
+        lastTime = m.timestamp;
+    });
+    // ===== 时间标签逻辑结束 =====
+    
     scrollBottom();
     setTimeout(() => applyBubbleStyle(), 100);
 }
+
+function formatTimeLabel(ts) {
+    var d = new Date(ts);
+    var now = new Date();
+    
+    var h = String(d.getHours()).padStart(2, '0');
+    var m = String(d.getMinutes()).padStart(2, '0');
+    var timeStr = h + ':' + m;
+    
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var msgDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    var diffDays = Math.floor((today.getTime() - msgDate.getTime()) / 86400000);
+    
+    if (diffDays === 0) {
+        return timeStr;
+    } else if (diffDays === 1) {
+        return '昨天 ' + timeStr;
+    } else if (diffDays < 7) {
+        var weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+        return weekdays[d.getDay()] + ' ' + timeStr;
+    } else if (d.getFullYear() === now.getFullYear()) {
+        return (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + timeStr;
+    } else {
+        return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + timeStr;
+    }
+}
+
 
 function renderMsg(m){
     const ca = document.getElementById('chatArea');
@@ -1326,15 +1376,16 @@ function renderMsg(m){
     av.src = m.sender === 'me' ? getAvatar('me') : getAvatar('contact');
     if(m.sender === 'other') av.onclick = function(){ openProfile(); };
     const b = document.createElement('div');
-    b.className = 'bubble';
-    const preset = BUBBLE_PRESETS.find(p => p.id === S.bubbleStyle) || BUBBLE_PRESETS[0];
-    if(m.sender === 'me'){
-        b.style.background = preset.myBg;
-        b.style.color = preset.myText;
-    } else {
-        b.style.background = preset.otherBg;
-        b.style.color = preset.otherText;
-    }
+    b.className = 'bubble ' + (m.sender === 'me' ? 'sent' : 'received');
+   // 预设样式由 CSS 控制，不设置内联样式
+// const preset = BUBBLE_PRESETS.find(p => p.id === S.bubbleStyle) || BUBBLE_PRESETS[0];
+// if(m.sender === 'me'){
+//     b.style.background = preset.myBg;
+//     b.style.color = preset.myText;
+// } else {
+//     b.style.background = preset.otherBg;
+//     b.style.color = preset.otherText;
+// }
    if(m.type === 'pat'){
     b.classList.add('pat-bubble');
     b.innerHTML = '<span>👋 <b>' + (m.sender === 'me' ? S.myName : S.contactName) + '</b> ' + m.content + '</span>';
@@ -1361,12 +1412,9 @@ function renderMsg(m){
 } else {
     b.textContent = m.content;
 }
-    const t = document.createElement('div');
-    t.className = 'message-time';
-    t.textContent = fmtTime(m.timestamp);
-    w.appendChild(av);
-    w.appendChild(b);
-    w.appendChild(t);
+   w.appendChild(av);
+w.appendChild(b);
+// 时间不再在这里显示，由 loadMessages 统一管理
 
     // 长按/右键菜单
     b.addEventListener('contextmenu', function(e) {
@@ -2315,17 +2363,32 @@ async function renderOurUniverse(){
     h += '<div style="background:#fdf8ff;border-radius:10px;padding:12px;margin-bottom:8px;font-size:14px;color:#555;font-style:italic;text-align:center;">' + mood + '</div>';
     h += '<button onclick="refreshMood()" style="width:100%;padding:8px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:12px;">⟳ 换一句</button></div>';
     
-    // 聊天气泡样式
-    h += '<div class="settings-section"><h4>💬 聊天气泡样式</h4>';
-    h += '<div class="bubble-preset-grid">';
-    BUBBLE_PRESETS.forEach(p => {
-        h += '<div class="bubble-preset-item ' + (S.bubbleStyle === p.id ? 'selected' : '') + '" onclick="selectBubblePreset(\'' + p.id + '\')" style="padding:8px 4px;border-radius:12px;text-align:center;cursor:pointer;border:2px solid ' + (S.bubbleStyle === p.id ? '#d4a8b8' : '#e8e0d8') + ';background:#fff;">';
-        h += '<div style="display:flex;flex-direction:column;gap:2px;margin-bottom:2px;align-items:center;">';
-        h += '<div class="mini-bubble other" style="padding:4px 8px;border-radius:10px;font-size:9px;background:' + p.otherBg + ';color:' + p.otherText + ';">你好呀</div>';
-        h += '<div class="mini-bubble me" style="padding:4px 8px;border-radius:10px;font-size:9px;background:' + p.myBg + ';color:' + p.myText + ';">想你了</div>';
-        h += '</div><div style="font-size:10px;color:#555;">' + p.name + '</div></div>';
-    });
-    h += '</div></div>';
+   // ===== 聊天气泡预设库 =====
+h += `
+<div class="settings-section">
+    <h4>🎨 气泡预设库</h4>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;">
+`;
+
+var currentPreset = localStorage.getItem('currentBubblePreset') || '粉白淡调';
+var presetKeys = Object.keys(BUBBLE_PRESET_STYLES);
+
+presetKeys.forEach(function(name) {
+    var isActive = name === currentPreset;
+    h += `<div onclick="applyBubblePreset('${name}')" style="
+        padding:8px 4px;
+        border-radius:10px;
+        text-align:center;
+        font-size:12px;
+        cursor:pointer;
+        background:${isActive ? '#d4a8b8' : '#fff'};
+        color:${isActive ? '#fff' : '#333'};
+        border:1.5px solid ${isActive ? '#d4a8b8' : '#e8e0d8'};
+        transition:all 0.2s;
+    ">${name}</div>`;
+});
+
+h += `</div></div>`;
     
 // 更换主页背景
 h += '<div class="settings-section"><h4>🏠 更换主页背景</h4>';
@@ -2430,6 +2493,417 @@ async function deleteHistoryAvatar(hid,type){await dbDelete('avatarHistory',pars
 async function saveAvatarToHistory(type,data){const h=await dbGetAll('avatarHistory');if(!h.find(x=>x.type===type&&x.data===data))await dbPut('avatarHistory',{type,data,timestamp:Date.now()});}
 async function handleMyAvatarUpload(event){const f=event.target.files[0];if(!f)return;const d=await fileToDataUrl(f);S.myAvatar=d;await dbPut('avatars',{key:'myAvatar',data:d});await saveAvatarToHistory('me',d);renderOurUniverse();updateHome();event.target.value='';}
 async function handleContactAvatarUpload(event){const f=event.target.files[0];if(!f)return;const d=await fileToDataUrl(f);S.contactAvatar=d;await dbPut('avatars',{key:'contactAvatar',data:d});await saveAvatarToHistory('contact',d);renderOurUniverse();updateHome();event.target.value='';}
+
+// ===== 气泡预设库 =====
+var BUBBLE_PRESET_STYLES = {
+    '粉白淡调': {
+        css: `
+            .bubble.received {
+                background: #ffffff !important;
+                color: #333333 !important;
+            }
+            .bubble.sent {
+                background: #ffe0e6 !important;
+                color: #333333 !important;
+            }
+        `
+    },
+    '黑白极简': {
+        css: `
+            .bubble.received {
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+            .bubble.sent {
+                background: #000000 !important;
+                color: #ffffff !important;
+            }
+        `
+    },
+ '星光信笺': {
+    css: `
+        .bubble.sent {
+            font-size: 12.5px !important;
+            padding: 5px 10px !important;
+            background: #FFF5F7 !important;
+            color: #222222 !important;
+            border: 1px solid rgba(0, 0, 0, 0.2) !important;
+            border-radius: 8px 2px 8px 8px !important;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 1), 0 0 15px rgba(255, 255, 255, 0.7), 0 0 25px rgba(255, 255, 255, 0.4) !important;
+            position: relative !important;
+        }
+        .bubble.sent::before {
+            content: '★';
+            position: absolute !important;
+            left: -7px !important;
+            top: -7px !important;
+            font-size: 14px !important;
+            color: #FFF9C4 !important;
+            text-shadow: -0.5px -0.5px 0 rgba(0,0,0,0.2), 0.5px -0.5px 0 rgba(0,0,0,0.2), -0.5px 0.5px 0 rgba(0,0,0,0.2), 0.5px 0.5px 0 rgba(0,0,0,0.2) !important;
+            pointer-events: none !important;
+        }
+        .bubble.received {
+            font-size: 12.5px !important;
+            padding: 5px 10px !important;
+            background: #F0F9FF !important;
+            color: #222222 !important;
+            border: 1px solid rgba(0, 0, 0, 0.2) !important;
+            border-radius: 2px 8px 8px 8px !important;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 1), 0 0 15px rgba(255, 255, 255, 0.7), 0 0 25px rgba(255, 255, 255, 0.4) !important;
+            position: relative !important;
+        }
+        .bubble.received::before {
+            content: '★';
+            position: absolute !important;
+            left: -7px !important;
+            bottom: -7px !important;
+            font-size: 14px !important;
+            color: #E1F5FE !important;
+            text-shadow: -0.5px -0.5px 0 rgba(0,0,0,0.2), 0.5px -0.5px 0 rgba(0,0,0,0.2), -0.5px 0.5px 0 rgba(0,0,0,0.2), 0.5px 0.5px 0 rgba(0,0,0,0.2) !important;
+            pointer-events: none !important;
+        }
+    `
+},
+    '白骨红痕': {
+        css: `
+            .bubble.sent,
+            .bubble.received {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                border: 3px solid #000000 !important;
+                box-shadow: 6px 6px 0px #ff0000 !important;
+                border-radius: 8px !important;
+                padding: 12px 16px !important;
+                transform: rotate(-1deg) !important;
+            }
+        `
+    },
+   '动物朋友': {
+    css: `
+        .bubble.received {
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            color: #4a3728 !important;
+            padding: 18px 18px 16px 22px !important;
+            position: relative !important;
+            z-index: 1 !important;
+        }
+        .bubble.received::before {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            z-index: -1 !important;
+            background-color: #fef9f0 !important;
+            border: 2px solid #d4a574 !important;
+            border-radius: 6px 20px 20px 20px !important;
+            box-shadow: 2px 2px 0 #e8c9a0, inset 0 1px 0 rgba(255,255,255,0.8) !important;
+            pointer-events: none;
+        }
+        .bubble.received::after {
+            content: '' !important;
+            position: absolute !important;
+            top: -8px !important;
+            left: 6px !important;
+            width: 16px !important;
+            height: 12px !important;
+            background: #d4a574 !important;
+            border-radius: 50% 50% 0 0 !important;
+            z-index: -2 !important;
+            box-shadow: 8px 0 0 #d4a574, 4px -2px 0 #d4a574 !important;
+            pointer-events: none;
+        }
+        .bubble.sent {
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            color: #5c4033 !important;
+            padding: 18px 22px 16px 18px !important;
+            position: relative !important;
+            z-index: 1 !important;
+        }
+        .bubble.sent::before {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            z-index: -1 !important;
+            background-color: #fff5f5 !important;
+            border: 2px solid #f0b8b8 !important;
+            border-radius: 20px 6px 20px 20px !important;
+            box-shadow: 2px 2px 0 #fddbdb, inset 0 1px 0 rgba(255,255,255,0.8) !important;
+            pointer-events: none;
+        }
+        .bubble.sent::after {
+            content: '' !important;
+            position: absolute !important;
+            top: -10px !important;
+            right: 8px !important;
+            width: 14px !important;
+            height: 18px !important;
+            background: #f0b8b8 !important;
+            border-radius: 50% 50% 0 0 !important;
+            z-index: -2 !important;
+            box-shadow: -8px 0 0 #f0b8b8 !important;
+            pointer-events: none;
+        }
+    `
+},
+    '星际漫游': {
+        css: `
+            .bubble.sent {
+                background-color: #0a0f1e !important;
+                background-image: linear-gradient(to right, rgba(80, 160, 255, 0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(80, 160, 255, 0.15) 1px, transparent 1px) !important;
+                background-size: 8px 8px !important;
+                border: 3px solid #3e6b9e !important;
+                border-radius: 20px !important;
+                box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.3) !important;
+                padding: 10px 18px !important;
+                font-family: 'Courier New', 'VT323', monospace !important;
+                color: #b8e2ff !important;
+                position: relative !important;
+                margin-bottom: 52px !important;
+            }
+            .bubble.sent::after {
+                content: '' !important;
+                position: absolute !important;
+                bottom: -44px !important;
+                right: -12px !important;
+                width: 70px !important;
+                height: 70px !important;
+                background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 70'%3E%3Crect x='22' y='22' width='26' height='26' fill='%23c0e0ff' rx='13' /%3E%3Crect x='28' y='28' width='4' height='4' fill='%23333' /%3E%3Crect x='38' y='28' width='4' height='4' fill='%23333' /%3E%3Crect x='33' y='36' width='4' height='3' fill='%23888' /%3E%3Crect x='33' y='16' width='4' height='8' fill='%23aaa' /%3E%3Crect x='31' y='14' width='8' height='4' fill='%23aaa' /%3E%3Crect x='48' y='46' width='8' height='14' fill='%23ff6b4a' /%3E%3Cpolygon points='48,46 56,46 52,42' fill='%23ff8c5a' /%3E%3Crect x='50' y='56' width='2' height='6' fill='%23ffcc44' /%3E%3Crect x='54' y='56' width='2' height='6' fill='%23ffcc44' /%3E%3Ccircle cx='12' cy='12' r='6' fill='%2388aaff' /%3E%3Ccircle cx='14' cy='10' r='2' fill='%23ffdd88' /%3E%3Crect x='4' y='28' width='2' height='5' fill='%23ffdd77' /%3E%3Crect x='2' y='30' width='6' height='2' fill='%23ffdd77' /%3E%3Crect x='58' y='14' width='2' height='5' fill='%23ffdd77' /%3E%3Crect x='56' y='16' width='6' height='2' fill='%23ffdd77' /%3E%3C/svg%3E") center / contain no-repeat !important;
+                image-rendering: pixelated !important;
+                pointer-events: none !important;
+            }
+            .bubble.sent::before {
+                content: '' !important;
+                position: absolute !important;
+                top: -34px !important;
+                left: -10px !important;
+                width: 54px !important;
+                height: 54px !important;
+                background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 54 54'%3E%3Crect x='18' y='18' width='16' height='16' fill='%23ccccaa' rx='2' /%3E%3Crect x='14' y='22' width='6' height='8' fill='%23aaaaff' /%3E%3Crect x='32' y='22' width='6' height='8' fill='%23aaaaff' /%3E%3Crect x='22' y='12' width='8' height='6' fill='%23ccccaa' /%3E%3Cpolygon points='42,8 48,12 44,16' fill='%23ffaa55' /%3E%3Crect x='44' y='10' width='2' height='4' fill='%23ff8844' /%3E%3Ccircle cx='8' cy='42' r='5' fill='%23997755' /%3E%3Ccircle cx='10' cy='40' r='2' fill='%23ccaa88' /%3E%3C/svg%3E") center / contain no-repeat !important;
+                image-rendering: pixelated !important;
+                pointer-events: none !important;
+            }
+            .bubble.received {
+                background-color: #1a1e2a !important;
+                background-image: radial-gradient(circle at 3px 3px, rgba(180, 100, 200, 0.2) 1.5px, transparent 1.5px) !important;
+                background-size: 12px 12px !important;
+                border: 3px solid #9b6b9e !important;
+                border-radius: 20px !important;
+                box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.3) !important;
+                padding: 10px 18px !important;
+                font-family: 'Courier New', 'VT323', monospace !important;
+                color: #e5ccff !important;
+                position: relative !important;
+                margin-bottom: 52px !important;
+            }
+            .bubble.received::after {
+                content: '' !important;
+                position: absolute !important;
+                bottom: -44px !important;
+                left: -12px !important;
+                width: 70px !important;
+                height: 70px !important;
+                background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 70'%3E%3Cpolygon points='28,18 42,18 35,42' fill='%233a2a6e' /%3E%3Crect x='32' y='42' width='6' height='12' fill='%235a3e8e' /%3E%3Crect x='34' y='52' width='2' height='6' fill='%23ddcc99' /%3E%3Crect x='46' y='40' width='10' height='18' fill='%2377aaff' rx='2' /%3E%3Crect x='48' y='36' width='6' height='6' fill='%2377aaff' /%3E%3Crect x='50' y='44' width='2' height='8' fill='%23ffdd99' /%3E%3Crect x='12' y='44' width='8' height='8' fill='%23aa88ff' /%3E%3Crect x='10' y='42' width='12' height='12' fill='none' stroke='%23ffcc88' stroke-width='1' /%3E%3Crect x='6' y='12' width='2' height='5' fill='%23ffdd77' /%3E%3Crect x='4' y='14' width='6' height='2' fill='%23ffdd77' /%3E%3Crect x='58' y='20' width='2' height='5' fill='%23ffdd77' /%3E%3Crect x='56' y='22' width='6' height='2' fill='%23ffdd77' /%3E%3C/svg%3E") center / contain no-repeat !important;
+                image-rendering: pixelated !important;
+                pointer-events: none !important;
+            }
+            .bubble.received::before {
+                content: '' !important;
+                position: absolute !important;
+                top: -34px !important;
+                right: -10px !important;
+                width: 54px !important;
+                height: 54px !important;
+                background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 54 54'%3E%3Ccircle cx='27' cy='23' r='10' fill='%23aaccff' /%3E%3Crect x='23' y='33' width='8' height='8' fill='%236644aa' /%3E%3Ccircle cx='27' cy='27' r='3' fill='%23ffffff' /%3E%3Crect x='34' y='34' width='12' height='12' fill='%23aa8866' /%3E%3Crect x='36' y='36' width='8' height='2' fill='%23ffccaa' /%3E%3Crect x='8' y='42' width='2' height='4' fill='%23ffdd77' /%3E%3Crect x='6' y='44' width='6' height='2' fill='%23ffdd77' /%3E%3C/svg%3E") center / contain no-repeat !important;
+                image-rendering: pixelated !important;
+                pointer-events: none !important;
+            }
+        `
+    },
+    '冰晶磨砂': {
+        css: `
+            .bubble.received {
+                background: linear-gradient(145deg, #FFFFFF 0%, #e1edff 100%) !important;
+                border: none !important;
+                color: #808080 !important;
+                border-radius: 24px !important;
+                padding: 8px 28px 8px 16px !important;
+                box-shadow: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.1), 0 -2px 4px rgba(255,255,255,0.8), -2px 0 4px rgba(255,255,255,0.8), 0 4px 8px rgba(225,237,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.05), inset 0 2px 4px rgba(255,255,255,0.8) !important;
+                position: relative;
+            }
+            .bubble.sent {
+                background: linear-gradient(145deg, #FFFFFF 0%, #FFDDE1 100%) !important;
+                border: none !important;
+                color: #AA8C92 !important;
+                border-radius: 24px !important;
+                padding: 8px 28px 8px 28px !important;
+                box-shadow: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.1), 0 -2px 4px rgba(255,255,255,0.8), -2px 0 4px rgba(255,255,255,0.8), 0 4px 8px rgba(255,221,225,0.4), inset 0 -2px 4px rgba(0,0,0,0.05), inset 0 2px 4px rgba(255,255,255,0.8) !important;
+                position: relative;
+            }
+            .bubble.sent::before {
+                content: "";
+                position: absolute;
+                top: -5px;
+                left: 1px;
+                width: 14px;
+                height: 14px;
+                background-image: url('https://img.sobot.com/c3d7f65e19e748b28fc7e9f989624633/console/wsRes/ticket/20260219/1768af743e16171c0f95c5258f18faeb/IyOmS_1771499166374.png');
+                background-size: contain;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-color: transparent;
+                filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+                z-index: 10;
+            }
+            .bubble.sent::after {
+                content: "";
+                position: absolute;
+                top: 2px;
+                right: 7px;
+                width: 6px;
+                height: 6px;
+                background-image: url('https://file.ljcdn.com/psd-sinan-file/prod/appeal_evidence/B18F0AACFB98437E8397ADA69B4434E8/qdqqd.png');
+                background-size: contain;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-color: transparent;
+                filter: blur(0.6px) drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+                z-index: 10;
+            }
+            .bubble.received::after {
+                content: "";
+                position: absolute;
+                top: 2px;
+                right: 9px;
+                width: 6px;
+                height: 6px;
+                background-image: url('https://file.ljcdn.com/psd-sinan-file/prod/appeal_evidence/B18F0AACFB98437E8397ADA69B4434E8/qdqqd.png');
+                background-size: contain;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-color: transparent;
+                filter: blur(0.6px) drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+                z-index: 10;
+            }
+        `
+    },
+'手写信笺': {
+    css: `
+        .bubble {
+            border-radius: 4px !important;
+            box-shadow: none !important;
+            overflow: visible !important;
+            font-size: 12px !important;
+            line-height: 1.8 !important;
+            font-family: "Yu Gothic", "Hiragino Maru Gothic", "MS PGothic", sans-serif !important;
+            position: relative !important;
+            background-image: repeating-linear-gradient(transparent, transparent 20px, #e8e8e8 20px, #e8e8e8 21px) !important;
+            background-position: 0 4px !important;
+        }
+        .bubble.sent {
+            background-color: #ffffff !important;
+            color: #2c3e50 !important;
+            border: 1px solid #cccccc !important;
+            border-right: 4px solid #ffb6c1 !important;
+            border-top: 1px solid #ddd !important;
+            border-left: 1px solid #ddd !important;
+            border-bottom: 1px solid #ddd !important;
+        }
+        .bubble.received {
+            background-color: #ffffff !important;
+            color: #2c3e50 !important;
+            border: 1px solid #cccccc !important;
+            border-left: 4px solid #ff0000 !important;
+            border-top: 1px solid #ddd !important;
+            border-right: 1px solid #ddd !important;
+            border-bottom: 1px solid #ddd !important;
+        }
+        .bubble.sent::before {
+            content: '' !important;
+            position: absolute !important;
+            right: -8px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            width: 4px !important;
+            height: 4px !important;
+            border-radius: 50% !important;
+            background: #ddd !important;
+            box-shadow: 0 -8px 0 #ddd, 0 8px 0 #ddd !important;
+            border: 1px solid #bbb !important;
+        }
+        .bubble.received::before {
+            content: '' !important;
+            position: absolute !important;
+            left: -8px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            width: 4px !important;
+            height: 4px !important;
+            border-radius: 50% !important;
+            background: #ddd !important;
+            box-shadow: 0 -8px 0 #ddd, 0 8px 0 #ddd !important;
+            border: 1px solid #bbb !important;
+        }
+        .bubble.sent::after {
+            content: '' !important;
+            position: absolute !important;
+            right: -3px !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            width: 4px !important;
+            background: linear-gradient(135deg, transparent 30%, #f0f0f0 30%, #f0f0f0 70%, transparent 70%) !important;
+            background-size: 4px 4px !important;
+        }
+        .bubble.received::after {
+            content: '' !important;
+            position: absolute !important;
+            left: -3px !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            width: 4px !important;
+            background: linear-gradient(45deg, transparent 30%, #f0f0f0 30%, #f0f0f0 70%, transparent 70%) !important;
+            background-size: 4px 4px !important;
+        }
+    `
+}
+};
+
+function applyBubblePreset(name) {
+    var preset = BUBBLE_PRESET_STYLES[name];
+    if (!preset) return;
+    
+    var styleId = 'bubble-preset-style';
+    var existing = document.getElementById(styleId);
+    if (existing) existing.remove();
+    
+    var style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = preset.css;
+    document.head.appendChild(style);
+    
+    localStorage.setItem('currentBubblePreset', name);
+    
+    // 刷新"此间万象"页面
+    if (document.getElementById('ourUniversePage').classList.contains('active')) {
+        renderOurUniverse();
+    }
+    showToast('✅ 已切换为「' + name + '」');
+}
+
 
 // ============ 通话 ============
 function startCall(){if(callState!=='idle')return;callState='ringing';callDirection='out';callSeconds=0;const fs=document.getElementById('callFullscreen');fs.classList.add('show');document.getElementById('callAvatarLg').src=getAvatar('contact');document.getElementById('callAvatarLg').classList.add('ringing');document.getElementById('callNameLg').textContent=S.contactName;document.getElementById('callStatusLg').textContent='正在呼叫...';document.getElementById('callTimerLg').textContent='00:00:00';document.getElementById('callMinBtn').style.display='none';document.getElementById('answerBtn').style.display='none';addSysMsg('📞 你向秦彻发起了通话');setTimeout(()=>{if(callState==='ringing'&&callDirection==='out')answerCall();},3000);}
@@ -5520,6 +5994,8 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 
+
+
 updateHome();
 scheduleStatusUpdate(); 
 scheduleMoodUpdate();
@@ -5537,6 +6013,10 @@ try {
     console.warn('⚠️ 回音保底失败:', e.message);
 }
 // ===== 保底结束 =====
+
+// 自动应用保存的气泡预设
+var savedPreset = localStorage.getItem('currentBubblePreset') || '粉白淡调';
+applyBubblePreset(savedPreset);
 
 console.log('✅ 2.0 启动完成');
         
@@ -5740,6 +6220,8 @@ window.saveCardCountSetting = saveCardCountSetting;
 window.getRandomMood2 = getRandomMood2;
 window.executeReply = executeReply;
 window.checkPendingReply = checkPendingReply;
+window.applyBubblePreset = applyBubblePreset;
+window.BUBBLE_PRESET_STYLES = BUBBLE_PRESET_STYLES;
 
 
 
