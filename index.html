@@ -1267,7 +1267,7 @@ async function deliverAutoReply(question, opts) {
 }
 
 function doDeliverReply(roleKey, userOptions) {
-    var shouldPick = Math.random() < 0.6;
+    var shouldPick = Math.random() < 0.8;
     var tails = ['选是选了，但这些选项概括不了我。','姑且选这个，别靠题目揣测我。','答案勾好了，想知道真心话直接问我。','就这个，纸上写不出全部。','按你的规则选了，我更愿意用行动说明。'];
     var declines = ['我不想选，这里没有合适答案。','不做，我不喜欢被限定答案。','没必要选，心意不是勾选就能说清。','拒绝作答，想问就直接开口。','没兴趣做测验，这些选择不适合我们。'];
     if (shouldPick && userOptions && userOptions.length > 0) {
@@ -3757,13 +3757,21 @@ async function checkMailReply() {
     var hasNew = false;
     
     for (var i = 0; i < pending.length; i++) {
-        var p = pending[i];
-        if (Date.now() >= p.replyAt) {
-            var count = Math.min(Math.floor(Math.random() * 14) + 2, pool.length);
-            var shuffled = pool.sort(function() { return Math.random() - 0.5; });
-            var selected = shuffled.slice(0, count);
-            var body = selected.map(function(c) { return c.content; }).join('\n');
-            
+    var p = pending[i];
+    if (Date.now() >= p.replyAt) {
+        // ===== 读取用户设置的条数 =====
+        var minCount = parseInt(localStorage.getItem('mail_cardMin') || '1');
+        var maxCount = parseInt(localStorage.getItem('mail_cardMax') || '4');
+        if (minCount < 1) minCount = 1;
+        if (maxCount < minCount) maxCount = minCount;
+        if (maxCount > 10) maxCount = 10;
+        var count = Math.min(Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount, pool.length);
+        // ===== 改完了 =====
+        
+        var shuffled = pool.sort(function() { return Math.random() - 0.5; });
+        var selected = shuffled.slice(0, count);
+        var body = selected.map(function(c) { return c.content; }).join('\n');
+      
             var now = new Date();
             var dateStr = now.getFullYear() + '.' + (now.getMonth()+1) + '.' + now.getDate();
             
@@ -4077,23 +4085,26 @@ async function autoReplyToEcho() {
     var groups = JSON.parse(groupStr);
     if (!groups || groups.length === 0) return;
     
-    var cards = await dbGetAll('wordcards');
-    var pool = cards.filter(function(c) {
-        return groups.some(function(g) { return c.groupName === g || c.groupId === g; }) &&
-            c.content && c.content !== '__GROUP_PLACEHOLDER__' && c.content.length > 1;
-    });
-    if (pool.length === 0) return;
-    
-    var count = Math.min(Math.floor(Math.random() * 4) + 1, pool.length);
-    var shuffled = pool.sort(function() { return Math.random() - 0.5; });
-    var selected = shuffled.slice(0, count);
-    if (selected.length > 1 && Math.random() < Math.random()) {
-        selected.splice(Math.floor(Math.random() * selected.length), 1);
-    }
-    if (selected.length > 0 && Math.random() < Math.random()) {
-        selected.push(selected[Math.floor(Math.random() * selected.length)]);
-    }
-    var content = selected.map(function(c) { return c.content; }).join(' ');
+   var cards = await dbGetAll('wordcards');
+var pool = cards.filter(function(c) {
+    return groups.some(function(g) { return c.groupName === g || c.groupId === g; }) &&
+        c.content && c.content !== '__GROUP_PLACEHOLDER__' && c.content.length > 1;
+});
+if (pool.length === 0) return;
+
+// ===== 读取用户设置的条数 =====
+var minCount = parseInt(localStorage.getItem('mailbox_cardMin') || '1');
+var maxCount = parseInt(localStorage.getItem('mailbox_cardMax') || '4');
+if (minCount < 1) minCount = 1;
+if (maxCount < minCount) maxCount = minCount;
+if (maxCount > 10) maxCount = 10;
+var count = Math.min(Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount, pool.length);
+// ===== 改完了 =====
+
+var shuffled = pool.sort(function() { return Math.random() - 0.5; });
+var selected = shuffled.slice(0, count);
+
+var content = selected.map(function(c) { return c.content; }).join(' ');
     
     // 找没被回复过的你的留言
     var unreplied = echoMessages.filter(function(m) { return m.who === 'me' && !m.repliedByHim; });
@@ -4755,27 +4766,30 @@ const mailGroups = JSON.parse(await getCal('mailGroups', '[]'));
     </div>
     `;
 
-    // ===== 留言板 =====
-    h += `
-    <div class="module-card">
-        <div class="module-title">📮 留言板</div>
-        <div class="module-options">
-            ${go.map(g => `
-                <label class="module-checkbox-label">
-                    <input type="checkbox" class="mailbox-group-checkbox" value="${g}" ${mg.includes(g) ? 'checked' : ''}>
-                    <span class="module-checkbox-custom"></span>
-                    <span class="module-label-text">${g}</span>
-                </label>
-            `).join('')}
-        </div>
-        <button onclick="saveMailboxGroups()" style="margin-top:10px;padding:10px 16px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;width:100%;">保存留言板分组</button>
+// ===== 留言板（树洞回音） =====
+h += `
+<div class="module-card">
+    <div class="module-title">🎐 树洞回音</div>
+    <div class="module-options">
+        ${go.map(g => `
+            <label class="module-checkbox-label">
+                <input type="checkbox" class="mailbox-group-checkbox" value="${g}" ${mg.includes(g) ? 'checked' : ''}>
+                <span class="module-checkbox-custom"></span>
+                <span class="module-label-text">${g}</span>
+            </label>
+        `).join('')}
     </div>
-    `;
+    <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;">
+        <button onclick="openCardCountSetting('mailbox')" style="flex:1;padding:10px 16px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:13px;cursor:pointer;white-space:nowrap;"> 拼字卡条数设置</button>
+        <button onclick="saveMailboxGroups()" style="flex:2;padding:10px 16px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:13px;cursor:pointer;">保存留言板分组</button>
+    </div>
+</div>
+`;
 
 // ===== 信箱拼信 =====
 h += `
 <div class="module-card">
-    <div class="module-title">✉️见字如晤</div>
+    <div class="module-title">✉️ 树心邮筒</div>
     <div class="module-options">
         ${go.map(g => `
             <label class="module-checkbox-label">
@@ -4785,7 +4799,10 @@ h += `
             </label>
         `).join('')}
     </div>
-    <button onclick="saveMailGroups()" style="margin-top:10px;padding:10px 16px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;width:100%;">保存信箱分组</button>
+    <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;">
+        <button onclick="openCardCountSetting('mail')" style="flex:1;padding:10px 16px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:13px;cursor:pointer;white-space:nowrap;">拼字卡条数设置</button>
+        <button onclick="saveMailGroups()" style="flex:2;padding:10px 16px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:13px;cursor:pointer;">保存信箱分组</button>
+    </div>
 </div>
 `;
 
@@ -4819,16 +4836,66 @@ console.log('🚀 saveChatGroups 被调用了');
     localStorage.setItem('chatGroups_backup', json);
     showToast('✅ 聊天分组已保存（已选 ' + s.length + ' 个）');
 }
-async function saveMailboxGroups(){const cbs=document.querySelectorAll('.mailbox-group-checkbox:checked');const s=Array.from(cbs).map(cb=>cb.value);await setCal('mailboxGroups',JSON.stringify(s));showToast('✅ 已保存');}
+async function saveMailboxGroups() {
+    var cbs = document.querySelectorAll('.mailbox-group-checkbox:checked');
+    var s = Array.from(cbs).map(cb => cb.value);
+    var json = JSON.stringify(s);
+    await setCal('mailboxGroups', json);
+    localStorage.setItem('mailboxGroups', json);
+    showToast('✅ 已保存');
+}
 async function saveMailGroups() {
     var cbs = document.querySelectorAll('.mail-group-checkbox:checked');
     var s = Array.from(cbs).map(cb => cb.value);
-    await setCal('mailGroups', JSON.stringify(s));
-localStorage.setItem('mailGroups', json); 
+    var json = JSON.stringify(s);  // ← 先定义 json
+    await setCal('mailGroups', json);
+    localStorage.setItem('mailGroups', json);  // ← 用定义好的 json
     showToast('✅ 已保存');
 }
 
 async function saveTarotGroup(){const v=document.getElementById('tarotGroupSelect').value;await setCal('tarotGroup',v);showToast('✅ 已保存');}
+
+// 打开拼字卡条数设置弹窗
+function openCardCountSetting(type) {
+    var modal = document.getElementById('cardCountModal');
+    if (!modal) return;
+    
+    var prefix = type === 'mail' ? 'mail' : 'mailbox';
+    var min = parseInt(localStorage.getItem(prefix + '_cardMin') || '1');
+    var max = parseInt(localStorage.getItem(prefix + '_cardMax') || '4');
+    
+    document.getElementById('cardMinInput').value = min;
+    document.getElementById('cardMaxInput').value = max;
+    
+    modal.dataset.type = type;
+    modal.style.display = 'flex';
+}
+
+// 关闭弹窗
+function closeCardCountModal() {
+    var modal = document.getElementById('cardCountModal');
+    if (modal) modal.style.display = 'none';
+}
+
+// 保存拼字卡条数设置
+function saveCardCountSetting() {
+    var modal = document.getElementById('cardCountModal');
+    var type = modal ? modal.dataset.type || 'mailbox' : 'mailbox';
+    var prefix = type === 'mail' ? 'mail' : 'mailbox';
+    
+    var min = parseInt(document.getElementById('cardMinInput').value) || 1;
+    var max = parseInt(document.getElementById('cardMaxInput').value) || 4;
+    
+    if (min < 1) min = 1;
+    if (max < min) max = min;
+    if (max > 10) max = 10;
+    
+    localStorage.setItem(prefix + '_cardMin', min);
+    localStorage.setItem(prefix + '_cardMax', max);
+    
+    closeCardCountModal();
+    showToast('✅ 已保存：最少 ' + min + ' 条，最多 ' + max + ' 条');
+}
 
 // ============ 数据管理 ============
 function openDataManage(){showPage('dataManagePage');renderDataManage();}
@@ -5618,6 +5685,10 @@ window.toggleTideDay = toggleTideDay;
 window.updateTideCycle = updateTideCycle;
 window.changeTideMonth = changeTideMonth;
 window.getTarotBackHTML = getTarotBackHTML;
+window.openCardCountSetting = openCardCountSetting;
+window.closeCardCountModal = closeCardCountModal;
+window.saveCardCountSetting = saveCardCountSetting;
+window.getRandomMood2 = getRandomMood2;
 
 
 init();
@@ -5627,5 +5698,30 @@ init();
 <div id="lockInputPanel">
     <input type="password" id="lockPasswordInput" maxlength="6" placeholder="通行令">
 </div>
+
+<div id="cardCountModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:16px;padding:24px;width:90%;max-width:340px;box-shadow:0 8px 30px rgba(0,0,0,0.2);">
+        <div style="font-size:16px;font-weight:600;color:#333;margin-bottom:4px;text-align:center;"> 拼字卡条数设置</div>
+        <div style="font-size:12px;color:#999;text-align:center;margin-bottom:16px;">秦彻每次回复会用多少条字卡拼成一句话</div>
+        
+        <div style="display:flex;gap:12px;margin-bottom:16px;align-items:center;justify-content:center;">
+            <div style="text-align:center;">
+                <div style="font-size:11px;color:#999;margin-bottom:4px;">最少</div>
+                <input type="number" id="cardMinInput" min="1" max="10" value="1" style="width:60px;padding:8px;border-radius:8px;border:1.5px solid #e8e0d8;text-align:center;font-size:16px;outline:none;">
+            </div>
+            <div style="font-size:20px;color:#ccc;">~</div>
+            <div style="text-align:center;">
+                <div style="font-size:11px;color:#999;margin-bottom:4px;">最多</div>
+                <input type="number" id="cardMaxInput" min="1" max="10" value="4" style="width:60px;padding:8px;border-radius:8px;border:1.5px solid #e8e0d8;text-align:center;font-size:16px;outline:none;">
+            </div>
+        </div>
+        
+        <div style="display:flex;gap:10px;">
+            <button onclick="closeCardCountModal()" style="flex:1;padding:10px;border-radius:10px;border:1px solid #ddd;background:#f5f5f5;color:#666;font-size:14px;cursor:pointer;">取消</button>
+            <button onclick="saveCardCountSetting()" style="flex:1;padding:10px;border-radius:10px;border:none;background:#d4a8b8;color:#fff;font-size:14px;cursor:pointer;">保存</button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
