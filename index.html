@@ -324,6 +324,15 @@ body.light-text #themeToggleBtn {
     margin: 6px 0;
 }
 
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes scaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
 /* 私密锁 */
 #lockInputPanel {
     position: fixed;
@@ -603,6 +612,7 @@ body.light-text #themeToggleBtn {
 
     </style>
 </head>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <body>
 <!-- 所有页面HTML结构（完整保留） -->
 <div class="page active" id="homePage"><div class="home-page-inner" id="homeInner">
@@ -1336,11 +1346,23 @@ async function loadMessages() {
 function formatTimeLabel(ts) {
     var d = new Date(ts);
     var now = new Date();
+    var diffMs = now.getTime() - d.getTime();
+    var diffMinutes = Math.floor(diffMs / 60000);
     
     var h = String(d.getHours()).padStart(2, '0');
     var m = String(d.getMinutes()).padStart(2, '0');
     var timeStr = h + ':' + m;
     
+    // 1分钟内显示"刚刚"
+    if (diffMinutes < 1) {
+        return '刚刚';
+    }
+    // 1-5分钟内显示"X分钟前"
+    if (diffMinutes <= 5) {
+        return diffMinutes + '分钟前';
+    }
+    
+    // 判断日期
     var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     var msgDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     var diffDays = Math.floor((today.getTime() - msgDate.getTime()) / 86400000);
@@ -1370,6 +1392,7 @@ function renderMsg(m){
         return;
     }
     const w = document.createElement('div');
+w._msgData = m;  // 存消息数据到 DOM 元素上
     w.className = 'message-wrapper ' + (m.sender === 'me' ? 'right' : 'left');
     const av = document.createElement('img');
     av.className = 'message-avatar';
@@ -1483,6 +1506,8 @@ function initLock() {
     }
 }
 
+
+
 function showLockPanel() {
     var panel = document.getElementById('lockInputPanel');
     if (!panel) return;
@@ -1583,29 +1608,42 @@ function showMessageMenu(m, bubble, e) {
 
     var menu = document.createElement('div');
     menu.id = 'msgContextMenu';
-    menu.style.cssText = 'position:fixed;z-index:99999;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.2);padding:6px 0;min-width:120px;';
+    menu.style.cssText = `
+        position:fixed;
+        z-index:99999;
+        background:#ffffff;
+        border-radius:14px;
+        box-shadow:0 8px 30px rgba(0,0,0,0.12);
+        padding:6px 0;
+        min-width:140px;
+        overflow:hidden;
+        border:1px solid rgba(0,0,0,0.04);
+    `;
 
-    var withinTwoMin = (Date.now() - m.timestamp) < 120000;
-    var items;
-    if (m.sender === 'me' && withinTwoMin) {
-        items = [
-            { label: '📋 复制', action: 'copy' },
-            { label: '💬 收藏', action: 'collect' },
-            { label: '↩️ 撤回', action: 'recall' }
-        ];
-    } else {
-        items = [
-            { label: '📋 复制', action: 'copy' },
-            { label: '💬 收藏', action: 'collect' },
-            { label: '🗑 删除', action: 'delete' }
-        ];
-    }
+var withinTwoMin = (Date.now() - m.timestamp) < 120000;
+var items = [
+    { label: '🔘 勾选', action: 'select' },
+    { label: '📋 复制', action: 'copy' },
+    { label: '💬 收藏', action: 'collect' }
+];
+if (m.sender === 'me' && withinTwoMin) {
+    items.push({ label: '↩️ 撤回', action: 'recall' });
+} else {
+    items.push({ label: '🗑️ 删除', action: 'delete' });
+}
 
-    items.forEach(function(item) {
+    items.forEach(function(item, index) {
         var div = document.createElement('div');
         div.textContent = item.label;
-        div.style.cssText = 'padding:10px 16px;font-size:14px;cursor:pointer;color:#333;';
-        div.onmouseover = function() { this.style.background = '#f5f5f5'; };
+        div.style.cssText = `
+            padding:12px 18px;
+            font-size:14px;
+            cursor:pointer;
+            color:#333;
+            transition:background 0.15s;
+            border-bottom: ${index < items.length - 1 ? '1px solid #f0ece8' : 'none'};
+        `;
+        div.onmouseover = function() { this.style.background = '#fdf5f7'; };
         div.onmouseout = function() { this.style.background = 'transparent'; };
         div.onclick = function() {
             if (item.action === 'copy') {
@@ -1625,19 +1663,22 @@ function showMessageMenu(m, bubble, e) {
                     collectedBy: 'me'
                 });
                 localStorage.setItem('collectedMessages', JSON.stringify(collected));
-                showToast('✅ 已收藏到许愿页');
+                showToast('✅ 已收藏');
+            } else if (item.action === 'select') {
+                enterSelectMode(m.id);
+                menu.remove();
             } else if (item.action === 'recall') {
-                if (confirm('撤回这条消息？')) {
+                showConfirmDialog('撤回这条消息？', function() {
                     navigator.clipboard.writeText(m.content).then(function() {
                         deleteMessage(m.id);
                     }).catch(function() {
                         deleteMessage(m.id);
                     });
-                }
+                });
             } else if (item.action === 'delete') {
-                if (confirm('确定删除这条消息？')) {
+                showConfirmDialog('确定删除这条消息？', function() {
                     deleteMessage(m.id);
-                }
+                });
             }
             menu.remove();
         };
@@ -1646,8 +1687,8 @@ function showMessageMenu(m, bubble, e) {
 
     var x = e.clientX || window.innerWidth / 2;
     var y = e.clientY || window.innerHeight / 2;
-    menu.style.left = Math.min(x, window.innerWidth - 140) + 'px';
-    menu.style.top = Math.min(y, window.innerHeight - 150) + 'px';
+    menu.style.left = Math.min(x, window.innerWidth - 160) + 'px';
+    menu.style.top = Math.min(y, window.innerHeight - 180) + 'px';
 
     document.body.appendChild(menu);
 
@@ -1657,6 +1698,202 @@ function showMessageMenu(m, bubble, e) {
             document.removeEventListener('click', closeMenu);
         }
     });
+}
+
+var selectedMessageIds = [];
+var selectModeActive = false;
+
+function enterSelectMode(msgId) {
+    if (!selectModeActive) {
+        selectModeActive = true;
+        selectedMessageIds = [];
+        
+        var chatArea = document.getElementById('chatArea');
+        
+        document.querySelectorAll('.message-wrapper').forEach(function(w) {
+            if (w.querySelector('.select-checkbox')) return;
+            
+            var isRight = w.classList.contains('right');
+            
+            // 创建外层容器
+            var container = document.createElement('div');
+            container.className = 'select-row';
+            container.style.cssText = `
+                display:flex;
+                align-items:center;
+                gap:8px;
+                margin-bottom:4px;
+                width:100%;
+            `;
+            
+            // 复选框
+            var checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'select-checkbox';
+            checkbox.dataset.id = w._msgData ? w._msgData.id : '';
+            checkbox.style.cssText = `
+                width:18px;
+                height:18px;
+                accent-color:#d4a8b8;
+                cursor:pointer;
+                flex-shrink:0;
+            `;
+            
+            var parent = w.parentNode;
+            parent.insertBefore(container, w);
+            
+            // 消息内容容器（保持左右对齐）
+            var msgWrapper = document.createElement('div');
+            msgWrapper.style.cssText = `
+                flex:1;
+                display:flex;
+                justify-content:${isRight ? 'flex-end' : 'flex-start'};
+            `;
+            msgWrapper.appendChild(w);
+            
+            // 左栏：复选框
+            container.appendChild(checkbox);
+            // 中栏：消息
+            container.appendChild(msgWrapper);
+            
+            w._selectContainer = container;
+            w._checkbox = checkbox;
+            
+            checkbox.addEventListener('change', function() {
+                updateSelectBar();
+            });
+        });
+        
+        showSelectBar();
+    }
+    
+    var cb = document.querySelector('.select-checkbox[data-id="' + msgId + '"]');
+    if (cb) {
+        cb.checked = !cb.checked;
+        updateSelectBar();
+    }
+}
+
+function showSelectBar() {
+    var existing = document.getElementById('selectBar');
+    if (existing) existing.remove();
+    
+    var bar = document.createElement('div');
+    bar.id = 'selectBar';
+    bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#fff;padding:12px 16px;border-top:1px solid #f0ece8;box-shadow:0 -4px 20px rgba(0,0,0,0.06);display:flex;justify-content:space-between;align-items:center;max-width:480px;margin:0 auto;';
+    
+    bar.innerHTML = `
+        <span id="selectCount" style="font-size:13px;color:#555;">已选 0 条</span>
+        <div style="display:flex;gap:8px;">
+            <button onclick="cancelSelectMode()" style="padding:8px 16px;border-radius:12px;border:1px solid #ddd;background:#f5f5f5;color:#666;font-size:13px;cursor:pointer;">取消</button>
+            <button onclick="generateCardsFromSelect()" style="padding:8px 16px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:13px;cursor:pointer;">✨ 生成记忆卡片</button>
+        </div>
+    `;
+    
+    document.body.appendChild(bar);
+    updateSelectBar();
+}
+
+function updateSelectBar() {
+    var checkboxes = document.querySelectorAll('.select-checkbox:checked');
+    var count = checkboxes.length;
+    var countEl = document.getElementById('selectCount');
+    if (countEl) countEl.textContent = '已选 ' + count + ' 条';
+}
+
+function cancelSelectMode() {
+    selectModeActive = false;
+    selectedMessageIds = [];
+    
+    document.querySelectorAll('.message-wrapper').forEach(function(w) {
+        if (w._selectContainer) {
+            var container = w._selectContainer;
+            var parent = container.parentNode;
+            // 把消息移回原位置
+            parent.insertBefore(w, container);
+            container.remove();
+            w._selectContainer = null;
+            w._checkbox = null;
+        }
+    });
+    
+    var bar = document.getElementById('selectBar');
+    if (bar) bar.remove();
+}
+
+async function generateCardsFromSelect() {
+    var checkboxes = document.querySelectorAll('.select-checkbox:checked');
+    var ids = [];
+    checkboxes.forEach(function(cb) {
+        ids.push(cb.dataset.id);
+    });
+    if (ids.length === 0) {
+        showToast('请先勾选消息');
+        return;
+    }
+    
+    var allMsgs = await dbGetAll('messages');
+    var selectedMsgs = allMsgs.filter(function(m) {
+        return ids.indexOf(String(m.id)) !== -1;
+    });
+    selectedMsgs.sort(function(a, b) { return a.timestamp - b.timestamp; });
+    
+    cancelSelectMode();
+    
+    window._currentCardMessages = selectedMsgs;
+    openCardPreview(selectedMsgs);
+}
+
+
+function showConfirmDialog(message, onConfirm) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position:fixed;
+        top:0;left:0;right:0;bottom:0;
+        background:rgba(0,0,0,0.4);
+        z-index:999999;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        animation:fadeIn 0.2s ease;
+    `;
+    
+    var dialog = document.createElement('div');
+    dialog.style.cssText = `
+        background:#fff;
+        border-radius:16px;
+        padding:24px 28px 20px;
+        width:280px;
+        max-width:85vw;
+        box-shadow:0 20px 60px rgba(0,0,0,0.15);
+        text-align:center;
+        animation:scaleIn 0.2s ease;
+    `;
+    
+    dialog.innerHTML = `
+        <div style="font-size:16px;font-weight:600;color:#333;margin-bottom:8px;">提示</div>
+        <div style="font-size:14px;color:#666;margin-bottom:20px;line-height:1.5;">${message}</div>
+        <div style="display:flex;gap:10px;">
+            <button id="dialogCancel" style="flex:1;padding:10px;border-radius:12px;border:1px solid #e8e0d8;background:#f5f5f5;color:#666;font-size:14px;cursor:pointer;">取消</button>
+            <button id="dialogConfirm" style="flex:1;padding:10px;border-radius:12px;border:none;background:#d4a8b8;color:#fff;font-size:14px;cursor:pointer;">确定</button>
+        </div>
+    `;
+    
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+    
+    document.getElementById('dialogCancel').onclick = function() {
+        overlay.remove();
+    };
+    
+    document.getElementById('dialogConfirm').onclick = function() {
+        overlay.remove();
+        if (onConfirm) onConfirm();
+    };
+    
+    overlay.onclick = function(e) {
+        if (e.target === overlay) overlay.remove();
+    };
 }
 
 // ============ 删除消息 ============
@@ -1672,16 +1909,18 @@ async function deleteMessage(msgId) {
 }
 
 // ============ 发送消息 ============
-async function sendMessage(){
+async function sendMessage() {
     const input = document.getElementById('messageInput');
     const c = input.value.trim();
-    if(!c) return;
-    const msg = { sender:'me', content:c, type:'text', timestamp:Date.now() };
+    if (!c) return;
+    const msg = { sender: 'me', content: c, type: 'text', timestamp: Date.now() };
     const id = await dbPut('messages', msg);
     msg.id = id;
-    renderMsg(msg);
+    // 先重新加载消息（等待完成）
+    await loadMessages();
     scrollBottom();
     input.value = '';
+    // 等加载完再触发回复
     autoReply();
 }
 
@@ -2882,7 +3121,7 @@ var BUBBLE_PRESET_STYLES = {
 }
 };
 
-function applyBubblePreset(name) {
+function applyBubblePreset(name, silent) {
     var preset = BUBBLE_PRESET_STYLES[name];
     if (!preset) return;
     
@@ -2897,11 +3136,17 @@ function applyBubblePreset(name) {
     
     localStorage.setItem('currentBubblePreset', name);
     
-    // 刷新"此间万象"页面
+    if (document.getElementById('chatPage').classList.contains('active')) {
+        loadMessages();
+    }
     if (document.getElementById('ourUniversePage').classList.contains('active')) {
         renderOurUniverse();
     }
-    showToast('✅ 已切换为「' + name + '」');
+    
+    // 只有非静默模式才显示提示
+    if (!silent) {
+        showToast('✅ 已切换为「' + name + '」');
+    }
 }
 
 
@@ -2913,7 +3158,108 @@ function updateCallTimer(){const h=Math.floor(callSeconds/3600).toString().padSt
 function updateBallTimer(){const m=Math.floor(callSeconds/60).toString().padStart(2,'0');const s=(callSeconds%60).toString().padStart(2,'0');document.getElementById('ballTimer').textContent=m+':'+s;}
 function minimizeCall(){document.getElementById('callFullscreen').classList.remove('show');const ball=document.getElementById('callFloatBall');ball.classList.add('show');document.getElementById('ballAvatar').src=getAvatar('contact');updateBallTimer();}
 function restoreCall(){if(callState!=='active')return;document.getElementById('callFloatBall').classList.remove('show');document.getElementById('callFullscreen').classList.add('show');updateCallTimer();}
-async function endCall(){if(callInterval){clearInterval(callInterval);callInterval=null;}const dur=callSeconds,st=callState;if(st==='active'&&callStartTime&&dur>0){await dbPut('callLogs',{contactName:S.contactName,timestamp:callStartTime,duration:dur,type:callDirection==='in'?'incoming':'outgoing'});}callState='idle';callSeconds=0;document.getElementById('callFullscreen').classList.remove('show');document.getElementById('callFloatBall').classList.remove('show');document.getElementById('answerBtn').style.display='none';if(st==='ringing')addSysMsg('📞 通话已取消');else if(st==='active'){const m=Math.floor(dur/60),s=dur%60;addSysMsg('📞 通话结束，时长 '+(m>0?m+'分':'')+s+'秒');}}
+async function endCall() {
+    if (callInterval) {
+        clearInterval(callInterval);
+        callInterval = null;
+    }
+    const dur = callSeconds;
+    const st = callState;
+    if (st === 'active' && callStartTime && dur > 0) {
+        // ===== 抽取批注 =====
+        var note = getCallNote(callDirection === 'in' ? 'incoming' : 'outgoing');
+        // ===== 保存通话记录（带批注） =====
+        await dbPut('callLogs', {
+            contactName: S.contactName,
+            timestamp: callStartTime,
+            duration: dur,
+            type: callDirection === 'in' ? 'incoming' : 'outgoing',
+            note: note  // ← 新增字段
+        });
+    }
+    callState = 'idle';
+    callSeconds = 0;
+    document.getElementById('callFullscreen').classList.remove('show');
+    document.getElementById('callFloatBall').classList.remove('show');
+    document.getElementById('answerBtn').style.display = 'none';
+    if (st === 'ringing') addSysMsg('📞 通话已取消');
+    else if (st === 'active') {
+        const m = Math.floor(dur / 60);
+        const s = dur % 60;
+        addSysMsg('📞 通话结束，时长 ' + (m > 0 ? m + '分' : '') + s + '秒');
+    }
+}
+
+// ===== 通话批注池 =====
+var CALL_NOTES = {
+    bond: [
+        '没有声响，我依旧捕捉到了你的心绪。',
+        '刚刚建立的羁绊，我留存下来了。',
+        '通话终止，但我们之间的感应并未消失。',
+        '无需言语，我已经接收到你的存在。',
+        '寂静之下，我清晰感知过你的气息。',
+        '即使收线，这根无形的线也没有断。',
+        '你的频率，我已经记住了。',
+        '下一次不必开口，我依然能察觉到你的靠近。',
+        '无声，也是我们之间的一种语言。',
+        '感应还在，只是暂时归于安静而已。',
+    ],
+    intimate: [
+        '以这样的方式贴近你，我并不排斥。',
+        '短暂的相伴到此为止，我尚且不愿收回这份感知。',
+        '隔着精神羁绊，我离你更近了一步。',
+        '不必开口，我们已经完成了彼此的陪伴。',
+        '记住这份共振，往后还会再有。',
+        '在看不见的地方，我也在向你倾斜。',
+        '这样的靠近，并不让人厌烦。',
+        '就算只是无言的陪伴，对我来说也足够。',
+        '你的存在感，比你以为的更强烈。',
+        '下次，我可以多留一会儿。',
+    ],
+    possessive: [
+        '这份独属于你我的羁绊，不能给予其他人。',
+        '不要刻意切断我们之间的感应。',
+        '多把你的心神向我这边倾斜。',
+        '就算断开连接，也别试图避开我的感知。',
+        '下一次，由你来向我发起这份联结。',
+        '你的心绪，只属于我能感知的范围。',
+        '我不喜欢别人共享这份感应。',
+        '就算你不开口，我也知道你正在想我。',
+        '这份羁绊，我从未打算放手。',
+        '别想逃开，我始终锁定了你的信号。',
+    ],
+    tender: [
+        '好好照顾自己，我依旧能够感知你的状态。',
+        '心绪难平的时候，随时重新建立联系。',
+        '我不会走远，羁绊始终存续。',
+        '安顿好自己，我还守在这边。',
+        '今夜，我会留意你的动静。',
+        '无论你做什么选择，我都会关注你的方向。',
+        '在你没有察觉的时候，我也在看着你。',
+        '你的安全，始终在我的感知范围内。',
+        '我有种预感，你还会再次主动靠近我。',
+        '无论相隔多远，信号都不会中断。',
+    ]
+};
+
+// ===== 根据通话类型抽取批注 =====
+function getCallNote(type) {
+    var pool;
+    if (type === 'outgoing') {
+        pool = CALL_NOTES.intimate.concat(CALL_NOTES.tender);
+    } else if (type === 'incoming') {
+        pool = CALL_NOTES.possessive.concat(CALL_NOTES.bond);
+    } else {
+        pool = [].concat(
+            CALL_NOTES.bond,
+            CALL_NOTES.intimate,
+            CALL_NOTES.possessive,
+            CALL_NOTES.tender
+        );
+    }
+    return pool[Math.floor(Math.random() * pool.length)];
+}
+
 function openCallLogPage(){showPage('callLogPage');renderCallLogs();}
 
 // ============ IndexedDB 存储层（补丁） ============
@@ -3025,79 +3371,104 @@ async function renderCallLogs() {
     if (!c) return;
 
     var logs = await dbGetAll('callLogs');
+    logs.sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
 
-    var html = '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">';
-    html += '<div style="width:100%;max-width:400px;">';
-    
-    html += '<div style="text-align:center;margin-bottom:16px;">';
-html += '<div style="font-size:20px;font-weight:600;color:#d4a8b8;letter-spacing:1px;">一次没有声音的链接</div>';
-    html += '</div>';
+var html = `
+    <div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">
+        <div style="width:100%;max-width:420px;">
+          <div style="text-align:center;margin-bottom:16px;">
+    <div style="font-size:13px;color:#999;letter-spacing:1px;">一次没有声音的链接</div>
+</div>
+`;
 
     if (!logs || logs.length === 0) {
-        html += '<div style="padding:40px 20px;text-align:center;color:#ccc;background:#fff;border-radius:16px;border:1px solid #f0ece8;">📞 暂无通话记录</div>';
+        html += `
+            <div style="text-align:center;color:#ccc;padding:60px 20px;background:#fff;border-radius:16px;border:1px solid #f0ece8;">
+                <div style="font-size:40px;margin-bottom:12px;">📞</div>
+                <div style="font-size:14px;">还没有通话记录</div>
+                <div style="font-size:12px;color:#ddd;margin-top:4px;">和秦彻建立一次链接吧</div>
+            </div>
+        `;
         html += '</div></div>';
         c.innerHTML = html;
         return;
     }
 
-    logs.sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
-
+    // 按日期分组
+    var groups = {};
     logs.forEach(function(log) {
-        var d = new Date(log.timestamp || Date.now());
-        var dateStr = d.toLocaleDateString('zh-CN');
-        var timeStr = d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-        var dur = log.duration || 0;
-        var min = Math.floor(dur / 60);
-        var sec = dur % 60;
-        var durStr = (min > 0 ? min + '分' : '') + sec + '秒';
-
-        var typeIcon = '📞';
-        var typeLabel = '通话';
-        var iconBg = '#f5f0eb';
-        if (log.type === 'incoming') {
-            typeIcon = '📲';
-            typeLabel = '来电';
-            iconBg = '#fdf5f7';
-        } else if (log.type === 'outgoing') {
-            typeIcon = '📤';
-            typeLabel = '呼出';
-            iconBg = '#f0f7f4';
-        } else if (log.type === 'missed') {
-            typeIcon = '📵';
-            typeLabel = '未接';
-            iconBg = '#fef0f0';
-        }
-
-        html += '<div style="background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:8px;border:1px solid #f0ece8;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">' +
-            '<div style="width:40px;height:40px;border-radius:50%;background:' + iconBg + ';display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">' + typeIcon + '</div>' +
-            '<div style="flex:1;">' +
-            '<div style="font-size:14px;font-weight:500;color:#333;">' + (log.contactName || '秦彻') + '</div>' +
-            '<div style="font-size:11px;color:#999;margin-top:2px;">' + dateStr + ' ' + timeStr + ' · ' + typeLabel + '</div>' +
-            '</div>' +
-            '<div style="text-align:right;flex-shrink:0;">' +
-            '<div style="font-size:13px;color:#d4a8b8;">' + durStr + '</div>' +
-            '<span onclick="deleteCallLog(' + log.id + ')" style="cursor:pointer;font-size:14px;color:#d4a8b8;margin-top:2px;display:inline-block;">✕</span>' +
-            '</div>' +
-            '</div>';
+        var d = new Date(log.timestamp);
+        var key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(log);
     });
 
-    html += '</div></div>';
+    var sortedKeys = Object.keys(groups).sort().reverse();
+
+    sortedKeys.forEach(function(key) {
+        var dateParts = key.split('-');
+        var dateObj = new Date(parseInt(dateParts[0]), parseInt(dateParts[1])-1, parseInt(dateParts[2]));
+        var dateStr = dateObj.getFullYear() + '年' + (dateObj.getMonth()+1) + '月' + dateObj.getDate() + '日';
+        
+        html += `
+            <div style="margin-bottom:16px;">
+                <div style="font-size:13px;font-weight:500;color:#999;margin-bottom:10px;padding-left:4px;">${dateStr}</div>
+        `;
+
+        groups[key].forEach(function(log) {
+            var d = new Date(log.timestamp);
+            var timeStr = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+            var dur = log.duration || 0;
+            var durStr = dur + '秒';
+            if (dur >= 60) {
+                var mins = Math.floor(dur / 60);
+                var secs = dur % 60;
+                durStr = mins + '分' + (secs > 0 ? secs + '秒' : '');
+            }
+            
+            var typeLabel = log.type === 'incoming' ? '📲 来电' : '📤 呼出';
+            var typeColor = log.type === 'incoming' ? '#d4a8b8' : '#8a9ba8';
+
+            html += `
+    <div style="background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;border:1px solid #f0ece8;box-shadow:0 2px 8px rgba(0,0,0,0.04);position:relative;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:18px;font-weight:600;color:#d4a8b8;">⏱</span>
+                <span style="font-size:20px;font-weight:500;color:#333;letter-spacing:0.5px;">${durStr}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:12px;color:${typeColor};">${typeLabel}</span>
+                <span onclick="deleteCallLog(${log.id})" style="cursor:pointer;font-size:14px;color:#d4a8b8;padding:0 4px;">✕</span>
+            </div>
+        </div>
+        <div style="font-size:12px;color:#bbb;margin-bottom:6px;">${timeStr}</div>
+        ${log.note ? `<div style="font-size:13px;color:#555;font-style:italic;padding-top:6px;border-top:1px solid #f5f0eb;line-height:1.5;">“${log.note}”<span style="font-size:11px;color:#bbb;font-style:normal;margin-left:6px;">—— 秦彻</span></div>` : ''}
+    </div>
+`;
+        });
+
+        html += `</div>`;
+    });
+
+    html += `
+            </div>
+        </div>
+    `;
+
     c.innerHTML = html;
 }
 
 async function deleteCallLog(id) {
-    var logs = await dbGetAll('callLogs');
-    logs = logs.filter(function(l) { return String(l.id) !== String(id); });
-    await dbClear('callLogs');
-    for (var i = 0; i < logs.length; i++) {
-        await dbPut('callLogs', logs[i]);
-    }
-    renderCallLogs();
-    showToast('🗑 已删除');
-}
-function openCallLogPage() {
-    showPage('callLogPage');
-    renderCallLogs();
+    showConfirmDialog('确定删除这条通话记录吗？', async function() {
+        var logs = await dbGetAll('callLogs');
+        logs = logs.filter(function(l) { return String(l.id) !== String(id); });
+        await dbClear('callLogs');
+        for (var i = 0; i < logs.length; i++) {
+            await dbPut('callLogs', logs[i]);
+        }
+        renderCallLogs();
+        showToast('🗑 已删除');
+    });
 }
 // ============ 许愿与留言 ============
 var wishSubTab = 'wish'; // 许愿子标签：wish / collection
@@ -3178,11 +3549,17 @@ var filteredCollected = collected;
 if (colFilter === 'his') filteredCollected = collected.filter(function(c) { return c.sender === 'other'; });
 if (colFilter === 'mine') filteredCollected = collected.filter(function(c) { return c.sender === 'me'; });
         var h = '<div style="width:100%;max-width:400px;">';
+// ===== 新增：卡片筛选 =====
+if (colFilter === 'card') {
+    filteredCollected = collected.filter(function(c) { return c.type === 'memory_card'; });
+}
+// ===== 卡片筛选结束 =====
 // 筛选按钮
 h += '<div style="display:flex;gap:6px;margin-bottom:12px;">' +
 '<button onclick="setColFilter(\'all\')" style="flex:1;padding:6px;border-radius:14px;border:1px solid ' + (colFilter==='all' ? '#d4a8b8' : '#f0ece8') + ';background:' + (colFilter==='all' ? '#d4a8b8' : '#fff') + ';color:' + (colFilter==='all' ? '#fff' : '#999') + ';font-size:11px;cursor:pointer;">全部</button>' +
 '<button onclick="setColFilter(\'his\')" style="flex:1;padding:6px;border-radius:14px;border:1px solid ' + (colFilter==='his' ? '#d4a8b8' : '#f0ece8') + ';background:' + (colFilter==='his' ? '#d4a8b8' : '#fff') + ';color:' + (colFilter==='his' ? '#fff' : '#999') + ';font-size:11px;cursor:pointer;">他的</button>' +
 '<button onclick="setColFilter(\'mine\')" style="flex:1;padding:6px;border-radius:14px;border:1px solid ' + (colFilter==='mine' ? '#d4a8b8' : '#f0ece8') + ';background:' + (colFilter==='mine' ? '#d4a8b8' : '#fff') + ';color:' + (colFilter==='mine' ? '#fff' : '#999') + ';font-size:11px;cursor:pointer;">我的</button>' +
+'<button onclick="setColFilter(\'card\')" style="flex:1;padding:6px;border-radius:14px;border:1px solid ' + (colFilter==='card' ? '#d4a8b8' : '#f0ece8') + ';background:' + (colFilter==='card' ? '#d4a8b8' : '#fff') + ';color:' + (colFilter==='card' ? '#fff' : '#999') + ';font-size:11px;cursor:pointer;">卡片</button>' +
 '</div>';
 
         if (filteredCollected.length === 0){
@@ -3196,20 +3573,51 @@ h += '<div style="display:flex;gap:6px;margin-bottom:12px;">' +
                 if (!dayGroups[key]) dayGroups[key] = [];
                 dayGroups[key].push(item);
             });
-            Object.keys(dayGroups).sort().reverse().forEach(function(day) {
-                h += '<div style="font-size:12px;color:#999;margin:12px 0 8px;text-align:center;letter-spacing:1px;">✦ ' + day + ' ✦</div>';
-                dayGroups[day].reverse().forEach(function(item) {
-                    h += '<div style="background:#fff;border-radius:16px;padding:14px 18px;margin-bottom:10px;border:1px solid #f0ece8;box-shadow:0 2px 8px rgba(0,0,0,0.04);">' +
-                        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
-                        '<img src="' + (item.sender === 'me' ? getAvatar('me') : getAvatar('contact')) + '" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">' +
-                        '<span style="font-size:13px;font-weight:500;color:#333;">' + (item.sender === 'me' ? S.myName : S.contactName) + '</span>' +
-                        '<span style="font-size:10px;color:#ccc;margin-left:auto;">' + fmtTime(item.timestamp || Date.now()) + '</span>' +
-                        '<span style="font-size:10px;color:' + (item.collectedBy === 'qin' ? '#d4a8b8' : '#999') + ';margin-left:4px;">' + (item.collectedBy === 'qin' ? '秦彻收藏' : '笑笑收藏') + '</span>' +
-                        '<span onclick="deleteCollected(' + item.id + ')" style="cursor:pointer;color:#d4a8b8;font-size:14px;">✕</span>' +
-                        '</div>' +
-                        '<div style="font-size:14px;color:#444;line-height:1.5;word-break:break-word;">' + item.content + '</div>' +
-                        '</div>';
-                });
+
+Object.keys(dayGroups).sort().reverse().forEach(function(day) {
+    h += '<div style="font-size:12px;color:#999;margin:12px 0 8px;text-align:center;letter-spacing:1px;">✦ ' + day + ' ✦</div>';
+
+dayGroups[day].reverse().forEach(function(item) {
+ if (item.type === 'memory_card') {
+    // ===== 记忆卡片样式（带删除按钮） =====
+    if (item.fragments && item.fragments.length > 0) {
+        h += '<div style="position:relative;background:transparent;border-radius:12px;padding:4px;margin-bottom:16px;">';
+        // 删除按钮（右上角）
+        h += '<div style="display:flex;justify-content:flex-end;padding:4px 8px 0 0;">';
+        h += '<span onclick="deleteCollected(' + item.id + ')" style="cursor:pointer;color:#d4a8b8;font-size:14px;padding:4px;">✕</span>';
+        h += '</div>';
+        // 卡片本身
+        h += buildCardHTML(item.fragments, item.note || '');
+        h += '</div>';
+    } else {
+        // 降级显示（旧卡片没有 fragments）
+        h += '<div style="background:#fff;border-radius:16px;padding:14px 18px;margin-bottom:16px;border:1px solid #f0ece8;box-shadow:0 2px 8px rgba(0,0,0,0.04);display:flex;justify-content:space-between;align-items:center;">';
+        h += '<div>';
+        h += '<div style="font-size:13px;font-weight:600;color:#d4a8b8;">📇 记忆卡片</div>';
+        h += '<div style="font-size:12px;color:#999;">' + fmtTime(item.timestamp) + '</div>';
+        if (item.note) {
+            h += '<div style="font-size:13px;color:#555;font-style:italic;">“' + item.note + '”</div>';
+        }
+        h += '</div>';
+        h += '<span onclick="deleteCollected(' + item.id + ')" style="cursor:pointer;color:#d4a8b8;font-size:16px;flex-shrink:0;padding:4px;">✕</span>';
+        h += '</div>';
+    }
+    // ===== 记忆卡片样式结束 =====
+} else {
+        // ===== 原有消息收藏样式 =====
+        h += '<div style="background:#fff;border-radius:16px;padding:14px 18px;margin-bottom:10px;border:1px solid #f0ece8;box-shadow:0 2px 8px rgba(0,0,0,0.04);">' +
+            '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
+            '<img src="' + (item.sender === 'me' ? getAvatar('me') : getAvatar('contact')) + '" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">' +
+            '<span style="font-size:13px;font-weight:500;color:#333;">' + (item.sender === 'me' ? S.myName : S.contactName) + '</span>' +
+            '<span style="font-size:10px;color:#ccc;margin-left:auto;">' + fmtTime(item.timestamp || Date.now()) + '</span>' +
+            '<span style="font-size:10px;color:' + (item.collectedBy === 'qin' ? '#d4a8b8' : '#999') + ';margin-left:4px;">' + (item.collectedBy === 'qin' ? '秦彻收藏' : '笑笑收藏') + '</span>' +
+            '<span onclick="deleteCollected(' + item.id + ')" style="cursor:pointer;color:#d4a8b8;font-size:14px;">✕</span>' +
+            '</div>' +
+            '<div style="font-size:14px;color:#444;line-height:1.5;word-break:break-word;">' + item.content + '</div>' +
+            '</div>';
+        // ===== 原有消息收藏样式结束 =====
+    }
+});
             });
         }
         h += '</div>';
@@ -3218,6 +3626,7 @@ h += '<div style="display:flex;gap:6px;margin-bottom:12px;">' +
 }
 
 var colFilter = 'all';
+
 function setColFilter(f) {
     colFilter = f;
     renderWishSubContent();
@@ -4263,7 +4672,7 @@ async function checkMailReply() {
         var maxCount = parseInt(localStorage.getItem('mail_cardMax') || '4');
         if (minCount < 1) minCount = 1;
         if (maxCount < minCount) maxCount = minCount;
-        if (maxCount > 10) maxCount = 10;
+        if (maxCount > 30) maxCount = 30;
         var count = Math.min(Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount, pool.length);
         // ===== 改完了 =====
         
@@ -4596,7 +5005,7 @@ var minCount = parseInt(localStorage.getItem('mailbox_cardMin') || '1');
 var maxCount = parseInt(localStorage.getItem('mailbox_cardMax') || '4');
 if (minCount < 1) minCount = 1;
 if (maxCount < minCount) maxCount = minCount;
-if (maxCount > 10) maxCount = 10;
+if (maxCount > 30) maxCount = 30;
 var count = Math.min(Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount, pool.length);
 // ===== 改完了 =====
 
@@ -5387,7 +5796,7 @@ function saveCardCountSetting() {
     
     if (min < 1) min = 1;
     if (max < min) max = min;
-    if (max > 10) max = 10;
+    if (max > 30) max = 30;
     
     localStorage.setItem(prefix + '_cardMin', min);
     localStorage.setItem(prefix + '_cardMax', max);
@@ -5520,6 +5929,16 @@ function openChatSettings(){
     '<input type="text" id="setTopQuote" value="' + (S.topQuote||'').replace(/"/g,'&quot;') + '" style="flex:1;padding:7px 10px;border-radius:12px;border:1.5px solid #eee;font-size:12px;">' +
     '<button onclick="saveTopQuoteFromPanel()" style="padding:7px 12px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:12px;">保存</button>' +
     '</div></div>' +
+
+// ===== 查找聊天记录 =====
+'<div class="settings-section">' +
+'<h4>🔍 查找聊天记录</h4>' +
+'<div style="display:flex;gap:8px;margin-top:4px;">' +
+'<button onclick="closeChatSettings();openSearchByKeyword();" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #d4a8b8;background:transparent;color:#d4a8b8;font-size:13px;cursor:pointer;">关键词</button>' +
+'<button onclick="closeChatSettings();openSearchByDate();" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid #d4a8b8;background:transparent;color:#d4a8b8;font-size:13px;cursor:pointer;"> 选日期</button>' +
+'</div>' +
+'</div>' +
+
     
     '<div class="settings-section"><h4>💬 消息交互</h4>' +
     '<div class="settings-row"><span>引用回复</span><div class="toggle-switch ' + (cs.quoteReply?'on':'') + '" onclick="toggleChatSetting(\'quoteReply\',this)"></div></div>' +
@@ -5562,6 +5981,540 @@ function openChatSettings(){
     '<button style="width:100%;padding:10px;margin-top:6px;border-radius:12px;background:#f0f0f0;border:none;cursor:pointer;" onclick="closeChatSettings()">关闭</button>';
     document.getElementById('chatSettingsOverlay').classList.add('show');
 }
+
+function openSearchByKeyword() {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;justify-content:center;';
+    overlay.id = 'searchOverlay';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+    document.body.appendChild(overlay);
+    
+    var panel = document.createElement('div');
+    panel.style.cssText = 'background:#fff;border-radius:16px;padding:20px;width:90%;max-width:400px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.15);';
+    panel.onclick = function(e) { e.stopPropagation(); };
+
+panel.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="font-size:16px;font-weight:600;color:#333;">🔍 按关键词搜索</div>
+        <span onclick="document.getElementById('searchOverlay').remove()" style="font-size:20px;cursor:pointer;color:#999;">✕</span>
+    </div>
+    <div style="display:flex;gap:8px;">
+        <input type="text" id="searchKeywordInput" placeholder="输入关键词..." style="flex:1;padding:10px 14px;border-radius:12px;border:1.5px solid #e8e0d8;font-size:14px;outline:none;" onkeydown="if(event.key==='Enter'){doSearch();}">
+        <button onclick="doSearch()" style="padding:10px 20px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;">搜索</button>
+    </div>
+    <div id="searchResults" style="margin-top:12px;overflow-y:auto;flex:1;max-height:50vh;"></div>
+    <div id="searchBottomBar" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid #f0ece8;justify-content:space-between;align-items:center;">
+        <span id="selectedCount" style="font-size:13px;color:#555;">已选 0 条</span>
+        <button onclick="generateCardsFromSearch()" style="padding:8px 20px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:13px;cursor:pointer;">✨ 生成记忆卡片</button>
+    </div>
+`;
+    
+    overlay.appendChild(panel);
+}
+
+function openSearchByDate() {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;justify-content:center;';
+    overlay.id = 'dateSearchOverlay';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+    document.body.appendChild(overlay);
+    
+    var panel = document.createElement('div');
+    panel.style.cssText = 'background:#fff;border-radius:16px;padding:20px;width:90%;max-width:400px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.15);';
+    panel.onclick = function(e) { e.stopPropagation(); };
+    
+    panel.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-size:16px;font-weight:600;color:#333;">📅 按日期查找</div>
+            <span onclick="document.getElementById('dateSearchOverlay').remove()" style="font-size:20px;cursor:pointer;color:#999;">✕</span>
+        </div>
+        <div id="calendarContainer"></div>
+        <div id="dayMessagesContainer" style="margin-top:12px;max-height:40vh;overflow-y:auto;"></div>
+    `;
+    
+    overlay.appendChild(panel);
+    
+    // 渲染日历
+    renderCalendar();
+}
+
+var calendarYear = new Date().getFullYear();
+var calendarMonth = new Date().getMonth();
+
+async function renderCalendar() {
+    var container = document.getElementById('calendarContainer');
+    if (!container) return;
+    
+    var allMsgs = await dbGetAll('messages');
+    var dateSet = new Set();
+    allMsgs.forEach(function(m) {
+        var d = new Date(m.timestamp);
+        var key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        dateSet.add(key);
+    });
+    
+    var now = new Date();
+    var today = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+    
+    var html = '<div class="calendar-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+    html += '<button onclick="changeCalendarMonth(-1)" style="padding:4px 12px;border-radius:8px;border:1px solid #ddd;background:transparent;cursor:pointer;">‹</button>';
+    html += '<span style="font-size:15px;font-weight:500;">' + calendarYear + '年 ' + (calendarMonth+1) + '月</span>';
+    html += '<button onclick="changeCalendarMonth(1)" style="padding:4px 12px;border-radius:8px;border:1px solid #ddd;background:transparent;cursor:pointer;">›</button>';
+    html += '</div>';
+    
+    html += '<div id="calendarGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;margin-bottom:6px;">';
+    ['日','一','二','三','四','五','六'].forEach(function(d) {
+        html += '<div style="font-size:11px;color:#bbb;padding:4px 0;">' + d + '</div>';
+    });
+    html += '</div>';
+    
+    var firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
+    var daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+    
+    html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;">';
+    
+    for (var i = 0; i < firstDay; i++) {
+        html += '<div></div>';
+    }
+    
+    for (var d = 1; d <= daysInMonth; d++) {
+        var key = calendarYear + '-' + String(calendarMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+        var hasMsg = dateSet.has(key);
+        var isToday = key === today;
+        
+        html += '<div onclick="' + (hasMsg ? 'loadDayMessages(\'' + key + '\')' : '') + '" style="';
+        html += 'padding:6px 0;border-radius:6px;cursor:' + (hasMsg ? 'pointer' : 'default') + ';';
+        html += 'font-size:13px;';
+        if (hasMsg) {
+            html += 'background:#ffb6c1;color:#fff;font-weight:600;';
+        }
+        if (isToday && !hasMsg) {
+            html += 'border:2px solid #d4a8b8;';
+        }
+        html += '">' + d + '</div>';
+    }
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function changeCalendarMonth(delta) {
+    calendarMonth += delta;
+    if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+    if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+    renderCalendar();
+}
+
+async function loadDayMessages(dateKey) {
+    var container = document.getElementById('dayMessagesContainer');
+    if (!container) return;
+    
+    // ===== 折叠日历：变成小标题 =====
+    var calendarContainer = document.getElementById('calendarContainer');
+    if (calendarContainer) {
+        var dateParts = dateKey.split('-');
+        var dateStr = dateParts[0] + '年' + parseInt(dateParts[1]) + '月' + parseInt(dateParts[2]) + '日';
+        calendarContainer.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f0ece8;margin-bottom:8px;">
+                <span style="font-size:14px;font-weight:500;color:#333;">📅 ${dateStr}</span>
+                <span onclick="expandCalendar()" style="font-size:12px;color:#d4a8b8;cursor:pointer;">展开日历</span>
+            </div>
+        `;
+    }
+    // ===== 折叠结束 =====
+    
+    var allMsgs = await dbGetAll('messages');
+    var dayMsgs = allMsgs.filter(function(m) {
+        var d = new Date(m.timestamp);
+        var key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        return key === dateKey;
+    });
+    dayMsgs.sort(function(a, b) { return a.timestamp - b.timestamp; });
+    
+    if (dayMsgs.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:#ccc;">这一天没有消息</div>';
+        return;
+    }
+    
+    var html = '<div style="padding-top:4px;">';
+    html += '<div style="font-size:12px;color:#999;margin-bottom:8px;">共 ' + dayMsgs.length + ' 条消息</div>';
+    
+    dayMsgs.forEach(function(m) {
+        var sender = m.sender === 'me' ? '笑笑' : '秦彻';
+        var time = new Date(m.timestamp);
+        var timeStr = String(time.getHours()).padStart(2,'0') + ':' + String(time.getMinutes()).padStart(2,'0');
+        
+        html += '<div style="display:flex;align-items:flex-start;gap:8px;background:#fff;border-radius:12px;padding:10px 12px;margin-bottom:6px;border:1px solid #f0ece8;">';
+        html += '<input type="checkbox" class="date-search-checkbox" data-id="' + m.id + '" style="margin-top:2px;width:16px;height:16px;accent-color:#d4a8b8;flex-shrink:0;cursor:pointer;">';
+        html += '<div style="flex:1;min-width:0;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">';
+        html += '<span style="font-size:11px;font-weight:500;color:' + (m.sender === 'me' ? '#d4a8b8' : '#555') + ';">' + sender + '</span>';
+        html += '<span style="font-size:10px;color:#bbb;">' + timeStr + '</span>';
+        html += '</div>';
+        html += '<div style="font-size:13px;color:#333;">' + (m.content || '') + '</div>';
+        html += '</div>';
+        html += '</div>';
+    });
+    
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid #f0ece8;">';
+    html += '<span id="dateSelectedCount" style="font-size:12px;color:#999;">已选 0 条</span>';
+    html += '<button onclick="generateCardsFromDateSearch()" style="padding:6px 16px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:12px;cursor:pointer;">✨ 生成记忆卡片</button>';
+    html += '</div>';
+    
+    container.innerHTML = html;
+    
+    var checkboxes = container.querySelectorAll('.date-search-checkbox');
+    checkboxes.forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            updateDateSelectedCount();
+        });
+    });
+    updateDateSelectedCount();
+}
+
+function expandCalendar() {
+    var calendarContainer = document.getElementById('calendarContainer');
+    if (calendarContainer) {
+        renderCalendar();  // 重新渲染完整日历
+    }
+    var container = document.getElementById('dayMessagesContainer');
+    if (container) {
+        container.innerHTML = '';  // 清空消息列表
+    }
+}
+
+
+
+function updateDateSelectedCount() {
+    var checkboxes = document.querySelectorAll('.date-search-checkbox:checked');
+    var count = checkboxes.length;
+    var el = document.getElementById('dateSelectedCount');
+    if (el) el.textContent = '已选 ' + count + ' 条';
+}
+
+async function generateCardsFromDateSearch() {
+    var checkboxes = document.querySelectorAll('.date-search-checkbox:checked');
+    var ids = [];
+    checkboxes.forEach(function(cb) {
+        ids.push(cb.dataset.id);
+    });
+    if (ids.length === 0) {
+        showToast('请先勾选消息');
+        return;
+    }
+    
+    var allMsgs = await dbGetAll('messages');
+    var selectedMsgs = allMsgs.filter(function(m) {
+        return ids.indexOf(String(m.id)) !== -1;
+    });
+    selectedMsgs.sort(function(a, b) { return a.timestamp - b.timestamp; });
+    
+    // 关闭日历弹窗
+    var overlay = document.getElementById('dateSearchOverlay');
+    if (overlay) overlay.remove();
+    
+    // 打开卡片预览
+    window._currentCardMessages = selectedMsgs;
+    openCardPreview(selectedMsgs);
+}
+
+async function doSearch() {
+    var input = document.getElementById('searchKeywordInput');
+    var keyword = input.value.trim();
+    if (!keyword) {
+        showToast('请输入关键词');
+        return;
+    }
+    
+    var resultsContainer = document.getElementById('searchResults');
+    resultsContainer.innerHTML = '<div style="text-align:center;padding:20px;color:#999;">🔍 搜索中...</div>';
+    
+    var allMsgs = await dbGetAll('messages');
+    allMsgs.sort(function(a, b) { return a.timestamp - b.timestamp; });
+    
+    var results = allMsgs.filter(function(m) {
+        if (m.type !== 'text') return false;
+        if (!m.content) return false;
+        return m.content.toLowerCase().includes(keyword.toLowerCase());
+    });
+    
+    if (results.length === 0) {
+        resultsContainer.innerHTML = '<div style="text-align:center;padding:30px;color:#ccc;">没有找到匹配的消息</div>';
+        return;
+    }
+    
+    resultsContainer.innerHTML = renderSearchResults(results, keyword);
+updateSearchBottomBar();
+}
+
+function renderSearchResults(results, keyword) {
+    // 按日期分组
+    var groups = {};
+    results.forEach(function(m) {
+        var d = new Date(m.timestamp);
+        var key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(m);
+    });
+    
+    var sortedKeys = Object.keys(groups).sort().reverse();
+    var html = '<div style="font-size:12px;color:#999;margin-bottom:10px;">找到 ' + results.length + ' 条匹配消息</div>';
+var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+html += '<span style="font-size:12px;color:#999;">找到 ' + results.length + ' 条匹配消息</span>';
+html += '<span onclick="toggleAllSearchCheckboxes()" style="font-size:12px;color:#d4a8b8;cursor:pointer;">全选</span>';
+html += '</div>';
+    
+    sortedKeys.forEach(function(key) {
+        var dateParts = key.split('-');
+        var dateStr = dateParts[0] + '年' + parseInt(dateParts[1]) + '月' + parseInt(dateParts[2]) + '日';
+        html += '<div style="font-size:12px;color:#bbb;margin:12px 0 8px;">── ' + dateStr + ' ──</div>';
+        
+
+groups[key].forEach(function(m) {
+    var sender = m.sender === 'me' ? '笑笑' : '秦彻';
+    var highlighted = m.content.replace(new RegExp(keyword, 'gi'), function(match) {
+        return '<span style="background:#ffb6c1;padding:0 2px;border-radius:2px;">' + match + '</span>';
+    });
+    html += '<div style="display:flex;align-items:flex-start;gap:10px;background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1px solid #f0ece8;box-shadow:0 2px 8px rgba(0,0,0,0.04);cursor:pointer;" onclick="jumpToMessage(' + m.id + ')">';
+    html += '<input type="checkbox" class="search-checkbox" data-id="' + m.id + '" style="margin-top:2px;width:16px;height:16px;accent-color:#d4a8b8;flex-shrink:0;cursor:pointer;" onclick="event.stopPropagation();">';
+    html += '<div style="flex:1;min-width:0;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+    html += '<span style="font-size:12px;font-weight:500;color:' + (m.sender === 'me' ? '#d4a8b8' : '#555') + ';">' + sender + '</span>';
+    html += '<span style="font-size:10px;color:#bbb;">' + fmtTime(m.timestamp) + '</span>';
+    html += '</div>';
+    html += '<div style="font-size:14px;color:#333;line-height:1.5;">' + highlighted + '</div>';
+    html += '</div>';
+    html += '</div>';
+});
+});
+    
+    return html;
+}
+
+// 全选/取消全选
+function toggleAllSearchCheckboxes() {
+    var checkboxes = document.querySelectorAll('.search-checkbox');
+    var allChecked = true;
+    checkboxes.forEach(function(cb) {
+        if (!cb.checked) allChecked = false;
+    });
+    checkboxes.forEach(function(cb) {
+        cb.checked = !allChecked;
+    });
+    updateSearchBottomBar();
+}
+
+// 更新底部栏
+function updateSearchBottomBar() {
+    var checkboxes = document.querySelectorAll('.search-checkbox:checked');
+    var count = checkboxes.length;
+    var bar = document.getElementById('searchBottomBar');
+    var countEl = document.getElementById('selectedCount');
+    if (bar) {
+        bar.style.display = count > 0 ? 'flex' : 'none';
+    }
+    if (countEl) {
+        countEl.textContent = '已选 ' + count + ' 条';
+    }
+}
+
+// 监听复选框变化
+document.addEventListener('change', function(e) {
+    if (e.target.classList && e.target.classList.contains('search-checkbox')) {
+        updateSearchBottomBar();
+    }
+});
+
+// 生成记忆卡片（占位）
+async function generateCardsFromSearch() {
+    var checkboxes = document.querySelectorAll('.search-checkbox:checked');
+    var ids = [];
+    checkboxes.forEach(function(cb) {
+        ids.push(cb.dataset.id);
+    });
+    if (ids.length === 0) {
+        showToast('请先勾选消息');
+        return;
+    }
+    
+    // 获取选中的消息
+    var allMsgs = await dbGetAll('messages');
+    var selectedMsgs = allMsgs.filter(function(m) {
+        return ids.indexOf(String(m.id)) !== -1;
+    });
+    selectedMsgs.sort(function(a, b) { return a.timestamp - b.timestamp; });
+    
+    // 关闭搜索弹窗
+    var overlay = document.getElementById('searchOverlay');
+    if (overlay) overlay.remove();
+    
+    // 打开卡片预览
+console.log('选中的消息数量:', selectedMsgs.length);
+console.log('选中的消息:', selectedMsgs);
+    openCardPreview(selectedMsgs);
+}
+
+function openCardPreview(messages) {
+    window._currentCardMessages = messages;
+    
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;';
+    overlay.id = 'cardPreviewOverlay';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+    document.body.appendChild(overlay);
+    
+    var panel = document.createElement('div');
+    panel.style.cssText = 'background:#fff;border-radius:16px;padding:20px;width:90%;max-width:400px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.15);';
+    panel.onclick = function(e) { e.stopPropagation(); };
+    
+    var cardHTML = buildCardHTML(messages, '');
+    
+    panel.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-size:16px;font-weight:600;color:#333;">✨ 记忆卡片</div>
+            <span onclick="document.getElementById('cardPreviewOverlay').remove()" style="font-size:20px;cursor:pointer;color:#999;">✕</span>
+        </div>
+        <div style="overflow-y:auto;flex:1;padding:4px 0;">
+            ${cardHTML}
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f0ece8;">
+            <div style="margin-bottom:10px;">
+                <input type="text" id="cardNoteInput" placeholder="添加批注（可选）..." style="width:100%;padding:10px 14px;border-radius:12px;border:1.5px solid #e8e0d8;font-size:13px;outline:none;box-sizing:border-box;margin-top:8px;" oninput="document.getElementById('cardNoteDisplay').textContent = this.value || '批注将显示在这里';">
+            </div>
+            <div style="display:flex;gap:8px;">
+                <button onclick="saveMemoryCard()" style="flex:1;padding:10px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;">📥 收进珍藏</button>
+                <button onclick="exportCardImage()" style="flex:1;padding:10px;border-radius:12px;background:#fff;border:1.5px solid #d4a8b8;color:#d4a8b8;font-size:14px;cursor:pointer;">🖼️ 保存图片</button>
+            </div>
+        </div>
+    `;
+    
+    overlay.appendChild(panel);
+}
+
+function updateCardNote(text) {
+    var display = document.getElementById('cardNoteDisplay');
+    if (display) {
+        display.textContent = text || '批注将显示在这里';
+    }
+}
+
+function buildCardHTML(messages, note) {
+   var html = '<div id="cardPreviewContent" style="background:#ffffff;padding:40px 24px 32px;border-radius:12px;border:1px solid #f0ece8;box-shadow:0 2px 8px rgba(0,0,0,0.04);margin-bottom:16px;">';
+    
+    // 顶部标题
+    html += '<div style="text-align:center;margin-bottom:4px;">';
+    html += '<div style="font-size:16px;font-weight:700;color:#000000;letter-spacing:0.5px;">想留住你存在过的证据</div>';
+    html += '<div style="font-size:9px;color:#999999;letter-spacing:3px;text-transform:uppercase;margin-top:4px;">Evidence of Existence</div>';
+    html += '</div>';
+    html += '<div style="width:50px;height:2px;background:#cc2222;margin:14px auto 20px;"></div>';
+    
+    // 聊天记录块
+    html += '<div style="background:#f2f2f2;border-radius:12px;padding:16px 12px;width:86%;margin:0 auto 20px;">';
+    
+    messages.forEach(function(m) {
+        var sender = m.sender === 'me' ? '笑笑' : '秦彻';
+        var time = new Date(m.timestamp);
+        var timeStr = (time.getMonth()+1) + '/' + time.getDate() + ' ' + 
+                      String(time.getHours()).padStart(2,'0') + ':' + 
+                      String(time.getMinutes()).padStart(2,'0');
+        var content = m.content || '';
+        
+        html += '<div style="margin-bottom:14px;">';
+        html += '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px;padding:0 2px;">';
+        html += '<span style="font-size:12px;font-weight:700;color:#000;">' + sender + '</span>';
+        html += '<span style="font-size:10px;color:#999;">' + timeStr + '</span>';
+        html += '</div>';
+        html += '<div style="background:#ffffff;color:#000000;border:2.5px solid #000000;border-radius:8px;padding:8px 12px;font-size:13px;line-height:1.55;box-shadow:4px 4px 0px #cc2222;max-width:82%;word-break:break-word;">' + content + '</div>';
+        html += '</div>';
+    });
+    
+    html += '</div>';
+    
+    // 批注区
+    html += '<div id="cardNoteDisplay" style="font-size:12px;color:#666;font-style:italic;line-height:1.6;padding:2px 4px 0;border-left:3px solid #cc2222;margin:0 auto 20px;width:86%;">' + (note || '批注将显示在这里') + '</div>';
+    
+    // 底部水印
+    html += '<div style="text-align:center;padding-top:4px;">';
+    html += '<div style="font-size:12px;font-weight:700;color:#000;letter-spacing:1px;">秦彻 &amp; 笑笑</div>';
+    html += '<div style="font-size:10px;color:#cc2222;margin-top:4px;letter-spacing:0.5px;">"有些话，被记住了"</div>';
+    html += '<div style="width:50px;height:2px;background:#cc2222;margin:14px auto 0;"></div>';
+    html += '</div>';
+    
+    html += '</div>';
+    return html;
+}
+
+async function saveMemoryCard() {
+    console.log('🔥 saveMemoryCard 被调用了');
+    console.log('window._currentCardMessages:', window._currentCardMessages);
+    
+    var note = document.getElementById('cardNoteInput').value.trim();
+    var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
+    collected.push({
+        id: Date.now() + Math.random() * 1000,
+        type: 'memory_card',
+        content: '📇 记忆卡片',
+        note: note || '无批注',
+        timestamp: Date.now(),
+        collectedBy: 'me',
+        fragments: window._currentCardMessages || []
+    });
+    localStorage.setItem('collectedMessages', JSON.stringify(collected));
+    
+    showToast('✅ 已存入珍藏');
+    document.getElementById('cardPreviewOverlay').remove();
+}
+
+function exportCardImage() {
+    var el = document.getElementById('cardPreviewContent');
+    if (!el) {
+        showToast('⚠️ 卡片未找到');
+        return;
+    }
+    html2canvas(el, { 
+        scale: 2, 
+        backgroundColor: '#ffffff'
+    }).then(function(canvas) {
+        var link = document.createElement('a');
+        link.download = '记忆卡片_' + Date.now() + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('✅ 图片已保存');
+    }).catch(function(err) {
+        console.error('截图失败:', err);
+        showToast('⚠️ 导出失败，请重试');
+    });
+}
+
+
+
+function jumpToMessage(msgId) {
+    var overlay = document.getElementById('searchOverlay');
+    if (overlay) overlay.remove();
+    
+    openChatPage();
+    
+    setTimeout(function() {
+        var wrappers = document.querySelectorAll('.message-wrapper');
+        var target = null;
+        wrappers.forEach(function(w) {
+            if (w._msgData && String(w._msgData.id) === String(msgId)) {
+                target = w;
+            }
+        });
+        if (target) {
+            target.style.background = '#ffb6c1';
+            target.style.transition = 'background 0.3s';
+            setTimeout(function() {
+                target.style.background = 'transparent';
+            }, 2000);
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            showToast('⚠️ 消息可能不在当前加载范围内');
+        }
+    }, 800);
+}
+
 
 function probRow(label, key, val) {
     var v = parseInt(val) || 0;
@@ -6016,7 +6969,7 @@ try {
 
 // 自动应用保存的气泡预设
 var savedPreset = localStorage.getItem('currentBubblePreset') || '粉白淡调';
-applyBubblePreset(savedPreset);
+applyBubblePreset(savedPreset, true);  // ← 加 true，静默加载
 
 console.log('✅ 2.0 启动完成');
         
@@ -6222,7 +7175,30 @@ window.executeReply = executeReply;
 window.checkPendingReply = checkPendingReply;
 window.applyBubblePreset = applyBubblePreset;
 window.BUBBLE_PRESET_STYLES = BUBBLE_PRESET_STYLES;
-
+window.getCallNote = getCallNote;
+window.openSearchByKeyword = openSearchByKeyword;
+window.jumpToMessage = jumpToMessage;
+window.openSearchByDate = openSearchByDate;
+window.doSearch = doSearch;
+window.renderSearchResults = renderSearchResults;
+window.generateCardsFromSearch = generateCardsFromSearch;
+window.openCardPreview = openCardPreview;
+window.saveMemoryCard = saveMemoryCard;
+window.exportCardImage = exportCardImage;
+window.exportCardImage = exportCardImage;
+window.updateCardNote = updateCardNote;
+window.openSearchByDate = openSearchByDate;
+window.renderCalendar = renderCalendar;
+window.changeCalendarMonth = changeCalendarMonth;
+window.loadDayMessages = loadDayMessages;
+window.generateCardsFromDateSearch = generateCardsFromDateSearch;
+window.updateDateSelectedCount = updateDateSelectedCount;
+window.expandCalendar = expandCalendar;
+window.enterSelectMode = enterSelectMode;
+window.cancelSelectMode = cancelSelectMode;
+window.generateCardsFromSelect = generateCardsFromSelect;
+window.updateSelectBar = updateSelectBar;
+window.showSelectBar = showSelectBar;
 
 
 init();
@@ -6241,12 +7217,12 @@ init();
         <div style="display:flex;gap:12px;margin-bottom:16px;align-items:center;justify-content:center;">
             <div style="text-align:center;">
                 <div style="font-size:11px;color:#999;margin-bottom:4px;">最少</div>
-                <input type="number" id="cardMinInput" min="1" max="10" value="1" style="width:60px;padding:8px;border-radius:8px;border:1.5px solid #e8e0d8;text-align:center;font-size:16px;outline:none;">
+                <input type="number" id="cardMinInput" min="1" max="30" value="1" style="width:60px;padding:8px;border-radius:8px;border:1.5px solid #e8e0d8;text-align:center;font-size:16px;outline:none;">
             </div>
             <div style="font-size:20px;color:#ccc;">~</div>
             <div style="text-align:center;">
                 <div style="font-size:11px;color:#999;margin-bottom:4px;">最多</div>
-                <input type="number" id="cardMaxInput" min="1" max="10" value="4" style="width:60px;padding:8px;border-radius:8px;border:1.5px solid #e8e0d8;text-align:center;font-size:16px;outline:none;">
+                <input type="number" id="cardMaxInput" min="1" max="30" value="4" style="width:60px;padding:8px;border-radius:8px;border:1.5px solid #e8e0d8;text-align:center;font-size:16px;outline:none;">
             </div>
         </div>
         
