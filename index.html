@@ -1940,6 +1940,7 @@ async function sendMessage() {
 }
 
 async function autoReply() {
+console.log('🔥 autoReply 被调用了');
     const cs = S.chatSettings;
     
     if (cs.readReceipt !== 'none') {
@@ -1972,8 +1973,15 @@ async function autoReply() {
     const min = parseInt(S.minReplyTime) || 1;
     const max = parseInt(S.maxReplyTime) || 5;
     const cnt = parseInt(S.replyCount) || 1;
+console.log('📊 autoReply cnt:', cnt);
     const delay = Math.floor(Math.random() * (max * 60000 - min * 1000 + 1)) + min * 1000;
     const replyAt = Date.now() + delay;
+
+console.log('📝 设置 pendingReplyAt:', replyAt);
+    console.log('📊 cnt:', cnt, 'delay:', delay, '秒:', Math.floor(delay/1000));
+    localStorage.setItem('pendingReplyAt', String(replyAt));
+    localStorage.setItem('pendingReplyCount', String(cnt));
+    console.log('✅ 已保存 pendingReplyAt:', localStorage.getItem('pendingReplyAt'));
     
     // 存储待回复信息（用于补发）
     localStorage.setItem('pendingReplyAt', String(replyAt));
@@ -1995,6 +2003,7 @@ async function autoReply() {
     }, delay);
 }
 async function executeReply(cnt, scheduledTime) {
+console.log('🔥 executeReply 被调用，cnt:', cnt);
     // 移除"正在输入..."提示
     var ti = document.querySelector('.typing-indicator');
     if (ti) ti.remove();
@@ -5932,16 +5941,26 @@ function showTarotContext() {
     '</div>' +
     '<div style="font-size:18px;font-weight:600;color:#333;margin-bottom:16px;">选择牌阵</div>' +
     '<div style="display:flex;gap:8px;margin-bottom:20px;">' +
-    '<div onclick="selectTarotSpread(1)" data-spread="1" style="flex:1;padding:14px 6px;background:#fff;border:2px solid #d4a8b8;border-radius:12px;text-align:center;cursor:pointer;">' +
+   '<div onclick="selectTarotSpread(1)" ontouchstart="selectTarotSpread(1)" data-spread="1" style="flex:1;padding:14px 6px;background:#fff;border:2px solid #d4a8b8;border-radius:12px;text-align:center;cursor:pointer;">' +
     '<div style="font-size:14px;font-weight:500;">单张</div></div>' +
-    '<div onclick="selectTarotSpread(3)" data-spread="3" style="flex:1;padding:14px 6px;background:#fff;border:1px solid #f0ece8;border-radius:12px;text-align:center;cursor:pointer;">' +
+'<div onclick="selectTarotSpread(3)" ontouchstart="selectTarotSpread(3)" data-spread="3" style="flex:1;padding:14px 6px;background:#fff;border:1px solid #f0ece8;border-radius:12px;text-align:center;cursor:pointer;">' +
     '<div style="font-size:14px;font-weight:500;">三张</div></div>' +
     '</div>' +
     '<textarea id="tarotQuestionInput" placeholder="想问什么？（可不填）" style="width:100%;height:60px;padding:10px;border:1px solid #f0ece8;border-radius:10px;font-size:13px;background:#fff;resize:vertical;box-sizing:border-box;margin-bottom:20px;"></textarea>' +
     '<button onclick="renderTarotDeck()" style="width:100%;padding:12px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:15px;cursor:pointer;">🃏 翻牌</button>' +
     '</div></div>';
-}
 
+    // ===== 双重保险：用 addEventListener 绑定牌阵切换 =====
+    document.querySelectorAll('[data-spread]').forEach(function(el) {
+        el.addEventListener('click', function() {
+            selectTarotSpread(parseInt(el.dataset.spread));
+        });
+        el.addEventListener('touchstart', function() {
+            selectTarotSpread(parseInt(el.dataset.spread));
+        });
+    });
+    // ===== 绑定结束 =====
+}
 function selectTarotContext(context) {
     tarotState.context = context;
     document.querySelectorAll('[data-ctx]').forEach(function(b) {
