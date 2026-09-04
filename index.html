@@ -2044,6 +2044,7 @@ console.log('🔥 executeReply 被调用，cnt:', cnt);
                     collectedBy: 'qin'
                 });
                 localStorage.setItem('collectedMessages', JSON.stringify(collected));
+addSysMsg('📌 秦彻收藏了你的一条消息', scheduledTime || Date.now());
             }
         }
         
@@ -2487,7 +2488,7 @@ html += '</div>';
         html += '<div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:10px;">';
         var holidayKeys = Object.keys(HOLIDAY_DATA);
         holidayKeys.forEach(function(name) {
-            html += '<div class="voice-keyword" data-group="节日" data-keyword="' + name + '" style="padding:6px 14px;border-radius:16px;background:rgba(255,107,129,0.15);border:1px solid rgba(255,107,129,0.3);color:#ffb6c1;font-size:13px;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px;" onclick="playHolidayVoice(\'' + name + '\')">🎐 ' + name + '</div>';
+            html += '<div class="voice-keyword" data-group="节日" data-keyword="' + name + '" style="padding:6px 14px;border-radius:16px;background:rgba(255,107,129,0.15);border:1px solid rgba(255,107,129,0.3);color:#ffb6c1;font-size:13px;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px;" onclick="playHolidayVoice(\'' + name + '\')">' + name + '</div>';
         });
         html += '</div>';
     }
@@ -2911,7 +2912,6 @@ var HOLIDAY_DATA = {
 };
 
 // ===== 触发节日 =====
-// ===== 触发节日 =====
 async function triggerHoliday(name) {
     var holidayKey = 'holiday_triggered_' + name;
     if (localStorage.getItem(holidayKey) === 'true') {
@@ -2953,16 +2953,14 @@ async function triggerHoliday(name) {
         read: false,
         holiday: name
     });
+
     localStorage.setItem('mailLetters', JSON.stringify(mailList));
-    
-    // ===== 3. 系统通知 =====
-    addSysMsg('💌 收到一封来自秦彻的节日来信');
-    
+addSysMsg('💌 秦彻给你写了一封信', Date.now());
+
     // 标记已触发
     localStorage.setItem(holidayKey, 'true');
 }
 
-// ===== 检测节日 =====
 // ===== 检测节日 =====
 function checkHoliday() {
     if (typeof Lunar === 'undefined') {
@@ -3015,118 +3013,577 @@ function checkHoliday() {
 function openWordCardLibrary(){showPage('wordcardLibraryPage');renderWordCardLibrary();}
 async function getAllGroups(){const cards=await dbGetAll('wordcards');const dg=await dbGetAll('disabledGroups');const dgids=new Set(dg.map(d=>d.groupId));const gm=new Map();cards.forEach(c=>{const gid=c.groupId||'default';const gn=c.groupName||'默认分组';if(!gm.has(gid))gm.set(gid,{id:gid,name:gn,isSystem:false,disabled:dgids.has(gid),cardCount:0});});cards.forEach(c=>{if(c.content==='__GROUP_PLACEHOLDER__')return;const gid=c.groupId||'default';if(gm.has(gid))gm.get(gid).cardCount++;});return Array.from(gm.values());}
 async function getCardsByGroup(gid){const cards=await dbGetAll('wordcards');const dc=await dbGetAll('disabledCards');const dids=new Set(dc.map(d=>String(d.cardId)));return cards.filter(c=>{if(!c||!c.content||c.content==='__GROUP_PLACEHOLDER__')return false;const cg=c.groupId||'default';return cg===gid||c.groupName===gid;}).map(c=>({id:c.id,content:c.content,isSystem:false,disabled:dids.has(String(c.id)),groupId:c.groupId||'default'}));}
-async function renderWordCardLibrary(){
+async function renderWordCardLibrary() {
     document.getElementById('wordcardContent').innerHTML =
     '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:#f8f5f0;min-height:100vh;">' +
     '<div style="width:100%;max-width:400px;">' +
-  '<div class="wordcard-top-bar" style="display:flex;gap:8px;margin-bottom:12px;">' +
-'<button onclick="openBatchAdd()" style="flex:1;padding:10px 8px;border-radius:12px;background:#fff;border:1px solid #d4a8b8;color:#d4a8b8;font-size:12px;cursor:pointer;">📝 批量添加</button>' +
-'<button onclick="document.getElementById(\'importCardsInput\').click()" style="flex:1;padding:10px 8px;border-radius:12px;background:#fff;border:1px solid #d4a8b8;color:#d4a8b8;font-size:12px;cursor:pointer;">📥 导入</button>' +
-'<button onclick="exportCardsJSON()" style="flex:1;padding:10px 8px;border-radius:12px;background:#fff;border:1px solid #d4a8b8;color:#d4a8b8;font-size:12px;cursor:pointer;">📤 导出</button>' +
+   // ===== 顶部按钮行 =====
+'<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">' +
+'<button onclick="openBatchAdd()" style="flex:1;padding:8px 6px;border-radius:12px;background:#fff;border:1px solid #d4a8b8;color:#d4a8b8;font-size:11px;cursor:pointer;">📝 批量添加</button>' +
+'<button onclick="createGroup()" style="flex:1;padding:8px 6px;border-radius:12px;background:#fff;border:1px solid #d4a8b8;color:#d4a8b8;font-size:11px;cursor:pointer;">➕ 新建分组</button>' +
+'<button onclick="document.getElementById(\'importCardsInput\').click()" style="flex:1;padding:8px 6px;border-radius:12px;background:#fff;border:1px solid #d4a8b8;color:#d4a8b8;font-size:11px;cursor:pointer;">📥 导入</button>' +
+'<button onclick="exportCardsJSON()" style="flex:1;padding:8px 6px;border-radius:12px;background:#fff;border:1px solid #d4a8b8;color:#d4a8b8;font-size:11px;cursor:pointer;">📤 导出</button>' +
 '</div>' +
+    // ===== 搜索框 =====
     '<input type="text" class="wordcard-global-search" id="wordcardGlobalSearch" placeholder="🔍 搜索全部字卡..." oninput="searchAllCardsAndDisplay()">' +
-    '<input type="text" class="wordcard-search" id="wordcardSearch" placeholder="🔍 搜索分组名称..." oninput="filterWordCards()">' +
     '<div id="globalSearchResults" style="display:none;margin-bottom:8px;"></div>' +
+// ===== 分组搜索框（新增） =====
+'<input type="text" class="wordcard-search" id="wordcardSearch" placeholder="🔍 搜索分组名称..." oninput="filterWordCards()" style="width:100%;padding:8px 12px;border-radius:14px;border:1.5px solid #eee;font-size:12px;outline:none;margin-bottom:6px;">' +
+    // ===== 分组列表（横排滑动） =====
+    '<div id="groupList" style="margin:10px 0;"></div>' +
+    // ===== 详情区域 =====
     '<div id="wordcardDetailArea"></div>' +
-    '<div class="wordcard-groups-section"><div style="font-weight:600;font-size:13px;color:#333;margin-bottom:8px;">📁 字卡分组管理</div><div id="groupList"></div><div class="add-group-row"><input type="text" id="newGroupInput" placeholder="新建分组..."><button onclick="createGroup()">+ 新建</button></div></div>' +
     '</div></div>';
+    
+    renderGroupList();
+// 默认显示所有字卡
+setTimeout(function() {
+    viewAllCards(1);
+}, 100);
+}
+
+function loadMoreAllCards() {
+    viewAllCards(allCardCurrentPage + 1);
+}
+
+var searchTimer = null;
+
+async function searchAllCardsAndDisplay() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(async function() {
+        var kw = document.getElementById('wordcardGlobalSearch').value.trim();
+        var co = document.getElementById('globalSearchResults');
+        var detail = document.getElementById('wordcardDetailArea');
+        
+        if (!kw) {
+            co.style.display = 'none';
+            // ===== 恢复显示字卡列表 =====
+            if (detail) detail.style.display = '';
+            return;
+        }
+        co.style.display = 'block';
+        
+        // ===== 隐藏分组字卡列表，减少 DOM 压力 =====
+        if (detail) detail.style.display = 'none';
+        // ===== 隐藏结束 =====
+        
+        // ===== 显示加载状态 =====
+        co.innerHTML = '<div style="text-align:center;padding:20px;color:#999;">🔍 搜索中...</div>';
+        
+        var results = await searchAllCards(kw);
+        if (results.length === 0) {
+            co.innerHTML = '<p style="text-align:center;color:#ccc;padding:10px;">未找到匹配的字卡</p>';
+            // 恢复显示字卡列表（因为没搜到）
+            if (detail) detail.style.display = '';
+            return;
+        }
+        
+        var dc = await dbGetAll('disabledCards');
+        var dids = new Set(dc.map(function(d) { return String(d.cardId); }));
+        
+        // ===== 限制显示数量：最多 20 条 =====
+        var maxShow = 20;
+        var showResults = results.slice(0, maxShow);
+        var totalCount = results.length;
+        // ===== 限制结束 =====
+        
+        var h = '<div style="background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">';
+        h += '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#999;margin-bottom:10px;">';
+        h += '<span>🔍 找到 ' + totalCount + ' 条' + (totalCount > maxShow ? '，显示前 ' + maxShow + ' 条' : '') + '</span>';
+        h += '<span onclick="toggleAllSearchCheckboxes()" style="color:#d4a8b8;cursor:pointer;">全选</span>';
+        h += '</div>';
+        
+        showResults.forEach(function(c) {
+            var is = dids.has(String(c.id));
+            var gid = c.groupId || 'default';
+            var groupName = c.groupName || '未分组';
+            
+            h += '<div style="background:#fff;border:1px solid #f0ece8;border-radius:14px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,0.04);cursor:pointer;" onclick="locateCard(\'' + c.id + '\',\'' + gid + '\',\'' + groupName + '\')">';
+            h += '<input type="checkbox" class="search-result-checkbox" value="' + c.id + '" style="width:16px;height:16px;accent-color:#d4a8b8;flex-shrink:0;cursor:pointer;" onclick="event.stopPropagation();">';
+            h += '<span style="flex:1;font-size:14px;color:#333;word-break:break-all;">' + c.content + '</span>';
+            h += '<span style="font-size:10px;color:#999;background:#f5f0eb;padding:2px 8px;border-radius:10px;flex-shrink:0;">' + groupName + '</span>';
+            h += '<div style="display:flex;gap:8px;flex-shrink:0;" onclick="event.stopPropagation();">';
+            h += '<span style="font-size:16px;cursor:pointer;" onclick="editCardContent(\'' + c.id + '\',\'' + gid + '\')">✎</span>';
+            h += '<span style="font-size:16px;cursor:pointer;" onclick="toggleCardDisable(\'' + c.id + '\',\'' + gid + '\',' + (c.isSystem || false) + ')">' + (is ? '☑️' : '🚫') + '</span>';
+            h += '<span style="font-size:16px;cursor:pointer;" onclick="moveCard(\'' + c.id + '\',\'' + gid + '\')">🔀</span>';
+            h += '<span style="font-size:16px;cursor:pointer;" onclick="deleteCard(\'' + c.id + '\',\'' + gid + '\',' + (c.isSystem || false) + ')">🗑️</span>';
+            h += '</div></div>';
+        });
+        
+        if (totalCount > maxShow) {
+            h += '<div style="text-align:center;padding:8px;font-size:11px;color:#999;">还有 ' + (totalCount - maxShow) + ' 条未显示，请使用更精确的关键词</div>';
+        }
+        
+        h += '<div style="display:flex;gap:8px;margin-top:12px;">';
+        h += '<button onclick="batchDeleteSearchResults()" style="flex:1;padding:10px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;">批量删除</button>';
+        h += '<button onclick="batchMoveSearchResults()" style="flex:1;padding:10px;border-radius:12px;background:#fff;border:1px solid #d4a8b8;color:#d4a8b8;font-size:14px;cursor:pointer;">批量移动</button>';
+        h += '</div></div>';
+        
+        co.innerHTML = h;
+    }, 300);
+}
+
+function locateCard(cardId, groupId, groupName) {
+    // 关闭搜索结果
+    var searchResults = document.getElementById('globalSearchResults');
+    if (searchResults) {
+        searchResults.style.display = 'none';
+        document.getElementById('wordcardGlobalSearch').value = '';
+    }
+    
+    // ===== 恢复显示字卡列表区域 =====
+    var detail = document.getElementById('wordcardDetailArea');
+    if (detail) detail.style.display = '';
+    // ===== 恢复结束 =====
+    
+    // 切换到对应的分组
+    viewGroupCards(groupId, groupName);
+    
+    // 高亮分组卡片
+    setTimeout(function() {
+        document.querySelectorAll('#groupList > div > div').forEach(function(el) {
+            el.style.border = '1px solid #f0ece8';
+            el.style.background = '#fff';
+            el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)';
+        });
+        var items = document.querySelectorAll('#groupList > div > div');
+        items.forEach(function(el) {
+            var nameEl = el.querySelector('div:first-child span:first-child');
+            if (nameEl && nameEl.textContent === groupName) {
+                el.style.border = '2px solid #d4a8b8';
+                el.style.background = '#fdf5f7';
+                el.style.boxShadow = '0 2px 12px rgba(212,168,184,0.15)';
+            }
+        });
+    }, 100);
+    
+    // 等待渲染完成后高亮字卡
+    setTimeout(function() {
+        var cardEl = document.querySelector('.card-checkbox[value="' + cardId + '"]');
+        if (cardEl) {
+            var wrapper = cardEl.closest('div[style*="border:1px solid #f0ece8"]');
+            if (wrapper) {
+                wrapper.style.background = '#ffb6c1';
+                wrapper.style.transition = 'background 0.5s';
+                setTimeout(function() {
+                    wrapper.style.background = 'transparent';
+                }, 2000);
+                wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    }, 300);
+}
+// ===== 搜索结果批量操作 =====
+
+// 获取搜索结果中选中的 ID
+function getSelectedSearchIds() {
+    var ids = [];
+    document.querySelectorAll('.search-result-checkbox:checked').forEach(function(cb) {
+        ids.push(cb.value);
+    });
+    return ids;
+}
+
+// 批量删除搜索结果
+async function batchDeleteSearchResults() {
+    var ids = getSelectedSearchIds();
+    if (ids.length === 0) {
+        showToast('请先勾选字卡');
+        return;
+    }
+    showConfirmDialog('确定删除选中的 ' + ids.length + ' 条字卡吗？', async function() {
+        var cards = await dbGetAll('wordcards');
+        cards = cards.filter(function(c) { return !ids.includes(String(c.id)); });
+        await idbClear('wordcards');
+for (var i = 0; i < cards.length; i++) {
+    await dbPut('wordcards', cards[i]);
+}
+
+// ===== 从页面上移除被删除的卡片 =====
+ids.forEach(function(id) {
+    // 从搜索结果中移除
+    document.querySelectorAll('.search-result-checkbox[value="' + id + '"]').forEach(function(cb) {
+        var el = cb.closest('div[style*="border:1px solid #f0ece8"]');
+        if (el) el.remove();
+    });
+    // 从分组卡片中移除
+    document.querySelectorAll('.card-checkbox[value="' + id + '"]').forEach(function(cb) {
+        var el = cb.closest('div[style*="border:1px solid #f0ece8"]');
+        if (el) el.remove();
+    });
+});
+// ===== 移除结束 =====
+
+showToast('已删除 ' + ids.length + ' 条');
+searchAllCardsAndDisplay();
+renderGroupList();
+    });
+}
+
+// 批量移动搜索结果
+async function batchMoveSearchResults() {
+    var ids = getSelectedSearchIds();
+    if (ids.length === 0) {
+        showToast('请先勾选字卡');
+        return;
+    }
+    
+    var groups = await getAllGroups();
+    if (groups.length === 0) {
+        showToast('⚠️ 暂无分组可移动');
+        return;
+    }
+    
+    // ===== 关闭之前的弹窗 =====
+    var oldOverlay = document.querySelector('.batch-move-overlay');
+    if (oldOverlay) oldOverlay.remove();
+    
+    // ===== 自定义分组选择弹窗 =====
+    var overlay = document.createElement('div');
+    overlay.className = 'batch-move-overlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;justify-content:center;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+    
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:#fff;border-radius:16px;padding:20px;width:85%;max-width:360px;max-height:70vh;box-shadow:0 20px 60px rgba(0,0,0,0.15);display:flex;flex-direction:column;';
+    dialog.onclick = function(e) { e.stopPropagation(); };
+    
+    var listHtml = '';
+    groups.forEach(function(g) {
+        listHtml += '<div onclick="confirmBatchMoveFromSearch(\'' + ids.join(',') + '\',\'' + g.id + '\',\'' + g.name + '\')" style="padding:12px 14px;border-bottom:1px solid #f0ece8;cursor:pointer;font-size:14px;display:flex;justify-content:space-between;align-items:center;">' +
+            '<span>' + g.name + '</span>' +
+            '<span style="font-size:11px;color:#999;">' + (g.cardCount || 0) + '条</span>' +
+            '</div>';
+    });
+    
+    dialog.innerHTML = `
+        <div style="font-size:16px;font-weight:600;color:#333;margin-bottom:4px;text-align:center;">📁 移动 ${ids.length} 条到</div>
+        <div style="font-size:12px;color:#999;text-align:center;margin-bottom:12px;">选择目标分组</div>
+        <div style="overflow-y:auto;flex:1;border:1px solid #f0ece8;border-radius:10px;">${listHtml}</div>
+        <button onclick="this.closest('.batch-move-overlay').remove()" style="width:100%;margin-top:12px;padding:10px;border-radius:12px;background:#f5f5f5;border:1px solid #e8e0d8;color:#666;font-size:14px;cursor:pointer;">取消</button>
+    `;
+    
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+}
+
+// ===== 从搜索结果确认移动 =====
+async function confirmBatchMoveFromSearch(idsStr, targetGid, targetName) {
+    // 关闭弹窗（精确查找）
+    var overlay = document.querySelector('.batch-move-overlay');
+    if (overlay) overlay.remove();
+    
+    var ids = idsStr.split(',');
+    var cards = await dbGetAll('wordcards');
+    cards.forEach(function(c) {
+        if (ids.includes(String(c.id))) {
+            c.groupId = targetGid;
+            c.groupName = targetName;
+        }
+    });
+    await idbClear('wordcards');
+    for (var i = 0; i < cards.length; i++) {
+        await dbPut('wordcards', cards[i]);
+    }
+    showToast('✅ 已移动 ' + ids.length + ' 条到「' + targetName + '」');
+    searchAllCardsAndDisplay();
     renderGroupList();
 }
-async function searchAllCardsAndDisplay(){
-    const kw=document.getElementById('wordcardGlobalSearch').value.trim();
-    const co=document.getElementById('globalSearchResults');
-    if(!kw){co.style.display='none';return;}
-    const results=await searchAllCards(kw);
-    co.style.display='block';
-    if(results.length===0){co.innerHTML='<p style="text-align:center;color:#ccc;padding:10px;">未找到匹配的字卡</p>';return;}
-    const dc=await dbGetAll('disabledCards');
-    const dids=new Set(dc.map(d=>String(d.cardId)));
-    let h='<div style="background:#fff;border-radius:12px;padding:10px;"><div style="font-size:12px;color:#999;margin-bottom:6px;">🔍 找到 '+results.length+' 条</div>';
-    results.forEach(c=>{
-        const is=dids.has(String(c.id));
-        const gid=c.groupId||'default';
-        h+='<div class="wordcard-list-item" style="'+(is?'opacity:0.5;':'')+'"><span style="flex:1;">'+c.content+'</span><span style="font-size:10px;color:#999;margin-right:8px;">'+(c.groupName||'')+'</span><div style="display:flex;gap:4px;">';
-        h+='<span style="background:'+(is?'#e8f5e9':'#fff8e1')+';color:'+(is?'#2e7d32':'#f57f17')+';font-size:10px;padding:2px 6px;border-radius:6px;cursor:pointer;" onclick="toggleCardDisable(\''+c.id+'\',\''+gid+'\','+(c.isSystem||false)+')">'+(is?'启用':'禁用')+'</span>';
-        h+='<span style="background:#e3f2fd;color:#1565c0;font-size:10px;padding:2px 6px;border-radius:6px;cursor:pointer;" onclick="moveCard(\''+c.id+'\',\''+gid+'\')">📁 移动</span>';
-        h+='<span style="background:#ffebee;color:#c62828;font-size:10px;padding:2px 6px;border-radius:6px;cursor:pointer;" onclick="deleteCard(\''+c.id+'\',\''+gid+'\','+(c.isSystem||false)+')">删除</span>';
-        h+='</div></div>';
+
+// 全选/取消全选搜索结果
+function toggleAllSearchCheckboxes() {
+    var checkboxes = document.querySelectorAll('.search-result-checkbox');
+    var allChecked = true;
+    checkboxes.forEach(function(cb) {
+        if (!cb.checked) allChecked = false;
     });
-    h+='</div>';co.innerHTML=h;
+    checkboxes.forEach(function(cb) {
+        cb.checked = !allChecked;
+    });
 }
-async function searchAllCards(kw){const cards=await dbGetAll('wordcards');return cards.filter(c=>c.content&&c.content!=='__GROUP_PLACEHOLDER__'&&c.content.toLowerCase().includes(kw.toLowerCase()));}
-async function renderGroupList(filter){
+
+// 获取搜索结果中选中的 ID
+function getSelectedSearchIds() {
+    var ids = [];
+    document.querySelectorAll('.search-result-checkbox:checked').forEach(function(cb) {
+        ids.push(cb.value);
+    });
+    return ids;
+}
+
+// 批量删除搜索结果
+async function batchDeleteSearchResults() {
+    var ids = getSelectedSearchIds();
+    if (ids.length === 0) { showToast('请先勾选字卡'); return; }
+    showConfirmDialog('确定删除选中的 ' + ids.length + ' 条字卡吗？', async function() {
+        var cards = await dbGetAll('wordcards');
+        cards = cards.filter(function(c) { return !ids.includes(String(c.id)); });
+        await idbClear('wordcards');
+        for (var i = 0; i < cards.length; i++) {
+            await dbPut('wordcards', cards[i]);
+        }
+        showToast('已删除 ' + ids.length + ' 条');
+        searchAllCardsAndDisplay();
+        renderGroupList();
+    });
+}
+
+
+async function searchAllCards(kw) {
+    var cards = await dbGetAll('wordcards');
+    return cards.filter(function(c) {
+        return c.content && c.content !== '__GROUP_PLACEHOLDER__' &&
+            c.content.toLowerCase().includes(kw.toLowerCase());
+    });
+}
+
+var filterTimer = null;
+
+async function filterWordCards() {
+    clearTimeout(filterTimer);
+    var input = document.getElementById('wordcardSearch');
+    var keyword = input.value.trim().toLowerCase();
+    
+    // 输入框变暗表示搜索中
+    input.style.opacity = '0.6';
+    
+    filterTimer = setTimeout(function() {
+        renderGroupList(keyword);
+        input.style.opacity = '1';
+    }, 300);
+}
+
+async function renderGroupList(filter) {
     const groups = await getAllGroups();
     let fg = groups;
     if (filter) fg = groups.filter(g => g.name.includes(filter) || g.id.includes(filter));
     const c = document.getElementById('groupList');
     c.innerHTML = '';
-    fg.forEach(g => {
-        const item = document.createElement('div');
-        item.style.cssText = 'background:#fff;border:1px solid #f0ece8;border-radius:14px;margin-bottom:8px;';
-        
-        const header = document.createElement('div');
-        header.style.cssText = 'padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;';
-        header.setAttribute('onclick', 'viewGroupCards(\'' + g.id + '\',\'' + g.name + '\')');
-        header.innerHTML =
-            '<div style="flex:1;opacity:' + (g.disabled ? '0.5' : '1') + ';">' +
-            '<div style="font-size:14px;font-weight:500;color:#333;">' + g.name + '</div>' +
-            '<div style="font-size:11px;color:#999;margin-top:2px;">' + (g.cardCount || 0) + '条</div>' +
-            '</div>' +
-            (g.isSystem ? '' : '<span onclick="deleteGroup(\'' + g.id + '\')" style="cursor:pointer;font-size:16px;padding:4px;" title="删除">🗑️</span>');
-        
-        var detail = document.createElement('div');
-        detail.id = 'groupDetail_' + g.id;
-        detail.style.cssText = 'display:none;border-top:1px solid #f0ece8;padding:10px 14px;';
-        
-        item.appendChild(header);
-        item.appendChild(detail);
-        c.appendChild(item);
+    
+    var scrollContainer = document.createElement('div');
+    scrollContainer.style.cssText = `
+        display:flex;
+        gap:8px;
+        overflow-x:auto;
+        padding:4px 4px 10px 4px;
+        scroll-snap-type:x mandatory;
+        -webkit-overflow-scrolling:touch;
+        scrollbar-width:thin;
+    `;
+    
+    // ===== 全部卡片 =====
+// 从现有分组数据计算总字卡数（不再重复查询数据库）
+var totalCount = 0;
+fg.forEach(function(g) {
+    totalCount += g.cardCount || 0;
+});
+
+var allItem = document.createElement('div');
+allItem.style.cssText = `
+    flex:0 0 auto;
+    scroll-snap-align:start;
+    background:#fff;
+    border:2px solid #d4a8b8;
+    border-radius:14px;
+    padding:10px 16px;
+    min-width:80px;
+    cursor:pointer;
+    transition:all 0.2s;
+    text-align:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.02);
+`;
+allItem.innerHTML = `
+    <div style="font-size:13px;font-weight:600;color:#d4a8b8;">全部</div>
+    <div style="font-size:10px;color:#999;margin-top:2px;">${totalCount}条</div>
+`;
+allItem.addEventListener('click', function() {
+    viewAllCards();
+});
+scrollContainer.appendChild(allItem);
+
+    
+    // ===== 分组卡片 =====
+    fg.forEach(function(g) {
+// ===== 跳过名为"全部"的分组（因为已经手动添加了） =====
+    if (g.name === '全部') return;
+    // ===== 跳过结束 =====
+        var item = document.createElement('div');
+        item.style.cssText = `
+            flex:0 0 auto;
+            scroll-snap-align:start;
+            background:${g.disabled ? 'rgba(0,0,0,0.05)' : '#fff'};
+            border:1px solid ${g.disabled ? '#e8e0d8' : '#f0ece8'};
+            border-radius:14px;
+            padding:10px 16px;
+            min-width:80px;
+            cursor:pointer;
+            transition:all 0.2s;
+            text-align:center;
+            box-shadow:0 2px 8px rgba(0,0,0,0.02);
+            opacity:${g.disabled ? '0.5' : '1'};
+        `;
+        item.innerHTML = `
+            <div style="display:flex;align-items:center;gap:6px;justify-content:center;">
+                <span style="font-size:13px;font-weight:500;color:#333;">${g.name}</span>
+                <span onclick="event.stopPropagation();editGroupName('${g.id}','${g.name}')" style="font-size:12px;color:#d4a8b8;cursor:pointer;">✎</span>
+            </div>
+            <div style="font-size:10px;color:#999;margin-top:2px;">${g.cardCount || 0}条</div>
+        `;
+        item.addEventListener('click', function() {
+console.log('🟢 点击了分组:', g.name);
+            viewGroupCards(g.id, g.name);
+        });
+        scrollContainer.appendChild(item);
     });
+    
+    c.appendChild(scrollContainer);
 }
-async function viewGroupCards(gid,gname){
-    await setCal('currentGroupName',gname);
-    var detail = document.getElementById('groupDetail_' + gid);
+
+var allCardPageSize = 50;
+var allCardCurrentPage = 1;
+var allCardTotal = 0;
+
+async function viewAllCards(page) {
+    page = page || 1;
+    
+    // ===== 高亮"全部" =====
+    document.querySelectorAll('#groupList > div > div').forEach(function(el) {
+        el.style.border = '1px solid #f0ece8';
+        el.style.background = '#fff';
+        el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)';
+    });
+    var allItem = document.querySelector('#groupList > div > div:first-child');
+    if (allItem) {
+        allItem.style.border = '2px solid #d4a8b8';
+        allItem.style.background = '#fdf5f7';
+        allItem.style.boxShadow = '0 2px 12px rgba(212,168,184,0.15)';
+    }
+    // ===== 高亮结束 =====
+    
+    var detail = document.getElementById('wordcardDetailArea');
     if (!detail) return;
     
-    if (detail.style.display === 'block') {
-        detail.style.display = 'none';
-        detail.innerHTML = '';
+    var cards = await dbGetAll('wordcards');
+    var validCards = cards.filter(function(c) {
+        return c.content && c.content !== '__GROUP_PLACEHOLDER__';
+    });
+    
+    allCardTotal = validCards.length;
+    
+    if (validCards.length === 0) {
+        detail.innerHTML = '<p style="color:#ccc;text-align:center;padding:20px;">暂无字卡</p>';
         return;
     }
     
-    let cards = await getCardsByGroup(gid);
-    cards = cards.filter(c => c && c.id && c.content);
-    const dc = await dbGetAll('disabledCards');
-    const dids = new Set(dc.map(d => String(d.cardId)));
+    // ===== 分页切片 =====
+    var start = (page - 1) * allCardPageSize;
+    var end = Math.min(start + allCardPageSize, validCards.length);
+    var pageCards = validCards.slice(start, end);
+    allCardCurrentPage = page;
+    // ===== 分页结束 =====
     
-    let h = '';
+    var dc = await dbGetAll('disabledCards');
+    var dids = new Set(dc.map(function(d) { return String(d.cardId); }));
+    
+    var h = '<div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+    h += '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#999;cursor:pointer;"><input type="checkbox" id="selectAllCards" onchange="toggleSelectAllCards()" style="width:16px;height:16px;accent-color:#d4a8b8;">全选</label>';
+    h += '<span style="font-size:11px;color:#999;">共 ' + allCardTotal + ' 条，显示第 ' + start + '-' + end + ' 条</span>';
+    h += '</div>';
+    
+    pageCards.forEach(function(c) {
+        var is = dids.has(String(c.id));
+        h += '<div style="background:#fff;border:1px solid #f0ece8;border-radius:14px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">';
+        h += '<input type="checkbox" class="card-checkbox" value="' + c.id + '" style="width:16px;height:16px;accent-color:#d4a8b8;flex-shrink:0;">';
+        h += '<span style="flex:1;font-size:14px;color:#333;word-break:break-all;">' + c.content + '</span>';
+        h += '<div style="display:flex;gap:8px;flex-shrink:0;">';
+        h += '<span style="font-size:16px;cursor:pointer;" onclick="editCardContent(\'' + c.id + '\',\'all\')">✎</span>';
+        h += '<span style="font-size:16px;cursor:pointer;" onclick="toggleCardDisable(\'' + c.id + '\',\'all\',' + (c.isSystem || false) + ')">' + (is ? '☑️' : '🚫') + '</span>';
+        h += '<span style="font-size:16px;cursor:pointer;" onclick="moveCard(\'' + c.id + '\',\'all\')">🔀</span>';
+        h += '<span style="font-size:16px;cursor:pointer;" onclick="deleteCard(\'' + c.id + '\',\'all\',' + (c.isSystem || false) + ')">🗑️</span>';
+        h += '</div></div>';
+    });
+    
+    // ===== 加载更多按钮 =====
+    if (end < validCards.length) {
+        h += '<div style="text-align:center;padding:8px;">';
+        h += '<button onclick="loadMoreAllCards()" style="padding:8px 24px;border-radius:20px;background:#fff;border:1px solid #d4a8b8;color:#d4a8b8;font-size:12px;cursor:pointer;">加载更多 +' + (validCards.length - end) + '条</button>';
+        h += '</div>';
+    }
+    // ===== 加载更多结束 =====
+    
+    h += '<div style="display:flex;gap:8px;margin-top:12px;">';
+    h += '<button onclick="batchDeleteCards(\'all\')" style="flex:1;padding:10px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;">批量删除</button>';
+    h += '<button onclick="batchMoveCards(\'all\')" style="flex:1;padding:10px;border-radius:12px;background:#fff;border:1px solid #d4a8b8;color:#d4a8b8;font-size:14px;cursor:pointer;">批量移动</button>';
+    h += '</div></div>';
+    
+    detail.innerHTML = h;
+}
+
+function loadMoreAllCards() {
+    viewAllCards(allCardCurrentPage + 1);
+}
+
+async function viewGroupCards(gid, gname) {
+// ===== 更新分组选中高亮 =====
+    document.querySelectorAll('#groupList > div > div').forEach(function(el) {
+        el.style.border = '1px solid #f0ece8';
+        el.style.background = '#fff';
+        el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)';
+    });
+    // 高亮当前分组（通过 gname 匹配）
+    var items = document.querySelectorAll('#groupList > div > div');
+    items.forEach(function(el) {
+        var nameEl = el.querySelector('div:first-child span:first-child');
+        if (nameEl && nameEl.textContent === gname) {
+            el.style.border = '2px solid #d4a8b8';
+            el.style.background = '#fdf5f7';
+            el.style.boxShadow = '0 2px 12px rgba(212,168,184,0.15)';
+        }
+    });
+    // ===== 高亮结束 =====
+    var detail = document.getElementById('wordcardDetailArea');
+    if (!detail) return;
+    
+    var cards = await getCardsByGroup(gid);
+    console.log('📋 字卡数量:', cards.length);
+    
+    var h = '';
+    
     if (cards.length === 0) {
         h += '<p style="color:#ccc;text-align:center;padding:20px;">暂无字卡</p>';
     } else {
-        h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">' +
-            '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#999;cursor:pointer;"><input type="checkbox" id="selectAllCards" onchange="toggleSelectAllCards()" style="width:16px;height:16px;accent-color:#d4a8b8;">全选</label>' +
-            '</div>';
+        var dc = await dbGetAll('disabledCards');
+        var dids = new Set(dc.map(function(d) { return String(d.cardId); }));
         
-        cards.forEach(c => {
-            const is = dids.has(String(c.id));
-            h += '<div style="background:#fff;border:1px solid #f0ece8;border-radius:14px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">' +
-                '<input type="checkbox" class="card-checkbox" value="' + c.id + '" style="width:16px;height:16px;accent-color:#d4a8b8;flex-shrink:0;">' +
-                '<span style="flex:1;font-size:14px;color:#333;word-break:break-all;">' + c.content + '</span>' +
-                '<div style="display:flex;gap:8px;flex-shrink:0;">' +
-                '<span style="font-size:16px;cursor:pointer;" title="' + (is ? '启用' : '禁用') + '" onclick="toggleCardDisable(\'' + c.id + '\',\'' + gid + '\',' + (c.isSystem || false) + ')">' + (is ? '☑️' : '🚫') + '</span>' +
-                '<span style="font-size:16px;cursor:pointer;" title="移动" onclick="moveCard(\'' + c.id + '\',\'' + gid + '\')">🔀</span>' +
-                '<span style="font-size:16px;cursor:pointer;" title="删除" onclick="deleteCard(\'' + c.id + '\',\'' + gid + '\',' + (c.isSystem || false) + ')">🗑️</span>' +
-                '</div></div>';
+        h += '<div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">';
+        h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">';
+        h += '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#999;cursor:pointer;"><input type="checkbox" id="selectAllCards" onchange="toggleSelectAllCards()" style="width:16px;height:16px;accent-color:#d4a8b8;">全选</label>';
+        h += '</div>';
+        
+        // ===== 遍历字卡 =====
+        cards.forEach(function(c) {
+            var is = dids.has(String(c.id));
+            h += '<div style="background:#fff;border:1px solid #f0ece8;border-radius:14px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">';
+            h += '<input type="checkbox" class="card-checkbox" value="' + c.id + '" style="width:16px;height:16px;accent-color:#d4a8b8;flex-shrink:0;">';
+            h += '<span style="flex:1;font-size:14px;color:#333;word-break:break-all;">' + c.content + '</span>';
+            h += '<div style="display:flex;gap:8px;flex-shrink:0;">';
+h += '<span style="font-size:16px;cursor:pointer;" onclick="editCardContent(\'' + c.id + '\',\'' + gid + '\')">✎</span>';
+h += '<span style="font-size:16px;cursor:pointer;" onclick="toggleCardDisable(\'' + c.id + '\',\'' + gid + '\',' + (c.isSystem || false) + ')">' + (is ? '☑️' : '🚫') + '</span>';
+h += '<span style="font-size:16px;cursor:pointer;" onclick="moveCard(\'' + c.id + '\',\'' + gid + '\')">🔀</span>';
+h += '<span style="font-size:16px;cursor:pointer;" onclick="deleteCard(\'' + c.id + '\',\'' + gid + '\',' + (c.isSystem || false) + ')">🗑️</span>';
+h += '</div></div>';
         });
+        // ===== 遍历结束 =====
         
-        h += '<div style="display:flex;gap:8px;margin-top:12px;">' +
-            '<button onclick="batchDeleteCards(\'' + gid + '\')" style="flex:1;padding:10px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;">批量删除</button>' +
-            '<button onclick="batchMoveCards(\'' + gid + '\')" style="flex:1;padding:10px;border-radius:12px;background:#fff;border:1px solid #d4a8b8;color:#d4a8b8;font-size:14px;cursor:pointer;">批量移动</button>' +
-            '</div>';
+        h += '<div style="display:flex;gap:8px;margin-top:12px;">';
+       h += '<button onclick="batchDeleteCards(\'all\')" style="flex:1;padding:10px;border-radius:12px;background:#d4a8b8;color:#fff;border:none;font-size:14px;cursor:pointer;">批量删除</button>';
+h += '<button onclick="batchMoveCards(\'all\')" style="flex:1;padding:10px;border-radius:12px;background:#fff;border:1px solid #d4a8b8;color:#d4a8b8;font-size:14px;cursor:pointer;">批量移动</button>';
+        h += '</div></div>';
     }
     
     detail.innerHTML = h;
-    detail.style.display = 'block';
+    console.log('✅ 渲染完成，h 长度:', h.length);
 }
 
 function toggleSelectAllCards() {
@@ -3166,6 +3623,21 @@ async function batchDeleteCards(gid) {
         await idbClear('wordcards');
         for (const c of cards) await dbPut('wordcards', c);
         
+        // ===== 从页面上移除被删除的卡片 =====
+        ids.forEach(function(id) {
+            // 从搜索结果中移除
+            document.querySelectorAll('.search-result-checkbox[value="' + id + '"]').forEach(function(cb) {
+                var el = cb.closest('div[style*="border:1px solid #f0ece8"]');
+                if (el) el.remove();
+            });
+            // 从分组卡片中移除
+            document.querySelectorAll('.card-checkbox[value="' + id + '"]').forEach(function(cb) {
+                var el = cb.closest('div[style*="border:1px solid #f0ece8"]');
+                if (el) el.remove();
+            });
+        });
+        // ===== 移除结束 =====
+        
         var gn = await getCal('currentGroupName', '');
         var detail = document.getElementById('groupDetail_' + gid);
         if (detail) {
@@ -3173,9 +3645,12 @@ async function batchDeleteCards(gid) {
             detail.innerHTML = '';
             viewGroupCards(gid, gn);
         }
+        renderGroupList();
         showToast('已删除' + ids.length + '条');
     };
 }
+
+
 
 async function batchMoveCards(gid) {
     var ids = getSelectedCardIds();
@@ -3230,41 +3705,254 @@ async function confirmBatchMove(fromGid, targetGid, ids) {
     viewGroupCards(fromGid, gn);
 }
 
+async function editGroupName(groupId, currentName) {
+    // ===== 自定义弹窗 =====
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;justify-content:center;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+    
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:#fff;border-radius:16px;padding:24px 28px 20px;width:300px;max-width:85vw;box-shadow:0 20px 60px rgba(0,0,0,0.15);text-align:center;';
+    dialog.onclick = function(e) { e.stopPropagation(); };
+    
+    dialog.innerHTML = `
+        <div style="font-size:16px;font-weight:600;color:#333;margin-bottom:8px;">✎ 修改分组名称</div>
+        <div style="font-size:13px;color:#666;margin-bottom:14px;">将「${currentName}」改为</div>
+        <input type="text" id="editGroupNameInput" value="${currentName}" style="width:100%;padding:10px 12px;border-radius:12px;border:1.5px solid #e8e0d8;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:16px;">
+        <div style="display:flex;gap:10px;">
+            <button id="dialogCancel" style="flex:1;padding:10px;border-radius:12px;border:1px solid #e8e0d8;background:#f5f5f5;color:#666;font-size:14px;cursor:pointer;">取消</button>
+            <button id="dialogConfirm" style="flex:1;padding:10px;border-radius:12px;border:none;background:#d4a8b8;color:#fff;font-size:14px;cursor:pointer;">保存</button>
+        </div>
+    `;
+    
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+    
+    var input = document.getElementById('editGroupNameInput');
+    input.focus();
+    input.select();
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('dialogConfirm').click();
+        }
+    });
+    
+    document.getElementById('dialogCancel').onclick = function() {
+        overlay.remove();
+    };
+    
+    document.getElementById('dialogConfirm').onclick = async function() {
+        var newName = input.value.trim();
+        if (!newName) {
+            showToast('⚠️ 请输入分组名称');
+            return;
+        }
+        if (newName === currentName) {
+            overlay.remove();
+            return;
+        }
+        overlay.remove();
+        await doEditGroupName(groupId, newName);
+    };
+}
+
+// ===== 实际执行修改分组名 =====
+async function doEditGroupName(groupId, newName) {
+    var cards = await dbGetAll('wordcards');
+    var updated = false;
+    cards.forEach(function(c) {
+        if (c.groupId === groupId) {
+            c.groupName = newName;
+            updated = true;
+        }
+    });
+    
+    if (!updated) {
+        showToast('⚠️ 未找到该分组');
+        return;
+    }
+    
+    await idbClear('wordcards');
+    for (var i = 0; i < cards.length; i++) {
+        await dbPut('wordcards', cards[i]);
+    }
+    
+    renderGroupList();
+    showToast('✅ 已更新为「' + newName + '」');
+}
+
 function closeCardDetail(){document.getElementById('wordcardDetailArea').innerHTML='';}
-async function filterWordCards(){renderGroupList(document.getElementById('wordcardSearch').value.trim().toLowerCase());}
-async function toggleCardDisable(cid,gid,isSys){
-    let dc = await dbGetAll('disabledCards');
-    const sc = String(cid);
-    const idx = dc.findIndex(d => String(d.cardId) === sc);
+async function toggleCardDisable(cid, gid, isSys) {
+    var dc = await dbGetAll('disabledCards');
+    var sc = String(cid);
+    var idx = dc.findIndex(function(d) { return String(d.cardId) === sc; });
     if (idx >= 0) dc.splice(idx, 1);
     else dc.push({ cardId: sc });
     await idbClear('disabledCards');
-    for (const d of dc) await dbPut('disabledCards', d);
+    for (var i = 0; i < dc.length; i++) {
+        await dbPut('disabledCards', dc[i]);
+    }
     
-    // 只刷新当前分组，不重新渲染列表
-    var gn = await getCal('currentGroupName', '');
-    var detail = document.getElementById('groupDetail_' + gid);
-    if (detail && detail.style.display === 'block') {
-        detail.style.display = 'none'; // 先收起
-        viewGroupCards(gid, gn); // 再展开，触发重新渲染
+    // ===== 立即更新卡片状态 =====
+    var isDisabled = idx < 0; // 刚刚被禁用
+    var icon = isDisabled ? '🚫' : '☑️';
+    
+    // 更新所有匹配的卡片
+    document.querySelectorAll('.search-result-checkbox[value="' + cid + '"]').forEach(function(cb) {
+        var cardEl = cb.closest('div[style*="border:1px solid #f0ece8"]');
+        if (cardEl) {
+            var span = cardEl.querySelector('span[style*="font-size:16px;cursor:pointer;"]');
+            if (span) span.textContent = icon;
+            cardEl.style.opacity = isDisabled ? '0.5' : '1';
+        }
+    });
+    document.querySelectorAll('.card-checkbox[value="' + cid + '"]').forEach(function(cb) {
+        var cardEl = cb.closest('div[style*="border:1px solid #f0ece8"]');
+        if (cardEl) {
+            var span = cardEl.querySelector('span[style*="font-size:16px;cursor:pointer;"]');
+            if (span) span.textContent = icon;
+            cardEl.style.opacity = isDisabled ? '0.5' : '1';
+        }
+    });
+    
+    showToast(idx >= 0 ? '✅ 已启用' : '🚫 已禁用');
+// ===== 重新渲染当前分组 =====
+    if (gid && gid !== 'all') {
+        var gname = await getCal('currentGroupName', '');
+        viewGroupCards(gid, gname);
+    } else {
+        viewAllCards();
     }
-    showToast(idx >= 0 ? '已启用' : '已禁用');
+    // ===== 刷新完成 =====
 }
-async function deleteCard(cid,gid,isSys){
+async function deleteCard(cid, gid, isSys) {
     if (!isSys) {
-        let cards = await dbGetAll('wordcards');
-        cards = cards.filter(c => String(c.id) !== String(cid));
-        await idbClear('wordcards');
-        for (const c of cards) await dbPut('wordcards', c);
+        showConfirmDialog('确定删除这条字卡吗？', async function() {
+            var cards = await dbGetAll('wordcards');
+            cards = cards.filter(function(c) { return String(c.id) !== String(cid); });
+            await idbClear('wordcards');
+            for (var i = 0; i < cards.length; i++) {
+                await dbPut('wordcards', cards[i]);
+            }
+            
+            // ===== 从页面上移除卡片 =====
+            // 1. 从搜索结果中移除
+            var searchResult = document.querySelector('.search-result-checkbox[value="' + cid + '"]');
+            if (searchResult) {
+                var cardEl = searchResult.closest('div[style*="border:1px solid #f0ece8"]');
+                if (cardEl) cardEl.remove();
+            }
+            // 2. 从分组卡片中移除
+            var groupCard = document.querySelector('.card-checkbox[value="' + cid + '"]');
+            if (groupCard) {
+                var cardEl = groupCard.closest('div[style*="border:1px solid #f0ece8"]');
+                if (cardEl) cardEl.remove();
+            }
+            
+            // ===== 更新分组卡片上的数量 =====
+            renderGroupList();
+            
+            showToast('🗑 已删除');
+        });
+    } else {
+        showToast('⚠️ 系统字卡不能删除');
     }
-    var gn = await getCal('currentGroupName', '');
-    var detail = document.getElementById('groupDetail_' + gid);
-    if (detail && detail.style.display === 'block') {
-        detail.style.display = 'none';
-        viewGroupCards(gid, gn);
-    }
-    showToast('已删除');
 }
+
+// ===== 编辑字卡内容 =====
+async function editCardContent(cardId, groupId) {
+    var cards = await dbGetAll('wordcards');
+    var card = cards.find(function(c) { return String(c.id) === String(cardId); });
+    if (!card) {
+        showToast('⚠️ 字卡不存在');
+        return;
+    }
+    
+    // ===== 自定义弹窗 =====
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;justify-content:center;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+    
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:#fff;border-radius:16px;padding:24px 28px 20px;width:320px;max-width:85vw;box-shadow:0 20px 60px rgba(0,0,0,0.15);';
+    dialog.onclick = function(e) { e.stopPropagation(); };
+    
+    dialog.innerHTML = `
+        <div style="font-size:16px;font-weight:600;color:#333;margin-bottom:8px;text-align:center;">✎ 编辑字卡</div>
+        <div style="font-size:13px;color:#999;margin-bottom:12px;text-align:center;">当前分组：${card.groupName || '未分组'}</div>
+        <textarea id="editCardContentInput" style="width:100%;min-height:80px;padding:10px 12px;border-radius:12px;border:1.5px solid #e8e0d8;font-size:14px;outline:none;box-sizing:border-box;resize:vertical;font-family:inherit;margin-bottom:16px;">${card.content}</textarea>
+        <div style="display:flex;gap:10px;">
+            <button id="dialogCancel" style="flex:1;padding:10px;border-radius:12px;border:1px solid #e8e0d8;background:#f5f5f5;color:#666;font-size:14px;cursor:pointer;">取消</button>
+            <button id="dialogConfirm" style="flex:1;padding:10px;border-radius:12px;border:none;background:#d4a8b8;color:#fff;font-size:14px;cursor:pointer;">保存</button>
+        </div>
+    `;
+    
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+    
+    var input = document.getElementById('editCardContentInput');
+    input.focus();
+    input.select();
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.shiftKey) {
+            // Shift+Enter 不提交
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('dialogConfirm').click();
+        }
+    });
+    
+    document.getElementById('dialogCancel').onclick = function() {
+        overlay.remove();
+    };
+    
+    document.getElementById('dialogConfirm').onclick = async function() {
+        var newContent = input.value.trim();
+        if (!newContent) {
+            showToast('⚠️ 字卡内容不能为空');
+            return;
+        }
+        overlay.remove();
+        await doEditCardContent(cardId, newContent);
+    };
+}
+
+// ===== 实际执行编辑字卡 =====
+async function doEditCardContent(cardId, newContent) {
+    var cards = await dbGetAll('wordcards');
+    var card = cards.find(function(c) { return String(c.id) === String(cardId); });
+    if (!card) {
+        showToast('⚠️ 字卡不存在');
+        return;
+    }
+    card.content = newContent;
+    
+    await idbClear('wordcards');
+    for (var i = 0; i < cards.length; i++) {
+        await dbPut('wordcards', cards[i]);
+    }
+    
+    // ===== 实时更新页面 =====
+    // 更新所有匹配的卡片显示
+    var newDisplay = newContent;
+    document.querySelectorAll('.search-result-checkbox[value="' + cardId + '"]').forEach(function(cb) {
+        var cardEl = cb.closest('div[style*="border:1px solid #f0ece8"]');
+        if (cardEl) {
+            var span = cardEl.querySelector('span[style*="flex:1"]');
+            if (span) span.textContent = newDisplay;
+        }
+    });
+    document.querySelectorAll('.card-checkbox[value="' + cardId + '"]').forEach(function(cb) {
+        var cardEl = cb.closest('div[style*="border:1px solid #f0ece8"]');
+        if (cardEl) {
+            var span = cardEl.querySelector('span[style*="flex:1"]');
+            if (span) span.textContent = newDisplay;
+        }
+    });
+    
+    showToast('✅ 已更新字卡');
+}
+
 async function moveCard(cid, fromGid) {
     const groups = await getAllGroups();
     let groupListHtml = '';
@@ -3301,7 +3989,72 @@ async function confirmMoveCard(cid, fromGid, targetGid) {
     }
 }
 async function deleteGroup(gid){if(!confirm('确定删除？'))return;let cards=await dbGetAll('wordcards');cards=cards.filter(c=>(c.groupId||'default')!==gid);await idbClear('wordcards');for(const c of cards)await dbPut('wordcards',c);renderGroupList();closeCardDetail();showToast('已删除');}
-async function createGroup(){const v=document.getElementById('newGroupInput').value.trim();if(!v){showToast('请输入分组名称');return;}const gid='group_'+Date.now();const cards=await dbGetAll('wordcards');if(cards.some(c=>c.groupName===v&&c.content==='__GROUP_PLACEHOLDER__')){showToast('分组已存在');return;}await dbPut('wordcards',{groupId:gid,groupName:v,content:'__GROUP_PLACEHOLDER__',timestamp:Date.now()});document.getElementById('newGroupInput').value='';renderGroupList();showToast('✅ 已创建分组「'+v+'」');}
+async function createGroup() {
+    // ===== 自定义弹窗 =====
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;justify-content:center;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+    
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:#fff;border-radius:16px;padding:24px 28px 20px;width:300px;max-width:85vw;box-shadow:0 20px 60px rgba(0,0,0,0.15);text-align:center;';
+    dialog.onclick = function(e) { e.stopPropagation(); };
+    
+    dialog.innerHTML = `
+        <div style="font-size:16px;font-weight:600;color:#333;margin-bottom:8px;"> ➕ 新建分组</div>
+        <div style="font-size:13px;color:#666;margin-bottom:14px;">输入新分组的名称</div>
+        <input type="text" id="newGroupNameInput" placeholder="分组名称..." style="width:100%;padding:10px 12px;border-radius:12px;border:1.5px solid #e8e0d8;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:16px;">
+        <div style="display:flex;gap:10px;">
+            <button id="dialogCancel" style="flex:1;padding:10px;border-radius:12px;border:1px solid #e8e0d8;background:#f5f5f5;color:#666;font-size:14px;cursor:pointer;">取消</button>
+            <button id="dialogConfirm" style="flex:1;padding:10px;border-radius:12px;border:none;background:#d4a8b8;color:#fff;font-size:14px;cursor:pointer;">创建</button>
+        </div>
+    `;
+    
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+    
+    var input = document.getElementById('newGroupNameInput');
+    input.focus();
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('dialogConfirm').click();
+        }
+    });
+    
+    document.getElementById('dialogCancel').onclick = function() {
+        overlay.remove();
+    };
+    
+    document.getElementById('dialogConfirm').onclick = async function() {
+        var name = input.value.trim();
+        if (!name) {
+            showToast('⚠️ 请输入分组名称');
+            return;
+        }
+        overlay.remove();
+        await doCreateGroup(name);
+    };
+}
+
+// ===== 实际创建分组 =====
+async function doCreateGroup(name) {
+    var gid = 'group_' + Date.now();
+    var cards = await dbGetAll('wordcards');
+    
+    if (cards.some(c => c.groupName === name && c.content === '__GROUP_PLACEHOLDER__')) {
+        showToast('⚠️ 分组已存在');
+        return;
+    }
+    
+    await dbPut('wordcards', {
+        groupId: gid,
+        groupName: name,
+        content: '__GROUP_PLACEHOLDER__',
+        timestamp: Date.now()
+    });
+    
+    renderGroupList();
+    showToast('✅ 已创建分组「' + name + '」');
+}
 async function openBatchAdd(){document.getElementById('batchAddModal').classList.add('show');document.getElementById('batchAddTextarea').value='';const groups=await getAllGroups();document.getElementById('batchGroupSelect').innerHTML=groups.map(g=>'<option value="'+g.id+'">'+g.name+'</option>').join('');}
 function closeBatchAdd(){document.getElementById('batchAddModal').classList.remove('show');}
 async function confirmBatchAdd(){const t=document.getElementById('batchAddTextarea').value;const lines=t.split('\n').map(l=>l.trim()).filter(l=>l);if(!lines.length){showToast('请输入字卡内容');return;}const gid=document.getElementById('batchGroupSelect').value;const gn=document.getElementById('batchGroupSelect').selectedOptions[0].textContent;let added=0;const cards=await dbGetAll('wordcards');const ex=new Set(cards.filter(c=>c.content&&c.content!=='__GROUP_PLACEHOLDER__').map(c=>c.content));for(const l of lines){if(ex.has(l))continue;await dbPut('wordcards',{id:Date.now()+Math.random()*1000+added,groupId:gid,groupName:gn,content:l,timestamp:Date.now()});ex.add(l);added++;}closeBatchAdd();renderGroupList();showToast('✅ 已添加'+added+'条');}
@@ -4455,6 +5208,7 @@ async function checkQinDailyMessage() {
     todayStart.setHours(0, 0, 0, 0);
     var elapsedMs = now - todayStart.getTime();
     var usedTimestamps = [];
+    var hasAddedSysMsg = false;
     
     for (var i = 0; i < msgCount; i++) {
         var randomOffset = Math.floor(Math.random() * elapsedMs);
@@ -4481,7 +5235,6 @@ async function checkQinDailyMessage() {
         }
         var content = selected.map(function(c) { return c.content; }).join(' ');
         
-        // 只写树洞回音
         var echoList = JSON.parse(localStorage.getItem('echoMessages') || '[]');
         echoList.push({
             id: Date.now() + Math.random() * 1000 + i,
@@ -4492,9 +5245,14 @@ async function checkQinDailyMessage() {
             replies: [],
             pinned: false,
             kept: false,
-    read: false
+            read: false
         });
         localStorage.setItem('echoMessages', JSON.stringify(echoList));
+        
+        if (!hasAddedSysMsg) {
+            addSysMsg('🌙 秦彻在树洞留了一条言', msgTime.getTime());
+            hasAddedSysMsg = true;
+        }
     }
     
     if (S.chatSettings.readNotReply) {
@@ -4520,15 +5278,15 @@ async function checkQinDailyMessage() {
         }
         console.log('✅ 已读不回模式：秦彻额外留了 ' + extraCount + ' 条言');
     }
-// 秦彻随机收藏你的留言
-var echoList3 = JSON.parse(localStorage.getItem('echoMessages') || '[]');
-var myMessages = echoList3.filter(function(m) { return m.who === 'me'; });
-if (myMessages.length > 0 && Math.random() < 0.3) {
-    var pick = myMessages[Math.floor(Math.random() * myMessages.length)];
-    pick.keptByHim = true;
-    localStorage.setItem('echoMessages', JSON.stringify(echoList3));
-    console.log('✅ 秦彻收藏了你的一条留言');
-}    
+
+    var echoList3 = JSON.parse(localStorage.getItem('echoMessages') || '[]');
+    var myMessages = echoList3.filter(function(m) { return m.who === 'me'; });
+    if (myMessages.length > 0 && Math.random() < 0.3) {
+        var pick = myMessages[Math.floor(Math.random() * myMessages.length)];
+        pick.keptByHim = true;
+        localStorage.setItem('echoMessages', JSON.stringify(echoList3));
+        console.log('✅ 秦彻收藏了你的一条留言');
+    }
 
     localStorage.setItem('lastQinMessageDate', today);
     console.log('✅ 秦彻今天共留了 ' + msgCount + ' 条言');
@@ -5268,6 +6026,9 @@ var newLetter = {
 var mailList = JSON.parse(localStorage.getItem('mailLetters') || '[]');
 mailList.push(newLetter);
 localStorage.setItem('mailLetters', JSON.stringify(mailList));
+// ===== 加在这里 =====
+addSysMsg('📨 你给秦彻寄了一封信', Date.now());
+// ===== 结束 =====
         
         // 每封信独立等待回信
         var pending = JSON.parse(localStorage.getItem('pendingReplies') || '[]');
@@ -5433,15 +6194,18 @@ async function checkMailReply() {
             var now = new Date();
             var dateStr = now.getFullYear() + '.' + (now.getMonth()+1) + '.' + now.getDate();
             
-            var mailList = JSON.parse(localStorage.getItem('mailLetters') || '[]');
-            mailList.push({
-                id: Date.now() + Math.random() * 1000,
-                direction: 'received',
-                content: body,
-                dateStr: dateStr,
-                timestamp: Date.now(),
-                read: false
-            });
+           var mailList = JSON.parse(localStorage.getItem('mailLetters') || '[]');
+mailList.push({
+    id: Date.now() + Math.random() * 1000,
+    direction: 'received',
+    content: body,
+    dateStr: dateStr,
+    timestamp: Date.now(),
+    read: false
+});
+// ===== 加在 push 后面 =====
+addSysMsg('📮 秦彻给你回了一封信', Date.now());
+// ===== 结束 =====
             localStorage.setItem('mailLetters', JSON.stringify(mailList));
             hasNew = true;
         } else {
@@ -7953,9 +8717,7 @@ window.generateCardsFromSearch = generateCardsFromSearch;
 window.openCardPreview = openCardPreview;
 window.saveMemoryCard = saveMemoryCard;
 window.exportCardImage = exportCardImage;
-window.exportCardImage = exportCardImage;
 window.updateCardNote = updateCardNote;
-window.openSearchByDate = openSearchByDate;
 window.renderCalendar = renderCalendar;
 window.changeCalendarMonth = changeCalendarMonth;
 window.loadDayMessages = loadDayMessages;
@@ -7980,6 +8742,18 @@ window.toggleGroupOpen = toggleGroupOpen;
 window.playHolidayVoice = playHolidayVoice;
 window.removePlayOverlay = removePlayOverlay;
 window.VOICE_DATA = VOICE_DATA;
+window.batchDeleteSearchResults = batchDeleteSearchResults;
+window.batchMoveSearchResults = batchMoveSearchResults;
+window.getSelectedSearchIds = getSelectedSearchIds;
+window.toggleAllSearchCheckboxes = toggleAllSearchCheckboxes;
+window.batchMoveSearchResults = batchMoveSearchResults;
+window.confirmBatchMoveFromSearch = confirmBatchMoveFromSearch;
+window.editGroupName = editGroupName;
+window.doEditGroupName = doEditGroupName;
+window.editCardContent = editCardContent;
+window.doEditCardContent = doEditCardContent;
+window.locateCard = locateCard;
+window.loadMoreAllCards = loadMoreAllCards;
 
 init();
 })();
@@ -7991,7 +8765,7 @@ init();
 
 <div id="cardCountModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
     <div style="background:#fff;border-radius:16px;padding:24px;width:90%;max-width:340px;box-shadow:0 8px 30px rgba(0,0,0,0.2);">
-        <div style="font-size:16px;font-weight:600;color:#333;margin-bottom:4px;text-align:center;"> 拼字卡条数设置</div>
+        <div style="font-size:16px;font-weight:600;color:#333;margin-bottom:4px;text-align:center;">拼字卡条数设置</div>
         <div style="font-size:12px;color:#999;text-align:center;margin-bottom:16px;">秦彻每次回复会用多少条字卡拼成一句话</div>
         
         <div style="display:flex;gap:12px;margin-bottom:16px;align-items:center;justify-content:center;">
