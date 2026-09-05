@@ -2658,19 +2658,26 @@ var AudioCache = {
 
 // ===== 带缓存的 playAudio =====
 function playAudio(path, displayText) {
+    // ===== 彻底清理旧音频 =====
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.src = '';
+        currentAudio = null;
+    }
+    // ===== 清理结束 =====
+    
+    // 随机按钮淡出
     var randomBtn = document.getElementById('randomBtn');
     if (randomBtn) {
         randomBtn.style.opacity = '0.2';
         randomBtn.style.pointerEvents = 'none';
         randomBtn.style.transition = 'opacity 0.3s';
     }
-    if (currentAudio) {
-        currentAudio.pause();
-        currentAudio = null;
-    }
+    
+    // 移除旧浮层
     removePlayOverlay();
     
-    // ===== 先尝试从缓存读取 =====
+    // 先尝试从缓存读取
     AudioCache.get(path).then(function(cachedData) {
         if (cachedData) {
             console.log('📦 从缓存播放:', path);
@@ -2728,6 +2735,10 @@ function loadAndPlayAudio(path, displayText) {
 }
 
 function showPlayOverlay(displayText) {
+    // 移除旧浮层
+    removePlayOverlay();
+    
+    // ===== 创建浮层 =====
     var overlay = document.createElement('div');
     overlay.id = 'playOverlay';
     overlay.style.cssText = `
@@ -2757,6 +2768,24 @@ function showPlayOverlay(displayText) {
         <div style="margin-top:4px;font-size:8px;color:rgba(255,255,255,0.08);letter-spacing:1px;">点击关闭</div>
     `;
     document.body.appendChild(overlay);
+    
+    // ===== 确保声波动画样式存在 =====
+    if (!document.getElementById('waveStyle')) {
+        var style = document.createElement('style');
+        style.id = 'waveStyle';
+        style.textContent = `
+            @keyframes waveAnim {
+                0% { transform: scaleY(0.3); opacity: 0.4; }
+                100% { transform: scaleY(1); opacity: 1; }
+            }
+            .wave-bar:nth-child(1) { animation-delay: 0.0s; height: 14px; }
+            .wave-bar:nth-child(2) { animation-delay: 0.1s; height: 24px; }
+            .wave-bar:nth-child(3) { animation-delay: 0.2s; height: 30px; }
+            .wave-bar:nth-child(4) { animation-delay: 0.3s; height: 24px; }
+            .wave-bar:nth-child(5) { animation-delay: 0.4s; height: 14px; }
+        `;
+        document.head.appendChild(style);
+    }
 }
     
 
