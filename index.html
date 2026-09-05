@@ -2564,6 +2564,8 @@ function playRandom() {
     playAudio(picked.path, picked.text);
 }
 
+// 在 playVoice 里，记录每个关键词上次播放的索引
+var lastPlayIndex = {};
 
 function playVoice(el, groupName, keywordText) {
     var group = VOICE_DATA.groups.find(function(g) { return g.name === groupName; });
@@ -2577,21 +2579,35 @@ function playVoice(el, groupName, keywordText) {
         return;
     }
     
-    var randomIndex = Math.floor(Math.random() * kw.audios.length);
+    // ===== 不重复逻辑 =====
+    var key = groupName + '_' + keywordText;
+    var lastIdx = lastPlayIndex[key] || -1;
+    var total = kw.audios.length;
+    
+    var randomIndex;
+    if (total === 1) {
+        randomIndex = 0;
+    } else {
+        do {
+            randomIndex = Math.floor(Math.random() * total);
+        } while (randomIndex === lastIdx);
+    }
+    lastPlayIndex[key] = randomIndex;
+    // ===== 不重复逻辑结束 =====
+    
     var audioPath = kw.audios[randomIndex];
     var displayText = kw.texts && kw.texts.length > randomIndex ? kw.texts[randomIndex] : keywordText;
-
+    
     console.log('audioPath:', audioPath);
     console.log('displayText:', displayText);
     
-    // ===== 清除之前的高亮 =====
+    // 清除之前的高亮
     document.querySelectorAll('.voice-keyword').forEach(function(b) {
         b.style.background = 'rgba(255,255,255,0.06)';
         b.style.borderColor = 'rgba(255,255,255,0.08)';
         b.style.boxShadow = 'none';
     });
     
-    // ===== 高亮当前按钮 =====
     if (el) {
         el.style.background = 'rgba(200,200,216,0.12)';
         el.style.borderColor = 'rgba(200,200,216,0.3)';
@@ -2599,7 +2615,6 @@ function playVoice(el, groupName, keywordText) {
         el.style.transform = 'scale(0.95)';
         setTimeout(function() { el.style.transform = 'scale(1)'; }, 200);
     }
-    // ===== 高亮结束 =====
     
     playAudio(audioPath, displayText);
 }
@@ -2656,17 +2671,28 @@ var AudioCache = {
     }
 };
 
-// ===== 带缓存的 playAudio =====
+var isPlaying = false;
+var lastPlayTime = 0;
+
 function playAudio(path, displayText) {
-    // ===== 彻底清理旧音频 =====
+ // ===== 防止重复点击：500ms 内禁止重复播放 =====
+    var now = Date.now();
+    if (isPlaying || (now - lastPlayTime < 500)) {
+        console.log('⏳ 播放太频繁，忽略');
+        return;
+    }
+    isPlaying = true;
+    lastPlayTime = now;
+    // ===== 锁结束 =====
+
+    
+    // 清理旧音频
     if (currentAudio) {
         currentAudio.pause();
         currentAudio.src = '';
         currentAudio = null;
     }
-    // ===== 清理结束 =====
     
-    // 随机按钮淡出
     var randomBtn = document.getElementById('randomBtn');
     if (randomBtn) {
         randomBtn.style.opacity = '0.2';
@@ -2674,10 +2700,8 @@ function playAudio(path, displayText) {
         randomBtn.style.transition = 'opacity 0.3s';
     }
     
-    // 移除旧浮层
     removePlayOverlay();
     
-    // 先尝试从缓存读取
     AudioCache.get(path).then(function(cachedData) {
         if (cachedData) {
             console.log('📦 从缓存播放:', path);
@@ -2685,15 +2709,17 @@ function playAudio(path, displayText) {
             var url = URL.createObjectURL(blob);
             var audio = new Audio(url);
             audio.onended = function() {
-                URL.revokeObjectURL(url);
-                currentAudio = null;
-                setTimeout(function() { removePlayOverlay(); }, 1000);
-            };
+    URL.revokeObjectURL(url);
+    currentAudio = null;
+    isPlaying = false;
+    setTimeout(function() { removePlayOverlay(); }, 1000);
+};
             audio.onerror = function() {
                 URL.revokeObjectURL(url);
                 showToast('⚠️ 缓存音频播放失败');
                 removePlayOverlay();
                 currentAudio = null;
+                isPlaying = false;
             };
             currentAudio = audio;
             showPlayOverlay(displayText);
@@ -2701,6 +2727,7 @@ function playAudio(path, displayText) {
                 showToast('⚠️ 播放失败');
                 removePlayOverlay();
                 currentAudio = null;
+                isPlaying = false;
             });
         } else {
             console.log('📡 从网络加载:', path);
@@ -2712,25 +2739,48 @@ function playAudio(path, displayText) {
 }
 
 function loadAndPlayAudio(path, displayText) {
-    // ===== 直接用 Audio 播放，不缓存（本地 file:// 协议下不报错） =====
     var audio = new Audio(path);
     currentAudio = audio;
+    var isCached = false;
+    
+    audio.onloadeddata = function() {
+        if (!isCached) {
+            isCached = true;
+            try {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', path, true);
+                xhr.responseType = 'arraybuffer';
+                xhr.onload = function() {
+                    if (xhr.status === 200 || xhr.status === 0) {
+                        AudioCache.set(path, xhr.response);
+                        console.log('💾 已缓存:', path);
+                    }
+                };
+                xhr.onerror = function() {
+                    console.log('⚠️ 缓存失败:', path);
+                };
+                xhr.send();
+            } catch(e) {
+                console.log('⚠️ 缓存失败:', e);
+            }
+        }
+    };
     
     audio.onended = function() {
         currentAudio = null;
+        isPlaying = false;
         setTimeout(function() { removePlayOverlay(); }, 1000);
     };
+    
+    // ===== 改成 console.log，不弹 toast =====
     audio.onerror = function() {
-        showToast('⚠️ 音频加载失败');
-        removePlayOverlay();
-        currentAudio = null;
+        console.log('⚠️ 音频加载出错（可忽略）:', path);
     };
+    // ===== 改完了 =====
     
     showPlayOverlay(displayText);
     audio.play().catch(function(e) {
-        showToast('⚠️ 播放失败');
-        removePlayOverlay();
-        currentAudio = null;
+        console.log('⚠️ 播放失败（可忽略）:', e);
     });
 }
 
@@ -7497,20 +7547,134 @@ async function renderDataManage() {
 }
 async function exportChat(){const msgs=await dbGetAll('messages');msgs.sort((a,b)=>a.timestamp-b.timestamp);let t='秦彻和笑笑的时光树洞 2.0\n'+'='.repeat(30)+'\n\n';msgs.forEach(m=>{const s=m.sender==='me'?S.myName:S.contactName;const c=m.type==='text'?m.content:(m.type==='emoji'?'[表情]':'[图片]');t+='['+new Date(m.timestamp).toLocaleString('zh-CN')+'] '+s+': '+c+'\n';});downloadBlob(t,'聊天记录.txt');}
 
-async function exportAll(){
-    const data = {
-        messages: await dbGetAll('messages'),
-        settings: await dbGetAll('settings'),
-        wordcards: await dbGetAll('wordcards'),
-        emojis: await dbGetAll('emojis'),
-        avatars: await dbGetAll('avatars'),
-        callLogs: await dbGetAll('callLogs'),
-        exportTime: new Date().toISOString(),
-        version: '2.0'
+async function exportAll() {
+    // ===== 弹出选择界面 =====
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;justify-content:center;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+    
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:#fff;border-radius:16px;padding:24px;width:90%;max-width:380px;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.15);';
+    dialog.onclick = function(e) { e.stopPropagation(); };
+    
+    // ===== 备份选项列表 =====
+    var options = [
+        { key: 'messages', label: '💬 聊天记录' },
+        { key: 'wordcards', label: '📝 字卡库' },
+        { key: 'emojis', label: '😊 表情包' },
+        { key: 'callLogs', label: '📞 通话记录' },
+        { key: 'wishes', label: '✨ 许愿' },
+        { key: 'anniversaries', label: '🎀 纪念日' },
+        { key: 'tarotHistory', label: '🔮 塔罗语录' },
+        { key: 'avatarHistory', label: '📷 头像历史' },
+        { key: 'mailLetters', label: '✉️ 树心邮筒信件', storage: 'localStorage' },
+        { key: 'echoMessages', label: '🌳 树洞回音留言', storage: 'localStorage' },
+        { key: 'collectedMessages', label: '💎 许愿珍藏收藏', storage: 'localStorage' },
+        { key: 'settings_local', label: '⚙️ 本地设置（条数/预设等）', storage: 'localStorage' }
+    ];
+    
+    var checkboxesHtml = options.map(function(opt) {
+        return '<label style="display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid #f5f0eb;cursor:pointer;">' +
+            '<input type="checkbox" class="backup-checkbox" value="' + opt.key + '" data-storage="' + (opt.storage || 'indexeddb') + '" checked style="width:18px;height:18px;accent-color:#d4a8b8;flex-shrink:0;">' +
+            '<span style="font-size:14px;color:#333;">' + opt.label + '</span>' +
+            '</label>';
+    }).join('');
+    
+    dialog.innerHTML = `
+        <div style="font-size:17px;font-weight:600;color:#333;margin-bottom:4px;">💾 全量备份</div>
+        <div style="font-size:12px;color:#999;margin-bottom:12px;">选择要备份的数据</div>
+        <div style="max-height:50vh;overflow-y:auto;">${checkboxesHtml}</div>
+        <div style="display:flex;gap:10px;margin-top:14px;">
+            <button id="backupCancel" style="flex:1;padding:10px;border-radius:12px;border:1px solid #e8e0d8;background:#f5f5f5;color:#666;font-size:14px;cursor:pointer;">取消</button>
+            <button id="backupConfirm" style="flex:1;padding:10px;border-radius:12px;border:none;background:#d4a8b8;color:#fff;font-size:14px;cursor:pointer;">导出</button>
+        </div>
+    `;
+    
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+    
+    document.getElementById('backupCancel').onclick = function() {
+        overlay.remove();
     };
-    downloadBlob(JSON.stringify(data, null, 2), '时光树洞_2.0_' + new Date().toLocaleDateString().replace(/\//g, '-') + '.json');
-    localStorage.setItem('lastBackupTime', Date.now());
+    
+    document.getElementById('backupConfirm').onclick = async function() {
+        overlay.remove();
+        await doExportSelected();
+    };
 }
+
+// ===== 执行选中的备份 =====
+async function doExportSelected() {
+    var checkboxes = document.querySelectorAll('.backup-checkbox:checked');
+    if (checkboxes.length === 0) {
+        showToast('⚠️ 请至少选择一项数据');
+        return;
+    }
+    
+    showToast('⏳ 正在打包数据...');
+    
+    var data = {};
+    var hasData = false;
+    
+    for (var i = 0; i < checkboxes.length; i++) {
+        var cb = checkboxes[i];
+        var key = cb.value;
+        var storage = cb.dataset.storage || 'indexeddb';
+        
+        try {
+            if (storage === 'localStorage') {
+                var val = localStorage.getItem(key);
+                if (val) {
+                    // 对 settings_local 特殊处理：备份多个 key
+                    if (key === 'settings_local') {
+                        var settingsKeys = [
+                            'mailbox_cardMin', 'mailbox_cardMax',
+                            'mail_cardMin', 'mail_cardMax',
+                            'currentBubblePreset', 'bubbleStyle',
+                            'chatGroups_backup'
+                        ];
+                        var settingsData = {};
+                        settingsKeys.forEach(function(sk) {
+                            var sv = localStorage.getItem(sk);
+                            if (sv) settingsData[sk] = sv;
+                        });
+                        if (Object.keys(settingsData).length > 0) {
+                            data[key] = settingsData;
+                            hasData = true;
+                        }
+                    } else {
+                        data[key] = JSON.parse(val);
+                        hasData = true;
+                    }
+                }
+            } else {
+                // IndexedDB
+                var storeData = await dbGetAll(key);
+                if (storeData && storeData.length > 0) {
+                    data[key] = storeData;
+                    hasData = true;
+                }
+            }
+        } catch(e) {
+            console.warn('⚠️ 备份 ' + key + ' 失败:', e);
+        }
+    }
+    
+    if (!hasData) {
+        showToast('⚠️ 没有可备份的数据');
+        return;
+    }
+    
+    data.exportTime = new Date().toISOString();
+    data.version = '2.0';
+    
+    var json = JSON.stringify(data, null, 2);
+    var filename = '时光树洞_2.0_' + new Date().toLocaleDateString().replace(/\//g, '-') + '.json';
+    downloadBlob(json, filename);
+    localStorage.setItem('lastBackupTime', Date.now());
+    showToast('✅ 备份成功！共 ' + checkboxes.length + ' 项数据');
+}
+
 async function importAllData(event){const f=event.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!confirm('导入将覆盖当前数据，确定？')){event.target.value='';return;}for(const s of ['messages','settings','wordcards','emojis','avatars','callLogs']){await dbClear(s);if(d[s])for(const item of d[s])await dbPut(s,item);}showToast('✅ 导入成功');}catch(e){showToast('导入失败');}event.target.value='';}
 async function clearChat(){await dbClear('messages');showToast('已清空');}
 async function exportChatByDate() {
