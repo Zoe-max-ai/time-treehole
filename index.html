@@ -2029,24 +2029,34 @@ console.log('🔥 executeReply 被调用，cnt:', cnt);
         scrollBottom();
         
         // 秦彻随机收藏
-        if (Math.random() < ((cs.qinCollectProb || 5) / 100)) {
-            var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
-            var allMsgs = await dbGetAll('messages');
-            var myMsgs = allMsgs.filter(function(x) { return x.sender === 'me' && x.type === 'text'; });
-            if (myMsgs.length > 0) {
-                var pick = myMsgs[Math.floor(Math.random() * myMsgs.length)];
-                collected.push({
-                    id: Date.now(),
-                    sender: 'me',
-                    content: pick.content,
-                    time: fmtTime(pick.timestamp),
-                    timestamp: pick.timestamp,
-                    collectedBy: 'qin'
-                });
-                localStorage.setItem('collectedMessages', JSON.stringify(collected));
-addSysMsg('📌 秦彻收藏了你的一条消息', scheduledTime || Date.now());
-            }
-        }
+if (Math.random() < ((cs.qinCollectProb || 5) / 100)) {
+    var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
+    var allMsgs = await dbGetAll('messages');
+    
+    // ===== 只取当天的消息 =====
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var todayMsgs = allMsgs.filter(function(x) {
+        return x.sender === 'me' &&
+               x.type === 'text' &&
+               x.timestamp >= today.getTime();
+    });
+    // ===== 当天消息结束 =====
+    
+    if (todayMsgs.length > 0) {
+        var pick = todayMsgs[Math.floor(Math.random() * todayMsgs.length)];
+        collected.push({
+            id: Date.now(),
+            sender: 'me',
+            content: pick.content,
+            time: fmtTime(pick.timestamp),
+            timestamp: pick.timestamp,
+            collectedBy: 'qin'
+        });
+        localStorage.setItem('collectedMessages', JSON.stringify(collected));
+        addSysMsg('📌 秦彻收藏了你的一条消息', scheduledTime || Date.now());
+    }
+}
         
         // 发表情
         if (cs.emojiMix && Math.random() < ((cs.emojiMixProb || 5) / 100)) {
@@ -2603,9 +2613,51 @@ function playHolidayVoice(name) {
     playAudio(data.shortAudio, data.shortText);
 }
 
-// ===== 播放语音 =====
+// ===== 音频缓存管理器（放在 playAudio 上面） =====
+var AudioCache = {
+    db: null,
+    init: function() {
+        return new Promise(function(resolve) {
+            var req = indexedDB.open('AudioCacheDB', 1);
+            req.onupgradeneeded = function(e) {
+                var db = e.target.result;
+                if (!db.objectStoreNames.contains('audio')) {
+                    db.createObjectStore('audio', { keyPath: 'path' });
+                }
+            };
+            req.onsuccess = function(e) {
+                AudioCache.db = e.target.result;
+                resolve();
+            };
+            req.onerror = function() { resolve(); };
+        });
+    },
+    get: function(path) {
+        return new Promise(function(resolve) {
+            if (!AudioCache.db) { resolve(null); return; }
+            try {
+                var tx = AudioCache.db.transaction('audio', 'readonly');
+                var store = tx.objectStore('audio');
+                var req = store.get(path);
+                req.onsuccess = function() {
+                    resolve(req.result ? req.result.data : null);
+                };
+                req.onerror = function() { resolve(null); };
+            } catch(e) { resolve(null); }
+        });
+    },
+    set: function(path, data) {
+        if (!AudioCache.db) return;
+        try {
+            var tx = AudioCache.db.transaction('audio', 'readwrite');
+            var store = tx.objectStore('audio');
+            store.put({ path: path, data: data });
+        } catch(e) {}
+    }
+};
+
+// ===== 带缓存的 playAudio =====
 function playAudio(path, displayText) {
-// 随机按钮淡出
     var randomBtn = document.getElementById('randomBtn');
     if (randomBtn) {
         randomBtn.style.opacity = '0.2';
@@ -2618,74 +2670,96 @@ function playAudio(path, displayText) {
     }
     removePlayOverlay();
     
-    var overlay = document.createElement('div');
-    overlay.id = 'playOverlay';
-   overlay.style.cssText = `
-    position:fixed;
-    bottom:100px;
-    left:50%;
-    transform:translateX(-50%);
-    z-index:999;
-    background:rgba(0,0,0,0.5);
-    backdrop-filter:blur(14px);
-    -webkit-backdrop-filter:blur(14px);
-    border-radius:28px;
-    padding:16px 28px 14px;
-    min-width:160px;
-    max-width:80%;
-    border:1px solid rgba(255,255,255,0.05);
-    box-shadow:0 8px 40px rgba(0,0,0,0.35);
-    text-align:center;
-`;
+    // ===== 先尝试从缓存读取 =====
+    AudioCache.get(path).then(function(cachedData) {
+        if (cachedData) {
+            console.log('📦 从缓存播放:', path);
+            var blob = new Blob([cachedData], { type: 'audio/mpeg' });
+            var url = URL.createObjectURL(blob);
+            var audio = new Audio(url);
+            audio.onended = function() {
+                URL.revokeObjectURL(url);
+                currentAudio = null;
+                setTimeout(function() { removePlayOverlay(); }, 1000);
+            };
+            audio.onerror = function() {
+                URL.revokeObjectURL(url);
+                showToast('⚠️ 缓存音频播放失败');
+                removePlayOverlay();
+                currentAudio = null;
+            };
+            currentAudio = audio;
+            showPlayOverlay(displayText);
+            audio.play().catch(function(e) {
+                showToast('⚠️ 播放失败');
+                removePlayOverlay();
+                currentAudio = null;
+            });
+        } else {
+            console.log('📡 从网络加载:', path);
+            loadAndPlayAudio(path, displayText);
+        }
+    }).catch(function() {
+        loadAndPlayAudio(path, displayText);
+    });
+}
 
-overlay.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:center;gap:3px;height:20px;margin-bottom:4px;">
-        ${'<div class="wave-bar" style="width:2.5px;height:10px;background:rgba(200,200,216,0.4);border-radius:2px;animation:waveAnim 0.6s ease-in-out infinite alternate;"></div>'.repeat(5)}
-    </div>
-    <div style="font-size:8px;color:rgba(255,255,255,0.15);letter-spacing:3px;margin-bottom:4px;">耳语传音</div>
-    <div style="font-size:14px;color:#e8e8ea;letter-spacing:1px;font-weight:300;line-height:1.8;word-break:break-word;">“${displayText}”</div>
-    <div style="margin-top:4px;font-size:8px;color:rgba(255,255,255,0.08);letter-spacing:1px;">点击关闭</div>
-`;
-    
-    document.body.appendChild(overlay);  // ← 移到这里
-    
-    // 声波动画样式（只加一次）
-    if (!document.getElementById('waveStyle')) {
-        var style = document.createElement('style');
-        style.id = 'waveStyle';
-        style.textContent = `
-            @keyframes waveAnim {
-                0% { transform: scaleY(0.3); opacity: 0.4; }
-                100% { transform: scaleY(1); opacity: 1; }
-            }
-            .wave-bar:nth-child(1) { animation-delay: 0.0s; height: 14px; }
-            .wave-bar:nth-child(2) { animation-delay: 0.1s; height: 24px; }
-            .wave-bar:nth-child(3) { animation-delay: 0.2s; height: 30px; }
-            .wave-bar:nth-child(4) { animation-delay: 0.3s; height: 24px; }
-            .wave-bar:nth-child(5) { animation-delay: 0.4s; height: 14px; }
-        `;
-        document.head.appendChild(style);
-    }
-    
+function loadAndPlayAudio(path, displayText) {
+    // ===== 直接用 Audio 播放，不缓存（本地 file:// 协议下不报错） =====
     var audio = new Audio(path);
     currentAudio = audio;
+    
     audio.onended = function() {
         currentAudio = null;
-        setTimeout(function() {
-            removePlayOverlay();
-        }, 1000);
+        setTimeout(function() { removePlayOverlay(); }, 1000);
     };
     audio.onerror = function() {
         showToast('⚠️ 音频加载失败');
         removePlayOverlay();
         currentAudio = null;
     };
+    
+    showPlayOverlay(displayText);
     audio.play().catch(function(e) {
         showToast('⚠️ 播放失败');
         removePlayOverlay();
         currentAudio = null;
     });
 }
+
+function showPlayOverlay(displayText) {
+    var overlay = document.createElement('div');
+    overlay.id = 'playOverlay';
+    overlay.style.cssText = `
+        position:fixed;
+        bottom:100px;
+        left:50%;
+        transform:translateX(-50%);
+        z-index:999;
+        background:rgba(0,0,0,0.5);
+        backdrop-filter:blur(14px);
+        -webkit-backdrop-filter:blur(14px);
+        border-radius:28px;
+        padding:16px 28px 14px;
+        min-width:160px;
+        max-width:80%;
+        border:1px solid rgba(255,255,255,0.05);
+        box-shadow:0 8px 40px rgba(0,0,0,0.35);
+        text-align:center;
+    `;
+    overlay.onclick = function() { removePlayOverlay(); };
+    overlay.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;gap:3px;height:20px;margin-bottom:4px;">
+            ${'<div class="wave-bar" style="width:2.5px;height:10px;background:rgba(200,200,216,0.4);border-radius:2px;animation:waveAnim 0.6s ease-in-out infinite alternate;"></div>'.repeat(5)}
+        </div>
+        <div style="font-size:8px;color:rgba(255,255,255,0.15);letter-spacing:3px;margin-bottom:4px;">耳语传音</div>
+        <div style="font-size:14px;color:#e8e8ea;letter-spacing:1px;font-weight:300;line-height:1.8;word-break:break-word;">“${displayText}”</div>
+        <div style="margin-top:4px;font-size:8px;color:rgba(255,255,255,0.08);letter-spacing:1px;">点击关闭</div>
+    `;
+    document.body.appendChild(overlay);
+}
+    
+
 function removePlayOverlay() {
     var overlay = document.getElementById('playOverlay');
     if (overlay) overlay.remove();
@@ -5012,6 +5086,7 @@ async function renderWishPage() {
     document.getElementById('wishTabContent').innerHTML = h;
     renderWishSubContent();
 }
+
 
 async function renderWishSubContent() {
     var container = document.getElementById('wishSubContent');
@@ -8498,6 +8573,10 @@ if (typeof Lunar !== 'undefined') {
     console.log('⚠️ 农历库未加载，节日检测跳过');
 }
 // ===== 节日检测结束 =====
+
+// ===== 音频缓存初始化 =====
+await AudioCache.init();
+// ===== 音频缓存初始化结束 =====
 
 // 自动应用保存的气泡预设
 var savedPreset = localStorage.getItem('currentBubblePreset') || '粉白淡调';
