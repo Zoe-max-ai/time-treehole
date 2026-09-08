@@ -10,6 +10,12 @@
         :root{--theme-primary:#d4a8b8;--theme-bg:#F7EADF;--theme-card:#FFFFFF;--theme-border:#F2D5DA;--theme-text:#5A3340;--theme-muted:#9A6F7A;--theme-input-bg:#FFFFFF;--theme-input-border:#E8BEC6;}
         :root{--stage-bg-1:rgba(255,255,255,.82);--stage-bg-2:rgba(198,74,92,.08);}
         :root{--page-bg:radial-gradient(circle at 50% 18%, var(--stage-bg-1), transparent 55%),radial-gradient(circle at 50% 105%, var(--stage-bg-2), transparent 45%),var(--theme-bg);}
+:root{--tarot-bg:#FBF3E8;
+--tarot-border:rgba(160,120,110,.22);
+--tarot-shadow:rgba(90,60,50,.10);
+--tarot-text:#4A3A35;
+--tarot-muted:#8A746A;
+--tarot-strip:rgba(248,238,225,.7););}
         *{margin:0;padding:0;box-sizing:border-box;}
         body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f0f0;color:var(--text);height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:480px;margin:0 auto;overflow:hidden;user-select:none;-webkit-tap-highlight-color:transparent;position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;}
         @supports(padding-top:env(safe-area-inset-top)){body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}}
@@ -31,10 +37,10 @@
 @keyframes homePulse{0%,100%{opacity:.55;transform:scale(1);}50%{opacity:1;transform:scale(1.15);}}
 .home-page-inner .quote-line{margin-top:4px;font-size:12px;letter-spacing:.12em;color:var(--theme-muted);z-index:2;font-style:italic;text-align:center;padding:0 20px;}
 .home-page-inner .divider{margin-top:14px;width:78%;height:18px;color:var(--theme-border);z-index:2;}
-.home-page-inner .creature{margin-top:8px;width:72px;height:54px;color:var(--theme-muted);opacity:.55;z-index:2;display:flex;justify-content:center;}
+.home-page-inner .creature{margin-top:10px;width:88px;height:66px;color:var(--theme-muted);opacity:.6;z-index:2;display:flex;justify-content:center;}
 .home-page-inner .creature svg{width:100%;height:100%;display:block;}
 .home-page-inner .divider svg{width:100%;height:100%;display:block;}
-.home-page-inner .grid{margin-top:14px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 20px;position:relative;z-index:2;}
+.home-page-inner .grid{margin-top:38initpx;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 20px;position:relative;z-index:2;}
 .home-page-inner .card{position:relative;min-height:96px;padding:14px 13px 12px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,244,248,.58));border:1px solid var(--theme-border);box-shadow:0 2px 8px rgba(0,0,0,.04);color:var(--theme-text);cursor:pointer;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;overflow:hidden;}
 .home-page-inner .card:active{transform:scale(.97);}
 .home-page-inner .card .num{font-size:10px;letter-spacing:.28em;color:var(--theme-primary);margin-bottom:6px;}
@@ -110,7 +116,7 @@
         .avatar-history-item.selected{border-color:var(--primary);box-shadow:0 0 0 3px rgba(255,107,129,0.2);}
         .avatar-history-item .ah-del{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:#ff4757;border-radius:50%;color:#fff;font-size:8px;display:flex;align-items:center;justify-content:center;}
         .toggle-switch{width:44px;height:24px;border-radius:12px;background:#ddd;cursor:pointer;position:relative;transition:all .2s;flex-shrink:0;}
-        .toggle-switch.on{background:var(--primary);}
+        .toggle-switch.on{background:var(--theme-primary);}
         .toggle-switch::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:all .2s;}
         .toggle-switch.on::after{left:22px;}
         .call-fullscreen{position:fixed;top:0;left:0;right:0;bottom:0;z-index:500;background:linear-gradient(180deg,#1a1a2e,#16213e,#0f3460);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;max-width:480px;margin:0 auto;}
@@ -614,16 +620,16 @@ body.light-text #themeToggleBtn {
 
 /* ===== 塔罗新样式 ===== */
 .tarot-deck-area { position:relative; width:260px; height:440px; margin:12px auto 8px; }
-.tarot-deck-shadow { position:absolute; width:260px; height:440px; border-radius:10px 12px 9px 11px; background:#F2EBDD; border:1px solid rgba(120,100,80,.12); box-shadow:0 2px 8px rgba(60,50,40,.08); }
+.tarot-deck-shadow { position:absolute; width:260px; height:440px; border-radius:10px 12px 9px 11px; background:var(--tarot-bg); border:1px solid var(--tarot-border); box-shadow:0 2px 8px var(--tarot-shadow); }
 .tarot-deck-shadow.s1 { transform:translate(-5px,4px) rotate(-1.5deg); opacity:.55; }
 .tarot-deck-shadow.s2 { transform:translate(-9px,8px) rotate(-2.5deg); opacity:.32; }
 .tarot-deck-shadow.s3 { transform:translate(-13px,12px) rotate(-3.5deg); opacity:.16; }
-.tarot-deck-top { position:absolute; inset:0; border-radius:10px 12px 9px 11px; background:#F2EBDD; border:1px solid rgba(120,100,80,.18); box-shadow:0 6px 18px rgba(60,50,40,.14),0 1px 0 rgba(255,255,255,.4) inset; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .25s ease; }
+.tarot-deck-top { position:absolute; inset:0; border-radius:10px 12px 9px 11px; background:var(--tarot-bg); border:1px solid var(--tarot-border); box-shadow:0 6px 18px var(--tarot-shadow),0 1px 0 rgba(255,255,255,.4) inset; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .25s ease; }
 .tarot-deck-top:active { transform:scale(.98); }
 .tarot-orient-badge { position:absolute; top:10px; right:10px; font-size:8px; letter-spacing:2px; color:#8C4433; border:1px solid rgba(140,68,51,.45); padding:2px 6px; border-radius:2px; background:rgba(140,68,51,.04); z-index:5; }
 .tarot-card-wrapper { flex:0 0 260px; scroll-snap-align:center; display:flex; flex-direction:column; align-items:center; gap:10px; }
-.tarot-card-front { background:#F2EBDD; border-radius:10px 12px 9px 11px; border:1px solid rgba(120,100,80,.12); }
-.tarot-strip { background:rgba(242,235,221,.55); border:1px dashed rgba(140,100,80,.22); border-radius:8px; }
+.tarot-card-front { background:var(--tarot-bg); border-radius:10px 12px 9px 11px; border:1px solid var(--tarot-border); }
+.tarot-strip { background:var(--tarot-strip); border:1px dashed var(--tarot-border); border-radius:8px; }
 
 /* 见字如晤 */
 .mailbox-tabs { display:flex; border-bottom:1px solid var(--theme-border); background:var(--theme-card); }
@@ -805,8 +811,8 @@ body.light-text #themeToggleBtn {
 <div class="call-float-ball" id="callFloatBall"><img id="ballAvatar" src="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;"><div id="ballTimer" style="position:absolute;bottom:-8px;background:#4cd964;color:#fff;font-size:9px;padding:2px 8px;border-radius:10px;">00:00</div><div class="ball-end" onclick="event.stopPropagation();endCall()">✕</div></div>
 
 <div class="chat-settings-overlay" id="chatSettingsOverlay" onclick="if(event.target===this)closeChatSettings()"><div class="chat-settings-panel" id="chatSettingsPanel"></div></div>
-<div class="batch-add-modal" id="batchAddModal"><div class="modal-content"><h4 style="text-align:center;margin-bottom:12px;">📝 批量添加字卡</h4><textarea id="batchAddTextarea" placeholder="输入字卡内容，每行一个..."></textarea><select id="batchGroupSelect" style="margin:8px 0;"></select><div style="display:flex;gap:8px;"><button style="flex:1;padding:10px;border-radius:20px;background:#f0f0f0;border:none;cursor:pointer;" onclick="closeBatchAdd()">取消</button><button style="flex:1;padding:10px;border-radius:20px;background:var(--primary);color:#fff;border:none;cursor:pointer;" onclick="confirmBatchAdd()">确认</button></div></div></div>
-<div class="profile-overlay" id="profileOverlay" onclick="if(event.target===this)closeProfile()"><div class="profile-card"><img id="pfAvatar" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 10px;border:3px solid #f0f0f0;"><div id="pfName" style="font-size:18px;font-weight:700;"></div><div style="display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:16px;font-size:13px;margin:6px 0 14px;background:#f0f9f0;color:#4a8a4a;"><span style="width:6px;height:6px;border-radius:50%;background:#4cd964;"></span><span id="pfStatus"></span></div><div style="background:#fdf8ff;border-radius:14px;padding:14px;margin-bottom:16px;"><div style="font-size:11px;color:#b0a0c0;">💭 秦彻想说</div><div id="pfMood" style="font-size:14px;color:#5a4a6a;"></div></div><button onclick="triggerPat(S.contactName)" style="padding:8px 20px;border-radius:20px;background:var(--primary);color:#fff;border:none;cursor:pointer;">👋 拍一拍</button><button onclick="closeProfile()" style="display:block;width:100%;padding:10px;border-radius:16px;background:#f0f0f0;color:#666;border:none;cursor:pointer;margin-top:8px;">关闭</button></div></div>
+<div class="batch-add-modal" id="batchAddModal"><div class="modal-content"><h4 style="text-align:center;margin-bottom:12px;">📝 批量添加字卡</h4><textarea id="batchAddTextarea" placeholder="输入字卡内容，每行一个..." style="border:1.5px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);"></textarea><select id="batchGroupSelect" style="margin:8px 0;border:1.5px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);"></select><div style="display:flex;gap:8px;"><button style="flex:1;padding:10px;border-radius:20px;background:var(--btn-secondary);color:var(--btn-secondary-text);border:1px solid var(--btn-secondary-border);cursor:pointer;" onclick="closeBatchAdd()">取消</button><button style="flex:1;padding:10px;border-radius:20px;background:var(--theme-primary);color:#fff;border:none;cursor:pointer;" onclick="confirmBatchAdd()">确认</button></div></div></div>
+<div class="profile-overlay" id="profileOverlay" onclick="if(event.target===this)closeProfile()"><div class="profile-card"><img id="pfAvatar" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 10px;border:3px solid #f0f0f0;"><div id="pfName" style="font-size:18px;font-weight:700;"></div><div style="display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:16px;font-size:13px;margin:6px 0 14px;background:#f0f9f0;color:#4a8a4a;"><span style="width:6px;height:6px;border-radius:50%;background:#4cd964;"></span><span id="pfStatus"></span></div><div style="background:#fdf8ff;border-radius:14px;padding:14px;margin-bottom:16px;"><div style="font-size:11px;color:#b0a0c0;">💭 秦彻想说</div><div id="pfMood" style="font-size:14px;color:#5a4a6a;"></div></div><button onclick="triggerPat(S.contactName)" style="padding:8px 20px;border-radius:20px;background:var(--theme-primary);color:#fff;border:none;cursor:pointer;">👋 拍一拍</button><button onclick="closeProfile()" style="display:block;width:100%;padding:10px;border-radius:16px;background:#f0f0f0;color:#666;border:none;cursor:pointer;margin-top:8px;">关闭</button></div></div>
 <!-- 他的房间 - 弹窗 -->
 <div id="hisRoomOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
     <div id="hisRoomModal" style="background:#f5efe8;border-radius:24px;padding:32px 24px 24px 24px;width:90%;max-width:360px;max-height:80vh;overflow-y:auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
@@ -2379,7 +2385,7 @@ function loadPatPanel(){
 
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;gap:5px;margin-top:6px;';
-    row.innerHTML = '<input type="text" id="newPatChat" placeholder="添加..." style="flex:1;padding:7px 10px;border-radius:12px;border:1.5px solid #eee;font-size:12px;">' +
+    row.innerHTML = '<input type="text" id="newPatChat" placeholder="添加..." style="flex:1;padding:7px 10px;border-radius:12px;border:1.5px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:12px;">' +
         '<button onclick="addPatChat()" style="padding:7px 12px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:12px;">添加</button>';
     l.appendChild(row);
 }
@@ -2505,7 +2511,7 @@ async function addEmojiGroupFromManage() {
     loadEmojiPanel();
     showToast('✅ 已创建');
 }
-async function handleEmojiUpload(event){const files=event.target.files;if(!files||files.length===0)return;const g=JSON.parse(await getCal('emojiGroups','["全部"]'));const group=await new Promise(r=>{const s='<select id="egs" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-bottom:12px;"><option value="">新建...</option>'+g.map(x=>'<option value="'+x+'">'+x+'</option>').join('')+'</select><input type="text" id="egni" placeholder="新分组名" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-bottom:12px;display:none;">';const ov=document.createElement('div');ov.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';ov.innerHTML='<div style="background:var(--theme-card);border-radius:16px;padding:20px;width:300px;"><h4>选择分组</h4>'+s+'<div style="display:flex;gap:8px;"><button id="ecb" style="flex:1;padding:10px;border-radius:8px;background:#f0f0f0;">取消</button><button id="eok" style="flex:1;padding:10px;border-radius:8px;background:var(--primary);color:#fff;">确定</button></div></div>';document.body.appendChild(ov);const sel=document.getElementById('egs');const ni=document.getElementById('egni');sel.onchange=()=>ni.style.display=sel.value===''?'block':'none';document.getElementById('ecb').onclick=()=>{ov.remove();r(null);};document.getElementById('eok').onclick=()=>{let v=sel.value;if(v===''){v=ni.value.trim();if(!v){alert('请输入分组名称');return;}}ov.remove();r(v);};});if(group===null){event.target.value='';return;}const fg=group||'全部';let ac=0,sc=0;for(let f of files){let d;if(f.size>100*1024)d=await compressImage(f,150,150);else d=await fileToDataUrl(f);if(d.length>300*1024){sc++;continue;}try{await dbPut('emojis',{data:d,group:fg,timestamp:Date.now()});ac++;}catch(e){sc++;}}if(fg!=='全部'&&!g.includes(fg)){g.push(fg);await setCal('emojiGroups',JSON.stringify(g));}loadEmojiPanel();if(typeof renderEmojiManage==='function')renderEmojiManage();showToast('✅ 已添加'+ac+'个'+(sc>0?'，跳过'+sc+'个':''));event.target.value='';}
+async function handleEmojiUpload(event){const files=event.target.files;if(!files||files.length===0)return;const g=JSON.parse(await getCal('emojiGroups','["全部"]'));const group=await new Promise(r=>{const s='<select id="egs" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-bottom:12px;"><option value="">新建...</option>'+g.map(x=>'<option value="'+x+'">'+x+'</option>').join('')+'</select><input type="text" id="egni" placeholder="新分组名" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-bottom:12px;display:none;">';const ov=document.createElement('div');ov.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';ov.innerHTML='<div style="background:var(--theme-card);border-radius:16px;padding:20px;width:300px;"><h4>选择分组</h4>'+s+'<div style="display:flex;gap:8px;"><button id="ecb" style="flex:1;padding:10px;border-radius:8px;background:#f0f0f0;">取消</button><button id="eok" style="flex:1;padding:10px;border-radius:8px;background:var(--theme-primary);color:#fff;">确定</button></div></div>';document.body.appendChild(ov);const sel=document.getElementById('egs');const ni=document.getElementById('egni');sel.onchange=()=>ni.style.display=sel.value===''?'block':'none';document.getElementById('ecb').onclick=()=>{ov.remove();r(null);};document.getElementById('eok').onclick=()=>{let v=sel.value;if(v===''){v=ni.value.trim();if(!v){alert('请输入分组名称');return;}}ov.remove();r(v);};});if(group===null){event.target.value='';return;}const fg=group||'全部';let ac=0,sc=0;for(let f of files){let d;if(f.size>100*1024)d=await compressImage(f,150,150);else d=await fileToDataUrl(f);if(d.length>300*1024){sc++;continue;}try{await dbPut('emojis',{data:d,group:fg,timestamp:Date.now()});ac++;}catch(e){sc++;}}if(fg!=='全部'&&!g.includes(fg)){g.push(fg);await setCal('emojiGroups',JSON.stringify(g));}loadEmojiPanel();if(typeof renderEmojiManage==='function')renderEmojiManage();showToast('✅ 已添加'+ac+'个'+(sc>0?'，跳过'+sc+'个':''));event.target.value='';}
 
 // ============ 表情包管理 ============
 function openEmojiManage(){showPage('emojiManagePage');renderEmojiManage();}
@@ -3452,7 +3458,7 @@ async function renderWordCardLibrary() {
     '<input type="text" class="wordcard-global-search" id="wordcardGlobalSearch" placeholder="🔍 搜索全部字卡..." oninput="searchAllCardsAndDisplay()">' +
     '<div id="globalSearchResults" style="display:none;margin-bottom:8px;"></div>' +
 // ===== 分组搜索框（新增） =====
-'<input type="text" class="wordcard-search" id="wordcardSearch" placeholder="🔍 搜索分组名称..." oninput="filterWordCards()" style="width:100%;padding:8px 12px;border-radius:14px;border:1.5px solid #eee;font-size:12px;outline:none;margin-bottom:6px;">' +
+'<input type="text" class="wordcard-search" id="wordcardSearch" placeholder="🔍 搜索分组名称..." oninput="filterWordCards()" style="width:100%;padding:8px 12px;border-radius:14px;border:1.5px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:12px;outline:none;margin-bottom:6px;">' +
     // ===== 分组列表（横排滑动） =====
     '<div id="groupList" style="margin:10px 0;"></div>' +
     // ===== 详情区域 =====
@@ -3810,7 +3816,7 @@ allItem.style.cssText = `
     flex:0 0 auto;
     scroll-snap-align:start;
     background:#fff;
-    border:2px solid #d4a8b8;
+    border:2px solid var(--theme-primary);
     border-radius:14px;
     padding:10px 16px;
     min-width:80px;
@@ -4548,7 +4554,7 @@ h += '</div>';
 
 
     // ===== 外观设置 =====
-    h += '<div style="height:8px;"></div>';
+    h += '<div style="height:12px;"></div>';
     h += '<div onclick="toggleUniverseSection(\'appearance\')" style="font-size:13px;color:var(--theme-muted);margin:4px 0 8px;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">🎨 外观设置 <span id="arrow-appearance">▾</span></div>';
 h += '<div id="section-appearance">';
 
@@ -4579,7 +4585,7 @@ h += '<div id="section-appearance">';
     // 更换聊天背景
     h += '<div class="settings-section"><h4>💬 聊天背景</h4>';
     h += '<div class="bg-preset-grid">';
-    [{id:'default',icon:'⬜',color:'#f8f8f8'},{id:'warm',icon:'💛',color:'#fffdf5'},{id:'cool',icon:'💙',color:'#f5f8ff'},{id:'pink',icon:'💗',color:'#fff5f7'}].forEach(function(p) {
+[{id:'default',icon:'🌸',color:'#FFF5F7'},{id:'mocha',icon:'☕',color:'#FBF4E8'},{id:'ocean',icon:'🌊',color:'#F2F8FC'},{id:'lavender',icon:'💜',color:'#F7F2FA'},{id:'gray',icon:'⬜',color:'#F5F5F5'},{id:'dark',icon:'🌙',color:'#1A1A1A'}].forEach(function(p) {
         h += '<div class="bg-preset-item ' + (S.chatBg === p.id ? 'selected' : '') + '" style="background:' + p.color + ';" onclick="setChatBg(\'' + p.id + '\')">' + p.icon + '</div>';
     });
     h += '</div>';
@@ -4588,11 +4594,10 @@ h += '<div id="section-appearance">';
  
    h += '</div>';
 
-    h += '</div></div>';
-
     // ===== 数据备份 =====
-    h += '<div style="height:8px;"></div>';
-    h += '<div style="font-size:13px;color:var(--theme-muted);margin:4px 0 8px;letter-spacing:1px;">📦 数据备份</div>';
+    h += '<div style="height:12px;"></div>';
+    h += '<div onclick="toggleUniverseSection(\'backup\')" style="font-size:13px;color:var(--theme-muted);margin:4px 0 8px;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">📦 数据备份 <span id="arrow-backup">▾</span></div>';
+h += '<div id="section-backup">';
 
 h += '<div class="settings-section"><h4>📊 存储用量</h4>';
 h += '<div id="storageUsageBox" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
@@ -4603,7 +4608,10 @@ h += '</div></div>';
     h += '<div style="display:flex;flex-direction:column;gap:8px;">';
     h += '<button onclick="exportAll()" style="padding:10px 14px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:13px;cursor:pointer;">💾 全量备份</button>';
     h += '<button onclick="document.getElementById(\'importFileInput\').click()" style="padding:10px 14px;border-radius:12px;background:var(--theme-card);border:1px solid var(--theme-primary);color:var(--theme-primary);font-size:13px;cursor:pointer;">📥 导入数据</button>';
-       h += '</div></div>';
+      
+h += '</div>';
+
+h += '</div></div>';
 
 document.getElementById('ourUniverseContent').innerHTML = h;
 loadAvatarHistory('me');
@@ -6240,7 +6248,7 @@ async function renderTideView() {
         h += '<div style="display:flex;justify-content:center;">' +
         '<div onclick="toggleTideDay(\'' + dateStr + '\')" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:14px;cursor:pointer;' +
         'color:' + (isToday ? '#d4a8b8' : '#333') + ';' +
-        (isTide ? 'background:#fdf5f7;border:2px solid #d4a8b8;' : '') +
+        (isTide ? 'background:#fdf5f7;border:2px solid var(--theme-primary);' : '') +
         '">' + d + '</div></div>';
     }
     
@@ -7154,18 +7162,18 @@ function openTarotPage() {
 
 function getTarotBackHTML() {
     return '<div style="width:150px;height:230px;margin:0 auto 20px;position:relative;">' +
-    '<div style="position:absolute;width:150px;height:230px;border-radius:10px;background:#F2EBDD;border:1px solid rgba(120,100,80,.12);box-shadow:0 2px 8px rgba(60,50,40,.08);transform:translate(-4px,3px) rotate(-1.5deg);opacity:.55;"></div>' +
-    '<div style="position:absolute;width:150px;height:230px;border-radius:10px;background:#F2EBDD;border:1px solid rgba(120,100,80,.12);transform:translate(-7px,6px) rotate(-2.5deg);opacity:.32;"></div>' +
-    '<div style="position:absolute;width:150px;height:230px;border-radius:10px;background:#F2EBDD;border:1px solid rgba(120,100,80,.12);transform:translate(-10px,9px) rotate(-3.5deg);opacity:.16;"></div>' +
-    '<div style="position:absolute;top:0;left:0;width:150px;height:230px;border-radius:10px 12px 9px 11px;background:#F2EBDD;border:1px solid rgba(120,100,80,.18);box-shadow:0 4px 12px rgba(60,50,40,.14);display:flex;align-items:center;justify-content:center;">' +
+    '<div style="position:absolute;width:150px;height:230px;border-radius:10px;background:var(--tarot-bg);border:1px solid var(--tarot-border);box-shadow:0 2px 8px var(--tarot-shadow);transform:translate(-4px,3px) rotate(-1.5deg);opacity:.55;"></div>' +
+    '<div style="position:absolute;width:150px;height:230px;border-radius:10px;background:var(--tarot-bg);border:1px solid var(--tarot-border);transform:translate(-7px,6px) rotate(-2.5deg);opacity:.32;"></div>' +
+    '<div style="position:absolute;width:150px;height:230px;border-radius:10px;background:var(--tarot-bg);border:1px solid var(--tarot-border);transform:translate(-10px,9px) rotate(-3.5deg);opacity:.16;"></div>' +
+    '<div style="position:absolute;top:0;left:0;width:150px;height:230px;border-radius:10px 12px 9px 11px;background:var(--tarot-bg);border:1px solid var(--tarot-border);box-shadow:0 4px 12px var(--tarot-shadow);display:flex;align-items:center;justify-content:center;">' +
     '<div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;">' +
-    '<svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#3A342D" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px;opacity:.3;">' +
+    '<svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="var(--tarot-text)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px;opacity:.3;">' +
     '<path d="M26 8 L40 20 L40 42 L12 42 L12 20 Z"/>' +
     '<path d="M18 42 L18 30 L34 30 L34 42"/>' +
     '<path d="M22 30 L22 24 L30 24 L30 30"/>' +
     '</svg>' +
-    '<span style="font-size:20px;font-weight:600;color:#3A342D;opacity:.32;line-height:1;">sylus</span>' +
-    '<span style="font-size:7px;letter-spacing:3px;color:#8C8273;opacity:.5;">TAROT</span>' +
+    '<span style="font-size:20px;font-weight:600;color:var(--tarot-text);opacity:.32;line-height:1;">sylus</span>' +
+    '<span style="font-size:7px;letter-spacing:3px;color:var(--tarot-muted);opacity:.5;">TAROT</span>' +
     '</div></div></div>';
 }
 
@@ -7198,12 +7206,12 @@ function showTarotAllowDeny() {
     '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:var(--page-bg);min-height:100vh;">' +
     '<div style="width:100%;max-width:400px;text-align:center;">' +
     '<div style="font-size:20px;font-weight:600;color:var(--theme-text);margin:20px 0 28px;text-align:center;letter-spacing:1px;">以光为引 · 链接你我</div>' +
-    '<div style="background:#fff;border:1px solid var(--theme-border);border-radius:16px;padding:24px;margin-bottom:20px;">' +
+    '<div style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:16px;padding:24px;margin-bottom:20px;">' +
     '<div style="font-size:15px;color:var(--theme-primary);line-height:2;font-style:italic;">秦彻：“' + response + '”</div>' +
     '</div>' +
-    (tarotState.isAllow ?
+     (tarotState.isAllow ?
     '<button onclick="showTarotContext()" style="width:100%;padding:12px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:15px;cursor:pointer;">进入占卜</button>' :
-    '<button onclick="renderTarotMain()" style="width:100%;padding:12px;border-radius:12px;background:#f5f0eb;color:#666;border:none;font-size:15px;cursor:pointer;">返回</button>') +
+    '<button onclick="renderTarotMain()" style="width:100%;padding:12px;border-radius:12px;background:var(--btn-secondary);color:var(--btn-secondary-text);border:1px solid var(--btn-secondary-border);font-size:15px;cursor:pointer;">返回</button>') +
     '</div></div>';
 }
 
@@ -7214,25 +7222,25 @@ function showTarotContext() {
     '<div style="width:100%;max-width:400px;">' +
     '<div style="font-size:20px;font-weight:600;color:var(--theme-text);margin:20px 0 28px;text-align:center;letter-spacing:1px;">选择你关心的方向</div>' +
     '<div style="display:flex;gap:8px;margin-bottom:20px;">' +
-    '<div onclick="selectTarotContext(\'love\')" data-ctx="love" style="flex:1;padding:14px 6px;background:#fff;border:2px solid #d4a8b8;border-radius:12px;text-align:center;cursor:pointer;">' +
+    '<div onclick="selectTarotContext(\'love\')" data-ctx="love" style="flex:1;padding:14px 6px;background:var(--theme-card);border:2px solid var(--theme-primary);border-radius:12px;text-align:center;cursor:pointer;">' +
     '<div style="font-size:10px;color:var(--theme-muted);letter-spacing:2px;">AFFECTION</div>' +
     '<div style="font-size:14px;font-weight:500;margin-top:4px;">感情人际</div></div>' +
-    '<div onclick="selectTarotContext(\'career\')" data-ctx="career" style="flex:1;padding:14px 6px;background:#fff;border:1px solid var(--theme-border);border-radius:12px;text-align:center;cursor:pointer;">' +
+    '<div onclick="selectTarotContext(\'career\')" data-ctx="career" style="flex:1;padding:14px 6px;background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;text-align:center;cursor:pointer;">' +
     '<div style="font-size:10px;color:var(--theme-muted);letter-spacing:2px;">REALITY</div>' +
     '<div style="font-size:14px;font-weight:500;margin-top:4px;">现实发展</div></div>' +
-    '<div onclick="selectTarotContext(\'self\')" data-ctx="self" style="flex:1;padding:14px 6px;background:#fff;border:1px solid var(--theme-border);border-radius:12px;text-align:center;cursor:pointer;">' +
+    '<div onclick="selectTarotContext(\'self\')" data-ctx="self" style="flex:1;padding:14px 6px;background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;text-align:center;cursor:pointer;">' +
     '<div style="font-size:10px;color:var(--theme-muted);letter-spacing:2px;">WITHIN</div>' +
     '<div style="font-size:14px;font-weight:500;margin-top:4px;">内心日常</div></div>' +
     '</div>' +
     '<div style="font-size:18px;font-weight:600;color:var(--theme-text);margin-bottom:16px;">选择牌阵</div>' +
     '<div style="display:flex;gap:8px;margin-bottom:20px;">' +
-   '<div onclick="selectTarotSpread(1)" ontouchstart="selectTarotSpread(1)" data-spread="1" style="flex:1;padding:14px 6px;background:#fff;border:2px solid #d4a8b8;border-radius:12px;text-align:center;cursor:pointer;">' +
+   '<div onclick="selectTarotSpread(1)" ontouchstart="selectTarotSpread(1)" data-spread="1" style="flex:1;padding:14px 6px;background:var(--theme-card);border:2px solid var(--theme-primary);border-radius:12px;text-align:center;cursor:pointer;">' +
     '<div style="font-size:14px;font-weight:500;">单张</div></div>' +
-'<div onclick="selectTarotSpread(3)" ontouchstart="selectTarotSpread(3)" data-spread="3" style="flex:1;padding:14px 6px;background:#fff;border:1px solid var(--theme-border);border-radius:12px;text-align:center;cursor:pointer;">' +
+'<div onclick="selectTarotSpread(3)" ontouchstart="selectTarotSpread(3)" data-spread="3" style="flex:1;padding:14px 6px;background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;text-align:center;cursor:pointer;">' +
     '<div style="font-size:14px;font-weight:500;">三张</div></div>' +
     '</div>' +
-    '<textarea id="tarotQuestionInput" placeholder="想问什么？（可不填）" style="width:100%;height:60px;padding:10px;border:1px solid var(--theme-border);border-radius:10px;font-size:13px;background:#fff;resize:vertical;box-sizing:border-box;margin-bottom:20px;"></textarea>' +
-    '<button onclick="renderTarotDeck()" style="width:100%;padding:12px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:15px;cursor:pointer;">🃏 翻牌</button>' +
+    '<textarea id="tarotQuestionInput" placeholder="想问什么？（可不填）" style="width:100%;height:60px;padding:10px;border:1px solid var(--theme-border);border-radius:10px;font-size:13px;background:var(--theme-card);resize:vertical;box-sizing:border-box;margin-bottom:20px;"></textarea>' +
+    '<button onclick="renderTarotDeck()" style="width:100%;padding:12px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:15px;cursor:pointer;">翻牌</button>' +
     '</div></div>';
 
     // ===== 双重保险：用 addEventListener 绑定牌阵切换 =====
@@ -7318,19 +7326,19 @@ function renderTarotResult() {
         
         return '<div class="tarot-card-wrapper" style="flex:0 0 260px;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;">' +
             (positions[idx] ? '<div style="font-size:10px;color:var(--theme-muted);letter-spacing:2px;">' + positions[idx] + '</div>' : '') +
-            '<div style="width:260px;height:440px;position:relative;background:#F2EBDD;border-radius:10px 12px 9px 11px;border:1px solid rgba(120,100,80,.12);box-shadow:0 4px 14px rgba(60,50,40,.12);display:flex;flex-direction:column;overflow:hidden;">' +
-            '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 16px;position:relative;border-bottom:1px solid rgba(120,100,80,.18);">' +
-            '<div style="position:absolute;top:12px;left:14px;font-size:10px;letter-spacing:2px;color:#8C8273;">' + card.rank + ' · ' + card.suit.toUpperCase() + '</div>' +
+            '<div style="width:260px;height:440px;position:relative;background:var(--tarot-bg);border-radius:10px 12px 9px 11px;border:1px solid var(--tarot-border);box-shadow:0 4px 14px var(--tarot-shadow);display:flex;flex-direction:column;overflow:hidden;">' +
+            '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 16px;position:relative;border-bottom:1px solid var(--tarot-border);">' +
+            '<div style="position:absolute;top:12px;left:14px;font-size:10px;letter-spacing:2px;color:var(--tarot-muted);">' + card.rank + ' · ' + card.suit.toUpperCase() + '</div>' +
             badge +
             '<div style="width:78%;">' + getTarotCardSvg(card) + '</div>' +
-            '<div style="margin-top:8px;font-size:15px;font-weight:600;letter-spacing:4px;color:#3A342D;">' + card.name + '</div>' +
+            '<div style="margin-top:8px;font-size:15px;font-weight:600;letter-spacing:4px;color:var(--tarot-text);">' + card.name + '</div>' +
             '</div>' +
-            '<div style="height:64px;display:flex;align-items:center;justify-content:center;padding:0 18px;text-align:center;font-size:12px;line-height:1.5;color:#5C5448;">' + data.summary + '</div>' +
+            '<div style="height:64px;display:flex;align-items:center;justify-content:center;padding:0 18px;text-align:center;font-size:12px;line-height:1.5;color:var(--tarot-text);opacity:.82;">' + data.summary + '</div>' +
             '</div>' +
-            '<div class="tarot-strip" style="width:260px;padding:12px 16px 14px;text-align:center;background:rgba(242,235,221,.55);border:1px dashed rgba(140,100,80,.22);border-radius:8px;">' +
-            '<div style="font-size:8px;letter-spacing:3px;color:#8C8273;">' + ctx + '</div>' +
-            '<div style="font-size:13px;color:#3A342D;line-height:1.6;margin-top:4px;">' + contextText + '</div>' +
-            (tipText ? '<div style="font-size:11px;color:#8C8273;line-height:1.5;margin-top:2px;font-style:italic;">' + tipText + '</div>' : '') +
+            '<div class="tarot-strip" style="width:260px;padding:12px 16px 14px;text-align:center;background:var(--tarot-strip);border:1px dashed var(--tarot-border);border-radius:8px;">' +
+            '<div style="font-size:8px;letter-spacing:3px;color:var(--tarot-muted);">' + ctx + '</div>' +
+            '<div style="font-size:13px;color:var(--tarot-text);line-height:1.6;margin-top:4px;">' + contextText + '</div>' +
+            (tipText ? '<div style="font-size:11px;color:var(--tarot-muted);line-height:1.5;margin-top:2px;font-style:italic;">' + tipText + '</div>' : '') +
             '</div></div>';
     }).join('');
     
@@ -7373,7 +7381,7 @@ async function submitTarotToRole() {
     document.getElementById('tarotContent').innerHTML =
     '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:var(--page-bg);min-height:100vh;">' +
     '<div style="width:100%;max-width:400px;">' +
-    '<div style="background:#fff;border:1px solid var(--theme-border);border-radius:16px;padding:16px;margin-bottom:16px;">' +
+    '<div style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:16px;padding:16px;margin-bottom:16px;">' +
     '<div style="font-size:11px;color:var(--theme-muted);margin-bottom:8px;">' + new Date().toLocaleDateString('zh-CN') + ' ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + '</div>' +
     (tarotState.question ? '<div style="font-size:13px;color:var(--theme-text);margin-bottom:8px;">问题：' + tarotState.question + '</div>' : '') +
     '<div style="font-size:13px;color:#555;white-space:pre-wrap;line-height:1.8;">' + cardsText + '</div>' +
@@ -7383,7 +7391,7 @@ async function submitTarotToRole() {
     '</div>' +
     '<div style="display:flex;gap:10px;justify-content:center;margin-top:16px;">' +
     '<button onclick="saveTarotQuote()" style="padding:10px 24px;border-radius:20px;font-size:13px;background:var(--theme-primary);color:#fff;border:none;cursor:pointer;">存为语录</button>' +
-    '<button onclick="renderTarotMain()" style="padding:10px 24px;border-radius:20px;font-size:13px;border:1px solid var(--theme-border);color:var(--theme-muted);background:#fff;cursor:pointer;">不存，再次占卜</button>' +
+    '<button onclick="renderTarotMain()" style="padding:10px 24px;border-radius:20px;font-size:13px;border:1px solid var(--theme-border);color:var(--theme-muted);background:var(--theme-card);cursor:pointer;">不存，再次占卜</button>' +
     '</div></div></div>';
 }
 
@@ -7444,7 +7452,7 @@ async function renderTarotQuotes() {
             var ctx = ctxLabels[q.context] || '';
             var dateStr = new Date(q.timestamp).toLocaleDateString('zh-CN') + ' ' + new Date(q.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
             
-            html += '<div style="background:#fff;border:1px solid var(--theme-border);border-radius:16px;padding:14px;margin-bottom:12px;">' +
+            html += '<div style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:16px;padding:14px;margin-bottom:12px;">' +
             '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--theme-muted);margin-bottom:6px;">' +
             '<span>' + dateStr + '</span>' +
             '<span>' + ctx + '</span>' +
@@ -7929,19 +7937,19 @@ async function renderDataManage() {
 '<div style="background:var(--theme-card);border-radius:16px;padding:16px 18px;border:1px solid var(--theme-border);margin-bottom:14px;">' +
 '<div style="font-size:15px;font-weight:500;color:var(--theme-text);margin-bottom:10px;">📤 聊天记录导出</div>' +
 '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
-'<input type="date" id="exportStartDate" style="flex:1;padding:8px;border-radius:8px;border:1px solid #eee;font-size:13px;">' +
+'<input type="date" id="exportStartDate" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--theme-input-border);font-size:13px;">' +
 '<span style="font-size:12px;color:var(--theme-muted);align-self:center;">至</span>' +
-'<input type="date" id="exportEndDate" style="flex:1;padding:8px;border-radius:8px;border:1px solid #eee;font-size:13px;">' +
+'<input type="date" id="exportEndDate" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--theme-input-border);font-size:13px;">' +
 '</div>' +
 '<button onclick="exportChatByDate()" style="width:100%;padding:12px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:14px;cursor:pointer;">📤 导出并复制</button>' +
 '</div>' +
 
         // 操作按钮
         '<div style="display:flex;flex-direction:column;gap:10px;">' +
-        '<button onclick="exportChat()" style="padding:12px 16px;border-radius:12px;background:#fff;border:1px solid var(--theme-border);color:var(--theme-text);font-size:14px;cursor:pointer;text-align:center;transition:all 0.2s;" onmouseover="this.style.background=\'var(--theme-bg)\'" onmouseout="this.style.background=\'#fff\'">📤 导出聊天记录</button>' +
-        '<button onclick="document.getElementById(\'importFileInput\').click()" style="padding:12px 16px;border-radius:12px;background:#fff;border:1px solid var(--theme-border);color:var(--theme-text);font-size:14px;cursor:pointer;text-align:center;transition:all 0.2s;" onmouseover="this.style.background=\'var(--theme-bg)\'" onmouseout="this.style.background=\'#fff\'">📥 导入数据</button>' +
-        '<button onclick="exportAll()" style="padding:12px 16px;border-radius:12px;background:#fff;border:1px solid var(--theme-border);color:var(--theme-text);font-size:14px;cursor:pointer;text-align:center;transition:all 0.2s;" onmouseover="this.style.background=\'var(--theme-bg)\'" onmouseout="this.style.background=\'#fff\'">💾 全量备份</button>' +
-        '<button onclick="if(confirm(\'确定清除聊天记录？\'))clearChat()" style="padding:12px 16px;border-radius:12px;background:#fff;border:1px solid var(--theme-border);color:var(--theme-primary);font-size:14px;cursor:pointer;text-align:center;transition:all 0.2s;" onmouseover="this.style.background=\'var(--theme-bg)\'" onmouseout="this.style.background=\'#fff\'">🗑 清空聊天记录</button>' +
+        '<button onclick="exportChat()" style="padding:12px 16px;border-radius:12px;background:var(--theme-card);border:1px solid var(--theme-border);color:var(--theme-text);font-size:14px;cursor:pointer;text-align:center;transition:all 0.2s;" onmouseover="this.style.background=\'var(--theme-bg)\'" onmouseout="this.style.background=\'#fff\'">📤 导出聊天记录</button>' +
+        '<button onclick="document.getElementById(\'importFileInput\').click()" style="padding:12px 16px;border-radius:12px;background:var(--theme-card);border:1px solid var(--theme-border);color:var(--theme-text);font-size:14px;cursor:pointer;text-align:center;transition:all 0.2s;" onmouseover="this.style.background=\'var(--theme-bg)\'" onmouseout="this.style.background=\'#fff\'">📥 导入数据</button>' +
+        '<button onclick="exportAll()" style="padding:12px 16px;border-radius:12px;background:var(--theme-card);border:1px solid var(--theme-border);color:var(--theme-text);font-size:14px;cursor:pointer;text-align:center;transition:all 0.2s;" onmouseover="this.style.background=\'var(--theme-bg)\'" onmouseout="this.style.background=\'#fff\'">💾 全量备份</button>' +
+        '<button onclick="if(confirm(\'确定清除聊天记录？\'))clearChat()" style="padding:12px 16px;border-radius:12px;background:var(--theme-card);border:1px solid var(--theme-border);color:var(--theme-primary);font-size:14px;cursor:pointer;text-align:center;transition:all 0.2s;" onmouseover="this.style.background=\'var(--theme-bg)\'" onmouseout="this.style.background=\'#fff\'">🗑 清空聊天记录</button>' +
         '</div>' +
         '</div>' +
         '</div>';
@@ -8126,26 +8134,16 @@ function openChatSettings(){
     document.getElementById('chatSettingsPanel').innerHTML = 
     '<h4 style="text-align:center;margin-bottom:16px;">🐱 聊天设置</h4>' +
     
-    '<div class="settings-section"><h4>📝 顶部文案</h4>' +
+'<div class="settings-section"><h4>📝 顶部文案</h4>' +
     '<div style="display:flex;gap:6px;">' +
-    '<input type="text" id="setTopQuote" value="' + (S.topQuote||'').replace(/"/g,'&quot;') + '" style="flex:1;padding:7px 10px;border-radius:12px;border:1.5px solid #eee;font-size:12px;">' +
-    '<button onclick="saveTopQuoteFromPanel()" style="padding:7px 12px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:12px;">保存</button>' +
+    '<input type="text" id="setTopQuote" value="' + (S.topQuote||'').replace(/"/g,'&quot;') + '" style="flex:1;padding:8px 10px;border-radius:12px;border:1.5px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:12px;">' +
+    '<button onclick="saveTopQuoteFromPanel()" style="padding:8px 14px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:12px;cursor:pointer;">保存</button>' +
     '</div></div>' +
-
-// ===== 查找聊天记录 =====
-'<div class="settings-section">' +
-'<h4>🔍 查找聊天记录</h4>' +
-'<div style="display:flex;gap:8px;margin-top:4px;">' +
-'<button onclick="closeChatSettings();openSearchByKeyword();" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid var(--theme-primary);background:transparent;color:var(--theme-primary);font-size:13px;cursor:pointer;">关键词</button>' +
-'<button onclick="closeChatSettings();openSearchByDate();" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid var(--theme-primary);background:transparent;color:var(--theme-primary);font-size:13px;cursor:pointer;"> 选日期</button>' +
-'</div>' +
-'</div>' +
-
-    
+  
     '<div class="settings-section"><h4>💬 消息交互</h4>' +
     '<div class="settings-row"><span>引用回复</span><div class="toggle-switch ' + (cs.quoteReply?'on':'') + '" onclick="toggleChatSetting(\'quoteReply\',this)"></div></div>' +
     probRow('引用回复概率', 'quoteReplyProb', cs.quoteReplyProb) +
-    '<div class="settings-row"><span>已读回执</span><select onchange="S.chatSettings.readReceipt=this.value;saveChatSettings();" style="padding:6px;border-radius:8px;border:1px solid #eee;">' +
+    '<div class="settings-row"><span>已读回执</span><select onchange="S.chatSettings.readReceipt=this.value;saveChatSettings();" style="padding:6px;border-radius:8px;border:1px solid var(--theme-input-border);">' +
     '<option value="none" ' + (cs.readReceipt==='none'?'selected':'') + '>关闭</option>' +
     '<option value="text" ' + (cs.readReceipt==='text'?'selected':'') + '>文字提示</option>' +
     '<option value="graphic" ' + (cs.readReceipt==='graphic'?'selected':'') + '>图形提示</option>' +
@@ -8155,12 +8153,12 @@ function openChatSettings(){
     '<div class="settings-row"><span>正在输入</span><div class="toggle-switch ' + (cs.typing?'on':'') + '" onclick="toggleChatSetting(\'typing\',this)"></div></div>' +
     '<div class="settings-row"><span>主动发消息</span><div class="toggle-switch ' + (cs.autoSend?'on':'') + '" onclick="toggleChatSetting(\'autoSend\',this)"></div></div>' +
     (cs.autoSend ? '<div class="settings-row"><span style="display:inline-block;width:100px;text-align:right;margin-right:8px;">间隔(分)</span><input type="range" min="1" max="120" value="' + (cs.autoSendInterval || 10) + '" oninput="this.nextElementSibling.textContent=this.value+\'分\';" onchange="S.chatSettings.autoSendInterval=parseInt(this.value);saveChatSettings();restartAutoSend();" style="width:120px;"><span style="margin-left:8px;font-size:12px;color:var(--theme-muted);min-width:35px;">' + (cs.autoSendInterval || 10) + '分</span></div>' +
-'<div class="settings-row"><span style="display:inline-block;width:100px;text-align:right;margin-right:8px;">每次发几条</span><input type="number" min="1" max="5" value="' + (cs.autoSendCount || 1) + '" onchange="S.chatSettings.autoSendCount=parseInt(this.value);saveChatSettings();restartAutoSend();" style="width:60px;text-align:center;border:1px solid #eee;border-radius:6px;padding:4px;"></div>' : '') +
+'<div class="settings-row"><span style="display:inline-block;width:100px;text-align:right;margin-right:8px;">每次发几条</span><input type="number" min="1" max="5" value="' + (cs.autoSendCount || 1) + '" onchange="S.chatSettings.autoSendCount=parseInt(this.value);saveChatSettings();restartAutoSend();" style="width:60px;text-align:center;border:1px solid var(--theme-input-border);border-radius:6px;padding:4px;"></div>' : '') +
     '<div class="settings-row"><span>表情混入消息</span><div class="toggle-switch ' + (cs.emojiMix?'on':'') + '" onclick="toggleChatSetting(\'emojiMix\',this)"></div></div>' +
     probRow('表情概率', 'emojiMixProb', cs.emojiMixProb) +
     probRow('拍一拍概率', 'patProb', cs.patProb) +
 '<div class="settings-row"><span>来电概率（‰）</span>' +
-'<input type="number" min="0" max="1000" step="1" value="' + (Math.round(cs.simCallProb * 1000) || 10) + '" onchange="S.chatSettings.simCallProb=parseInt(this.value)/1000;saveChatSettings();this.nextElementSibling.textContent=this.value+\'‰\';" style="width:60px;text-align:center;border:1px solid #eee;border-radius:6px;padding:4px;">' +
+'<input type="number" min="0" max="1000" step="1" value="' + (Math.round(cs.simCallProb * 1000) || 10) + '" onchange="S.chatSettings.simCallProb=parseInt(this.value)/1000;saveChatSettings();this.nextElementSibling.textContent=this.value+\'‰\';" style="width:60px;text-align:center;border:1px solid var(--theme-input-border);border-radius:6px;padding:4px;">' +
 '<span style="margin-left:8px;font-size:12px;color:var(--theme-muted);">' + (Math.round(cs.simCallProb * 1000) || 10) + '‰</span></div>' +
     
     '<div class="settings-section"><h4>💬 收藏</h4>' +
@@ -8168,19 +8166,24 @@ function openChatSettings(){
     '</div>' +
     
     '<div class="settings-section"><h4>🤖 拼字卡</h4>' +
-    '<div class="settings-row"><span>拼几条</span><input type="number" id="setCardMin" value="' + (cs.cardMin||1) + '" style="width:45px;text-align:center;border:1px solid #eee;border-radius:6px;padding:4px;"> ~ <input type="number" id="setCardMax" value="' + (cs.cardMax||4) + '" style="width:45px;text-align:center;border:1px solid #eee;border-radius:6px;padding:4px;"></div>' +
+    '<div class="settings-row"><span>拼几条</span><input type="number" id="setCardMin" value="' + (cs.cardMin||1) + '" style="width:45px;text-align:center;border:1px solid var(--theme-input-border);border-radius:6px;padding:4px;"> ~ <input type="number" id="setCardMax" value="' + (cs.cardMax||4) + '" style="width:45px;text-align:center;border:1px solid var(--theme-input-border);border-radius:6px;padding:4px;"></div>' +
     probRow('重复概率', 'cardRepeatProb', cs.cardRepeatProb) +
     probRow('删除概率', 'cardDeleteProb', cs.cardDeleteProb) +
     '</div>' +
     
     '<div class="settings-section"><h4>🤖 自动回复</h4>' +
-    '<div class="settings-row"><span>最快回复（秒）</span><input type="number" id="setMin" value="' + S.minReplyTime + '" style="width:60px;text-align:center;border:1px solid #eee;border-radius:6px;padding:4px;"></div>' +
-    '<div class="settings-row"><span>最慢回复（分钟）</span><input type="number" id="setMax" value="' + S.maxReplyTime + '" style="width:60px;text-align:center;border:1px solid #eee;border-radius:6px;padding:4px;"></div>' +
-    '<div class="settings-row"><span>回复次数</span><input type="number" id="setCnt" value="' + S.replyCount + '" style="width:60px;text-align:center;border:1px solid #eee;border-radius:6px;padding:4px;"></div>' +
+    '<div class="settings-row"><span>最快回复（秒）</span><input type="number" id="setMin" value="' + S.minReplyTime + '" style="width:60px;text-align:center;border:1px solid var(--theme-input-border);border-radius:6px;padding:4px;"></div>' +
+    '<div class="settings-row"><span>最慢回复（分钟）</span><input type="number" id="setMax" value="' + S.maxReplyTime + '" style="width:60px;text-align:center;border:1px solid var(--theme-input-border);border-radius:6px;padding:4px;"></div>' +
+    '<div class="settings-row"><span>回复次数</span><input type="number" id="setCnt" value="' + S.replyCount + '" style="width:60px;text-align:center;border:1px solid var(--theme-input-border);border-radius:6px;padding:4px;"></div>' +
     '</div>' +
 
-    '<div class="settings-section"><h4>📊 聊天数据</h4>' +
-    '<div class="settings-row"><span>💬 聊天记录</span></div>' +
+
+'<div class="settings-row"><span>🔍 查找聊天记录</span></div>' +
+'<div style="display:flex;gap:6px;margin-top:6px;margin-bottom:8px;">' +
+'<button onclick="closeChatSettings();openSearchByKeyword();" style="flex:1;padding:9px 4px;border-radius:10px;border:1px solid var(--theme-primary);background:transparent;color:var(--theme-primary);font-size:11px;cursor:pointer;">🔍 关键词</button>' +
+'<button onclick="closeChatSettings();openSearchByDate();" style="flex:1;padding:9px 4px;border-radius:10px;border:1px solid var(--theme-primary);background:transparent;color:var(--theme-primary);font-size:11px;cursor:pointer;">📅 选日期</button>' +
+'</div>' +
+'<div class="settings-row"><span>💬 聊天记录</span></div>' +
     '<div style="display:flex;gap:6px;margin-top:6px;">' +
     '<button onclick="closeChatSettings();exportChat();" style="flex:1;padding:9px 4px;border-radius:10px;border:1px solid var(--theme-primary);background:transparent;color:var(--theme-primary);font-size:11px;cursor:pointer;">导出全部</button>' +
     '<button onclick="closeChatSettings();openChatDateExport();" style="flex:1;padding:9px 4px;border-radius:10px;border:1px solid var(--theme-primary);background:transparent;color:var(--theme-primary);font-size:11px;cursor:pointer;">按日期导出</button>' +
@@ -8189,8 +8192,8 @@ function openChatSettings(){
     '<div class="settings-row" style="margin-top:8px;"><span>📞 通话记录</span><button onclick="closeChatSettings();openCallLogPage();" style="padding:6px 14px;border-radius:12px;border:1px solid var(--theme-primary);background:transparent;color:var(--theme-primary);font-size:12px;cursor:pointer;">查看</button></div>' +
     '</div>' +
     
-    '<button style="width:100%;padding:12px;border-radius:12px;background:var(--primary);color:#fff;border:none;font-size:15px;cursor:pointer;" onclick="saveAllChatSettings()">💾 保存聊天设置</button>' +
-    '<button style="width:100%;padding:10px;margin-top:6px;border-radius:12px;background:#f0f0f0;border:none;cursor:pointer;" onclick="closeChatSettings()">关闭</button>';
+    '<button style="width:100%;padding:12px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:15px;cursor:pointer;" onclick="saveAllChatSettings()">💾 保存聊天设置</button>' +
+'<button style="width:100%;padding:10px;margin-top:6px;border-radius:12px;background:var(--btn-secondary);color:var(--btn-secondary-text);border:1px solid var(--btn-secondary-border);cursor:pointer;" onclick="closeChatSettings()">关闭</button>'
     document.getElementById('chatSettingsOverlay').classList.add('show');
 }
 
@@ -8373,7 +8376,7 @@ async function renderCalendar() {
             html += 'background:#ffb6c1;color:#fff;font-weight:600;';
         }
         if (isToday && !hasMsg) {
-            html += 'border:2px solid #d4a8b8;';
+            html += 'border:2px solid var(--theme-primary);';
         }
         html += '">' + d + '</div>';
     }
@@ -8667,7 +8670,7 @@ function openCardPreview(messages) {
             </div>
             <div style="display:flex;gap:8px;">
                 <button onclick="saveMemoryCard()" style="flex:1;padding:10px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:14px;cursor:pointer;">📥 收进珍藏</button>
-                <button onclick="exportCardImage()" style="flex:1;padding:10px;border-radius:12px;background:#fff;border:1.5px solid var(--theme-primary);color:var(--theme-primary);font-size:14px;cursor:pointer;">🖼️ 保存图片</button>
+                <button onclick="exportCardImage()" style="flex:1;padding:10px;border-radius:12px;background:var(--theme-card);border:1.5px solid var(--theme-primary);color:var(--theme-primary);font-size:14px;cursor:pointer;">🖼️ 保存图片</button>
             </div>
         </div>
     `;
@@ -8892,11 +8895,17 @@ function applyChatBgOpacity() {
     var el = document.getElementById('chatArea');
     if (el) el.style.opacity = (S.chatBgOpacity || 100) / 100;
 }
-
 function setChatBg(id) {
     S.chatBg = id;
     S.chatBgImage = '';
-    const m = { default: '#f8f8f8', warm: '#fffdf5', cool: '#f5f8ff', pink: '#fff5f7' };
+    const m = {
+        default: '#FFF5F7',
+        mocha: '#FBF4E8',
+        ocean: '#F2F8FC',
+        lavender: '#F7F2FA',
+        gray: '#F5F5F5',
+        dark: '#1A1A1A'
+    };
     const el = document.getElementById('chatArea');
     if (el) {
         el.style.background = m[id] || m.default;
@@ -8905,7 +8914,7 @@ function setChatBg(id) {
     }
     dbPut('bgSettings', { key: 'chatBg', value: id });
     dbPut('bgSettings', { key: 'chatBgImage', value: '' });
-    renderOurUniverse(); // 立即刷新页面
+    renderOurUniverse();
     showToast('✅ 聊天背景已更新');
 }
 async function handleChatBgUpload(event){const f=event.target.files[0];if(!f)return;const d=await fileToDataUrl(f);S.chatBgImage=d;S.chatBg='custom';const el=document.getElementById('chatArea');if(el){el.style.backgroundImage='url('+d+')';el.style.backgroundSize='cover';el.style.backgroundPosition='center';}await dbPut('bgSettings',{key:'chatBg',value:'custom'});await dbPut('bgSettings',{key:'chatBgImage',value:d});}
@@ -9041,8 +9050,8 @@ try {
             chatEl.style.backgroundImage = 'url(' + S.chatBgImage + ')';
             chatEl.style.backgroundSize = 'cover';
             chatEl.style.backgroundPosition = 'center';
-        } else if (S.chatBg && S.chatBg !== 'default' && chatEl) {
-            const m = { warm: '#fffdf5', cool: '#f5f8ff', pink: '#fff5f7' };
+              } else if (S.chatBg && S.chatBg !== 'default' && chatEl) {
+            const m = { mocha: '#FBF4E8', ocean: '#F2F8FC', lavender: '#F7F2FA', gray: '#F5F5F5', dark: '#1A1A1A' };
             if (m[S.chatBg]) {
                 chatEl.style.background = m[S.chatBg];
                 chatEl.style.backgroundImage = 'none';
@@ -9152,6 +9161,30 @@ if (savedMood) {
     S.contactMood = await getMoodFromGroup();
     await setCal('contactMood', S.contactMood);
 }
+
+var lastStatusTime = parseInt(await getCal('contactStatusTime', '0'));
+var lastMoodTime = parseInt(await getCal('contactMoodTime', '0'));
+var nowTime = Date.now();
+
+if (nowTime - lastStatusTime > 3 * 3600 * 1000) {
+    var newStatus = await getStatusFromGroup();
+    if (newStatus && newStatus !== S.contactStatus) {
+        S.contactStatus = newStatus;
+        await setCal('contactStatus', S.contactStatus);
+    }
+    await setCal('contactStatusTime', String(nowTime));
+}
+
+if (nowTime - lastMoodTime > 3 * 3600 * 1000) {
+    var newMood = await getMoodFromGroup();
+    if (newMood && newMood !== S.contactMood) {
+        S.contactMood = newMood;
+        await setCal('contactMood', S.contactMood);
+    }
+    await setCal('contactMoodTime', String(nowTime));
+}
+
+updateHome();
 
 // 备份提醒
 var lastBackup = localStorage.getItem('lastBackupTime');
