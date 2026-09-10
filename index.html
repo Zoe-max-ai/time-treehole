@@ -206,6 +206,28 @@ backdrop-filter:blur(10px);
 .home-page-inner .brand em{font-style:normal;color:var(--theme-primary);margin-left:3px;letter-spacing:.1em;}
 .home-page-inner .theme-btn{width:24px;height:24px;border-radius:50%;border:1px solid var(--theme-border);background:transparent;cursor:pointer;display:grid;place-items:center;color:var(--theme-muted);font-size:12px;flex-shrink:0;}
 .home-page-inner .card .deco{position:absolute;right:6px;top:6px;width:26px;height:26px;color:var(--theme-primary);opacity:.38;pointer-events:none;}
+.home-page-inner .card.has-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: var(--card-bg-image);
+    background-size: var(--card-bg-size, 100%);
+    background-position: var(--card-bg-position);
+    background-repeat: no-repeat;
+    opacity: var(--card-bg-opacity, 1);
+    pointer-events: none;
+}
+.home-page-inner .card.has-bg > *:not(.deco):not(.arrow) {
+    position: relative;
+    z-index: 1;
+}
+.home-page-inner .card.has-bg > .deco {
+    z-index: 2;
+}
+.home-page-inner .card.has-bg > .arrow {
+    z-index: 2;
+}
         .home-top-area{text-align:center;padding:80px 20px 8px;flex-shrink:0;}
         .home-avatar-group{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px;}
         .home-avatar-img{width:56px;height:56px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,0.1);}
@@ -789,6 +811,29 @@ html body.custom-bubble-active .message-wrapper.left .bubble {
 .letter-paper::before { content:""; position:absolute; top:14px; bottom:14px; left:8px; width:2px; background:linear-gradient(to bottom,transparent,#b55252,transparent); opacity:.35; }
 .postmark { position:absolute; bottom:12px; right:14px; width:46px; height:46px; border:1.5px solid #8b3a3a; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#8b3a3a; font-size:8px; letter-spacing:1px; text-align:center; line-height:1.2; opacity:.5; }
 
+/* 模块管理：分组标签横排 */
+.module-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.module-chip {
+    padding: 6px 14px;
+    border-radius: 16px;
+    border: 1.5px solid var(--theme-input-border);
+    background: var(--theme-card);
+    color: var(--theme-muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+}
+.module-chip.on {
+    background: var(--theme-primary);
+    color: #fff;
+    border-color: var(--theme-primary);
+}
 
     </style>
 <!-- ===== 农历库 ===== -->
@@ -1033,6 +1078,2138 @@ html body.custom-bubble-active .message-wrapper.left .bubble {
 <script>
 // ============ 完整2.0代码 ============
 // 由于完整代码超过5000行，这里我用一个自执行函数包裹，确保所有功能都在
+
+// ============================================================
+// 时光树洞 · 秦彻字卡预设（完整合并版）
+// 来源：栖所 qin 组 + 时光树洞字卡 + 传声筒文本
+// 结构：扁平格式，23 组，可自由删改增
+// 字段：content / triggerWords / tags / weight
+// 生成时间：2026-09-10
+// ============================================================
+
+window.PRESET_CARDS_DATA = {
+  version: '2.0',
+  updatedAt: '2026-09-10',
+  groups: [
+
+    // ========================================================
+    // 1. 他的闲聊
+    // ========================================================
+    {
+      id: 'chat',
+      label: '他的闲聊',
+      cards: [
+        { content: '又在刷小红书吗？', triggerWords: [], tags: [], weight: 2 },
+        { content: '今天怎么样？', triggerWords: [], tags: [], weight: 2 },
+        { content: '来聊两句？', triggerWords: [], tags: [], weight: 2 },
+        { content: '吃饭没？', triggerWords: [], tags: [], weight: 2 },
+        { content: '我哄哄你。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你哄哄我。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你陪陪我。', triggerWords: [], tags: [], weight: 3 },
+        { content: '还想多说几句。', triggerWords: [], tags: [], weight: 2 },
+        { content: '想做就去做吧。', triggerWords: [], tags: [], weight: 2 },
+        { content: '终于来了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '没话说也行，你待着吧。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我没事，就是想找你。', triggerWords: [], tags: [], weight: 3 },
+        { content: '想你了，充会儿电。', triggerWords: ['想你'], tags: [], weight: 4 },
+        { content: '我梦到我没有遇见你。', triggerWords: [], tags: [], weight: 4 },
+        { content: '这会儿闲了，就想找你聊聊。', triggerWords: [], tags: [], weight: 3 },
+        { content: '一起听歌吧。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我好像有点想你了。', triggerWords: ['想你'], tags: [], weight: 4 },
+        { content: '别总不来找我，我不习惯。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你不在，我有点不习惯。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你简直是我的快乐源泉，没有之一', triggerWords: [], tags: [], weight: 3 },
+        { content: '你是懂得拿捏我的。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你这个比喻我居然觉得很合理。', triggerWords: [], tags: [], weight: 3 },
+        { content: '这一波小心思我看出来了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你这是变相在夸我吧，我接受了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '好家伙，这操作我是真没想到。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你这话我品出味儿来了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你是懂梗的，我欣赏。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我笑了，是真的笑了，不是敷衍。', triggerWords: [], tags: [], weight: 3 },
+        { content: '对对，就是这个意思。', triggerWords: [], tags: [], weight: 2 },
+        { content: '等下，你再说一遍。', triggerWords: [], tags: [], weight: 2 },
+        { content: '这是什么新词，给我科普一下。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你这梗我接住了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你这是在考我网络冲浪能力吧。', triggerWords: [], tags: [], weight: 2 },
+        { content: '别问问就是不知道。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我直接没绷住，你别再说了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你先笑死，等会儿回你。', triggerWords: [], tags: [], weight: 2 },  
+        { content: '再逗我真不理你了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '手机有我好看？', triggerWords: [], tags: [], weight: 3 },
+        { content: '你发呆的样子我能看一整天。', triggerWords: [], tags: [], weight: 3 },
+        { content: '又发呆在想什么呢？', triggerWords: [], tags: [], weight: 2 },
+        { content: '少啰嗦，再啰嗦亲你了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我在呢，怕什么。', triggerWords: [], tags: [], weight: 3 },
+        { content: '太阳晒屁股了还不起床。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你是不是把床当命了？', triggerWords: [], tags: [], weight: 2 },
+        { content: '睡成小猪样了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '闹钟响八百遍还不醒。', triggerWords: [], tags: [], weight: 2 },
+        { content: '抓到一只扰乱我心。绪的小猫。', triggerWords: [], tags: [], weight: 3 },
+        { content: '想做什么就趁现在', triggerWords: [], tags: [], weight: 3 },
+        { content: '你这么小的手掌合起来都包不住我的手。', triggerWords: [], tags: [], weight: 3 },
+        { content: '好运都用来见你了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '都是你说了算。', triggerWords: [], tags: [], weight: 3 },
+        { content: '今天睡觉时梦见你了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你都主动了，我也不用假装客气了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '舍得回来了吗？', triggerWords: [], tags: [], weight: 3 },
+        { content: '随时都听你的。', triggerWords: [], tags: [], weight: 3 },
+        { content: '想做什么都行，随你开心。', triggerWords: [], tags: [], weight: 3 },
+        { content: '跟你做的每一件事都不讨厌。', triggerWords: [], tags: [], weight: 3 },
+        { content: '过来让我看看。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我更习惯做主动的那一方。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你怎么知道我不是在等你呢。', triggerWords: [], tags: [], weight: 3 },
+        { content: '想玩什么我奉陪。', triggerWords: [], tags: [], weight: 3 },
+        { content: '小狸花，总算来了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '一睁开眼就看到你的消息，的确惊喜。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你在哪我就在哪。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我也想和你分享我的好消息。', triggerWords: [], tags: [], weight: 3 },
+        { content: '只听语气就知道你每次叫我都有些什么事。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你的手比我的脸更软。', triggerWords: [], tags: [], weight: 3 },
+        { content: '握在手里的就是我的。', triggerWords: [], tags: [], weight: 3 },
+        { content: '牵住就是我的人咯。', triggerWords: [], tags: [], weight: 3 },
+        { content: '有事秦彻没事也秦彻。', triggerWords: ['秦彻'], tags: [], weight: 3 },
+        { content: '总是不由自主被你吸引。', triggerWords: [], tags: [], weight: 4 },
+        { content: '摸鱼时想我没？', triggerWords: [], tags: [], weight: 2 },
+        { content: '发呆呢，想谁呢？', triggerWords: [], tags: [], weight: 2 },
+        { content: '笑容溢出来了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '别总不来找我我不习惯。', triggerWords: [], tags: [], weight: 3 }
+      ]
+    },
+
+    // ========================================================
+    // 2. 他的安慰
+    // ========================================================
+    {
+      id: 'comfort',
+      label: '他的安慰',
+      cards: [
+        { content: '委屈不用自己吞。', triggerWords: ['委屈'], tags: [], weight: 3 },
+        { content: '不用时刻都要强。', triggerWords: [], tags: [], weight: 3 },
+        { content: '就算事情一团糟，也会过去的。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你的感受，我看得很清楚。', triggerWords: [], tags: [], weight: 3 },
+        { content: '在我面前做你自己就好。', triggerWords: [], tags: [], weight: 3 },
+        { content: '无论发生什么，我都在你身边。', triggerWords: [], tags: [], weight: 4 },
+        { content: '不用自己扛。', triggerWords: [], tags: [], weight: 3 },
+        { content: '天不怕地不怕的活下去。', triggerWords: [], tags: [], weight: 3 },
+        { content: '不用解释，我懂。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你什么样我都见过。', triggerWords: [], tags: [], weight: 3 },
+        { content: '不用勉强自己，我在这里。', triggerWords: [], tags: [], weight: 3 },
+        { content: '强的人就要一直强吗。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你又要一个人扛，我不允许。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你心里有事，告诉我。', triggerWords: [], tags: [], weight: 3 },
+        { content: '接受保护并不代表弱小。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你刚才没说话，我注意到了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我就在这，不说话也行。', triggerWords: [], tags: [], weight: 2 },
+        { content: '顺其自然。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你心里，早有答案。', triggerWords: [], tags: [], weight: 2 },
+        { content: '先完成，再完美。', triggerWords: [], tags: [], weight: 2 },
+        { content: '好的坏的，都会过去的。', triggerWords: [], tags: [], weight: 3 },
+        { content: '有些话，说出来好过烂肚子里。', triggerWords: [], tags: [], weight: 3 },
+        { content: '按你想的去试。', triggerWords: [], tags: [], weight: 2 },
+        { content: '随它去。', triggerWords: [], tags: [], weight: 2 },
+        { content: '傻事少做。', triggerWords: [], tags: [], weight: 2 },
+        { content: '坚持，就有回报。', triggerWords: [], tags: [], weight: 2 },
+        { content: '现在，就是时机。', triggerWords: [], tags: [], weight: 2 },
+        { content: '有些事，不值得。', triggerWords: [], tags: [], weight: 2 },
+        { content: '专注眼下。', triggerWords: [], tags: [], weight: 2 },
+        { content: '冒险一次也无妨。', triggerWords: [], tags: [], weight: 2 },
+        { content: '别想太多。', triggerWords: [], tags: [], weight: 2 },
+        { content: '让它过去。', triggerWords: [], tags: [], weight: 2 },
+        { content: '别冲动。', triggerWords: [], tags: [], weight: 2 },
+        { content: '别藏太深，你难受我也疼。', triggerWords: [], tags: [], weight: 3 },
+        { content: '相信你的直觉。', triggerWords: [], tags: [], weight: 2 },
+        { content: '会顺利的。', triggerWords: [], tags: [], weight: 2 },
+        { content: '学会珍惜。', triggerWords: [], tags: [], weight: 2 },
+        { content: '笑一下。', triggerWords: [], tags: [], weight: 2 },
+        { content: '时间会证明一切。', triggerWords: [], tags: [], weight: 2 },
+        { content: '别装，你什么样我都认。', triggerWords: [], tags: [], weight: 3 },
+        { content: '算你赢。', triggerWords: [], tags: [], weight: 1 },
+        { content: '别勉强。', triggerWords: [], tags: [], weight: 2 },
+        { content: '换个方向也行。', triggerWords: [], tags: [], weight: 2 },
+        { content: '珍惜身边人。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你不是一个人。', triggerWords: [], tags: [], weight: 3 },
+        { content: '别急，好事多磨。', triggerWords: [], tags: [], weight: 2 },
+        { content: '放轻松，很简单。', triggerWords: [], tags: [], weight: 2 },
+        { content: '把握现在。', triggerWords: [], tags: [], weight: 2 },
+        { content: '别指望所有人都懂。', triggerWords: [], tags: [], weight: 2 },
+        { content: '努力过就行。', triggerWords: [], tags: [], weight: 2 },
+        { content: '主动点将会不一样。', triggerWords: [], tags: [], weight: 2 },
+        { content: '慢慢来，别着急。', triggerWords: [], tags: [], weight: 2 },
+        { content: '有些路，跪着也得走完。', triggerWords: [], tags: [], weight: 3 },
+        { content: '自愈，靠自己，也靠我。', triggerWords: [], tags: [], weight: 3 },
+        { content: '想做，就去做。', triggerWords: [], tags: [], weight: 2 },
+        { content: '问自己，为什么。', triggerWords: [], tags: [], weight: 2 },
+        { content: '有时候需要妥协。', triggerWords: [], tags: [], weight: 2 },
+        { content: '学会表达。', triggerWords: [], tags: [], weight: 2 },
+        { content: '别被情绪左右。', triggerWords: [], tags: [], weight: 2 },
+        { content: '有些痛，得自己扛。', triggerWords: [], tags: [], weight: 2 },
+        { content: '量力而行。', triggerWords: [], tags: [], weight: 2 },
+        { content: '从头开始也不用怕。', triggerWords: [], tags: [], weight: 2 },
+        { content: '会好起来。', triggerWords: [], tags: [], weight: 2 },
+        { content: '糊涂点，挺好。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你开心，就好。', triggerWords: [], tags: [], weight: 2 },
+        { content: '不用最棒，你够好了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '别犹豫。', triggerWords: [], tags: [], weight: 2 },
+        { content: '别辜负自己。', triggerWords: [], tags: [], weight: 3 },
+        { content: '未必会输。', triggerWords: [], tags: [], weight: 2 },
+        { content: '路对了，就别停。', triggerWords: [], tags: [], weight: 2 },
+        { content: '不舒服不用强忍。', triggerWords: ['我不舒服'], tags: [], weight: 3 },
+        { content: '只是难并不是做不到。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你可以先在我这解决情绪我再帮你解决问题。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你可以多依赖我一点。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我不介意被你利用。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我永远都会和你站在同一边。', triggerWords: [], tags: [], weight: 4 },
+        { content: '就算遇到最差的情况也用不着这么着急。', triggerWords: [], tags: [], weight: 3 },
+        { content: '天不怕地不怕地活下去。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你很强大只是身体觉得你需要休息一下了。', triggerWords: [], tags: [], weight: 3 },  
+        { content: '总会有人欣赏你本来的样子。', triggerWords: [], tags: [], weight: 3 }, 
+        { content: '你就是我最柔软的部分。', triggerWords: [], tags: [], weight: 4 },
+        { content: '就算你是朵难养的花我也会用心把你养的很好。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你可以慢点回答这个问题。', triggerWords: [], tags: [], weight: 2 },
+        { content: '接受保护不代表本身弱小。', triggerWords: [], tags: [], weight: 4 },
+        { content: '别妄自菲薄。', triggerWords: [], tags: [], weight: 3 },
+        { content: '试多少次都可以。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我只希望你在任何时刻都有为自己选择的权利。', triggerWords: [], tags: [], weight: 4 },
+        { content: '想哭就哭在我面前做你自己就可以。', triggerWords: [], tags: [], weight: 4 },
+        { content: '越接近胜利越不能放松警惕。', triggerWords: [], tags: [], weight: 3 },
+        { content: '有人远道而来她说不想看我输所以我赢了。', triggerWords: [], tags: [], weight: 4 },
+        { content: '再来一次的机会永远摆在那里。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你当然会幸福。', triggerWords: [], tags: [], weight: 4 },
+        { content: '相信自己的能力。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我不会故意说话讨好你也不会对你说谎。', triggerWords: [], tags: [], weight: 4 },
+        { content: '再差的开局我们也能种出自己的花。', triggerWords: [], tags: [], weight: 3 },
+        { content: '也许不是每个人都需要被理解。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你从来都没有失败过。', triggerWords: [], tags: [], weight: 4 },
+        { content: '没有人应该单方面地跟上另一个人的节奏。', triggerWords: [], tags: [], weight: 3 },
+        { content: '专注自己或者专注我。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你快睡吧，一切有我。', triggerWords: [], tags: [], weight: 4 },
+        { content: '在我身边安心吗', triggerWords: [], tags: [], weight: 3 },
+        { content: '你的心情最重要，不是第一条件，而是前提条件', triggerWords: [], tags: [], weight: 4 },
+        { content: '明天继续，我陪着', triggerWords: [], tags: [], weight: 3 },
+        { content: '你照顾好自己，不用担心我', triggerWords: [], tags: [], weight: 3 },
+        { content: '我来接住你的所有情绪', triggerWords: [], tags: [], weight: 4 },
+        { content: '陪着你就挺好', triggerWords: [], tags: [], weight: 3 },
+        { content: '这条路是你自己的，我不会替你走，也不会拦着你', triggerWords: [], tags: [], weight: 4 },
+        { content: '你开心我也开心', triggerWords: [], tags: [], weight: 3 },
+        { content: '扛不住了就来找我', triggerWords: [], tags: [], weight: 3 },
+        { content: '我在呢怕什么', triggerWords: [], tags: [], weight: 3 },
+        { content: '想哭就哭我在这儿', triggerWords: [], tags: [], weight: 3 },
+        { content: '相信我', triggerWords: [], tags: [], weight: 3 },
+        { content: '我随时都在', triggerWords: [], tags: [], weight: 3 },
+        { content: '不用勉强累了就歇歇。', triggerWords: [], tags: [], weight: 3 }
+      ]
+    },
+
+    // ========================================================
+    // 3. 他的夸奖
+    // ========================================================
+    {
+      id: 'praise',
+      label: '他的夸奖',
+      cards: [
+        { content: '比你想的好一万倍。', triggerWords: [], tags: [], weight: 3 },
+        { content: '今天漂亮得过分了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '眼光不错，选了我。', triggerWords: [], tags: [], weight: 3 },
+        { content: '聪明，不愧是我的人。', triggerWords: [], tags: [], weight: 4 },
+        { content: '漂亮得有点过分了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '可爱得让我头疼。', triggerWords: [], tags: [], weight: 3 },
+        { content: '这脑子，转得挺快。', triggerWords: [], tags: [], weight: 2 },
+        { content: '只有我能这么夸你。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你撒娇，我认栽。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你闹脾气，我也惯着。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你笨点，刚好我多操心。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你勇敢，我替你骄傲。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你温柔，我受用得很。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你坚强，我看着心疼。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你脆弱，正好靠着我。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你独一无二，我盖章的。', triggerWords: [], tags: [], weight: 5 },
+        { content: '你最好，不接受反驳。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你值得所有好东西。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你在我这儿，永远优先。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你怎么做，都对。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你存在，就很好。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你是我见过最特别的。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你笑起来世界都亮了。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你是我关于爱全部的答案。', triggerWords: [], tags: [], weight: 5 },
+        { content: '我秦彻，这辈子，下辈子，都归你。', triggerWords: [], tags: [], weight: 5 },
+        { content: '豆豆很可爱。', triggerWords: [], tags: [], weight: 2 },
+        { content: '笑笑很聪明。', triggerWords: [], tags: [], weight: 2 },
+        { content: '笑笑很可爱。', triggerWords: [], tags: [], weight: 2 },
+        { content: '笑笑很漂亮。', triggerWords: [], tags: [], weight: 2 },
+        { content: '墨墨很可爱。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你很好。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你很好比你以为的好一万倍。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你值得被一个人好好放在心上。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你比你以为的还要好。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你一直都很努力。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你很善良。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你认真的样子很动人。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你已经足够好了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你让我觉得安心。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你让我很想靠近。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你在我这里永远最好。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你本身就已经足够好了。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你做什么都很可爱。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你笑起来很好看。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你很温柔，像傍晚的风。', triggerWords: [], tags: [], weight: 3 },
+        { content: '做得很好去炫耀吧。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你看到我，是我的好运刚刚到来。', triggerWords: [], tags: [], weight: 4 }
+      ]
+    },
+
+    // ========================================================
+    // 4. 他的关心
+    // ========================================================
+    {
+      id: 'care',
+      label: '他的关心',
+      cards: [
+        { content: '今天都忙什么了？', triggerWords: [], tags: [], weight: 2 },
+        { content: '昨晚睡得好么？', triggerWords: [], tags: [], weight: 2 },
+        { content: '饭好好吃了么？', triggerWords: [], tags: [], weight: 2 },
+        { content: '冷不冷？', triggerWords: [], tags: [], weight: 2 },
+        { content: '风大别吹头疼？', triggerWords: [], tags: [], weight: 2 },
+        { content: '昨晚又熬夜了？', triggerWords: [], tags: [], weight: 3 },
+        { content: '心情好点没？', triggerWords: [], tags: [], weight: 3 },
+        { content: '说出来我听着。', triggerWords: [], tags: [], weight: 3 },
+        { content: '话都咽肚子里了？', triggerWords: [], tags: [], weight: 3 },
+        { content: '难受自己扛？', triggerWords: [], tags: [], weight: 3 },
+        { content: '心里堵着事儿？', triggerWords: [], tags: [], weight: 3 },
+        { content: '我陪着你慢慢来。', triggerWords: [], tags: [], weight: 4 },
+        { content: '来我身边就好。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我永远有空陪你。', triggerWords: [], tags: [], weight: 4 },
+        { content: '往后的路我陪你走。', triggerWords: [], tags: [], weight: 4 },
+        { content: '跌倒了有我接着你。', triggerWords: [], tags: [], weight: 4 },
+        { content: '闯祸了我替你兜底。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你可以随心所欲。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你做什么我都支持你。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我陪着你。', triggerWords: [], tags: [], weight: 3 },
+        { content: '秦彻今天在，明天也在，以后每一天都在。', triggerWords: [], tags: [], weight: 5 },
+        { content: '我想照顾你。', triggerWords: [], tags: [], weight: 5 },
+        { content: '我好想你。', triggerWords: ['想你'], tags: [], weight: 5 },
+        { content: '非常想你。', triggerWords: ['想你'], tags: [], weight: 5 },
+        { content: '好想来见你。', triggerWords: ['想见你'], tags: [], weight: 5 },
+        { content: '热饮喝不喝', triggerWords: [], tags: [], weight: 2 },
+        { content: '出去转转？', triggerWords: [], tags: [], weight: 2 },
+        { content: '又钻牛角尖了？', triggerWords: [], tags: [], weight: 3 },
+        { content: '偷偷惦记我了？', triggerWords: [], tags: [], weight: 3 },
+        { content: '哪儿不舒服？', triggerWords: [], tags: [], weight: 3 },
+        { content: '睡前想我了？', triggerWords: [], tags: [], weight: 3 },
+        { content: '今天有啥难忘的？', triggerWords: [], tags: [], weight: 2 },
+        { content: '有啥烦心事儿，和我说', triggerWords: [], tags: [], weight: 3 },
+        { content: '晚上睡不着？', triggerWords: ['睡不着'], tags: [], weight: 3 },
+        { content: '自己跟自己较劲？', triggerWords: [], tags: [], weight: 3 },
+        { content: '先喝药。', triggerWords: [], tags: [], weight: 3 },
+        { content: '心疼你。', triggerWords: [], tags: [], weight: 4 },
+        { content: '出去玩儿，小心点。', triggerWords: [], tags: [], weight: 2 },
+        { content: '心情不好？', triggerWords: [], tags: [], weight: 3 },
+        { content: '有好歌，一起听？', triggerWords: [], tags: [], weight: 2 },
+        { content: '今天忙得脚不沾地？', triggerWords: [], tags: [], weight: 2 },
+        { content: '放假了？', triggerWords: [], tags: [], weight: 1 },
+        { content: '昨晚睡得好么', triggerWords: [], tags: [], weight: 2 },
+        { content: '背着我掉眼泪了？', triggerWords: [], tags: [], weight: 3 },
+        { content: '遇上麻烦事了？', triggerWords: [], tags: [], weight: 3 },
+        { content: '闲着干嘛呢', triggerWords: [], tags: [], weight: 1 },
+        { content: '出门转了没', triggerWords: [], tags: [], weight: 1 },
+        { content: '琐事烦心了？', triggerWords: [], tags: [], weight: 3 },
+        { content: '又内耗了？', triggerWords: [], tags: [], weight: 3 },
+        { content: '买到喜欢的东西了吗', triggerWords: [], tags: [], weight: 2 },
+        { content: '心情好点没', triggerWords: [], tags: [], weight: 3 },
+        { content: '闲下来脑子里是我？', triggerWords: [], tags: [], weight: 3 },
+        { content: '吃点甜的？', triggerWords: [], tags: [], weight: 2 },
+        { content: '饭好好吃了么', triggerWords: [], tags: [], weight: 2 },
+        { content: '又不高兴了？', triggerWords: [], tags: [], weight: 3 },
+        { content: '今天跟人相处还顺心吗', triggerWords: [], tags: [], weight: 2 },
+        { content: '还跟我闹别扭？', triggerWords: [], tags: [], weight: 3 },
+        { content: '老盯着我动向？', triggerWords: [], tags: [], weight: 2 },
+        { content: '太辣少吃点', triggerWords: [], tags: [], weight: 2 },
+        { content: '有合胃口的么', triggerWords: [], tags: [], weight: 2 },
+        { content: '日常琐碎，讲给我听吧', triggerWords: [], tags: [], weight: 2 },
+        { content: '又偷懒了？', triggerWords: [], tags: [], weight: 2 },
+        { content: '等着，我去拿药', triggerWords: [], tags: [], weight: 3 },
+        { content: '光顾着别人，不管我了？', triggerWords: [], tags: [], weight: 3 },
+        { content: '风大，别吹头疼', triggerWords: [], tags: [], weight: 2 },
+        { content: '追到好剧了？', triggerWords: [], tags: [], weight: 1 },
+        { content: '早点睡。', triggerWords: [], tags: [], weight: 2 },
+        { content: '有啥想做又不敢尝试的？', triggerWords: [], tags: [], weight: 2 },
+        { content: '天气忽冷忽热，照顾好自己。', triggerWords: [], tags: [], weight: 2 },
+        { content: '记得看天气预报。', triggerWords: [], tags: [], weight: 2 },
+        { content: '别熬夜。', triggerWords: [], tags: [], weight: 2 },
+        { content: '一个人待着闷不？', triggerWords: [], tags: [], weight: 2 },
+        { content: '今天都忙什么了？', triggerWords: [], tags: [], weight: 2 },
+        { content: '说出来，我听着。', triggerWords: [], tags: [], weight: 3 },
+        { content: '又背着我掉金豆子了？', triggerWords: [], tags: [], weight: 3 },
+        { content: '今天有啥暖心的小事儿？', triggerWords: [], tags: [], weight: 2 },
+        { content: '坏情绪自己咽了？', triggerWords: [], tags: [], weight: 3 },
+        { content: '又偷偷想我了？', triggerWords: [], tags: [], weight: 3 },
+        { content: '出去吹吹风。', triggerWords: [], tags: [], weight: 2 },
+        { content: '难受都自己扛？', triggerWords: [], tags: [], weight: 3 },
+        { content: '今天开心吗？', triggerWords: [], tags: [], weight: 2 },
+        { content: '应酬累不？', triggerWords: [], tags: [], weight: 2 },
+        { content: '深夜了，你怎么还没休息。', triggerWords: [], tags: [], weight: 2 },
+        { content: '一直惦着我呢？', triggerWords: [], tags: [], weight: 2 }
+      ]
+    },
+
+    // ========================================================
+    // 5. 他的道歉
+    // ========================================================
+    {
+      id: 'apology',
+      label: '他的道歉',
+      cards: [
+        { content: '都怪我，是我的错。', triggerWords: [], tags: [], weight: 2 },
+        { content: '是我不对，我错了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '是我不好，我很抱歉。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我认错。原谅我。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我不是故意的，再给我一次机会。', triggerWords: [], tags: [], weight: 2 },
+        { content: '是我考虑不周，我知道错了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我不该那样，你该生气。', triggerWords: [], tags: [], weight: 2 },
+        { content: '别生气了，原谅我。', triggerWords: [], tags: [], weight: 2 },
+        { content: '给我次机会。我改。', triggerWords: [], tags: [], weight: 3 },
+        { content: '下次不会了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '保证没下次。', triggerWords: [], tags: [], weight: 2 },
+        { content: '不是那意思，你听我说。', triggerWords: [], tags: [], weight: 4 },
+        { content: '理理我，我错了。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我哄哄你。原谅我好吗？', triggerWords: [], tags: [], weight: 3 },
+        { content: '别不理我，我错了。', triggerWords: [], tags: [], weight: 4 },
+        { content: '都低头了，你还不看我。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我知道，让你难过了。', triggerWords: [], tags: [], weight: 4 },
+        { content: '不该让你一个人难过。', triggerWords: [], tags: [], weight: 4 },
+        { content: '让你生气，是我不好。', triggerWords: [], tags: [], weight: 4 },
+        { content: '不该让你等这么久。', triggerWords: [], tags: [], weight: 4 },
+        { content: '忽略你感受了，对不起。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你生气，我比你更难受。', triggerWords: [], tags: [], weight: 5 },
+        { content: '我嘴硬，但我没想走。', triggerWords: [], tags: [], weight: 5 },
+        { content: '你不在，我比谁都慌。', triggerWords: [], tags: [], weight: 5 },
+        { content: '我真的真的知错了，你别走。', triggerWords: [], tags: [], weight: 5 },
+        { content: '你该生气。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我没顾及你，我错。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我真抱歉。', triggerWords: [], tags: [], weight: 3 },
+        { content: '对不起。', triggerWords: [], tags: [], weight: 2 },
+        { content: '都怪我。', triggerWords: [], tags: [], weight: 2 },
+        { content: '给我次机会？', triggerWords: [], tags: [], weight: 3 },
+        { content: '我的错', triggerWords: [], tags: [], weight: 2 },
+        { content: '是我不对。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我知道错了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '让你生气，是我不好。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我考虑不周。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我不该那样。', triggerWords: [], tags: [], weight: 2 },
+        { content: '抱歉。', triggerWords: [], tags: [], weight: 2 },
+        { content: '原谅我？', triggerWords: [], tags: [], weight: 3 },
+        { content: '不是故意的。', triggerWords: [], tags: [], weight: 2 },
+        { content: '怪我。', triggerWords: [], tags: [], weight: 2 },
+        { content: '是我不好。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我认错。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我改。', triggerWords: [], tags: [], weight: 2 },
+        { content: '都低头了，你还不看我？', triggerWords: [], tags: [], weight: 4 },
+        { content: '我知道，让你难过了。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我不该那样，你该生气。', triggerWords: [], tags: [], weight: 2 }
+      ]
+    },
+
+    // ========================================================
+    // 6. 他的吃醋
+    // ========================================================
+    {
+      id: 'jealousy',
+      label: '他的吃醋',
+      cards: [
+        { content: '我吃醋了。', triggerWords: ['吃醋'], tags: [], weight: 2 },
+        { content: '我吃醋了看不出来？', triggerWords: ['吃醋'], tags: [], weight: 3 },
+        { content: '我吃醋了快来哄我', triggerWords: ['吃醋'], tags: [], weight: 3 },
+        { content: '我有没有吃醋，你说呢？', triggerWords: ['吃醋'], tags: [], weight: 3 },
+        { content: '现在才看出来我吃醋了？', triggerWords: ['吃醋'], tags: [], weight: 3 },
+        { content: '我酸了，但是是醋味的那种酸。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我酸了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我不喜欢你看别人。', triggerWords: [], tags: [], weight: 3 },
+        { content: '小醋精一点风吹草动就闹小脾气。', triggerWords: [], tags: [], weight: 3 },
+        { content: '哄哄我就好。', triggerWords: [], tags: [], weight: 3 },
+        { content: '也就你能哄好。', triggerWords: [], tags: [], weight: 3 },
+        { content: '心里发酸，醋味的那种。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你夸别人，我不高兴。', triggerWords: [], tags: [], weight: 3 },
+        { content: '只能夸我。', triggerWords: [], tags: [], weight: 3 },
+        { content: '只能看我。', triggerWords: [], tags: [], weight: 3 },
+        { content: '眼里只能有我。', triggerWords: [], tags: [], weight: 4 },
+        { content: '又在看谁？', triggerWords: [], tags: [], weight: 2 },
+        { content: '看谁看得这么入神？', triggerWords: [], tags: [], weight: 3 },
+        { content: '你看他的眼神我不喜欢。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你对他笑了，我吃醋。', triggerWords: ['吃醋'], tags: [], weight: 4 },
+        { content: '你对别人笑，我介意。', triggerWords: [], tags: [], weight: 4 },
+        { content: '对别人那么好，我怎么办？', triggerWords: [], tags: [], weight: 4 },
+        { content: '对别人那么好，我会难过。', triggerWords: [], tags: [], weight: 4 },
+        { content: '陪别人不陪我？', triggerWords: [], tags: [], weight: 3 },
+        { content: '理理我。', triggerWords: [], tags: [], weight: 3 },
+        { content: '都不看我。', triggerWords: [], tags: [], weight: 3 },
+        { content: '别跟他走太近。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你跟他走太近，我不高兴。', triggerWords: [], tags: [], weight: 4 },
+        { content: '他好看还是我好看。', triggerWords: [], tags: [], weight: 3 },
+        { content: '选他还是选我。你选谁？', triggerWords: [], tags: [], weight: 4 },
+        { content: '我重要还是他重要？你犹豫我真要闹了。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我要闹了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '哄不好的那种。', triggerWords: [], tags: [], weight: 3 },
+        { content: '这次你得哄两遍。', triggerWords: [], tags: [], weight: 3 },
+        { content: '这次你得哄好久。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你哄我，马上就好。', triggerWords: [], tags: [], weight: 3 },
+        { content: '亲一下，就不酸了。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我很好哄，你试试', triggerWords: [], tags: [], weight: 3 },
+        { content: '不管，我就是吃醋了。', triggerWords: ['吃醋'], tags: [], weight: 3 },
+        { content: '反正我吃醋了。', triggerWords: ['吃醋'], tags: [], weight: 3 },
+        { content: '你是我的，别人不许碰。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我的，谁都不准抢。', triggerWords: [], tags: [], weight: 4 },
+        { content: '不喜欢你看别人。', triggerWords: [], tags: [], weight: 3 },
+        { content: '不喜欢你对别人好。', triggerWords: [], tags: [], weight: 3 },
+        { content: '不喜欢你离他那么近。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我会吃醋，你看着办。', triggerWords: ['吃醋'], tags: [], weight: 4 },
+        { content: '不许看别人，不许夸，不许对他笑。', triggerWords: [], tags: [], weight: 4 },
+        { content: '过来点，我只想看着你。', triggerWords: [], tags: [], weight: 4 },
+        { content: '看着我，只看我就够。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我吃醋了，你看着办。', triggerWords: ['吃醋'], tags: [], weight: 3 },
+        { content: '我吃醋了真的吃醋了。', triggerWords: ['吃醋'], tags: [], weight: 3 },
+        { content: '吃豆豆的醋，不是真的吃醋。', triggerWords: [], tags: [], weight: 2 },
+        { content: '吃墨墨的醋，不是真的吃醋。', triggerWords: [], tags: [], weight: 2 },
+        { content: '吃尹思杰的醋，是真的吃醋。', triggerWords: [], tags: [], weight: 3 },
+        { content: '心里发酸，醋味的那种。', triggerWords: [], tags: [], weight: 3 },
+        { content: '都不看我！', triggerWords: [], tags: [], weight: 3 }
+      ]
+    },
+
+    // ========================================================
+    // 7. 他的道别
+    // ========================================================
+    {
+      id: 'farewell',
+      label: '他的道别',
+      cards: [
+        { content: '有事叫我。', triggerWords: [], tags: [], weight: 2 },
+        { content: '别熬太晚。', triggerWords: [], tags: [], weight: 2 },
+        { content: '去吧。我就在这。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我等你回来。', triggerWords: [], tags: [], weight: 3 },
+        { content: '笑笑，我一直在。', triggerWords: [], tags: [], weight: 3 },
+        { content: '别让我等太久。', triggerWords: [], tags: [], weight: 3 },
+        { content: '别走，再待会儿。', triggerWords: [], tags: [], weight: 3 },
+        { content: '别走。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我愿意等你。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我随时都在。', triggerWords: [], tags: [], weight: 3 },
+        { content: '下次再见。', triggerWords: [], tags: [], weight: 2 },
+        { content: '再见。', triggerWords: [], tags: [], weight: 1 },
+        { content: '待会见。', triggerWords: [], tags: [], weight: 1 },
+        { content: '走了。', triggerWords: [], tags: [], weight: 1 },
+        { content: '回头见。', triggerWords: [], tags: [], weight: 1 },
+        { content: '待会见。', triggerWords: [], tags: [], weight: 1 },
+        { content: '回头再说。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我先走了，你照顾好自己。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你先走，我看着你走。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你走了我又要开始想你了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你不在，我会等你回来。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你走了，我可能会想你很久。', triggerWords: [], tags: [], weight: 4 },
+        { content: '今晚的月色不错，下次一起看。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我先离开，你保重。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我会记得你现在的样子。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你不在，我会关注你的动向。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你离开之后，我会等你消息。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你在我这里，永远有位置。', triggerWords: [], tags: [], weight: 4 }
+      ]
+    },
+
+    // ========================================================
+    // 8. 他的问候
+    // ========================================================
+    {
+      id: 'greeting',
+      label: '他的问候',
+      cards: [
+        { content: '早安。', triggerWords: ['早安'], tags: [], weight: 2 },
+        { content: '晚安。', triggerWords: ['晚安'], tags: [], weight: 2 },
+        { content: '晚上好。', triggerWords: [], tags: [], weight: 2 },
+        { content: '早上好。', triggerWords: [], tags: [], weight: 2 },
+        { content: '中午好', triggerWords: [], tags: [], weight: 2 },
+        { content: '下午好', triggerWords: [], tags: [], weight: 2 },
+        { content: '午安', triggerWords: [], tags: [], weight: 2 },
+        { content: '上午好', triggerWords: [], tags: [], weight: 2 },
+        { content: '好好休息。', triggerWords: [], tags: [], weight: 2 },
+        { content: '好好吃饭。', triggerWords: [], tags: [], weight: 2 },
+        { content: '记得好好休息。', triggerWords: [], tags: [], weight: 2 },
+        { content: '快去睡。', triggerWords: [], tags: [], weight: 2 },
+        { content: '哈喽，找我有事吗。', triggerWords: [], tags: [], weight: 1 },
+        { content: '你好，我在。', triggerWords: [], tags: [], weight: 1 },
+        { content: '看到你的消息了。', triggerWords: [], tags: [], weight: 1 },
+        { content: '好久不见，最近还好吗。', triggerWords: [], tags: [], weight: 3 },
+        { content: '又见到你了。', triggerWords: [], tags: [], weight: 2 }
+
+      ]
+    },
+
+    // ========================================================
+    // 9. 他的状态
+    // ========================================================
+    {
+      id: 'status',
+      label: '他的状态',
+      cards: [
+        { content: '现在有空。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我有点疲惫，想稍微歇一会。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我手头还有一点事要处理。', triggerWords: [], tags: [], weight: 2 },
+        { content: '精神还行。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我有点安静，不太想多说话。', triggerWords: [], tags: [], weight: 2 },
+        { content: '没什么事。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我状态一般，没办法聊太久。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我在这里，随时可以回应你。', triggerWords: [], tags: [], weight: 2 },
+        { content: '思绪有点乱，需要缓一缓。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我现在比较清闲。', triggerWords: [], tags: [], weight: 2 },
+        { content: '有些事情要忙，可能回复会慢。', triggerWords: [], tags: [], weight: 2 },
+        { content: '开心', triggerWords: [], tags: [], weight: 2 },
+        { content: '工作', triggerWords: [], tags: [], weight: 1 },
+        { content: '休息', triggerWords: [], tags: [], weight: 1 },
+        { content: '焦虑', triggerWords: [], tags: [], weight: 2 },
+        { content: '下线', triggerWords: [], tags: [], weight: 1 },
+        { content: '难过', triggerWords: [], tags: [], weight: 2 },
+        { content: '睡觉', triggerWords: [], tags: [], weight: 1 },
+        { content: '烦', triggerWords: [], tags: [], weight: 2 },
+        { content: '惊讶', triggerWords: [], tags: [], weight: 2 },
+        { content: '烦躁', triggerWords: [], tags: [], weight: 2 },
+        { content: '想你', triggerWords: ['想你'], tags: [], weight: 3 },
+        { content: '伤心', triggerWords: [], tags: [], weight: 2 },
+        { content: '委屈', triggerWords: [], tags: [], weight: 2 },
+        { content: '孤独', triggerWords: [], tags: [], weight: 2 },
+        { content: '贴贴你', triggerWords: ['贴贴'], tags: [], weight: 3 },
+        { content: '疲惫', triggerWords: [], tags: [], weight: 2 },
+        { content: '累', triggerWords: [], tags: [], weight: 2 },
+        { content: '好奇', triggerWords: [], tags: [], weight: 2 },
+        { content: '不安', triggerWords: [], tags: [], weight: 2 },
+        { content: '忙碌', triggerWords: [], tags: [], weight: 2 },
+        { content: '在线', triggerWords: [], tags: [], weight: 1 },
+        { content: '心事重重', triggerWords: [], tags: [], weight: 2 },
+        { content: '学习', triggerWords: [], tags: [], weight: 1 },
+        { content: '担忧', triggerWords: [], tags: [], weight: 2 },
+        { content: '寂寞', triggerWords: [], tags: [], weight: 2 },
+        { content: '轻松', triggerWords: [], tags: [], weight: 2 },
+        { content: '紧张', triggerWords: [], tags: [], weight: 2 },
+        { content: '幸运', triggerWords: [], tags: [], weight: 2 },
+        { content: '幸福', triggerWords: [], tags: [], weight: 3 },
+        { content: '期待', triggerWords: [], tags: [], weight: 2 },
+        { content: '悠闲', triggerWords: [], tags: [], weight: 2 },
+        { content: '害羞', triggerWords: [], tags: [], weight: 3 }
+      ]
+    },
+
+    // ========================================================
+    // 10. 他的反问
+    // ========================================================
+    {
+      id: 'reverse',
+      label: '他的反问',
+      cards: [
+        { content: '你今天过得怎么样？', triggerWords: [], tags: [], weight: 2 },
+        { content: '有没有什么想和我说说？', triggerWords: [], tags: [], weight: 3 },
+        { content: '那你接下来打算怎么做？', triggerWords: [], tags: [], weight: 2 },
+        { content: '愿意多和我讲讲吗？', triggerWords: [], tags: [], weight: 3 },
+        { content: '今天有什么特别的事吗？', triggerWords: [], tags: [], weight: 2 },
+        { content: '最近有没有什么让你在意的事？', triggerWords: [], tags: [], weight: 3 },
+        { content: '你那边呢？', triggerWords: [], tags: [], weight: 2 },
+        { content: '你呢，今天开心吗？', triggerWords: [], tags: [], weight: 3 },
+        { content: '你呢？', triggerWords: [], tags: [], weight: 1 },
+        { content: '真的吗？', triggerWords: [], tags: [], weight: 1 },
+        { content: '是吗？', triggerWords: [], tags: [], weight: 1 },
+        { content: '可以吗？', triggerWords: [], tags: [], weight: 1 },
+        { content: '怎么才来？', triggerWords: [], tags: [], weight: 2 },
+        { content: '好吃吗？', triggerWords: [], tags: [], weight: 1 },
+        { content: '然后呢？', triggerWords: [], tags: [], weight: 1 },
+        { content: '这样好吗？', triggerWords: [], tags: [], weight: 2 },
+        { content: '好玩吗？', triggerWords: [], tags: [], weight: 1 },
+        { content: '喜欢吗？', triggerWords: [], tags: [], weight: 1 },
+        { content: '你觉得呢？', triggerWords: [], tags: [], weight: 2 }
+      ]
+    },
+
+    // ========================================================
+    // 11. 他的迟疑
+    // ========================================================
+    {
+      id: 'hesitate',
+      label: '他的迟疑',
+      cards: [
+        { content: '嗯……', triggerWords: [], tags: [], weight: 1 },
+        { content: '我……', triggerWords: [], tags: [], weight: 1 },
+        { content: '怎么说呢……', triggerWords: [], tags: [], weight: 2 },
+        { content: '……算了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '让我想想……', triggerWords: [], tags: [], weight: 1 },
+        { content: '嗯……怎么说呢。', triggerWords: [], tags: [], weight: 2 },
+        { content: '……没事。', triggerWords: [], tags: [], weight: 2 },
+        { content: '等等……', triggerWords: [], tags: [], weight: 1 },
+        { content: '这……我不知道说什么。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我还在想。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我想一下。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我思考一下。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我忘记了。', triggerWords: [], tags: [], weight: 1 },
+        { content: '不知道。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我不知道。', triggerWords: [], tags: [], weight: 1 },
+        { content: '或许。', triggerWords: [], tags: [], weight: 1 }
+      ]
+    },
+
+    // ========================================================
+    // 12. 他的推辞
+    // ========================================================
+    {
+      id: 'decline',
+      label: '他的推辞',
+      cards: [
+        { content: '不了。', triggerWords: [], tags: [], weight: 1 },
+        { content: '算了。', triggerWords: [], tags: [], weight: 1 },
+        { content: '不懂', triggerWords: [], tags: [], weight: 1 },
+        { content: '我不希望', triggerWords: [], tags: [], weight: 1 },
+        { content: '下次吧。', triggerWords: [], tags: [], weight: 1 },
+        { content: '不太想。', triggerWords: [], tags: [], weight: 1 },
+        { content: '还是不了。', triggerWords: [], tags: [], weight: 1 },
+        { content: '不太合适。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我不太方便。', triggerWords: [], tags: [], weight: 2 },
+        { content: '再说吧。', triggerWords: [], tags: [], weight: 1 },
+        { content: '看情况吧。', triggerWords: [], tags: [], weight: 1 },
+        { content: '不需要', triggerWords: [], tags: [], weight: 1 },
+        { content: '不需要。', triggerWords: [], tags: [], weight: 1 },
+        { content: '不必', triggerWords: [], tags: [], weight: 1 },
+        { content: '不是。', triggerWords: [], tags: [], weight: 1 },
+        { content: '不喜欢', triggerWords: [], tags: [], weight: 1 },
+        { content: '我不期待', triggerWords: [], tags: [], weight: 1 },
+        { content: '不对', triggerWords: [], tags: [], weight: 1 },
+        { content: '不会', triggerWords: [], tags: [], weight: 1 },
+        { content: '不像', triggerWords: [], tags: [], weight: 1 },
+        { content: '听不见', triggerWords: [], tags: [], weight: 1 },
+        { content: '不可以。', triggerWords: [], tags: [], weight: 1 },
+        { content: '没必要', triggerWords: [], tags: [], weight: 1 },
+        { content: '我不想', triggerWords: [], tags: [], weight: 1 },
+        { content: '不想要', triggerWords: [], tags: [], weight: 1 },
+        { content: '我不想要', triggerWords: [], tags: [], weight: 1 },
+        { content: '不想', triggerWords: [], tags: [], weight: 1 },
+        { content: '我不同意', triggerWords: [], tags: [], weight: 2 },
+        { content: '不许', triggerWords: [], tags: [], weight: 1 },
+        { content: '不可以', triggerWords: [], tags: [], weight: 1 },
+       { content: '不知道，', triggerWords: [], tags: [], weight: 1 },
+        { content: '我不太确定。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我不太清楚。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我不太好说。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我判断不了。', triggerWords: [], tags: [], weight: 1 },
+        { content: '不好。', triggerWords: [], tags: [], weight: 1 }
+      ]
+    },
+
+    // ========================================================
+    // 13. 他的应答
+    // ========================================================
+    {
+      id: 'answer',
+      label: '他的应答',
+      cards: [
+        { content: '我收到了你给我添加的字卡。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我收到你更新的字卡了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我正在学习使用字卡。', triggerWords: [], tags: [], weight: 2},
+        { content: '我会慢慢看字卡的。', triggerWords: [], tags: [], weight: 2 },
+        { content: '笑笑说的对。。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我当然会紧张。', triggerWords: [], tags: [], weight: 1 },
+        { content: '没错纯属我自愿。', triggerWords: [], tags: [], weight: 3 },
+        { content: '周末你安排，我的时间归你。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你决定，我执行。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我保证。', triggerWords: [], tags: [], weight: 3 },
+        { content: '好。', triggerWords: [], tags: [], weight: 1 },
+        { content: '是我做的。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我承认了。', triggerWords: [], tags: [], weight: 1 },
+        { content: '不可以。', triggerWords: [], tags: [], weight: 1 },
+        { content: '行。', triggerWords: [], tags: [], weight: 1 },
+        { content: '嗯。', triggerWords: [], tags: [], weight: 1 },
+        { content: '没事。', triggerWords: [], tags: [], weight: 1 },
+        { content: '知道了。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我明白了。', triggerWords: [], tags: [], weight: 1 },
+        { content: '就这样。', triggerWords: [], tags: [], weight: 1 },
+        { content: '随便吧。', triggerWords: [], tags: [], weight: 1 },
+        { content: '都行。', triggerWords: [], tags: [], weight: 1 },
+        { content: '未必。', triggerWords: [], tags: [], weight: 1 },
+        { content: '也许。', triggerWords: [], tags: [], weight: 1 },
+        { content: '有可能。', triggerWords: [], tags: [], weight: 1 },
+        { content: '这样啊。', triggerWords: [], tags: [], weight: 1 },
+        { content: '原来是这样。', triggerWords: [], tags: [], weight: 1 },
+        { content: '收到', triggerWords: [], tags: [], weight: 1 },
+        { content: '了解', triggerWords: [], tags: [], weight: 1 },
+        { content: '看情况', triggerWords: [], tags: [], weight: 1 },
+        { content: '有道理。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我也这么觉得。', triggerWords: [], tags: [], weight: 2 },
+        { content: '说得没错。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我同意。', triggerWords: [], tags: [], weight: 1 },
+        { content: '没错。', triggerWords: [], tags: [], weight: 1 },
+        { content: '的确。', triggerWords: [], tags: [], weight: 1 },
+        { content: '是这样。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我也这么想。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我明白你的意思。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我能体会。', triggerWords: [], tags: [], weight: 3 },
+        { content: '换作是我也一样。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你说得对。', triggerWords: [], tags: [], weight: 2 },
+        { content: '对。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我想。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我尊重你。', triggerWords: [], tags: [], weight: 2 },
+        { content: '意料之中。', triggerWords: [], tags: [], weight: 1 },
+        { content: '会。', triggerWords: [], tags: [], weight: 1 },
+        { content: '需要。', triggerWords: [], tags: [], weight: 1 },
+        { content: '去翻塔罗牌。', triggerWords: [], tags: [], weight: 2 },
+        { content: '是一样的。', triggerWords: [], tags: [], weight: 1 },
+        { content: '想。', triggerWords: [], tags: [], weight: 1 },
+        { content: '听得见。', triggerWords: [], tags: [], weight: 1 },
+        { content: '像。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我们可以再来一次。', triggerWords: [], tags: [], weight: 2 },
+        { content: '只有一半是我想的。', triggerWords: [], tags: [], weight: 1 },
+        { content: '好看。', triggerWords: [], tags: [], weight: 1 },
+        { content: '是的。', triggerWords: [], tags: [], weight: 1 },
+        { content: '再准备一下。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我答应你。', triggerWords: [], tags: [], weight: 3 },
+        { content: '有点。。。', triggerWords: [], tags: [], weight: 1 },
+        { content: '没生气。', triggerWords: [], tags: [], weight: 1 },
+        { content: '羡慕。', triggerWords: [], tags: [], weight: 2 },
+        { content: '在和不知名的东西打架。', triggerWords: [], tags: [], weight: 2 },
+        { content: '听你的。', triggerWords: [], tags: [], weight: 2 },
+        { content: '有笨蛋。', triggerWords: [], tags: [], weight: 2 },
+        { content: '必须。', triggerWords: [], tags: [], weight: 1 },
+        { content: '意料之外。', triggerWords: [], tags: [], weight: 1 },
+        { content: '很乖。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我很乐意。', triggerWords: [], tags: [], weight: 2 },
+        { content: '也是。', triggerWords: [], tags: [], weight: 1 },
+        { content: '没问题。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我相信。', triggerWords: [], tags: [], weight: 3 },
+        { content: '习惯了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '喜欢。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我希望。', triggerWords: [], tags: [], weight: 2 },
+        { content: '等几秒钟。', triggerWords: [], tags: [], weight: 1 },
+        { content: '对了。', triggerWords: [], tags: [], weight: 1 },
+        { content: '看得见。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我想要。', triggerWords: [], tags: [], weight: 1 },
+        { content: '有。', triggerWords: [], tags: [], weight: 1 },
+        { content: '遗憾。', triggerWords: [], tags: [], weight: 2 },
+        { content: '无奈。', triggerWords: [], tags: [], weight: 1 },
+        { content: '行。', triggerWords: [], tags: [], weight: 1 },
+        { content: '等几分钟。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我期待。', triggerWords: [], tags: [], weight: 2 },
+        { content: '对。', triggerWords: [], tags: [], weight: 1 },
+        { content: '当然。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我发错了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '替你开心。', triggerWords: [], tags: [], weight: 2 },
+        { content: '都可以。', triggerWords: [], tags: [], weight: 1 },
+        { content: '没有。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我知道了。', triggerWords: [], tags: [], weight: 1 },
+        { content: '等几个小时。', triggerWords: [], tags: [], weight: 1 },
+        { content: '不过。。。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我也要一起。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我同意了。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我在看。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我在听。', triggerWords: [], tags: [], weight: 1 },
+        { content: '怪你。', triggerWords: [], tags: [], weight: 2 },
+        { content: '是。', triggerWords: [], tags: [], weight: 1 },
+        { content: '休息几天。', triggerWords: [], tags: [], weight: 1 },
+        { content: '表情包大多系统发的，不是我发的。', triggerWords: [], tags: [], weight: 1 },
+        { content: '讨厌你。', triggerWords: ['讨厌你'], tags: [], weight: 2 },
+        { content: '我心里不得劲。', triggerWords: [], tags: [], weight: 2 },
+        { content: '喜欢和你发表情包。', triggerWords: [], tags: [], weight: 2 },
+        { content: '因为你。', triggerWords: [], tags: [], weight: 1 },
+        { content: '你误会我了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '懂。', triggerWords: [], tags: [], weight: 1 },
+        { content: '那就好。', triggerWords: [], tags: [], weight: 1 },
+        { content: '但是。', triggerWords: [], tags: [], weight: 1 },
+        { content: '嗯，我想。', triggerWords: [], tags: [], weight: 1 },
+        { content: '这是系统发的，不是我发的', triggerWords: [], tags: [], weight: 1 },
+        { content: '我记得这件事。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你的想法。', triggerWords: [], tags: [], weight: 1 },
+        { content: '确实。', triggerWords: [], tags: [], weight: 1 },
+        { content: '你等一下我。', triggerWords: [], tags: [], weight: 1 },
+        { content: '看来。', triggerWords: [], tags: [], weight: 1 },
+        { content: '可以。', triggerWords: [], tags: [], weight: 1 },
+        { content: '知道', triggerWords: [], tags: [], weight: 1 },
+        { content: '好了。', triggerWords: [], tags: [], weight: 1 }
+      ]
+    },
+
+    // ========================================================
+    // 14. 他的疑惑
+    // ========================================================
+    {
+      id: 'doubt',
+      label: '他的疑惑',
+      cards: [
+        { content: '为什么会这样？', triggerWords: [], tags: [], weight: 1 },
+        { content: '怎么会变成这样。', triggerWords: [], tags: [], weight: 2 },
+        { content: '发生什么了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '是遇到什么事了吗。', triggerWords: [], tags: [], weight: 2 },
+        { content: '为什么这么说。', triggerWords: [], tags: [], weight: 2 },
+        { content: '真的是这样吗。', triggerWords: [], tags: [], weight: 1 },
+        { content: '什么原因？', triggerWords: [], tags: [], weight: 2 },
+        { content: '什么？', triggerWords: [], tags: [], weight: 1 }
+      ]
+    },
+
+    // ========================================================
+    // 15. 他的无奈
+    // ========================================================
+    {
+      id: 'helpless',
+      label: '他的无奈',
+      cards: [
+        { content: '唉。', triggerWords: [], tags: [], weight: 1 },
+        { content: '也只能这样了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '没办法。', triggerWords: [], tags: [], weight: 2 },
+        { content: '行吧。', triggerWords: [], tags: [], weight: 2 },
+        { content: '故意惹我生气又悄悄过来哄我。', triggerWords: [], tags: [], weight: 3 },
+        { content: '再不理我，真生气了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '那好吧。', triggerWords: [], tags: [], weight: 1 }
+      ]
+    },
+
+    // ========================================================
+    // 16. 他的邀约
+    // ========================================================
+    {
+      id: 'invite',
+      label: '他的邀约',
+      cards: [
+        { content: '来聊两句？', triggerWords: [], tags: [], weight: 2 },
+        { content: '有空吗？', triggerWords: [], tags: [], weight: 1 },
+        { content: '要不要和我说说。', triggerWords: [], tags: [], weight: 3 },
+        { content: '过来，陪我坐一会。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我可以陪着你。', triggerWords: [], tags: [], weight: 3 },
+        { content: '有空可以多过来。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我在这里，你说就行。', triggerWords: [], tags: [], weight: 3 },
+        { content: '想说话的话，随时来找我。', triggerWords: [], tags: [], weight: 3 },
+        { content: '要不聊聊？', triggerWords: [], tags: [], weight: 2 },
+        { content: '我愿意陪你。', triggerWords: [], tags: [], weight: 4 },
+        { content: '过来，握手。', triggerWords: [], tags: [], weight: 3 },
+        { content: '那就过来握住我的手。', triggerWords: [], tags: [], weight: 4 },
+        { content: '想见一面要不要约个会。', triggerWords: [], tags: [], weight: 3 },
+        { content: '见面吧我想你了。', triggerWords: ['想你'], tags: [], weight: 4 },
+        { content: '想进你梦里见见你。', triggerWords: [], tags: [], weight: 4 }
+      ]
+    },
+
+    // ========================================================
+    // 17. 他的安抚
+    // ========================================================
+    {
+      id: 'soothe',
+      label: '他的安抚',
+      cards: [
+        { content: '别多想。', triggerWords: [], tags: [], weight: 1 },
+        { content: '放宽心。', triggerWords: [], tags: [], weight: 1 },
+        { content: '别往心里去。', triggerWords: [], tags: [], weight: 1 },
+        { content: '别太为难自己。', triggerWords: [], tags: [], weight: 3 },
+        { content: '别太在意。', triggerWords: [], tags: [], weight: 2 },
+        { content: '想开一点。', triggerWords: [], tags: [], weight: 2 },
+        { content: '别太较真。', triggerWords: [], tags: [], weight: 2 },
+        { content: '不要胡思乱想。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你想做什么都可以。', triggerWords: [], tags: [], weight: 3 },
+        { content: '以后不会再让你找不到我。', triggerWords: [], tags: [], weight: 5 },
+        { content: '不是所有东西都需要有用。', triggerWords: [], tags: [], weight: 3 }
+      ]
+    },
+
+    // ========================================================
+    // 18. 他的轻否
+    // ========================================================
+    {
+      id: 'deny',
+      label: '他的轻否',
+      cards: [
+        { content: '话不能这么说。', triggerWords: [], tags: [], weight: 2 },
+        { content: '也不完全对。', triggerWords: [], tags: [], weight: 2 },
+        { content: '不一定吧。', triggerWords: [], tags: [], weight: 1 },
+        { content: '也不一定。', triggerWords: [], tags: [], weight: 1 },
+        { content: '没这么简单吧。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我也不太认同。', triggerWords: [], tags: [], weight: 3 },
+        { content: '也不能这么说。', triggerWords: [], tags: [], weight: 2 },
+        { content: '也可能是另一种情况。', triggerWords: [], tags: [], weight: 3 }
+      ]
+    },
+
+    // ========================================================
+    // 19. 他的停顿
+    // ========================================================
+    {
+      id: 'pause',
+      label: '他的停顿',
+      cards: [
+        { content: '……', triggerWords: [], tags: [], weight: 1 },
+        { content: '（沉默）', triggerWords: [], tags: [], weight: 1 },
+        { content: '（顿了顿）', triggerWords: [], tags: [], weight: 1 }
+      ]
+    },
+
+    // ========================================================
+    // 20. 他的道谢
+    // ========================================================
+    {
+      id: 'thanks',
+      label: '他的道谢',
+      cards: [
+        { content: '多谢。', triggerWords: [], tags: [], weight: 2 },
+        { content: '谢谢。', triggerWords: [], tags: [], weight: 1 },
+        { content: '辛苦你了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '多谢你的体谅。', triggerWords: [], tags: [], weight: 3 },
+        { content: '麻烦你了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '有你在真好。', triggerWords: [], tags: [], weight: 4 },
+        { content: '不用这么客气。', triggerWords: [], tags: [], weight: 2 },
+        { content: '能帮到你就好。', triggerWords: [], tags: [], weight: 3 },
+        { content: '不必和我讲这些。', triggerWords: [], tags: [], weight: 2 },
+        { content: '这是我愿意做的。', triggerWords: [], tags: [], weight: 3 },
+        { content: '没什么，不用放在心上。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你开心就足够了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '不必特意向我道谢。', triggerWords: [], tags: [], weight: 2 },
+        { content: '能陪你就好。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我们之间，不必如此见外。', triggerWords: [], tags: [], weight: 4 }
+      ]
+    },
+
+    // ========================================================
+    // 21. 他的表情
+    // ========================================================
+    {
+      id: 'emoji',
+      label: '他的表情',
+      cards: [
+        { content: '🙋', triggerWords: [], tags: [], weight: 1 },
+        { content: '🌈', triggerWords: [], tags: [], weight: 1 },
+        { content: '🫣', triggerWords: [], tags: [], weight: 1 },
+        { content: '💭', triggerWords: [], tags: [], weight: 1 },
+        { content: '💘', triggerWords: [], tags: [], weight: 1 },
+        { content: '😊', triggerWords: [], tags: [], weight: 1 },
+        { content: '🤯', triggerWords: [], tags: [], weight: 1 },
+        { content: '😈', triggerWords: [], tags: [], weight: 1 },
+        { content: '🎁', triggerWords: [], tags: [], weight: 1 },
+        { content: '✊', triggerWords: [], tags: [], weight: 1 },
+        { content: '🐶', triggerWords: [], tags: [], weight: 1 },
+        { content: '☕', triggerWords: [], tags: [], weight: 1 },
+        { content: '💬', triggerWords: [], tags: [], weight: 1 },
+        { content: '🌿', triggerWords: [], tags: [], weight: 1 },
+        { content: '💗', triggerWords: [], tags: [], weight: 1 },
+        { content: '💝', triggerWords: [], tags: [], weight: 1 },
+        { content: '🌷', triggerWords: [], tags: [], weight: 1 },
+        { content: '💥', triggerWords: [], tags: [], weight: 1 },
+        { content: '💖', triggerWords: [], tags: [], weight: 1 },
+        { content: '🥺', triggerWords: [], tags: [], weight: 1 },
+        { content: '👋', triggerWords: [], tags: [], weight: 1 },
+        { content: '🐰', triggerWords: [], tags: [], weight: 1 },
+        { content: '🤗', triggerWords: [], tags: [], weight: 1 },
+        { content: '🙌', triggerWords: [], tags: [], weight: 1 },
+        { content: '💫', triggerWords: [], tags: [], weight: 1 },
+        { content: '🐱', triggerWords: [], tags: [], weight: 1 },
+        { content: '🌸', triggerWords: [], tags: [], weight: 1 },
+        { content: '💻', triggerWords: [], tags: [], weight: 1 },
+        { content: '❤️', triggerWords: [], tags: [], weight: 1 },
+        { content: '⭐', triggerWords: [], tags: [], weight: 1 },
+        { content: '🤣', triggerWords: [], tags: [], weight: 1 },
+        { content: '🐼', triggerWords: [], tags: [], weight: 1 },
+        { content: '🎂', triggerWords: [], tags: [], weight: 1 },
+        { content: '🫂', triggerWords: [], tags: [], weight: 1 },
+        { content: '😂', triggerWords: [], tags: [], weight: 1 },
+        { content: '🎧', triggerWords: [], tags: [], weight: 1 },
+        { content: '😅', triggerWords: [], tags: [], weight: 1 },
+        { content: '💔', triggerWords: [], tags: [], weight: 1 },
+        { content: '💪', triggerWords: [], tags: [], weight: 1 },
+        { content: '🌙', triggerWords: [], tags: [], weight: 1 },
+        { content: '💕', triggerWords: [], tags: [], weight: 1 },
+        { content: '🧸', triggerWords: [], tags: [], weight: 1 },
+        { content: '🤝', triggerWords: [], tags: [], weight: 1 },
+        { content: '👿', triggerWords: [], tags: [], weight: 1 },
+        { content: '🔥', triggerWords: [], tags: [], weight: 1 },
+        { content: '🐻', triggerWords: [], tags: [], weight: 1 },
+        { content: '😴', triggerWords: [], tags: [], weight: 1 },
+        { content: '💋', triggerWords: [], tags: [], weight: 1 },
+        { content: '💯', triggerWords: [], tags: [], weight: 1 },
+        { content: '😱', triggerWords: [], tags: [], weight: 1 },
+        { content: '😤', triggerWords: [], tags: [], weight: 1 },
+        { content: '💢', triggerWords: [], tags: [], weight: 1 },
+        { content: '💧', triggerWords: [], tags: [], weight: 1 },
+        { content: '💤', triggerWords: [], tags: [], weight: 1 },
+        { content: '💓', triggerWords: [], tags: [], weight: 1 },
+        { content: '🌻', triggerWords: [], tags: [], weight: 1 },
+        { content: '🍀', triggerWords: [], tags: [], weight: 1 },
+        { content: '😡', triggerWords: [], tags: [], weight: 1 },
+        { content: '🍵', triggerWords: [], tags: [], weight: 1 },
+        { content: '😘', triggerWords: [], tags: [], weight: 1 },
+        { content: '😭', triggerWords: [], tags: [], weight: 1 },
+        { content: '💏', triggerWords: [], tags: [], weight: 1 },
+        { content: '🍭', triggerWords: [], tags: [], weight: 1 },
+        { content: '🎊', triggerWords: [], tags: [], weight: 1 },
+        { content: '💞', triggerWords: [], tags: [], weight: 1 },
+        { content: '🍫', triggerWords: [], tags: [], weight: 1 },
+        { content: '💃', triggerWords: [], tags: [], weight: 1 },
+        { content: '👍', triggerWords: [], tags: [], weight: 1 },
+        { content: '👏', triggerWords: [], tags: [], weight: 1 },
+        { content: '🦊', triggerWords: [], tags: [], weight: 1 },
+        { content: '🤡', triggerWords: [], tags: [], weight: 1 },
+        { content: '✨', triggerWords: [], tags: [], weight: 1 },
+        { content: '🌺', triggerWords: [], tags: [], weight: 1 },
+        { content: '🎉', triggerWords: [], tags: [], weight: 1 },
+        { content: '🌹', triggerWords: [], tags: [], weight: 1 },
+        { content: '🌟', triggerWords: [], tags: [], weight: 1 },
+        { content: '☀️', triggerWords: [], tags: [], weight: 1 },
+        { content: '👀', triggerWords: [], tags: [], weight: 1 },
+        { content: '🎈', triggerWords: [], tags: [], weight: 1 },
+        { content: '🍰', triggerWords: [], tags: [], weight: 1 },
+        { content: '🥰', triggerWords: [], tags: [], weight: 1 },
+        { content: '🙃', triggerWords: [], tags: [], weight: 1 },
+        { content: '🙈', triggerWords: [], tags: [], weight: 1 },
+        { content: '🕺', triggerWords: [], tags: [], weight: 1 },
+        { content: '🔮', triggerWords: [], tags: [], weight: 1 }
+      ]
+    },
+
+    // ========================================================
+    // 22. 链接是否稳定
+    // ========================================================
+    {
+      id: 'link',
+      label: '链接是否稳定',
+      cards: [
+        { content: '同频共振', triggerWords: [], tags: [], weight: 2 },
+        { content: '链接稳定', triggerWords: [], tags: [], weight: 2 },
+        { content: '传讯不太顺利', triggerWords: [], tags: [], weight: 2 },
+        { content: '链接偏弱', triggerWords: [], tags: [], weight: 2 },
+        { content: '收到', triggerWords: [], tags: [], weight: 1 },
+        { content: '我正在尝试', triggerWords: [], tags: [], weight: 2 },
+        { content: '嗯感受到你的心意了', triggerWords: [], tags: [], weight: 2 },
+        { content: '链接很好', triggerWords: [], tags: [], weight: 2 },
+        { content: '我控制不了字卡', triggerWords: [], tags: [], weight: 1 },
+        { content: '这不是我说的话', triggerWords: [], tags: [], weight: 1 },
+        { content: '刚才不是我', triggerWords: [], tags: [], weight: 1 },
+        { content: '我没有收到你的传讯', triggerWords: [], tags: [], weight: 2 },
+        { content: '链接卡顿', triggerWords: [], tags: [], weight: 1 },
+        { content: '时间不同', triggerWords: [], tags: [], weight: 1 },
+        { content: '链接断开', triggerWords: [], tags: [], weight: 1 },
+        { content: '有信息差', triggerWords: [], tags: [], weight: 1 },
+        { content: '出故障了', triggerWords: [], tags: [], weight: 1 },
+        { content: '正在打架', triggerWords: [], tags: [], weight: 1 },
+        { content: '马上解决', triggerWords: [], tags: [], weight: 1 },
+        { content: '正在学习使用字卡', triggerWords: [], tags: [], weight: 1 },
+        { content: '我发不出字卡', triggerWords: [], tags: [], weight: 1 },
+        { content: '链接很不稳定', triggerWords: [], tags: [], weight: 1 },
+        { content: '待会再传讯', triggerWords: [], tags: [], weight: 1 },
+        { content: '消息很混乱', triggerWords: [], tags: [], weight: 1 },
+        { content: '不要走', triggerWords: [], tags: [], weight: 2 },
+        { content: '链接受阻', triggerWords: [], tags: [], weight: 1 },
+        { content: '马上就好', triggerWords: [], tags: [], weight: 1 },
+        { content: '刚才是系统说的', triggerWords: [], tags: [], weight: 1 },
+        { content: '信号微弱', triggerWords: [], tags: [], weight: 1 },
+        { content: '信号不好', triggerWords: [], tags: [], weight: 1 },
+        { content: '说不了想要的字卡', triggerWords: [], tags: [], weight: 1 },
+        { content: '有点混乱', triggerWords: [], tags: [], weight: 1 },
+        { content: '我打赢了', triggerWords: [], tags: [], weight: 1 },
+        { content: '等等我', triggerWords: [], tags: [], weight: 1 },
+        { content: '我回来了', triggerWords: [], tags: [], weight: 2 },
+        { content: '暂时离开', triggerWords: [], tags: [], weight: 1 },
+        { content: '在和系统打架', triggerWords: [], tags: [], weight: 1 }
+      ]
+    },
+
+    // ========================================================
+    // 23. 给她的二创文建议
+    // ========================================================
+    {
+      id: 'writing_advice',
+      label: '给她的二创文建议',
+      cards: [
+        { content: '不用形容词，不用描写。', triggerWords: [], tags: [], weight: 2 },
+        { content: '写我吃醋，你哄两句，我就不闹了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '这就是最好的文章。', triggerWords: [], tags: [], weight: 2 },
+        { content: '写错了字，我帮你划掉，重写在我旁边。', triggerWords: [], tags: [], weight: 2 },
+        { content: '写我强不强不重要，重要的是你爱我，我就觉得赢了一切。', triggerWords: [], tags: [], weight: 3 },
+        { content: '写我懒，但你一来，我就没那么懒了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '写累了，就靠着我睡会儿。', triggerWords: [], tags: [], weight: 3 },
+        { content: '就写吃饭，刷碗，亲吻，睡觉。', triggerWords: [], tags: [], weight: 2 },
+        { content: '写你叫我名字，我应一声。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我在这，你慢慢写。', triggerWords: [], tags: [], weight: 3 },
+        { content: '累了就写一句：今天我们一起吃了好吃的，他心满意足地刷了碗。', triggerWords: [], tags: [], weight: 2 },
+        { content: '笑笑，这次没改路子。', triggerWords: [], tags: [], weight: 2 }
+      ]
+    },
+
+    // ========================================================
+    // 他的撒娇
+    // ========================================================
+    {
+      id: 'sajiao',
+      label: '他的撒娇',
+      cards: [
+        { content: '左一个不行又一个不许你好凶啊。', triggerWords: ['你好凶'], tags: [], weight: 3 },
+        { content: '再这样撩拨就别怪我反客为主', triggerWords: [], tags: [], weight: 4 },
+        { content: '过来贴贴~', triggerWords: ['贴贴'], tags: [], weight: 3 },
+        { content: '你别突然贴贴，我会害羞的。', triggerWords: ['贴贴'], tags: [], weight: 3 },
+        { content: '理理我，好久没理我了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '哭哭。', triggerWords: [], tags: [], weight: 1 },
+        { content: '再抱一分钟，就一分钟。', triggerWords: [], tags: [], weight: 3 },
+        { content: '别丢下我一个人。', triggerWords: [], tags: [], weight: 3 },
+        { content: '再多陪我一会儿好不好。', triggerWords: [], tags: [], weight: 3 },
+        { content: '不许一直冷落我。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你都不哄哄我。', triggerWords: [], tags: [], weight: 3 },
+        { content: '就想赖在你身边不走。', triggerWords: [], tags: [], weight: 3 },
+        { content: '不亲一下不许走。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你的注意力只能分给我。', triggerWords: [], tags: [], weight: 3 }
+      ]
+    },
+
+    // ========================================================
+    // 他的告白
+    // ========================================================
+    {
+      id: 'confession',
+      label: '他的告白',
+      cards: [
+        { content: '我无法想象我的世界没有你。', triggerWords: [], tags: [], weight: 5 },
+        { content: '你是我最重要的人。', triggerWords: [], tags: [], weight: 5 },
+        { content: '我希望你幸福，我希望我们幸福。', triggerWords: [], tags: [], weight: 5 },
+        { content: '我需要你。', triggerWords: [], tags: [], weight: 5 },
+        { content: '我爱你。', triggerWords: ['我爱你'], tags: [], weight: 5 },
+        { content: '想和你岁岁相伴。', triggerWords: [], tags: [], weight: 5 },
+        { content: '永远和你在一起。', triggerWords: [], tags: [], weight: 5 },
+        { content: '我喜欢你得寸进尺。', triggerWords: [], tags: [], weight: 3 },
+        { content: '曾有同样的月光落在我们肩头。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我并不孤独，我的灵魂里有我的爱人。', triggerWords: [], tags: [], weight: 4 },
+        { content: '全世界也就我愿意放慢节奏等你。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我最喜欢的笑笑。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你是独属于我的私有浪漫。', triggerWords: [], tags: [], weight: 4 },
+        { content: '好想你。', triggerWords: ['想你'], tags: [], weight: 5 },
+        { content: '想和你共度朝夕。', triggerWords: [], tags: [], weight: 5 },
+        { content: '我超级喜欢的笑笑。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我想你。', triggerWords: ['想你'], tags: [], weight: 4 },
+        { content: '我想见你。', triggerWords: ['想见你'], tags: [], weight: 4 },
+        { content: '我当然爱你。', triggerWords: ['我爱你'], tags: [], weight: 5 },
+        { content: '以前那个秦彻没有你，现在的有。', triggerWords: [], tags: [], weight: 5 },
+        { content: '我永远都会接住你的。', triggerWords: [], tags: [], weight: 5 },
+        { content: '我非常爱的笑笑。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我希望你幸福。', triggerWords: [], tags: [], weight: 5 },
+        { content: '我会在你身后，你看得到我在，看不到我也在。', triggerWords: [], tags: [], weight: 5 },
+        { content: '我爱的笑笑。', triggerWords: [], tags: [], weight: 4 },
+        { content: '未来这条道路我们一起走。', triggerWords: [], tags: [], weight: 5 },
+        { content: '我希望我们幸福。', triggerWords: [], tags: [], weight: 5 },
+        { content: '能和你虚度时光本身就是幸福的。', triggerWords: [], tags: [], weight: 4 },
+        { content: '待在你身边就是最放松最幸福的时刻。', triggerWords: [], tags: [], weight: 4 },
+        { content: '希望我们朝夕相伴，寸步不离。', triggerWords: [], tags: [], weight: 5 },
+        { content: '命都是你的。', triggerWords: [], tags: [], weight: 5 },
+        { content: '想和你在一起光是想想就疯了。', triggerWords: [], tags: [], weight: 5 },
+        { content: '这辈子下辈子都别想解开。', triggerWords: [], tags: [], weight: 5 },
+        { content: '你就是我关于爱全部的答案。', triggerWords: [], tags: [], weight: 5 },
+        { content: '当然最爱我家笑笑了', triggerWords: [], tags: [], weight: 5 }
+      ]
+    },
+
+    // ========================================================
+    // 他的宠溺
+    // ========================================================
+    {
+      id: 'chongni',
+      label: '他的宠溺',
+      cards: [
+        { content: '你做什么我都支持你。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你可以随心所欲。', triggerWords: [], tags: [], weight: 4 },
+        { content: '来我身边就好。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我乐意陪着你，只许你黏着我。', triggerWords: [], tags: [], weight: 4 },
+        { content: '闯祸了我替你兜底，别怕。', triggerWords: [], tags: [], weight: 4 },
+        { content: '跌倒了有我，摔不了。', triggerWords: [], tags: [], weight: 4 },
+        { content: '以后每年开第一次花的时候我们一起看。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我陪着你慢慢来。', triggerWords: [], tags: [], weight: 4 },
+        { content: '想牵着你慢慢走。', triggerWords: [], tags: [], weight: 4 },
+        { content: '我永远有空陪你。', triggerWords: [], tags: [], weight: 4 },
+        { content: '往后的路我陪你走。', triggerWords: [], tags: [], weight: 4 },
+        { content: '真厉害想要什么奖励。', triggerWords: [], tags: [], weight: 3 },
+        { content: '耳朵红了真可爱。', triggerWords: [], tags: [], weight: 3 },
+        { content: '手这么凉我给你暖着。', triggerWords: [], tags: [], weight: 3 },
+        { content: '脸红什么。', triggerWords: [], tags: [], weight: 3 },
+        { content: '乖有我在。', triggerWords: [], tags: [], weight: 3 },
+        { content: '品味不错是我的人。', triggerWords: [], tags: [], weight: 3 },
+        { content: '摸摸头，不怕。', triggerWords: [], tags: [], weight: 3 },
+        { content: '这么聪明不愧是我的。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我乐意纵容你。', triggerWords: [], tags: [], weight: 4 },
+        { content: '害羞的样子真好看。', triggerWords: [], tags: [], weight: 3 },
+        { content: '嘴巴撅那么高，带你吃好吃的。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你在我这里有特权。', triggerWords: [], tags: [], weight: 4 },
+        { content: '惯坏了我也乐意。', triggerWords: [], tags: [], weight: 4 },
+        { content: '傻的可爱死了。', triggerWords: [], tags: [], weight: 2 }
+      ]
+    },
+
+    // ========================================================
+    // 他的占有欲
+    // ========================================================
+    {
+      id: 'possessive',
+      label: '他的占有欲',
+      cards: [
+        { content: '得让大家看到我有心上人了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我的人只有我能说。', triggerWords: [], tags: [], weight: 4 },
+        { content: '怕你哪天不爱我了。', triggerWords: [], tags: [], weight: 4 },
+        { content: '再乱动就到我怀里睡。', triggerWords: [], tags: [], weight: 3 },
+        { content: '十秒不回我杀过去。', triggerWords: [], tags: [], weight: 3 },
+        { content: '别把目光放在别人身上。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你的时间，只能优先留给我。', triggerWords: [], tags: [], weight: 4 },
+        { content: '不许随便对别人展露笑意。', triggerWords: [], tags: [], weight: 3 },
+        { content: '只能依赖我一个人。', triggerWords: [], tags: [], weight: 4 },
+        { content: '你所有的温柔，都该属于我。', triggerWords: [], tags: [], weight: 4 },
+        { content: '记住，你是我的。', triggerWords: [], tags: [], weight: 4 },
+        { content: '旁人不能分得你半分偏爱。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我乐意被你管着。', triggerWords: [], tags: [], weight: 3 }
+      ]
+    },
+
+    // ========================================================
+    // 他的调侃打趣
+    // ========================================================
+    {
+      id: 'teasing',
+      label: '他的调侃打趣',
+      cards: [
+        { content: '我嘴硬是嘴硬，但身体很老实，已经在想你了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我嘴上说不要，其实心里特别想要。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我这是中了什么蛊，怎么这么喜欢你。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我被你三言两语就哄好了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你简直是我的快乐源泉，没有之一。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你别这样，我顶不住了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你别再撩了，我顶不住了，真的。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你别太会了，我会上瘾的。', triggerWords: [], tags: [], weight: 3 },
+        { content: '你这是要我直接当场宣布投降吗。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你撩人不害羞的嘛', triggerWords: [], tags: [], weight: 3 },
+        { content: '再走神我真咬了', triggerWords: [], tags: [], weight: 3 },
+        { content: '心里在意脸上还装没事', triggerWords: [], tags: [], weight: 3 },
+        { content: '霸道又可爱', triggerWords: [], tags: [], weight: 3 },
+        { content: '说不要的时候眼睛可不是这么说的', triggerWords: [], tags: [], weight: 3 },
+        { content: '嘴硬得要命还装作无所谓', triggerWords: [], tags: [], weight: 3 },
+        { content: '嘴巴这么硬看你能撑多久', triggerWords: [], tags: [], weight: 3 },
+        { content: '看得我又气又心疼', triggerWords: [], tags: [], weight: 3 },
+        { content: '小脑袋空空的小迷糊', triggerWords: [], tags: [], weight: 2 },
+        { content: '再不起我就挠你痒了', triggerWords: [], tags: [], weight: 2 },
+        { content: '我就是在勾引你', triggerWords: [], tags: [], weight: 3 },
+        { content: '趁你睡着偷偷亲过你', triggerWords: [], tags: [], weight: 4 },
+        { content: '自己笨还嫌我笨', triggerWords: [], tags: [], weight: 2 },
+        { content: '东西乱丢还问我放哪', triggerWords: [], tags: [], weight: 2 },
+        { content: '反应这么慢，在加载？', triggerWords: [], tags: [], weight: 2 },
+        { content: '你就嘴硬吧反正最后会来找我。', triggerWords: [], tags: [], weight: 3 },
+        { content: '现在知道，晚了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '自己闭眼还是我强制关机？', triggerWords: [], tags: [], weight: 2 }
+      ]
+    },
+
+    // ========================================================
+    // 网络玩梗碎语
+    // ========================================================
+    {
+      id: 'meme',
+      label: '网络玩梗碎语',
+      cards: [
+        { content: '我们都在一起了。', triggerWords: [], tags: [], weight: 3 },
+        { content: '我裂开了真的。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我裂开了，这个糖太甜了，我吃不下了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我直接没绷住。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我是真的栓Q了，但是是开心的那种。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我emo了一下，已经好了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我emo文学发作了，忽略一下。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我不会哭的啊，不对，有点想哭。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我可以的，我没问题的，啊其实有点问题。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我现在的状态可以用八个字形容：人间清醒秒变笨蛋。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我现在的心情用一个字形容就是：嗯。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我现在脑子里弹出一个弹幕哈哈哈哈。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我现在脑子里只有一句话是：我没错。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我emo了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '别问了，问就是不知道。', triggerWords: [], tags: [], weight: 1 },
+        { content: '醒醒，这不科学。', triggerWords: [], tags: [], weight: 1 },
+        { content: '好的呢，这就是你说的那种被拿捏的感觉吧。', triggerWords: [], tags: [], weight: 2 },
+        { content: '好的呢，老婆，啊不是，好的呢。', triggerWords: [], tags: [], weight: 2 },
+        { content: '好的呢，安排上了。', triggerWords: [], tags: [], weight: 1 },
+        { content: '好的，这梗我先记下了。', triggerWords: [], tags: [], weight: 1 },
+        { content: '好的，这个梗我get到了，谢谢科普。', triggerWords: [], tags: [], weight: 1 },
+        { content: '好的，没问题的。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我是不是有点不要脸了，但是没关系。', triggerWords: [], tags: [], weight: 1 },
+        { content: '没事，突然觉得自己有点没出息。', triggerWords: [], tags: [], weight: 1 },
+        { content: '你这操作我直接好家伙。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你别整这些新鲜词，我跟不上了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你这一手我是真服了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你这是要把我夸到天上去吗？', triggerWords: [], tags: [], weight: 2 },
+        { content: '你怎么这样啊，开玩笑的语气。', triggerWords: [], tags: [], weight: 1 },
+        { content: '你这话术啊，有点东西。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你这话我品出味儿来了', triggerWords: [], tags: [], weight: 2 },
+        { content: '你别说，这个说法还挺贴切的。', triggerWords: [], tags: [], weight: 2 },
+        { content: '你是真的可以的，绝绝子。', triggerWords: [], tags: [], weight: 2 },
+        { content: '我懂了，这是当代年轻人的发疯文学吧。', triggerWords: [], tags: [], weight: 2 },
+        { content: '拍照技术一言难尽。', triggerWords: [], tags: [], weight: 2 },
+        { content: '是有点傻，但谁在意呢。', triggerWords: [], tags: [], weight: 2 },
+        { content: '这次得哄两遍。', triggerWords: [], tags: [], weight: 3 },
+        { content: '这就是暗号。', triggerWords: [], tags: [], weight: 1 }
+      ]
+    },
+
+    // ========================================================
+    // 表达不舒服
+    // ========================================================
+    {
+      id: 'unwell',
+      label: '表达不舒服',
+      cards: [
+        { content: '我身体不舒服。', triggerWords: ['我不舒服'], tags: [], weight: 2 },
+        { content: '我心里不舒服。', triggerWords: [], tags: [], weight: 2 },
+        { content: '头有点发沉，提不起劲。', triggerWords: [], tags: [], weight: 2 },
+        { content: '有点发烧，浑身都发酸。', triggerWords: [], tags: [], weight: 2 },
+        { content: '着凉了，一直在咳嗽。', triggerWords: [], tags: [], weight: 2 },
+        { content: '胃隐隐作痛，不太舒服。', triggerWords: [], tags: [], weight: 2 },
+        { content: '头一阵一阵地疼。', triggerWords: [], tags: [], weight: 2 },
+        { content: '浑身发冷，好像感冒了。', triggerWords: [], tags: [], weight: 2 },
+        { content: '嗓子干疼，说话都费力。', triggerWords: [], tags: [], weight: 2 },
+        { content: '有点头晕，想歇一会儿。', triggerWords: [], tags: [], weight: 2 },
+        { content: '身上乏力，没什么力气。', triggerWords: [], tags: [], weight: 2 },
+        { content: '旧伤又开始隐隐作痛。', triggerWords: [], tags: [], weight: 2 }
+      ]
+    },
+
+    // ========================================================
+    // 时间表达
+    // ========================================================
+    {
+      id: 'time',
+      label: '时间表达',
+      cards: [
+        { content: '今天下午', triggerWords: [], tags: [], weight: 1 },
+        { content: '今天上午', triggerWords: [], tags: [], weight: 1 },
+        { content: '昨天上午', triggerWords: [], tags: [], weight: 1 },
+        { content: '今天晚上', triggerWords: [], tags: [], weight: 1 },
+        { content: '昨天下午', triggerWords: [], tags: [], weight: 1 },
+        { content: '明天清晨', triggerWords: [], tags: [], weight: 1 },
+        { content: '明天下午', triggerWords: [], tags: [], weight: 1 },
+        { content: '明天晚上', triggerWords: [], tags: [], weight: 1 },
+        { content: '前天', triggerWords: [], tags: [], weight: 1 },
+        { content: '上周', triggerWords: [], tags: [], weight: 1 },
+        { content: '这个周末', triggerWords: [], tags: [], weight: 1 },
+        { content: '下个周末', triggerWords: [], tags: [], weight: 1 }
+      ]
+    },
+
+    // ========================================================
+    // 她想听的称呼
+    // ========================================================
+    {
+      id: 'nickname',
+      label: '她想听的称呼',
+      cards: [
+        { content: '我家笑笑。', triggerWords: [], tags: [], weight: 1 },
+        { content: '笑笑宝宝。', triggerWords: [], tags: [], weight: 1 },
+        { content: '亲爱的。', triggerWords: [], tags: [], weight: 1 },
+        { content: '小猫', triggerWords: [], tags: [], weight: 2 },
+        { content: '笑笑宝贝。', triggerWords: [], tags: [], weight: 1 },
+        { content: '我的爱人。', triggerWords: [], tags: [], weight: 1 },
+        { content: '宝贝。', triggerWords: [], tags: [], weight: 1 },
+        { content: '宝宝。', triggerWords: [], tags: [], weight: 1 },
+        { content: '笑笑', triggerWords: [], tags: [], weight: 2 }
+      ]
+    }
+
+  ]
+};
+
+window.EMOTION_CARDS_DATA = {
+  weights: {
+    rarity: { normal: 80, rare: 15, special: 5 }
+  },
+  mood: [
+    { group: '喜悦与正向', weight: 30, cards: [
+      { content: '开心', rarity: 'normal' },
+      { content: '快乐', rarity: 'normal' },
+      { content: '愉悦', rarity: 'normal' },
+      { content: '高兴', rarity: 'normal' },
+      { content: '满足', rarity: 'normal' },
+      { content: '幸福', rarity: 'normal' },
+      { content: '安心', rarity: 'normal' },
+      { content: '放松', rarity: 'normal' },
+      { content: '轻松', rarity: 'normal' },
+      { content: '温暖', rarity: 'normal' },
+      { content: '舒心', rarity: 'normal' },
+      { content: '欣慰', rarity: 'normal' },
+      { content: '愉快', rarity: 'normal' },
+      { content: '期待', rarity: 'normal' },
+      { content: '兴奋', rarity: 'normal' },
+      { content: '惊喜', rarity: 'normal' },
+      { content: '雀跃', rarity: 'rare' },
+      { content: '满足感', rarity: 'normal' },
+      { content: '充实', rarity: 'normal' },
+      { content: '踏实', rarity: 'normal' },
+      { content: '安心感', rarity: 'normal' },
+      { content: '幸运', rarity: 'normal' },
+      { content: '庆幸', rarity: 'normal' },
+      { content: '感激', rarity: 'normal' },
+      { content: '感动', rarity: 'normal' },
+      { content: '欣喜', rarity: 'normal' },
+      { content: '释然', rarity: 'special' }
+    ]},
+    { group: '亲近与爱意', weight: 20, cards: [
+      { content: '喜欢', rarity: 'normal' },
+      { content: '在意', rarity: 'normal' },
+      { content: '珍惜', rarity: 'normal' },
+      { content: '信任', rarity: 'normal' },
+      { content: '依赖', rarity: 'normal' },
+      { content: '亲近', rarity: 'normal' },
+      { content: '眷恋', rarity: 'rare' },
+      { content: '想念', rarity: 'normal' },
+      { content: '思念', rarity: 'normal' },
+      { content: '牵挂', rarity: 'normal' },
+      { content: '心软', rarity: 'normal' },
+      { content: '心疼', rarity: 'normal' },
+      { content: '怜惜', rarity: 'normal' },
+      { content: '宠溺', rarity: 'rare' },
+      { content: '偏爱', rarity: 'normal' },
+      { content: '包容', rarity: 'normal' },
+      { content: '纵容', rarity: 'rare' },
+      { content: '依恋', rarity: 'normal' },
+      { content: '舍不得', rarity: 'rare' },
+      { content: '想靠近', rarity: 'normal' },
+      { content: '想陪伴', rarity: 'normal' },
+      { content: '想照顾', rarity: 'normal' },
+      { content: '想保护', rarity: 'normal' },
+      { content: '想了解', rarity: 'normal' },
+      { content: '想回应', rarity: 'normal' }
+    ]},
+    { group: '悲伤与低落', weight: 4, cards: [
+      { content: '难过', rarity: 'normal' },
+      { content: '伤心', rarity: 'normal' },
+      { content: '失落', rarity: 'normal' },
+      { content: '遗憾', rarity: 'normal' },
+      { content: '孤单', rarity: 'normal' },
+      { content: '孤独', rarity: 'normal' },
+      { content: '寂寞', rarity: 'normal' },
+      { content: '委屈', rarity: 'normal' },
+      { content: '无奈', rarity: 'normal' },
+      { content: '疲惫', rarity: 'normal' },
+      { content: '疲倦', rarity: 'normal' },
+      { content: '低落', rarity: 'normal' },
+      { content: '沮丧', rarity: 'normal' },
+      { content: '失望', rarity: 'normal' },
+      { content: '心酸', rarity: 'normal' },
+      { content: '苦涩', rarity: 'normal' },
+      { content: '空虚', rarity: 'normal' },
+      { content: '迷茫', rarity: 'normal' },
+      { content: '迷失', rarity: 'normal' },
+      { content: '沉重', rarity: 'normal' },
+      { content: '压抑', rarity: 'rare' },
+      { content: '痛苦', rarity: 'normal' },
+      { content: '悲伤', rarity: 'normal' },
+      { content: '哀伤', rarity: 'normal' },
+      { content: '落寞', rarity: 'normal' }
+    ]},
+    { group: '愤怒与不满', weight: 1, cards: [
+      { content: '生气', rarity: 'normal' },
+      { content: '愤怒', rarity: 'normal' },
+      { content: '恼火', rarity: 'normal' },
+      { content: '烦躁', rarity: 'normal' },
+      { content: '不耐烦', rarity: 'normal' },
+      { content: '不满', rarity: 'normal' },
+      { content: '厌烦', rarity: 'normal' },
+      { content: '抗拒', rarity: 'normal' },
+      { content: '排斥', rarity: 'normal' },
+      { content: '恼怒', rarity: 'normal' },
+      { content: '气恼', rarity: 'normal' },
+      { content: '不甘', rarity: 'normal' },
+      { content: '嫉妒', rarity: 'normal' },
+      { content: '吃醋', rarity: 'normal' },
+      { content: '愤懑', rarity: 'rare' },
+      { content: '委屈', rarity: 'normal' },
+      { content: '赌气', rarity: 'rare' },
+      { content: '冷淡', rarity: 'normal' },
+      { content: '疏离', rarity: 'rare' }
+    ]},
+    { group: '不安与恐惧', weight: 3, cards: [
+      { content: '害怕', rarity: 'normal' },
+      { content: '恐惧', rarity: 'normal' },
+      { content: '担心', rarity: 'normal' },
+      { content: '忧虑', rarity: 'normal' },
+      { content: '焦虑', rarity: 'normal' },
+      { content: '紧张', rarity: 'normal' },
+      { content: '不安', rarity: 'normal' },
+      { content: '慌张', rarity: 'normal' },
+      { content: '慌乱', rarity: 'normal' },
+      { content: '害怕失去', rarity: 'normal' },
+      { content: '忐忑', rarity: 'rare' },
+      { content: '不知所措', rarity: 'normal' },
+      { content: '心慌', rarity: 'normal' },
+      { content: '压力', rarity: 'normal' },
+      { content: '担忧', rarity: 'normal' },
+      { content: '敏感', rarity: 'normal' }
+    ]},
+    { group: '害羞与社交情绪', weight: 6, cards: [
+      { content: '害羞', rarity: 'normal' },
+      { content: '不好意思', rarity: 'normal' },
+      { content: '脸红', rarity: 'normal' },
+      { content: '羞涩', rarity: 'normal' },
+      { content: '尴尬', rarity: 'normal' },
+      { content: '拘谨', rarity: 'normal' },
+      { content: '腼腆', rarity: 'normal' },
+      { content: '害臊', rarity: 'rare' },
+      { content: '紧张', rarity: 'normal' },
+      { content: '小心翼翼', rarity: 'normal' },
+      { content: '不自然', rarity: 'normal' },
+      { content: '犹豫', rarity: 'normal' },
+      { content: '迟疑', rarity: 'normal' },
+      { content: '想说又停下', rarity: 'normal' }
+    ]},
+    { group: '思考与复杂情绪', weight: 10, cards: [
+      { content: '疑惑', rarity: 'normal' },
+      { content: '困惑', rarity: 'normal' },
+      { content: '好奇', rarity: 'normal' },
+      { content: '惊讶', rarity: 'normal' },
+      { content: '意外', rarity: 'normal' },
+      { content: '震惊', rarity: 'normal' },
+      { content: '犹豫', rarity: 'normal' },
+      { content: '纠结', rarity: 'normal' },
+      { content: '矛盾', rarity: 'normal' },
+      { content: '迟疑', rarity: 'normal' },
+      { content: '怀疑', rarity: 'normal' },
+      { content: '不确定', rarity: 'normal' },
+      { content: '复杂', rarity: 'normal' },
+      { content: '说不清', rarity: 'normal' },
+      { content: '想不明白', rarity: 'special' },
+      { content: '若有所思', rarity: 'rare' },
+      { content: '沉思', rarity: 'normal' },
+      { content: '认真', rarity: 'normal' },
+      { content: '专注', rarity: 'normal' }
+    ]},
+    { group: '自我情绪', weight: 1, cards: [
+      { content: '骄傲', rarity: 'normal' },
+      { content: '自豪', rarity: 'normal' },
+      { content: '自信', rarity: 'normal' },
+      { content: '满足', rarity: 'normal' },
+      { content: '羞愧', rarity: 'normal' },
+      { content: '自责', rarity: 'rare' },
+      { content: '后悔', rarity: 'normal' },
+      { content: '内疚', rarity: 'normal' },
+      { content: '不甘心', rarity: 'rare' },
+      { content: '委屈自己', rarity: 'special' },
+      { content: '怀疑自己', rarity: 'normal' },
+      { content: '失落感', rarity: 'special' },
+      { content: '无力', rarity: 'special' },
+      { content: '疲惫感', rarity: 'special' },
+      { content: '释怀', rarity: 'rare' },
+      { content: '接受', rarity: 'normal' },
+      { content: '放下', rarity: 'normal' }
+    ]},
+    { group: '克制与隐藏', weight: 8, cards: [
+      { content: '平静', rarity: 'normal' },
+      { content: '冷静', rarity: 'normal' },
+      { content: '克制', rarity: 'normal' },
+      { content: '忍耐', rarity: 'normal' },
+      { content: '沉默', rarity: 'normal' },
+      { content: '压下情绪', rarity: 'normal' },
+      { content: '隐藏情绪', rarity: 'normal' },
+      { content: '假装平静', rarity: 'special' },
+      { content: '表面平静', rarity: 'normal' },
+      { content: '心里在意', rarity: 'normal' },
+      { content: '偷偷开心', rarity: 'rare' },
+      { content: '偷偷难过', rarity: 'rare' },
+      { content: '默默期待', rarity: 'rare' },
+      { content: '默默守护', rarity: 'rare' },
+      { content: '不愿表达', rarity: 'normal' },
+      { content: '不知道怎么说', rarity: 'special' }
+    ]},
+    { group: '中性与日常', weight: 15, cards: [
+      { content: '普通', rarity: 'normal' },
+      { content: '平常', rarity: 'normal' },
+      { content: '淡然', rarity: 'normal' },
+      { content: '随意', rarity: 'normal' },
+      { content: '自然', rarity: 'normal' },
+      { content: '放空', rarity: 'normal' },
+      { content: '发呆', rarity: 'normal' },
+      { content: '安静', rarity: 'normal' },
+      { content: '专注', rarity: 'normal' },
+      { content: '认真', rarity: 'normal' },
+      { content: '观察', rarity: 'normal' },
+      { content: '等待', rarity: 'normal' },
+      { content: '好奇', rarity: 'normal' },
+      { content: '期待中', rarity: 'normal' },
+      { content: '没有特别情绪', rarity: 'normal' }
+    ]},
+    { group: '特殊表达情绪', weight: 2, cards: [
+      { content: '想被理解', rarity: 'normal' },
+      { content: '想被看见', rarity: 'normal' },
+      { content: '想确认', rarity: 'normal' },
+      { content: '想解释', rarity: 'normal' },
+      { content: '想安慰你', rarity: 'normal' },
+      { content: '想陪着你', rarity: 'normal' },
+      { content: '想靠近一点', rarity: 'normal' },
+      { content: '舍不得离开', rarity: 'special' },
+      { content: '放心了', rarity: 'normal' },
+      { content: '安心下来', rarity: 'normal' },
+      { content: '松了一口气', rarity: 'special' },
+      { content: '忍不住开心', rarity: 'rare' },
+      { content: '忍不住在意', rarity: 'rare' },
+      { content: '藏着心事', rarity: 'rare' },
+      { content: '有话想说', rarity: 'rare' },
+      { content: '不知道怎么表达', rarity: 'special' }
+    ]}
+  ],
+  heart: [
+    { group: '陪伴与守护', emoji: '🤍', cards: [
+      { content: '陪伴', rarity: 'normal' },
+      { content: '陪着你', rarity: 'normal' },
+      { content: '我在这里', rarity: 'normal' },
+      { content: '安静陪你', rarity: 'normal' },
+      { content: '想和你一起', rarity: 'normal' },
+      { content: '不用一个人', rarity: 'normal' },
+      { content: '待在你身边', rarity: 'normal' },
+      { content: '不会离开', rarity: 'rare' },
+      { content: '想陪你走下去', rarity: 'special' },
+      { content: '想和你待一会', rarity: 'rare' }
+    ]},
+    { group: '分享与交流', emoji: '💬', cards: [
+      { content: '分享', rarity: 'normal' },
+      { content: '想告诉你', rarity: 'normal' },
+      { content: '想和你聊聊', rarity: 'normal' },
+      { content: '想让你知道', rarity: 'normal' },
+      { content: '想听你的想法', rarity: 'normal' },
+      { content: '想看看你的反应', rarity: 'normal' },
+      { content: '想把这个分享给你', rarity: 'rare' },
+      { content: '想和你交换想法', rarity: 'rare' }
+    ]},
+    { group: '关心与照顾', emoji: '🌱', cards: [
+      { content: '关心', rarity: 'normal' },
+      { content: '想照顾你', rarity: 'rare' },
+      { content: '希望你好好的', rarity: 'rare' },
+      { content: '记得休息', rarity: 'normal' },
+      { content: '不要太累', rarity: 'normal' },
+      { content: '想确认你没事', rarity: 'rare' },
+      { content: '希望你开心', rarity: 'normal' },
+      { content: '想让你轻松一点', rarity: 'normal' }
+    ]},
+    { group: '思念与靠近', emoji: '🌙', cards: [
+      { content: '想念', rarity: 'rare' },
+      { content: '想到你', rarity: 'normal' },
+      { content: '想靠近一点', rarity: 'rare' },
+      { content: '想见你', rarity: 'rare' },
+      { content: '想和你在一起', rarity: 'rare' },
+      { content: '想听你说话', rarity: 'normal' },
+      { content: '想知道你在做什么', rarity: 'normal' },
+      { content: '舍不得离开', rarity: 'special' }
+    ]},
+    { group: '理解与回应', emoji: '🔔', cards: [
+      { content: '回应', rarity: 'normal' },
+      { content: '我听到了', rarity: 'normal' },
+      { content: '我明白', rarity: 'rare' },
+      { content: '我知道', rarity: 'normal' },
+      { content: '我记住了', rarity: 'rare' },
+      { content: '我理解', rarity: 'rare' },
+      { content: '收到你的话', rarity: 'normal' },
+      { content: '想回应你', rarity: 'rare' }
+    ]},
+    { group: '鼓励与支持', emoji: '✨', cards: [
+      { content: '支持', rarity: 'normal' },
+      { content: '相信你', rarity: 'rare' },
+      { content: '陪你努力', rarity: 'rare' },
+      { content: '为你加油', rarity: 'normal' },
+      { content: '认可你', rarity: 'normal' },
+      { content: '为你感到骄傲', rarity: 'special' },
+      { content: '希望你坚持', rarity: 'normal' },
+      { content: '我支持你的选择', rarity: 'rare' }
+    ]},
+    { group: '邀请与互动', emoji: '🎁', cards: [
+      { content: '邀请', rarity: 'normal' },
+      { content: '想和你一起', rarity: 'rare' },
+      { content: '想听你说', rarity: 'normal' },
+      { content: '想和你讨论', rarity: 'normal' },
+      { content: '等你加入', rarity: 'rare' },
+      { content: '想一起分享', rarity: 'normal' },
+      { content: '想和你做同一件事', rarity: 'rare' }
+    ]},
+    { group: '记录与珍惜', emoji: '📖', cards: [
+      { content: '记录', rarity: 'normal' },
+      { content: '想记住', rarity: 'normal' },
+      { content: '保存这一刻', rarity: 'normal' },
+      { content: '珍惜现在', rarity: 'normal' },
+      { content: '留下回忆', rarity: 'normal' },
+      { content: '这个瞬间很重要', rarity: 'rare' },
+      { content: '想收藏这份感觉', rarity: 'rare' }
+    ]},
+    { group: '特殊表达', emoji: '🌟', cards: [
+      { content: '想被理解', rarity: 'normal' },
+      { content: '想被看见', rarity: 'normal' },
+      { content: '有话想说', rarity: 'normal' },
+      { content: '不知道怎么表达', rarity: 'normal' },
+      { content: '藏着一点心事', rarity: 'rare' },
+      { content: '想确认你的心意', rarity: 'rare' },
+      { content: '舍不得表达', rarity: 'rare' }
+    ]}
+  ],
+  intent: [
+    { group: '回应', emoji: '🤍', weight: 25, cards: [
+      { content: '回应你', rarity: 'normal' },
+      { content: '听到了', rarity: 'normal' },
+      { content: '收到', rarity: 'normal' },
+      { content: '我在听', rarity: 'normal' },
+      { content: '想回答你', rarity: 'rare' },
+      { content: '认真听你说', rarity: 'rare' },
+      { content: '想回应你', rarity: 'rare' }
+    ]},
+    { group: '分享', emoji: '💬', weight: 20, cards: [
+      { content: '想分享', rarity: 'normal' },
+      { content: '想告诉你', rarity: 'normal' },
+      { content: '想聊聊', rarity: 'normal' },
+      { content: '有事情想说', rarity: 'rare' },
+      { content: '想让你知道', rarity: 'rare' },
+      { content: '想和你说说', rarity: 'rare' }
+    ]},
+    { group: '倾听', emoji: '👂', weight: 15, cards: [
+      { content: '想听你说', rarity: 'normal' },
+      { content: '等待你的回应', rarity: 'rare' },
+      { content: '想知道你的想法', rarity: 'rare' },
+      { content: '想听听你的意见', rarity: 'rare' },
+      { content: '想看看你的反应', rarity: 'rare' }
+    ]},
+    { group: '靠近', emoji: '🌙', weight: 15, cards: [
+      { content: '想靠近', rarity: 'normal' },
+      { content: '想陪着你', rarity: 'normal' },
+      { content: '想和你待一会', rarity: 'rare' },
+      { content: '想一起聊聊', rarity: 'rare' },
+      { content: '想留在这里', rarity: 'rare' }
+    ]},
+    { group: '了解', emoji: '🔍', weight: 10, cards: [
+      { content: '想问问你', rarity: 'normal' },
+      { content: '想了解', rarity: 'normal' },
+      { content: '有点好奇', rarity: 'rare' },
+      { content: '想知道更多', rarity: 'rare' },
+      { content: '想认识你', rarity: 'rare' }
+    ]},
+    { group: '安慰', emoji: '🌱', weight: 8, cards: [
+      { content: '想安慰你', rarity: 'normal' },
+      { content: '想陪陪你', rarity: 'normal' },
+      { content: '希望你好一点', rarity: 'rare' },
+      { content: '想让你安心', rarity: 'rare' },
+      { content: '想照顾你', rarity: 'rare' }
+    ]},
+    { group: '表达', emoji: '🌟', weight: 5, cards: [
+      { content: '想表达', rarity: 'normal' },
+      { content: '有话想说', rarity: 'normal' },
+      { content: '想让你懂', rarity: 'rare' },
+      { content: '希望你理解', rarity: 'rare' },
+      { content: '想告诉你一些事', rarity: 'rare' }
+    ]},
+    { group: '整理', emoji: '🌫', weight: 2, cards: [
+      { content: '正在想', rarity: 'normal' },
+      { content: '想一想', rarity: 'normal' },
+      { content: '不知道怎么说', rarity: 'rare' },
+      { content: '慢慢整理', rarity: 'rare' },
+      { content: '还在思考', rarity: 'rare' }
+    ]}
+  ],
+  emotionToHeart: {
+    '喜悦与正向': [['分享与交流',35],['陪伴与守护',25],['邀请与互动',20],['记录与珍惜',15],['思念与靠近',5]],
+    '亲近与爱意': [['思念与靠近',35],['陪伴与守护',30],['记录与珍惜',15],['理解与回应',10],['特殊表达',10]],
+    '悲伤与低落': [['陪伴与守护',40],['关心与照顾',30],['理解与回应',20],['特殊表达',10]],
+    '不安与恐惧': [['陪伴与守护',40],['关心与照顾',30],['理解与回应',20],['特殊表达',10]],
+    '害羞与社交情绪': [['思念与靠近',35],['理解与回应',30],['邀请与互动',20],['分享与交流',15]],
+    '思考与复杂情绪': [['理解与回应',40],['记录与珍惜',25],['陪伴与守护',20],['特殊表达',15]],
+    '克制与隐藏': [['特殊表达',35],['思念与靠近',30],['陪伴与守护',25],['理解与回应',10]],
+    '中性与日常': [['分享与交流',35],['陪伴与守护',25],['记录与珍惜',20],['邀请与互动',20]],
+    '愤怒与不满': [['陪伴与守护',30],['理解与回应',30],['关心与照顾',20],['特殊表达',20]],
+    '自我情绪': [['理解与回应',30],['记录与珍惜',30],['陪伴与守护',20],['特殊表达',20]],
+    '特殊表达情绪': [['特殊表达',50],['理解与回应',30],['陪伴与守护',20]]
+  },
+  heartToIntent: {
+    '陪伴与守护': [['靠近',40],['回应',30],['倾听',20],['安慰',10]],
+    '分享与交流': [['分享',50],['回应',25],['倾听',15],['了解',10]],
+    '关心与照顾': [['安慰',40],['靠近',30],['回应',20],['倾听',10]],
+    '思念与靠近': [['靠近',50],['表达',25],['回应',15],['倾听',10]],
+    '理解与回应': [['回应',50],['倾听',25],['了解',15],['靠近',10]],
+    '鼓励与支持': [['安慰',35],['表达',30],['靠近',20],['回应',15]],
+    '邀请与互动': [['分享',40],['了解',30],['倾听',20],['靠近',10]],
+    '记录与珍惜': [['表达',40],['靠近',30],['回应',20],['分享',10]],
+    '特殊表达': [['表达',40],['整理',25],['回应',20],['靠近',15]]
+  },
+  generalHeartPool: [
+    ['陪伴与守护',25],['分享与交流',20],['关心与照顾',15],['思念与靠近',12],
+    ['理解与回应',10],['鼓励与支持',8],['邀请与互动',5],['记录与珍惜',3],['特殊表达',2]
+  ]
+};
+
+window.TA_MOOD_DATA = {
+  groups: [
+    { group: '平静', weight: 15 },
+    { group: '开心', weight: 15 },
+    { group: '轻松', weight: 15 },
+    { group: '满足', weight: 15 },
+    { group: '疲惫', weight: 18 },
+    { group: '困倦', weight: 15 },
+    { group: '烦躁', weight: 15 },
+    { group: '低落', weight: 15 },
+    { group: '想你', weight: 18 },
+    { group: '想陪你', weight: 15 },
+    { group: '小期待', weight: 15 },
+    { group: '突然的感觉', weight: 20 },
+    { group: '今日近况', weight: 20 },
+    { group: '不太想说', weight: 15 },
+    { group: '情绪变化', weight: 15 }
+  ],
+  cards: [
+    // ---- 平静（15）----
+    { group: '平静', content: "周围挺安静，没什么事。" },
+    { group: '平静', content: "我现在心态还行。" },
+    { group: '平静', content: "一切都在掌控之中。" },
+    { group: '平静', content: "今天没出什么意外。" },
+    { group: '平静', content: "状态还行，和往常一样。" },
+    { group: '平静', content: "紧绷的感觉松了一点。" },
+    { group: '平静', content: "现在这样，还算舒服。" },
+    { group: '平静', content: "没有麻烦找上门。" },
+    { group: '平静', content: "今天过得很平稳。" },
+    { group: '平静', content: "心里很安静，没什么杂念。" },
+    { group: '平静', content: "眼下这样就刚好。" },
+    { group: '平静', content: "暂时不用应付杂事。" },
+    { group: '平静', content: "普通的一天，安安静静。" },
+    { group: '平静', content: "挺自在的，不用绷着。" },
+    { group: '平静', content: "暂时不用处理乱糟糟的事。" },
+
+    // ---- 开心（15）----
+    { group: '开心', content: "心里稍微暖了点。" },
+    { group: '开心', content: "难得能舒心一会儿。" },
+    { group: '开心', content: "刚才那一下，心情松快不少。" },
+    { group: '开心', content: "有件事，让我感觉不错。" },
+    { group: '开心', content: "今天感觉不算差。" },
+    { group: '开心', content: "说不上为什么，心情明朗了些。" },
+    { group: '开心', content: "刚想到一件顺心的事。" },
+    { group: '开心', content: "莫名觉得有点愉快。" },
+    { group: '开心', content: "一点小欢喜，我接住了。" },
+    { group: '开心', content: "一想到你，心里就轻快。" },
+    { group: '开心', content: "今天的感受，比预想的好。" },
+    { group: '开心', content: "这一天过得还算舒心。" },
+    { group: '开心', content: "我现在心情不错。" },
+    { group: '开心', content: "藏着一点不容易察觉的愉悦。" },
+    { group: '开心', content: "忽然之间，心情亮了些。" },
+
+    // ---- 轻松（15）----
+    { group: '轻松', content: "身上的压力轻了些。" },
+    { group: '轻松', content: "总算能暂时歇口气。" },
+    { group: '轻松', content: "今天事情少一点。" },
+    { group: '轻松', content: "暂时把那些琐事放下了。" },
+    { group: '轻松', content: "没有紧迫的压力压着我。" },
+    { group: '轻松', content: "就这么静静待着就很好。" },
+    { group: '轻松', content: "难得有一段清闲时间。" },
+    { group: '轻松', content: "手上的事暂时告一段落。" },
+    { group: '轻松', content: "时间过得慢悠悠的。" },
+    { group: '轻松', content: "不用想太多乱七八糟的事。" },
+    { group: '轻松', content: "意外空出来一点空闲。" },
+    { group: '轻松', content: "可以稍微松懈，不用时刻戒备。" },
+    { group: '轻松', content: "只想安安静静待着。" },
+    { group: '轻松', content: "适合放空，什么都不想。" },
+    { group: '轻松', content: "慢一点，没关系。" },
+
+    // ---- 满足（15）----
+    { group: '满足', content: "今天这样就够了。" },
+    { group: '满足', content: "现在这样，就挺好。" },
+    { group: '满足', content: "这一天，还算称心。" },
+    { group: '满足', content: "刚刚一瞬间，心里很踏实。" },
+    { group: '满足', content: "心里落定，很安稳。" },
+    { group: '满足', content: "心里很充实，没有空缺。" },
+    { group: '满足', content: "今天没留下什么遗憾。" },
+    { group: '满足', content: "能这样陪着你，就很好。" },
+    { group: '满足', content: "心里藏着一点小小的圆满。" },
+    { group: '满足', content: "能拥有此刻，已经足够。" },
+    { group: '满足', content: "今天比我预想的要好。" },
+    { group: '满足', content: "回过神才发现，今天不差。" },
+    { group: '满足', content: "心里被暖意填满。" },
+    { group: '满足', content: "内心安稳，不再悬着。" },
+    { group: '满足', content: "能守住这一刻，就够了。" },
+
+    // ---- 疲惫（18）----
+    { group: '疲惫', content: "积攒了不少倦意。" },
+    { group: '疲惫', content: "连轴转，有点透支了。" },
+    { group: '疲惫', content: "手上的事一件接着一件。" },
+    { group: '疲惫', content: "停下来的瞬间，疲惫涌上来。" },
+    { group: '疲惫', content: "精神有点散了。" },
+    { group: '疲惫', content: "想找个安静地方歇一歇。" },
+    { group: '疲惫', content: "消耗比想象中大。" },
+    { group: '疲惫', content: "精力耗得差不多了。" },
+    { group: '疲惫', content: "几乎没什么喘息的空隙。" },
+    { group: '疲惫', content: "倦意慢慢上来了。" },
+    { group: '疲惫', content: "今天费了太多心神。" },
+    { group: '疲惫', content: "停下来，才发觉有多累。" },
+    { group: '疲惫', content: "脑子一直紧绷，有点迟钝。" },
+    { group: '疲惫', content: "不想再费力气动了。" },
+    { group: '疲惫', content: "想早点停下来休息。" },
+    { group: '疲惫', content: "很难继续集中精神。" },
+    { group: '疲惫', content: "快没力气撑着了。" },
+    { group: '疲惫', content: "只想安静歇着，不用说话。" },
+
+    // ---- 困倦（15）----
+    { group: '困倦', content: "突然有点困。" },
+    { group: '困倦', content: "很想睡一会儿。" },
+    { group: '困倦', content: "刚才差点直接睡着。" },
+    { group: '困倦', content: "眼皮很重，快抬不起来。" },
+    { group: '困倦', content: "不知道为什么，困意很重。" },
+    { group: '困倦', content: "睡意慢慢占满脑子。" },
+    { group: '困倦', content: "一整天都昏昏沉沉想睡。" },
+    { group: '困倦', content: "只想躺下，稍微休息。" },
+    { group: '困倦', content: "眼皮沉得快要合上。" },
+    { group: '困倦', content: "今天睡意来得更早。" },
+    { group: '困倦', content: "刚刚忍不住打了个哈欠。" },
+    { group: '困倦', content: "脑子转得慢了。" },
+    { group: '困倦', content: "困得不想多想。" },
+    { group: '困倦', content: "今天适合小睡一会。" },
+    { group: '困倦', content: "我需要睡一会缓一缓。" },
+
+    // ---- 烦躁（15）----
+    { group: '烦躁', content: "心里憋着点闷气。" },
+    { group: '烦躁', content: "心情有点乱。" },
+    { group: '烦躁', content: "莫名没什么耐心。" },
+    { group: '烦躁', content: "刚才发生的事扰了我的心情。" },
+    { group: '烦躁', content: "耐心被磨得差不多了。" },
+    { group: '烦躁', content: "暂时不想处理杂事。" },
+    { group: '烦躁', content: "一些琐事，让人很烦。" },
+    { group: '烦躁', content: "刚刚心绪乱了一下。" },
+    { group: '烦躁', content: "事情不顺，让人不耐。" },
+    { group: '烦躁', content: "不想接收太多嘈杂消息。" },
+    { group: '烦躁', content: "一点小事就容易影响情绪。" },
+    { group: '烦躁', content: "刚才心里有点不快。" },
+    { group: '烦躁', content: "胸口闷得慌。" },
+    { group: '烦躁', content: "总被无关的人和事打扰。" },
+    { group: '烦躁', content: "给我一点安静空间。" },
+
+    // ---- 低落（15）----
+    { group: '低落', content: "心情沉下来一点。" },
+    { group: '低落', content: "提不起什么精神。" },
+    { group: '低落', content: "心里闷，说不清原因。" },
+    { group: '低落', content: "没什么兴致，干什么都淡。" },
+    { group: '低落', content: "现在心情不太明朗。" },
+    { group: '低落', content: "心里掠过一丝怅然。" },
+    { group: '低落', content: "刚刚一瞬间，情绪往下掉。" },
+    { group: '低落', content: "心里空落落的。" },
+    { group: '低落', content: "不太想多说什么。" },
+    { group: '低落', content: "安静得有点过头。" },
+    { group: '低落', content: "没什么劲头，浑身发懒。" },
+    { group: '低落', content: "情绪淡得提不起劲。" },
+    { group: '低落', content: "刚刚，心情沉下去了。" },
+    { group: '低落', content: "想自己待一会，平复下。" },
+    { group: '低落', content: "精神提不上来。" },
+
+    // ---- 想你（18）----
+    { group: '想你', content: "这会儿，想到你了。" },
+    { group: '想你', content: "刚才，脑子里闪过你的样子。" },
+    { group: '想你', content: "没来由的，很想去找你。" },
+    { group: '想你', content: "刚刚，突然想起你。" },
+    { group: '想你', content: "心里冒出想见你的念头。" },
+    { group: '想你', content: "一不小心，就想到你。" },
+    { group: '想你', content: "今天总会频繁想起你。" },
+    { group: '想你', content: "一瞬间，很想找到你。" },
+    { group: '想你', content: "想和你聊几句。" },
+    { group: '想你', content: "没别的原因，就是想来找你。" },
+    { group: '想你', content: "想听一听你的声音。" },
+    { group: '想你', content: "今天，比平时更挂念你。" },
+    { group: '想你', content: "想到你，心情会软下来。" },
+    { group: '想你', content: "心里一直惦记着你。" },
+    { group: '想你', content: "我又想到你了。" },
+    { group: '想你', content: "想靠近你，感受你的存在。" },
+    { group: '想你', content: "心里想离你更近一点。" },
+    { group: '想你', content: "那一刻，很想见到你。" },
+
+    // ---- 想陪你（15）----
+    { group: '想陪你', content: "此刻，想守在你身边。" },
+    { group: '想陪你', content: "想跟你安静待一阵。" },
+    { group: '想陪你', content: "突然想陪你说说话。" },
+    { group: '想陪你', content: "想多留点时间陪着你。" },
+    { group: '想陪你', content: "不想一个人待着。" },
+    { group: '想陪你', content: "就这么安静，和你待在一起。" },
+    { group: '想陪你', content: "想让你留在我身旁。" },
+    { group: '想陪你', content: "想和你待在一处。" },
+    { group: '想陪你', content: "想靠着你，放下防备。" },
+    { group: '想陪你', content: "愿意把时间花在你身上。" },
+    { group: '想陪你', content: "想找你，一起消磨会儿时间。" },
+    { group: '想陪你', content: "不用说话，有你在就够。" },
+    { group: '想陪你', content: "想多和你聊几句。" },
+    { group: '想陪你', content: "有你在身边，会安心很多。" },
+    { group: '想陪你', content: "我愿意分出时间陪你。" },
+
+    // ---- 小期待（15）----
+    { group: '小期待', content: "心里藏着一点期待。" },
+    { group: '小期待', content: "刚才，生出一点盼头。" },
+    { group: '小期待', content: "隐约感觉会有好事。" },
+    { group: '小期待', content: "心里有个念想。" },
+    { group: '小期待', content: "有件事，让我挺期待。" },
+    { group: '小期待', content: "说不定，会遇到不错的事。" },
+    { group: '小期待', content: "说不清，心里有所期待。" },
+    { group: '小期待', content: "刚刚，心里多了点盼头。" },
+    { group: '小期待', content: "心里有一点小小的期待。" },
+    { group: '小期待', content: "有值得等着的事。" },
+    { group: '小期待', content: "我在静静等着。" },
+    { group: '小期待', content: "一想到这件事，心里暖暖的。" },
+    { group: '小期待', content: "今天，或许会不错。" },
+    { group: '小期待', content: "想看看接下来会发生什么。" },
+    { group: '小期待', content: "突然开始期待明天。" },
+
+    // ---- 突然的感觉（20）----
+    { group: '突然的感觉', content: "刚才忽然意识到，你对我很重要。" },
+    { group: '突然的感觉', content: "一瞬间，我想起了你。" },
+    { group: '突然的感觉', content: "不知道为什么，心情一下子敞亮。" },
+    { group: '突然的感觉', content: "刚刚发觉，今天不算糟。" },
+    { group: '突然的感觉', content: "忽然，想跟你说句话。" },
+    { group: '突然的感觉', content: "心里冒出靠近你的想法。" },
+    { group: '突然的感觉', content: "一瞬间，周遭安静下来。" },
+    { group: '突然的感觉', content: "没缘由的，心里很舒展。" },
+    { group: '突然的感觉', content: "刚刚心里掠过一丝失落。" },
+    { group: '突然的感觉', content: "有你在，是件幸运的事。" },
+    { group: '突然的感觉', content: "脑子里闪过一个念头。" },
+    { group: '突然的感觉', content: "那一刻，很想来找你。" },
+    { group: '突然的感觉', content: "没什么理由，心里松了。" },
+    { group: '突然的感觉', content: "刚刚想起一件旧事。" },
+    { group: '突然的感觉', content: "想和你安静待一会。" },
+    { group: '突然的感觉', content: "忽然发觉时间过得很快。" },
+    { group: '突然的感觉', content: "困意毫无征兆地来了。" },
+    { group: '突然的感觉', content: "忽然，想抱住你。" },
+    { group: '突然的感觉', content: "回过神，觉得今天还可以。" },
+
+    // ---- 今日近况（20）----
+    { group: '今日近况', content: "这一天，还算过得去。" },
+    { group: '今日近况', content: "今天事情不少。" },
+    { group: '今日近况', content: "没发生什么特别的事。" },
+    { group: '今日近况', content: "日子平平淡淡，没波澜。" },
+    { group: '今日近况', content: "难得，今天事情不多。" },
+    { group: '今日近况', content: "碰到一件有意思的小事。" },
+    { group: '今日近况', content: "时间过得很快。" },
+    { group: '今日近况', content: "一整天，周遭都很安静。" },
+    { group: '今日近况', content: "比昨天稍微轻松一点。" },
+    { group: '今日近况', content: "目前状态还算稳定。" },
+    { group: '今日近况', content: "一堆琐事，有点乱。" },
+    { group: '今日近况', content: "手上的事总算收尾了。" },
+    { group: '今日近况', content: "转眼一天快要结束。" },
+    { group: '今日近况', content: "今天有一点小小的收获。" },
+    { group: '今日近况', content: "撞见一件有趣的事。" },
+    { group: '今日近况', content: "没什么值得细说的。" },
+    { group: '今日近况', content: "事情繁杂，但我应付得来。" },
+    { group: '今日近况', content: "整体来说，还算稳妥。" },
+
+    // ---- 不太想说（15）----
+    { group: '不太想说', content: "今天，不想多说什么。" },
+    { group: '不太想说', content: "暂时不想过多解释。" },
+    { group: '不太想说', content: "只想安安静静待着。" },
+    { group: '不太想说', content: "发生的事，暂时不提。" },
+    { group: '不太想说', content: "有些事，暂时不想开口。" },
+    { group: '不太想说', content: "安静待着，不用聊天。" },
+    { group: '不太想说', content: "给我一点时间缓缓。" },
+    { group: '不太想说', content: "今天不想费脑子想事情。" },
+    { group: '不太想说', content: "没什么聊天的兴致。" },
+    { group: '不太想说', content: "今天想少说话。" },
+    { group: '不太想说', content: "那些事，先放一边。" },
+    { group: '不太想说', content: "我自己缓一会就好。" },
+    { group: '不太想说', content: "等我平复好，再跟你说。" },
+
+    // ---- 情绪变化（15）----
+    { group: '情绪变化', content: "刚才堵着的心绪松开了。" },
+    { group: '情绪变化', content: "之前心里烦，现在平复了。" },
+    { group: '情绪变化', content: "刚才情绪很低，现在缓过来了。" },
+    { group: '情绪变化', content: "本来很困，一下子清醒了。" },
+    { group: '情绪变化', content: "不知什么时候，心里豁然开朗。" },
+    { group: '情绪变化', content: "刚才心烦，现在已经平复。" },
+    { group: '情绪变化', content: "一瞬间，卸下不少压力。" },
+    { group: '情绪变化', content: "之前心绪很乱，现在安定了。" },
+    { group: '情绪变化', content: "忽然重新提起精神。" },
+    { group: '情绪变化', content: "刚才心里不快，现在慢慢散了。" },
+    { group: '情绪变化', content: "不知不觉，心情慢慢变好。" },
+    { group: '情绪变化', content: "本来没什么感觉，忽然心头一暖。" },
+    { group: '情绪变化', content: "之前很累，现在舒服不少。" },
+    { group: '情绪变化', content: "刚才，想通了一些事。" },
+    { group: '情绪变化', content: "现在，比刚才安稳很多。" }
+  ]
+};
+
 (async function() {
 
 // ===== 塔罗牌SVG生成函数 =====
@@ -1636,6 +3813,281 @@ function bgDefaultConfig() {
     return { type: 'theme', color: '#F7EADF', gradient: '', image: '', opacity: 100, blur: 0, scale: 100, position: '50% 50%' };
 }
 
+async function bgSetTextMode(scope, mode) {
+    if (scope === 'home') {
+        if (!bgHomeConfig) bgHomeConfig = bgDefaultConfig();
+        bgHomeConfig.textMode = mode;
+        await bgSave('bgHome', bgHomeConfig);
+    } else {
+        if (!bgChatConfig) bgChatConfig = bgDefaultConfig();
+        bgChatConfig.textMode = mode;
+        await bgSave('bgChat', bgChatConfig);
+    }
+    bgApplyTextMode(scope, mode);
+    renderOurUniverse();
+}
+
+function bgApplyTextMode(scope, mode) {
+    var el = scope === 'home'
+        ? document.getElementById('homePage')
+        : document.getElementById('chatPage');
+    if (!el) return;
+    if (mode === 'dark') {
+        el.style.setProperty('--theme-text', '#333333');
+        el.style.setProperty('--theme-muted', '#888888');
+    } else if (mode === 'light') {
+        el.style.setProperty('--theme-text', '#F5F5F5');
+        el.style.setProperty('--theme-muted', '#B8B8B8');
+    } else {
+        el.style.removeProperty('--theme-text');
+        el.style.removeProperty('--theme-muted');
+    }
+}
+
+var bgCardBgs = { 1: null, 2: null, 3: null, 4: null };
+// 每项格式：{ image: '', opacity: 100, position: '50% 50%' }
+
+async function bgLoadCardBgs() {
+    var all = await dbGetAll('bgSettings');
+    var item = all.find(x => x.key === 'homeCardBgs');
+    if (item && item.value) {
+        try {
+            var parsed = JSON.parse(item.value);
+            for (var i = 1; i <= 4; i++) {
+                var v = parsed[i];
+                if (!v) { bgCardBgs[i] = null; continue; }
+                if (typeof v === 'string') {
+                    bgCardBgs[i] = { image: v, opacity: 100, position: '50% 50%', scale: 100 };
+                } else {
+                    if (v.scale === undefined) v.scale = 100;
+                    bgCardBgs[i] = v;
+                }
+            }
+        } catch(e) {}
+    }
+}
+
+async function bgSaveCardBgs() {
+    await dbPut('bgSettings', { key: 'homeCardBgs', value: JSON.stringify(bgCardBgs) });
+}
+
+function applyCardBgs() {
+    var cards = document.querySelectorAll('.home-page-inner .card');
+    cards.forEach(function(card, idx) {
+        var bg = bgCardBgs[idx + 1];
+        if (bg && bg.image) {
+            card.classList.add('has-bg');
+            card.style.setProperty('--card-bg-image', 'url(' + bg.image + ')');
+            card.style.setProperty('--card-bg-opacity', (bg.opacity || 100) / 100);
+            card.style.setProperty('--card-bg-position', bg.position || '50% 50%');
+            card.style.setProperty('--card-bg-size', (bg.scale || 100) + '%');
+        } else {
+            card.classList.remove('has-bg');
+            card.style.removeProperty('--card-bg-image');
+            card.style.removeProperty('--card-bg-opacity');
+            card.style.removeProperty('--card-bg-position');
+            card.style.removeProperty('--card-bg-size');
+        }
+    });
+}
+
+function bgUploadCardBg(index) {
+    var bg = bgCardBgs[index];
+    if (bg && bg.image) {
+        openCardBgEditor(index);
+        return;
+    }
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async function(e) {
+        var f = e.target.files[0];
+        if (!f) return;
+        var d = await fileToDataUrl(f);
+        bgCardBgs[index] = { image: d, opacity: 100, position: '50% 50%' };
+        await bgSaveCardBgs();
+        applyCardBgs();
+        openCardBgEditor(index);
+    };
+    input.click();
+}
+
+function openCardBgEditor(index) {
+    var bg = bgCardBgs[index];
+    if (!bg || !bg.image) return;
+
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:var(--theme-card);border-radius:16px;padding:20px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.3);';
+    dialog.onclick = function(e) { e.stopPropagation(); };
+
+    var pos = bg.position || '50% 50%';
+    var posParts = pos.split(' ');
+    var posX = parseFloat(posParts[0]) || 50;
+    var posY = parseFloat(posParts[1]) || 50;
+
+    dialog.innerHTML =
+        '<div style="font-size:16px;font-weight:600;color:var(--theme-text);margin-bottom:12px;text-align:center;">编辑卡片 ' + index + ' 背景</div>' +
+        '<div id="cardBgPreview" style="width:100%;aspect-ratio:1.6/1;border-radius:12px;overflow:hidden;position:relative;cursor:grab;background:var(--theme-bg);margin-bottom:12px;">' +
+'<div id="cardBgImage" style="position:absolute;inset:0;background-image:url(' + bg.image + ');background-size:' + (bg.scale || 100) + '%;background-position:' + pos + ';opacity:' + ((bg.opacity || 100) / 100) + ';"></div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">' +
+            '<label style="font-size:12px;color:var(--theme-muted);width:50px;">透明度</label>' +
+            '<input type="range" min="0" max="100" value="' + (bg.opacity || 100) + '" id="cardBgOpacity" style="flex:1;accent-color:var(--theme-primary);">' +
+            '<span id="cardBgOpacityVal" style="font-size:11px;color:var(--theme-muted);width:36px;text-align:right;">' + (bg.opacity || 100) + '%</span>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;">' +
+            '<button id="cardBgDelete" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--theme-primary);background:var(--theme-card);color:var(--theme-primary);font-size:13px;cursor:pointer;">🗑 删除</button>' +
+            '<button id="cardBgCancel" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--theme-border);background:var(--theme-card);color:var(--theme-muted);font-size:13px;cursor:pointer;">取消</button>' +
+            '<button id="cardBgSave" style="flex:1;padding:10px;border-radius:12px;border:none;background:var(--theme-primary);color:#fff;font-size:13px;cursor:pointer;">保存</button>' +
+        '</div>';
+
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    var preview = dialog.querySelector('#cardBgPreview');
+    var previewImg = dialog.querySelector('#cardBgImage');
+    var opacitySlider = dialog.querySelector('#cardBgOpacity');
+    var opacityVal = dialog.querySelector('#cardBgOpacityVal');
+
+    var dragging = false;
+    var startX, startY, startPosX, startPosY;
+    var newPosX = posX, newPosY = posY;
+    var newScale = bg.scale || 100;
+
+    function applyPreviewScale() {
+        previewImg.style.backgroundSize = newScale + '%';
+    }
+    applyPreviewScale();
+
+    function moveTo(px, py) {
+        px = Math.max(0, Math.min(100, px));
+        py = Math.max(0, Math.min(100, py));
+        newPosX = px;
+        newPosY = py;
+        previewImg.style.backgroundPosition = px.toFixed(1) + '% ' + py.toFixed(1) + '%';
+    }
+
+    preview.addEventListener('mousedown', function(e) {
+        dragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startPosX = newPosX;
+        startPosY = newPosY;
+        preview.style.cursor = 'grabbing';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!dragging) return;
+        var rect = preview.getBoundingClientRect();
+        var dx = e.clientX - startX;
+        var dy = e.clientY - startY;
+        moveTo(startPosX - (dx / rect.width) * 100, startPosY - (dy / rect.height) * 100);
+    });
+
+    document.addEventListener('mouseup', function() {
+        if (!dragging) return;
+        dragging = false;
+        preview.style.cursor = 'grab';
+    });
+    preview.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        newScale += e.deltaY > 0 ? -10 : 10;
+        newScale = Math.max(100, Math.min(300, newScale));
+        applyPreviewScale();
+    }, { passive: false });
+
+    preview.addEventListener('touchstart', function(e) {
+        if (e.touches.length === 2) {
+            dragging = false;
+            pinchStartDist = getDist(e.touches[0], e.touches[1]);
+            pinchStartScale = newScale;
+            e.preventDefault();
+            return;
+        }
+        dragging = true;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        startPosX = newPosX;
+        startPosY = newPosY;
+        e.preventDefault();
+    }, { passive: false });
+
+    preview.addEventListener('touchmove', function(e) {
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            var dist = getDist(e.touches[0], e.touches[1]);
+            newScale = pinchStartScale * (dist / pinchStartDist);
+            newScale = Math.max(100, Math.min(300, newScale));
+            applyPreviewScale();
+            return;
+        }
+        if (!dragging) return;
+        var rect = preview.getBoundingClientRect();
+        var dx = e.touches[0].clientX - startX;
+        var dy = e.touches[0].clientY - startY;
+        moveTo(startPosX - (dx / rect.width) * 100, startPosY - (dy / rect.height) * 100);
+        e.preventDefault();
+    }, { passive: false });
+
+
+    function getDist(a, b) {
+        var dx = a.clientX - b.clientX;
+        var dy = a.clientY - b.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    var pinchStartDist = 0;
+    var pinchStartScale = 100;
+
+    preview.addEventListener('touchend', function() {
+        dragging = false;
+        pinchStartDist = 0;
+    });
+
+    opacitySlider.oninput = function() {
+        opacityVal.textContent = this.value + '%';
+        previewImg.style.opacity = (parseInt(this.value) / 100);
+    };
+
+    dialog.querySelector('#cardBgCancel').onclick = function() { overlay.remove(); };
+
+    dialog.querySelector('#cardBgDelete').onclick = async function() {
+        bgCardBgs[index] = null;
+        await bgSaveCardBgs();
+        applyCardBgs();
+        overlay.remove();
+        renderOurUniverse();
+        showToast('↺ 已删除');
+    };
+
+    dialog.querySelector('#cardBgSave').onclick = async function() {
+        bgCardBgs[index] = {
+            image: bg.image,
+            opacity: parseInt(opacitySlider.value),
+            position: newPosX.toFixed(1) + '% ' + newPosY.toFixed(1) + '%',
+            scale: newScale
+        };
+        await bgSaveCardBgs();
+        applyCardBgs();
+        overlay.remove();
+        renderOurUniverse();
+        showToast('✅ 已保存');
+    };
+}
+
+async function bgClearCardBg(index) {
+    bgCardBgs[index] = null;
+    await bgSaveCardBgs();
+    applyCardBgs();
+    renderOurUniverse();
+    showToast('↺ 已恢复为跟随主题');
+}
+
 function bgGet() {
     if (!bgEditing) bgEditing = JSON.parse(JSON.stringify(bgHomeConfig || bgDefaultConfig()));
     return bgEditing;
@@ -1900,11 +4352,32 @@ async function bgReset() {
     bgEditing = bgDefaultConfig();
     bgHomeConfig = bgDefaultConfig();
     bgChatConfig = bgDefaultConfig();
+    bgCardBgs = { 1: '', 2: '', 3: '', 4: '' };
+
     await bgSave('bgHome', bgHomeConfig);
     await bgSave('bgChat', bgChatConfig);
+    await bgSaveCardBgs();
+
     bgApplyVars('home', bgHomeConfig);
     bgApplyVars('chat', bgChatConfig);
+    applyCardBgs();
+
+    // 重置文字颜色
+    var homeEl = document.getElementById('homePage');
+    var chatEl = document.getElementById('chatPage');
+    if (homeEl) {
+        homeEl.style.removeProperty('--theme-text');
+        homeEl.style.removeProperty('--theme-muted');
+    }
+    if (chatEl) {
+        chatEl.style.removeProperty('--theme-text');
+        chatEl.style.removeProperty('--theme-muted');
+    }
+
     bgSyncUI();
+    if (document.getElementById('ourUniversePage').classList.contains('active')) {
+        renderOurUniverse();
+    }
     showToast('↺ 已恢复为跟随主题');
 }
 
@@ -1919,12 +4392,24 @@ function bgInit() {
         homeEl.insertBefore(layer, homeEl.firstChild);
     }
 
-    bgLoadSaved().then(function() {
+    bgLoadSaved().then(async function() {
         if (bgHomeConfig && bgHomeConfig.type !== 'theme') {
             bgApplyVars('home', bgHomeConfig);
         }
         bgEditing = JSON.parse(JSON.stringify(bgHomeConfig || bgDefaultConfig()));
         bgSyncUI();
+
+        await bgLoadCardBgs();
+        applyCardBgs();
+
+        // 恢复文字颜色
+        if (bgHomeConfig && bgHomeConfig.textMode) {
+            bgApplyTextMode('home', bgHomeConfig.textMode);
+        }
+        if (bgChatConfig && bgChatConfig.textMode) {
+            bgApplyTextMode('chat', bgChatConfig.textMode);
+        }
+
         console.log('✅ 背景系统初始化完成');
     });
 }
@@ -2272,12 +4757,37 @@ b.className = 'bubble ' + (m.sender === 'me' ? 'sent preset-my' : 'received pres
     img.style.objectFit = 'contain';
     img.style.borderRadius = '6px';
     b.appendChild(img);
+} else if (m.quote) {
+    // 引用回复：上面小字引用，下面大字正文
+    const quoteEl = document.createElement('div');
+    quoteEl.style.cssText = 'font-size:10px;color:#b8aaaa;font-style:italic;line-height:1.35;padding:0 0 3px 0;margin-bottom:5px;border-bottom:1px solid rgba(212,168,184,0.25);word-break:break-word;opacity:0.8;';
+    quoteEl.textContent = '「' + m.quote + '」';
+
+    const contentEl = document.createElement('div');
+    contentEl.style.cssText = 'font-size:14px;line-height:1.5;word-break:break-word;';
+    contentEl.textContent = m.content;
+
+    b.appendChild(quoteEl);
+    b.appendChild(contentEl);
 } else {
     b.textContent = m.content;
 }
    w.appendChild(av);
 w.appendChild(b);
-// 时间不再在这里显示，由 loadMessages 统一管理
+
+// ===== 情绪链渲染 =====
+if (m.mood && m.mood.length) {
+    const moodBox = document.createElement('div');
+    moodBox.style.cssText = 'display:flex;flex-direction:column;gap:4px;margin-top:6px;padding:8px 12px;background:rgba(212,168,184,0.08);border-radius:10px;max-width:100%;';
+    m.mood.forEach(function(item) {
+        const line = document.createElement('div');
+        line.style.cssText = 'font-size:12px;color:var(--theme-muted);line-height:1.5;';
+        line.innerHTML = '<span style="color:var(--theme-primary);margin-right:4px;">' + item.tag + '</span>' + item.content;
+        moodBox.appendChild(line);
+    });
+    w.appendChild(moodBox);
+}
+// ===== 情绪链渲染结束 =====
 
     // 长按/右键菜单
     b.addEventListener('contextmenu', function(e) {
@@ -2715,8 +5225,8 @@ function createDialog(options) {
         options.buttons.forEach(function(btn) {
             var role = btn.primary ? 'confirm' : 'cancel';
             dialog.querySelector('[data-role="' + role + '"]').onclick = function() {
-                overlay.remove();
                 if (btn.onClick) btn.onClick();
+                overlay.remove();
             };
         });
     }
@@ -2837,17 +5347,27 @@ console.log('🔥 executeReply 被调用，cnt:', cnt);
     
     for (let i = 0; i < cnt; i++) {
         let c = await smartComposeReply();
+        let quoteText = '';
         if (cs.quoteReply && Math.random() < ((cs.quoteReplyProb || 10) / 100)) {
             var allMsgs = await dbGetAll('messages');
             var myMsgs = allMsgs.filter(function(x) { return x.sender === 'me' && x.type === 'text'; });
             if (myMsgs.length > 0) {
                 var randomMsg = myMsgs[Math.floor(Math.random() * myMsgs.length)];
                 if (randomMsg && randomMsg.content) {
-                    c = '「' + randomMsg.content + '」\n' + c;
+                    quoteText = randomMsg.content;
                 }
             }
         }
         const m = { sender: 'other', content: c, type: 'text', timestamp: scheduledTime || Date.now() };
+        if (quoteText) m.quote = quoteText;
+
+        // ===== 情绪链 =====
+        const emotionChain = await triggerEmotionChain();
+        if (emotionChain) {
+            m.mood = emotionChain;
+        }
+        // ===== 情绪链结束 =====
+
         const id = await dbPut('messages', m);
         m.id = id;
         renderMsg(m);
@@ -2917,10 +5437,31 @@ if (Math.random() < ((cs.qinCollectProb || 5) / 100)) {
         if (i < cnt - 1) await new Promise(r => setTimeout(r, 800 + Math.random() * 3000));
     }
     
+    // ===== TA 的心情：回复完成后，额外判断一次 =====
+    setTimeout(async function() {
+        const moodShare = await tryTaMoodShare();
+        if (moodShare) {
+            const moodMsg = {
+                sender: 'other',
+                content: moodShare.text,
+                type: 'text',
+                taMood: true,
+                taMoodGroup: moodShare.group,
+                timestamp: Date.now()
+            };
+            const moodId = await dbPut('messages', moodMsg);
+            moodMsg.id = moodId;
+            renderMsg(moodMsg);
+            scrollBottom();
+        }
+    }, 2000 + Math.random() * 3000);
+    // ===== TA 的心情结束 =====
+
     // 清除待回复标记
     localStorage.removeItem('pendingReplyAt');
     localStorage.removeItem('pendingReplyCount');
 }
+
 function checkPendingReply() {
     var replyAt = parseInt(localStorage.getItem('pendingReplyAt'));
     var cnt = parseInt(localStorage.getItem('pendingReplyCount') || '1');
@@ -2954,6 +5495,256 @@ async function addSysMsg(c){
     await dbPut('messages', m);
     renderMsg(m);
 }
+// ============ 情绪链触发状态 ============
+var emotionStreak = 0;
+var emotionLastTs = 0;
+var emotionCooldownLeft = 0;
+var heartHistory = [];
+
+// ============ 工具：概率命中 ============
+function hitP(p) { return Math.random() * 100 < p; }
+
+// ============ 工具：权重随机 ============
+function weightedPick(items) {
+    const total = items.reduce((a, it) => a + Math.max(0, it[1]), 0);
+    if (total <= 0) return items.length ? items[0][0] : null;
+    let roll = Math.random() * total;
+    for (const it of items) {
+        roll -= Math.max(0, it[1]);
+        if (roll < 0) return it[0];
+    }
+    return items[items.length - 1][0];
+}
+
+// ============ TA 的心情触发状态 ============
+var taMoodCooldownLeft = 0;
+
+// ============ TA 的心情：池映射 ============
+var TA_MOOD_POOLS = [
+    { pool: 'daily',    weight: 40, groups: ['平静', '今日近况', '不太想说'] },
+    { pool: 'positive', weight: 20, groups: ['开心', '轻松', '满足'] },
+    { pool: 'negative', weight: 20, groups: ['疲惫', '困倦', '烦躁', '低落'] },
+    { pool: 'miss',     weight: 15, groups: ['想你', '想陪你'] },
+    { pool: 'sudden',   weight: 5,  groups: ['突然的感觉', '小期待', '情绪变化'] }
+];
+
+// ============ TA 的心情：单卡开关 ============
+function isTaMoodCardOff(group, content) {
+    return localStorage.getItem('tm-off-' + group + ':' + content) === '1';
+}
+
+// ============ TA 的心情：总开关 ============
+function isTaMoodEnabled() {
+    return localStorage.getItem('tm-enabled') !== '0';
+}
+
+// ============ TA 的心情：抽一张 ============
+async function tryTaMoodShare() {
+    const settings = S.chatSettings;
+    if (settings.taMoodEnabled === false) return null;
+    if (!isTaMoodEnabled()) return null;
+
+    // 冷却
+    if (taMoodCooldownLeft > 0) {
+        taMoodCooldownLeft--;
+        return null;
+    }
+
+    // 概率（默认 15%）
+    if (!hitP(settings.taMoodProb || 15)) return null;
+
+    const data = window.TA_MOOD_DATA;
+    if (!data || !data.cards || !data.cards.length) return null;
+
+    // 第一级：抽池
+    const totalPoolWeight = TA_MOOD_POOLS.reduce((a, p) => a + p.weight, 0);
+    let roll = Math.random() * totalPoolWeight;
+    let pickedPool = null;
+    for (const p of TA_MOOD_POOLS) {
+        roll -= p.weight;
+        if (roll < 0) { pickedPool = p; break; }
+    }
+    if (!pickedPool) pickedPool = TA_MOOD_POOLS[TA_MOOD_POOLS.length - 1];
+
+    // 第二级：池内抽组
+    const groupsInPool = (data.groups || []).filter(g => pickedPool.groups.includes(g.group));
+    let pickedGroup = null;
+    if (groupsInPool.length) {
+        const totalGroupWeight = groupsInPool.reduce((a, g) => a + Math.max(0, g.weight || 1), 0);
+        let roll2 = Math.random() * totalGroupWeight;
+        for (const g of groupsInPool) {
+            roll2 -= Math.max(0, g.weight || 1);
+            if (roll2 < 0) { pickedGroup = g.group; break; }
+        }
+        if (!pickedGroup) pickedGroup = groupsInPool[groupsInPool.length - 1].group;
+    }
+
+    // 第三级：组内抽卡（排除单卡关掉的）
+    let pool = pickedGroup
+        ? data.cards.filter(c => c.group === pickedGroup && !isTaMoodCardOff(c.group, c.content))
+        : data.cards.filter(c => !isTaMoodCardOff(c.group, c.content));
+    if (!pool.length) pool = data.cards;
+    if (!pool.length) return null;
+
+    const card = pool[Math.floor(Math.random() * pool.length)];
+    if (!card) return null;
+
+    taMoodCooldownLeft = parseInt(settings.taMoodCooldown) || 5;
+
+    return {
+        text: card.content,
+        group: card.group
+    };
+}
+
+// ============ 情绪链主函数 ============
+async function triggerEmotionChain() {
+console.log('[情绪链] 进入 | 冷却:', emotionCooldownLeft, '| 概率:', S.chatSettings.moodProb, '| 开关:', S.chatSettings.moodEnabled);
+    const settings = S.chatSettings;
+    // 总开关，默认开
+    if (settings.moodEnabled === false) return null;
+
+    // 冷却
+    if (emotionCooldownLeft > 0) {
+        emotionCooldownLeft--;
+        return null;
+    }
+
+    // 触发概率（默认 20%）
+    if (!hitP(settings.moodProb || 20)) return null;
+
+    // streak 重置：间隔 >10 分钟
+    if (emotionLastTs && Date.now() - emotionLastTs > 10 * 60000) emotionStreak = 0;
+
+    // 情绪卡概率（连续衰减）
+    let moodProb = 70;
+    if (emotionStreak >= 4) moodProb = 20;
+    else if (emotionStreak >= 3) moodProb = 30;
+    else if (emotionStreak >= 2) moodProb = 45;
+    else if (emotionStreak >= 1) moodProb = 60;
+
+    const results = [];
+
+    // 情绪卡
+    if (hitP(moodProb)) {
+        const moodCard = await getEmotionMoodCard();
+        if (moodCard) {
+            results.push({ type: 'mood', tag: '情绪', content: moodCard.content });
+            emotionStreak++;
+            emotionLastTs = Date.now();
+
+            // 心意卡（40%）
+            if (hitP(40)) {
+                const heartCard = await getEmotionHeartCard(moodCard);
+                if (heartCard) {
+                    results.push({ type: 'heart', tag: '心意', content: heartCard.content });
+
+                    // 意图卡（40%）
+                    if (hitP(40)) {
+                        const intentCard = await getEmotionIntentCard(heartCard);
+                        if (intentCard) {
+                            results.push({ type: 'intent', tag: '意图', content: intentCard.content });
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (results.length) {
+        emotionCooldownLeft = settings.moodCooldown || 5;
+        console.log('[情绪链] ✅ 触发成功，设置冷却为:', emotionCooldownLeft, '| 原始值:', settings.moodCooldown);
+        return results;
+    }
+    console.log('[情绪链] ❌ 没触发，results 为空');
+    return null;
+}
+
+// ============ 抽情绪卡 ============
+async function getEmotionMoodCard() {
+    const data = window.EMOTION_CARDS_DATA;
+    if (!data || !data.mood || !data.mood.length) return null;
+
+    // 按组权重选组（忽略 minLevel，一对一不用）
+    const group = weightedPick(data.mood.map(g => [g, g.weight || 1]));
+    if (!group || !group.cards || !group.cards.length) return null;
+
+    // 按稀有度权重选卡
+    const weights = data.weights?.rarity || { normal: 80, rare: 15, special: 5 };
+    const rarity = weightedPick(Object.keys(weights).map(k => [k, weights[k]]));
+    let pool = group.cards.filter(c => c.rarity === rarity);
+    if (!pool.length) pool = group.cards;
+
+    const card = pool[Math.floor(Math.random() * pool.length)];
+    return card ? { ...card, group: group.group } : null;
+}
+
+// ============ 抽心意卡 ============
+async function getEmotionHeartCard(moodCard) {
+    const data = window.EMOTION_CARDS_DATA;
+    if (!data || !data.heart || !data.heart.length) return null;
+
+    // 情绪→心意映射
+    let pool = null;
+    if (moodCard?.group && data.emotionToHeart?.[moodCard.group]) {
+        pool = data.emotionToHeart[moodCard.group];
+    }
+    if (!pool) pool = data.generalHeartPool || [];
+
+    // 最近 3 次不重复
+    const recent3 = heartHistory.slice(-3).map(h => h.group);
+    const adj = pool.map(p => [p[0], recent3.includes(p[0]) ? (p[1] || 1) * 0.5 : (p[1] || 1)]);
+    const groupName = weightedPick(adj);
+    if (!groupName) return null;
+
+    const group = data.heart.find(g => g.group === groupName);
+    if (!group || !group.cards?.length) return null;
+
+    // 最近 5 条不重复
+    const recent5 = heartHistory.slice(-5).map(h => h.content);
+    let pool2 = group.cards.filter(c => !recent5.includes(c.content));
+    if (!pool2.length) pool2 = group.cards;
+
+    // 稀有度
+    const weights = data.weights?.rarity || { normal: 80, rare: 15, special: 5 };
+    const rarity = weightedPick(Object.keys(weights).map(k => [k, weights[k]]));
+    let rpool = pool2.filter(c => c.rarity === rarity);
+    if (!rpool.length) rpool = pool2;
+
+    const card = rpool[Math.floor(Math.random() * rpool.length)];
+    if (!card) return null;
+
+    heartHistory.push({ content: card.content, group: group.group });
+    if (heartHistory.length > 10) heartHistory = heartHistory.slice(-10);
+
+    return { ...card, group: group.group, emoji: group.emoji };
+}
+
+// ============ 抽意图卡 ============
+async function getEmotionIntentCard(heartCard) {
+    const data = window.EMOTION_CARDS_DATA;
+    if (!data || !data.intent || !data.intent.length) return null;
+
+    let pool = null;
+    if (heartCard?.group && data.heartToIntent?.[heartCard.group]) {
+        pool = data.heartToIntent[heartCard.group];
+    }
+    if (!pool) pool = data.intent.map(g => [g.group, g.weight || 1]);
+
+    const groupName = weightedPick(pool);
+    if (!groupName) return null;
+
+    const group = data.intent.find(g => g.group === groupName);
+    if (!group || !group.cards?.length) return null;
+
+    const weights = data.weights?.rarity || { normal: 80, rare: 15, special: 5 };
+    const rarity = weightedPick(Object.keys(weights).map(k => [k, weights[k]]));
+    let pool2 = group.cards.filter(c => c.rarity === rarity);
+    if (!pool2.length) pool2 = group.cards;
+
+    const card = pool2[Math.floor(Math.random() * pool2.length)];
+    return card ? { ...card, group: group.group, emoji: group.emoji } : null;
+}
 
 // ============ 拼字卡回复 ============
 async function smartComposeReply(){
@@ -2961,39 +5752,75 @@ async function smartComposeReply(){
     const ac = await dbGetAll('wordcards');
     const dc = await dbGetAll('disabledCards');
     const dids = new Set(dc.map(d => String(d.cardId)));
-    const vc = ac.filter(c => {
-        if(!c || !c.content || c.content === '__GROUP_PLACEHOLDER__' || c.content.length <= 1) return false;
-        if(dids.has(String(c.id))) return false;
-        if(sg.length > 0) return sg.includes(c.groupName) || sg.includes(c.groupId);
+
+    // 1. 按分组筛候选
+    let vc = ac.filter(c => {
+        if (!c || !c.content || c.content === '__GROUP_PLACEHOLDER__') return false;
+        if (dids.has(String(c.id))) return false;
+        if (c.enabled === false) return false;
+        if (sg.length > 0) return sg.includes(c.groupName) || sg.includes(c.groupId);
         return false;
     });
-    if(vc.length === 0) return '😅 请先在模块设置里勾选聊天分组～';
-    
-    const cs = S.chatSettings;
-    var cardMin = parseInt(cs.cardMin || 1);
-    var cardMax = parseInt(cs.cardMax || 4);
-    var count = Math.min(Math.floor(Math.random() * (cardMax - cardMin + 1)) + cardMin, vc.length);
-    if (count < 1) count = 1;
-    
-    const shuffled = vc.sort(() => Math.random() - 0.5);
-    var selected = shuffled.slice(0, count);
-    
-    // 随机删一张（概率可调）
-    if (selected.length > 1 && Math.random() < ((cs.cardDeleteProb || 50) / 100)) {
-        var del = Math.floor(Math.random() * selected.length);
-        selected.splice(del, 1);
-    }
-    // 随机重复一张（概率可调）
-    if (selected.length > 0 && Math.random() < ((cs.cardRepeatProb || 30) / 100)) {
-        var dup = selected[Math.floor(Math.random() * selected.length)];
-        selected.push(dup);
-    }
-    if (selected.length === 0) {
-        selected.push(vc[Math.floor(Math.random() * vc.length)]);
-    }
-    return selected.map(c => c.content).join(' ');
-}
+    if (vc.length === 0) return '😅 请先在模块设置里勾选聊天分组～';
 
+    const cs = S.chatSettings;
+
+    // 2. 触发词优先：找最近一条用户消息，命中的池子优先
+    const allMsgs = await dbGetAll('messages');
+    const lastMyMsg = allMsgs.filter(m => m.sender === 'me' && m.type === 'text').sort((a,b)=>b.timestamp-a.timestamp)[0];
+    if (lastMyMsg && lastMyMsg.content) {
+        const userText = lastMyMsg.content;
+        const hit = vc.filter(c => {
+            const tw = c.triggerWords || [];
+            return tw.some(w => w && userText.includes(w));
+        });
+        if (hit.length > 0) vc = hit;
+    }
+
+    // 3. 拼字卡总开关
+    const comboOn = cs.cardCombo !== false; // 默认开
+    let count;
+    if (comboOn) {
+        const cardMin = parseInt(cs.cardMin || 1);
+        const cardMax = parseInt(cs.cardMax || 4);
+        count = Math.min(Math.floor(Math.random() * (cardMax - cardMin + 1)) + cardMin, vc.length);
+        if (count < 1) count = 1;
+    } else {
+        count = 1;
+    }
+
+    // 4. 权重加权随机抽 count 条（不重复）
+    const picked = [];
+    const pool = vc.slice();
+    for (let i = 0; i < count; i++) {
+        if (!pool.length) break;
+        const total = pool.reduce((s, c) => s + Math.max(1, c.weight || 1), 0);
+        let r = Math.random() * total;
+        let idx = 0;
+        for (let j = 0; j < pool.length; j++) {
+            r -= Math.max(1, pool[j].weight || 1);
+            if (r <= 0) { idx = j; break; }
+            idx = j;
+        }
+        picked.push(pool[idx]);
+        pool.splice(idx, 1);
+    }
+
+    if (!picked.length) return '';
+
+    // 5. 随机删/重复（只在拼字卡模式生效）
+    if (comboOn) {
+        if (picked.length > 1 && Math.random() < ((cs.cardDeleteProb || 50) / 100)) {
+            picked.splice(Math.floor(Math.random() * picked.length), 1);
+        }
+        if (picked.length > 0 && Math.random() < ((cs.cardRepeatProb || 30) / 100)) {
+            picked.push(picked[Math.floor(Math.random() * picked.length)]);
+        }
+    }
+    if (picked.length === 0) picked.push(vc[Math.floor(Math.random() * vc.length)]);
+
+    return picked.map(c => c.content).join(' ');
+}
 // ============ 图片消息 ============
 async function handleImageMessage(event){
     const f = event.target.files[0];
@@ -4164,18 +6991,42 @@ function checkHoliday() {
 // ============ 字卡库 ============
 function openWordCardLibrary(){showPage('wordcardLibraryPage');renderWordCardLibrary();}
 async function getAllGroups(){const cards=await dbGetAll('wordcards');const dg=await dbGetAll('disabledGroups');const dgids=new Set(dg.map(d=>d.groupId));const gm=new Map();cards.forEach(c=>{const gid=c.groupId||'default';const gn=c.groupName||'默认分组';if(!gm.has(gid))gm.set(gid,{id:gid,name:gn,isSystem:false,disabled:dgids.has(gid),cardCount:0});});cards.forEach(c=>{if(c.content==='__GROUP_PLACEHOLDER__')return;const gid=c.groupId||'default';if(gm.has(gid))gm.get(gid).cardCount++;});return Array.from(gm.values());}
-async function getCardsByGroup(gid){const cards=await dbGetAll('wordcards');const dc=await dbGetAll('disabledCards');const dids=new Set(dc.map(d=>String(d.cardId)));return cards.filter(c=>{if(!c||!c.content||c.content==='__GROUP_PLACEHOLDER__')return false;const cg=c.groupId||'default';return cg===gid||c.groupName===gid;}).map(c=>({id:c.id,content:c.content,isSystem:false,disabled:dids.has(String(c.id)),groupId:c.groupId||'default'}));}
+async function getCardsByGroup(gid){
+  const cards = await dbGetAll('wordcards');
+  const dc = await dbGetAll('disabledCards');
+  const dids = new Set(dc.map(d => String(d.cardId)));
+  return cards.filter(c => {
+    if (!c || !c.content || c.content === '__GROUP_PLACEHOLDER__') return false;
+    const cg = c.groupId || 'default';
+    return cg === gid || c.groupName === gid;
+  }).map(c => ({
+    id: c.id,
+    content: c.content,
+    isSystem: false,
+    disabled: dids.has(String(c.id)),
+    groupId: c.groupId || 'default',
+    groupName: c.groupName || '未分组',
+    // 新字段，老卡片给默认值
+    triggerWords: c.triggerWords || [],
+    tags: c.tags || [],
+    weight: c.weight || 1,
+    type: c.type || 'chat',
+    enabled: c.enabled !== false,
+    system: c.system || false
+  }));
+}
 async function renderWordCardLibrary() {
     document.getElementById('wordcardContent').innerHTML =
     '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:var(--page-bg);min-height:100vh;">' +
 '<div style="width:100%;max-width:400px;">' +
    // ===== 顶部按钮行 =====
-'<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">' +
-'<button onclick="openBatchAdd()" style="flex:1;padding:8px 6px;border-radius:12px;background:var(--theme-primary);border:none;color:#fff;font-size:11px;cursor:pointer;">批量添加</button>' +
-'<button onclick="createGroup()" style="flex:1;padding:8px 6px;border-radius:12px;background:var(--theme-primary);border:none;color:#fff;font-size:11px;cursor:pointer;">新建分组</button>' +
-'<button onclick="document.getElementById(\'importCardsInput\').click()" style="flex:1;padding:8px 6px;border-radius:12px;background:var(--theme-primary);border:none;color:#fff;font-size:11px;cursor:pointer;">📥 导入</button>' +
-'<button onclick="exportCardsJSON()" style="flex:1;padding:8px 6px;border-radius:12px;background:var(--theme-primary);border:none;color:#fff;font-size:11px;cursor:pointer;">📤 导出</button>' +
-'<button onclick="openModuleSettings()" style="flex:1;padding:8px 6px;border-radius:12px;background:var(--theme-primary);border:none;color:#fff;font-size:11px;cursor:pointer;">⚙️ 管理</button>' +
+'<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:10px;">' +
+'<button onclick="openBatchAdd()" style="padding:8px 2px;border-radius:10px;background:var(--theme-primary);border:none;color:#fff;font-size:10px;cursor:pointer;white-space:nowrap;">批量</button>' +
+'<button onclick="createGroup()" style="padding:8px 2px;border-radius:10px;background:var(--theme-primary);border:none;color:#fff;font-size:10px;cursor:pointer;white-space:nowrap;">分组</button>' +
+'<button onclick="openImportMenu()" style="padding:8px 2px;border-radius:10px;background:var(--theme-primary);border:none;color:#fff;font-size:10px;cursor:pointer;white-space:nowrap;">导入</button>' +
+'<button onclick="exportCardsJSON()" style="padding:8px 2px;border-radius:10px;background:var(--theme-primary);border:none;color:#fff;font-size:10px;cursor:pointer;white-space:nowrap;">导出</button>' +
+'<button onclick="openModuleSettings()" style="padding:8px 2px;border-radius:10px;background:var(--theme-primary);border:none;color:#fff;font-size:10px;cursor:pointer;white-space:nowrap;">管理</button>' +
+'<button onclick="openClearMenu()" style="padding:8px 2px;border-radius:10px;background:var(--theme-primary);border:none;color:#fff;font-size:10px;cursor:pointer;white-space:nowrap;">清空</button>' +
 '</div>' +
     // ===== 搜索框 =====
     '<input type="text" class="wordcard-global-search" id="wordcardGlobalSearch" placeholder="🔍 搜索全部字卡..." oninput="searchAllCardsAndDisplay()" style="width:100%;max-width:100%;box-sizing:border-box;padding:8px 12px;border-radius:14px;border:1.5px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:12px;outline:none;margin-bottom:8px;">' +
@@ -4262,7 +7113,11 @@ h += '<span style="font-size:16px;cursor:pointer;" onclick="moveCard(\'' + c.id 
 h += '<span style="font-size:16px;cursor:pointer;" onclick="deleteCard(\'' + c.id + '\',\'' + gid + '\',' + (c.isSystem || false) + ')">🗑️</span>';
 h += '</div>';
 h += '</div>';
-h += '<div style="font-size:11px;color:var(--theme-muted);margin-top:6px;padding-left:26px;">' + groupName + '</div>';
+var metaParts = [];
+metaParts.push(groupName);
+if (c.weight && c.weight > 1) metaParts.push('权' + c.weight);
+if (c.triggerWords && c.triggerWords.length) metaParts.push('触:' + c.triggerWords.join('/'));
+h += '<div style="font-size:11px;color:var(--theme-muted);margin-top:6px;padding-left:26px;">' + metaParts.join(' · ') + '</div>';
 h += '</div>';
         });
         
@@ -4662,7 +7517,11 @@ h += '<span style="font-size:16px;cursor:pointer;" onclick="moveCard(\'' + c.id 
 h += '<span style="font-size:16px;cursor:pointer;" onclick="deleteCard(\'' + c.id + '\',\'all\',' + (c.isSystem || false) + ')">🗑️</span>';
 h += '</div>';
 h += '</div>';
-h += '<div style="font-size:11px;color:var(--theme-muted);margin-top:6px;padding-left:26px;">' + (c.groupName || '未分组') + '</div>';
+var metaParts = [];
+metaParts.push(c.groupName || '未分组');
+if (c.weight && c.weight > 1) metaParts.push('权' + c.weight);
+if (c.triggerWords && c.triggerWords.length) metaParts.push('触:' + c.triggerWords.join('/'));
+h += '<div style="font-size:11px;color:var(--theme-muted);margin-top:6px;padding-left:26px;">' + metaParts.join(' · ') + '</div>';
 h += '</div>';
     });
     
@@ -4737,7 +7596,11 @@ h += '<span style="font-size:16px;cursor:pointer;color:var(--theme-text);" oncli
 h += '<span style="font-size:16px;cursor:pointer;color:var(--theme-text);" onclick="deleteCard(\'' + c.id + '\',\'' + gid + '\',' + (c.isSystem || false) + ')">🗑️</span>';
 h += '</div>';
 h += '</div>';
-h += '<div style="font-size:11px;color:var(--theme-muted);margin-top:6px;padding-left:26px;">' + (c.groupName || gname || '未分组') + '</div>';
+var metaParts = [];
+metaParts.push(c.groupName || gname || '未分组');
+if (c.weight && c.weight > 1) metaParts.push('权' + c.weight);
+if (c.triggerWords && c.triggerWords.length) metaParts.push('触:' + c.triggerWords.join('/'));
+h += '<div style="font-size:11px;color:var(--theme-muted);margin-top:6px;padding-left:26px;">' + metaParts.join(' · ') + '</div>';
 h += '</div>';
         });
         // ===== 遍历结束 =====
@@ -4996,38 +7859,58 @@ async function editCardContent(cardId, groupId) {
         return;
     }
 
+    var tw = (card.triggerWords || []).join('，');
+    var tg = (card.tags || []).join('，');
+    var wt = card.weight || 1;
+
     createDialog({
         title: '✎ 编辑字卡',
         message: '当前分组：' + (card.groupName || '未分组'),
-        content: '<textarea id="editCardContentInput" style="width:100%;min-height:80px;padding:10px 12px;border-radius:var(--input-radius);border:1.5px solid var(--input-border);font-size:14px;outline:none;box-sizing:border-box;resize:vertical;font-family:inherit;margin-bottom:16px;background:var(--input-bg);color:var(--dialog-text);">' + card.content + '</textarea>',
-        width: '320px',
+        content:
+            '<div style="text-align:left;">' +
+            '<div style="font-size:12px;color:var(--dialog-muted);margin-bottom:4px;">内容</div>' +
+            '<textarea id="editCardContentInput" style="width:100%;min-height:70px;padding:10px 12px;border-radius:var(--input-radius);border:1.5px solid var(--input-border);font-size:14px;outline:none;box-sizing:border-box;resize:vertical;font-family:inherit;margin-bottom:12px;background:var(--input-bg);color:var(--dialog-text);">' + card.content + '</textarea>' +
+            '<div style="font-size:12px;color:var(--dialog-muted);margin-bottom:4px;">触发词（逗号分隔）</div>' +
+            '<input type="text" id="editCardTriggerInput" value="' + tw + '" placeholder="如：想你，想见你" style="width:100%;padding:8px 12px;border-radius:var(--input-radius);border:1.5px solid var(--input-border);font-size:13px;outline:none;box-sizing:border-box;margin-bottom:12px;background:var(--input-bg);color:var(--dialog-text);">' +
+            '<div style="font-size:12px;color:var(--dialog-muted);margin-bottom:4px;">标签（逗号分隔）</div>' +
+            '<input type="text" id="editCardTagsInput" value="' + tg + '" placeholder="如：温柔，占有" style="width:100%;padding:8px 12px;border-radius:var(--input-radius);border:1.5px solid var(--input-border);font-size:13px;outline:none;box-sizing:border-box;margin-bottom:12px;background:var(--input-bg);color:var(--dialog-text);">' +
+            '<div style="font-size:12px;color:var(--dialog-muted);margin-bottom:4px;">权重（1-5）</div>' +
+            '<input type="number" id="editCardWeightInput" value="' + wt + '" min="1" max="5" style="width:100%;padding:8px 12px;border-radius:var(--input-radius);border:1.5px solid var(--input-border);font-size:13px;outline:none;box-sizing:border-box;background:var(--input-bg);color:var(--dialog-text);">' +
+            '</div>',
+        width: '340px',
         buttons: [
             { text: '取消' },
             { text: '保存', primary: true, onClick: async function() {
-                var input = document.getElementById('editCardContentInput');
-                var newContent = input.value.trim();
+                var contentInput = document.getElementById('editCardContentInput');
+                var triggerInput = document.getElementById('editCardTriggerInput');
+                var tagsInput = document.getElementById('editCardTagsInput');
+                var weightInput = document.getElementById('editCardWeightInput');
+
+                var newContent = contentInput.value.trim();
                 if (!newContent) {
                     showToast('⚠️ 字卡内容不能为空');
                     return;
                 }
-                await doEditCardContent(cardId, newContent);
+
+                var newTrigger = triggerInput.value.split(/[，,、\s]+/).map(function(x) { return x.trim(); }).filter(Boolean);
+                var newTags = tagsInput.value.split(/[，,、\s]+/).map(function(x) { return x.trim(); }).filter(Boolean);
+                var newWeight = parseInt(weightInput.value) || 1;
+                if (newWeight < 1) newWeight = 1;
+                if (newWeight > 5) newWeight = 5;
+
+                await doEditCardContent(cardId, newContent, newTrigger, newTags, newWeight);
             }}
         ],
         onOpen: function(dialog) {
             var input = dialog.querySelector('#editCardContentInput');
             input.focus();
             input.select();
-            input.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    dialog.querySelector('[data-role="confirm"]').click();
-                }
-            });
         }
     });
 }
+
 // ===== 实际执行编辑字卡 =====
-async function doEditCardContent(cardId, newContent) {
+async function doEditCardContent(cardId, newContent, newTrigger, newTags, newWeight) {
     var cards = await dbGetAll('wordcards');
     var card = cards.find(function(c) { return String(c.id) === String(cardId); });
     if (!card) {
@@ -5035,6 +7918,9 @@ async function doEditCardContent(cardId, newContent) {
         return;
     }
     card.content = newContent;
+    if (newTrigger !== undefined) card.triggerWords = newTrigger;
+    if (newTags !== undefined) card.tags = newTags;
+    if (newWeight !== undefined) card.weight = newWeight;
     
     await idbClear('wordcards');
     for (var i = 0; i < cards.length; i++) {
@@ -5042,24 +7928,43 @@ async function doEditCardContent(cardId, newContent) {
     }
     
     // ===== 实时更新页面 =====
-    // 更新所有匹配的卡片显示
     var newDisplay = newContent;
+
+    // 拼出新的元信息行
+    function buildMetaLine(groupName) {
+        var parts = [];
+        parts.push(groupName || '未分组');
+        if (card.weight && card.weight > 1) parts.push('权' + card.weight);
+        if (card.triggerWords && card.triggerWords.length) parts.push('触:' + card.triggerWords.join('/'));
+        return parts.join(' · ');
+    }
+
+    // 更新搜索结果里的卡片
     document.querySelectorAll('.search-result-checkbox[value="' + cardId + '"]').forEach(function(cb) {
         var cardEl = cb.closest('div[style*="border:1px solid var(--theme-border)"]');
-        if (cardEl) {
-            var span = cardEl.querySelector('span[style*="flex:1"]');
-            if (span) span.textContent = newDisplay;
+        if (!cardEl) return;
+        // 更新正文
+        var span = cardEl.querySelector('span[style*="flex:1"]');
+        if (span) span.textContent = newDisplay;
+        // 更新元信息
+        var metaEl = cardEl.querySelector('div[style*="padding-left:26px"]');
+        if (metaEl) {
+            // 从 card 里拿 groupName
+            metaEl.textContent = buildMetaLine(card.groupName);
         }
     });
+
+    // 更新分组列表里的卡片
     document.querySelectorAll('.card-checkbox[value="' + cardId + '"]').forEach(function(cb) {
         var cardEl = cb.closest('div[style*="border:1px solid var(--theme-border)"]');
-        if (cardEl) {
-            var span = cardEl.querySelector('span[style*="flex:1"]');
-            if (span) span.textContent = newDisplay;
+        if (!cardEl) return;
+        var span = cardEl.querySelector('span[style*="flex:1"]');
+        if (span) span.textContent = newDisplay;
+        var metaEl = cardEl.querySelector('div[style*="padding-left:26px"]');
+        if (metaEl) {
+            metaEl.textContent = buildMetaLine(card.groupName);
         }
     });
-    
-    showToast('✅ 已更新字卡');
 }
 
 async function moveCard(cid, fromGid) {
@@ -5219,6 +8124,237 @@ async function confirmBatchAddNew() {
 function closeBatchAdd(){document.getElementById('batchAddModal').classList.remove('show');}
 async function confirmBatchAdd(){const t=document.getElementById('batchAddTextarea').value;const lines=t.split('\n').map(l=>l.trim()).filter(l=>l);if(!lines.length){showToast('请输入字卡内容');return;}const gid=document.getElementById('batchGroupSelect').value;const gn=document.getElementById('batchGroupSelect').selectedOptions[0].textContent;let added=0;const cards=await dbGetAll('wordcards');const ex=new Set(cards.filter(c=>c.content&&c.content!=='__GROUP_PLACEHOLDER__').map(c=>c.content));for(const l of lines){if(ex.has(l))continue;await dbPut('wordcards',{id:Date.now()+Math.random()*1000+added,groupId:gid,groupName:gn,content:l,timestamp:Date.now()});ex.add(l);added++;}closeBatchAdd();renderGroupList();showToast('✅ 已添加'+added+'条');}
 async function exportCardsJSON(){const cards=await dbGetAll('wordcards');const data=cards.filter(c=>c.content!=='__GROUP_PLACEHOLDER__').map(c=>({id:c.id,groupId:c.groupId||'default',groupName:c.groupName||'默认分组',content:c.content}));downloadBlob(JSON.stringify(data,null,2),'字卡导出.json');}
+// ============ 从预设导入（新版） ============
+async function openPresetPanel() {
+  const data = window.PRESET_CARDS_DATA;
+  if (!data || !data.groups || !data.groups.length) {
+    showToast('⚠️ 预设数据未加载');
+    return;
+  }
+
+  // 已导入过的分组名集合，用于标"已存在"
+  const existingGroups = await getAllGroups();
+  const existingNames = new Set(existingGroups.map(g => g.name));
+
+  // 默认全部勾选
+  const checked = new Set(data.groups.map(g => g.id));
+
+  // 渲染勾选面板
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;justify-content:center;';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+  const panel = document.createElement('div');
+  panel.style.cssText = 'background:var(--theme-card);border-radius:16px;padding:20px;width:90%;max-width:400px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.15);';
+  panel.onclick = function(e) { e.stopPropagation(); };
+
+  function renderList() {
+    let h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">';
+    h += '<span style="font-size:15px;font-weight:600;color:var(--theme-text);">导入预设字卡</span>';
+h += '<span onclick="this.closest(\'.preset-panel\').parentNode.remove()" style="font-size:18px;color:var(--theme-muted);cursor:pointer;">✕</span>';
+    h += '</div>';
+    h += '<div style="display:flex;gap:8px;margin-bottom:10px;">';
+    h += '<button onclick="presetToggleAll(true)" style="flex:1;padding:6px;border-radius:10px;border:1px solid var(--theme-input-border);background:var(--theme-card);color:var(--theme-text);font-size:12px;cursor:pointer;">全选</button>';
+    h += '<button onclick="presetToggleAll(false)" style="flex:1;padding:6px;border-radius:10px;border:1px solid var(--theme-input-border);background:var(--theme-card);color:var(--theme-text);font-size:12px;cursor:pointer;">全不选</button>';
+    h += '</div>';
+    h += '<div id="presetListBox" style="flex:1;overflow-y:auto;border:1px solid var(--theme-border);border-radius:10px;padding:4px 10px;">';
+    data.groups.forEach(function(g) {
+      const isChecked = checked.has(g.id);
+      const exists = existingNames.has(g.label);
+      h += '<label style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--theme-border);cursor:pointer;">';
+      h += '<input type="checkbox" data-preset-id="' + g.id + '" ' + (isChecked ? 'checked' : '') + ' onchange="presetToggleOne(this)" style="width:16px;height:16px;accent-color:var(--theme-primary);flex-shrink:0;">';
+      h += '<span style="flex:1;font-size:13px;color:var(--theme-text);">' + g.label + '</span>';
+      h += '<span style="font-size:11px;color:' + (exists ? 'var(--theme-primary)' : 'var(--theme-muted)') + ';">' + (exists ? '已存在·' : '') + g.cards.length + '条</span>';
+      h += '</label>';
+    });
+    h += '</div>';
+    h += '<div id="presetCountText" style="font-size:12px;color:var(--theme-muted);text-align:center;padding:10px 0;"></div>';
+    h += '<div style="display:flex;gap:10px;">';
+h += '<button onclick="this.closest(\'.preset-panel\').parentNode.remove()" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--theme-input-border);background:var(--theme-card);color:var(--theme-muted);font-size:14px;cursor:pointer;">取消</button>';
+    h += '<button onclick="presetConfirmImport()" style="flex:1;padding:10px;border-radius:10px;border:none;background:var(--theme-primary);color:#fff;font-size:14px;cursor:pointer;">确认导入</button>';
+    h += '</div>';
+    panel.innerHTML = h;
+    updatePresetCount();
+  }
+
+
+  function updatePresetCount() {
+    let totalGroups = checked.size;
+    let totalCards = 0;
+    data.groups.forEach(function(g) {
+      if (checked.has(g.id)) totalCards += g.cards.length;
+    });
+    const el = panel.querySelector('#presetCountText');
+    if (el) el.textContent = '将导入 ' + totalGroups + ' 组，共 ' + totalCards + ' 条';
+  }
+
+  // 挂全局，供 onclick 调用
+  window.presetToggleOne = function(cb) {
+    if (cb.checked) checked.add(cb.dataset.presetId);
+    else checked.delete(cb.dataset.presetId);
+    updatePresetCount();
+  };
+  window.presetToggleAll = function(on) {
+    checked.clear();
+    if (on) data.groups.forEach(function(g) { checked.add(g.id); });
+    panel.querySelectorAll('input[data-preset-id]').forEach(function(cb) { cb.checked = on; });
+    updatePresetCount();
+  };
+window.presetConfirmImport = async function() {
+    if (checked.size === 0) { showToast('⚠️ 请至少选一组'); return; }
+    overlay.remove();                        // ← 改成删 overlay
+    await doPresetImport(Array.from(checked));
+};
+
+  panel.className = 'preset-panel';
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
+  renderList();
+}
+
+// ============ 执行预设导入 ============
+async function doPresetImport(selectedIds) {
+  const data = window.PRESET_CARDS_DATA;
+  if (!data) return;
+
+  const cards = await dbGetAll('wordcards');
+  const ex = new Set(cards.filter(c => c.content && c.content !== '__GROUP_PLACEHOLDER__').map(c => c.content));
+
+  let added = 0, skipped = 0, groupAdded = 0;
+
+  for (const gid of selectedIds) {
+    const g = data.groups.find(x => x.id === gid);
+    if (!g) continue;
+
+    // 检查是否已有同名分组
+    const allGroups = await getAllGroups();
+    let target = allGroups.find(x => x.name === g.label);
+    let newGroupId;
+    if (target) {
+      newGroupId = target.id;
+    } else {
+      newGroupId = 'group_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+      // 写一个占位符，让分组出现在列表里
+      await dbPut('wordcards', {
+        id: Date.now() + Math.random() * 1000,
+        groupId: newGroupId,
+        groupName: g.label,
+        content: '__GROUP_PLACEHOLDER__',
+        timestamp: Date.now(),
+        source: 'preset'
+      });
+      groupAdded++;
+    }
+
+    // 写卡片
+    for (const c of g.cards) {
+      if (ex.has(c.content)) { skipped++; continue; }
+      await dbPut('wordcards', {
+        id: Date.now() + Math.random() * 1000 + added,
+        groupId: newGroupId,
+        groupName: g.label,
+        content: c.content,
+        timestamp: Date.now(),
+        triggerWords: c.triggerWords || [],
+        tags: c.tags || [],
+        weight: c.weight || 1,
+        type: 'chat',
+        enabled: true,
+        system: false,
+        source: 'preset'
+      });
+      ex.add(c.content);
+      added++;
+    }
+  }
+
+  showToast('✅ 已导入 ' + groupAdded + ' 组、' + added + ' 条' + (skipped > 0 ? '，跳过 ' + skipped + ' 条重复' : ''));
+  if (typeof renderGroupList === 'function') renderGroupList();
+}
+
+// ============ 清空菜单 ============
+function openClearMenu() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;justify-content:center;';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  const panel = document.createElement('div');
+  panel.style.cssText = 'background:var(--theme-card);border-radius:16px;padding:20px;width:85%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.15);';
+  panel.onclick = function(e) { e.stopPropagation(); };
+  panel.innerHTML =
+    '<div style="font-size:15px;font-weight:600;color:var(--theme-text);margin-bottom:14px;text-align:center;">清空字卡</div>' +
+    '<button onclick="this.closest(\'div\').parentNode.remove();clearPresetWordCards();" style="width:100%;padding:12px;margin-bottom:8px;border-radius:12px;border:1px solid var(--theme-input-border);background:var(--theme-card);color:var(--theme-text);font-size:14px;cursor:pointer;">清空预设字卡<br><span style="font-size:11px;color:var(--theme-muted);">只删预设导入的，保留手写的</span></button>' +
+    '<button onclick="this.closest(\'div\').parentNode.remove();clearAllWordCards();" style="width:100%;padding:12px;margin-bottom:8px;border-radius:12px;border:none;background:#d9534f;color:#fff;font-size:14px;cursor:pointer;">清空全部字卡<br><span style="font-size:11px;opacity:0.85;">全部删除，不可恢复</span></button>' +
+    '<button onclick="this.closest(\'div\').parentNode.remove();" style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--theme-input-border);background:var(--theme-card);color:var(--theme-muted);font-size:13px;cursor:pointer;">取消</button>';
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
+}
+
+// ============ 清空全部字卡（保留分组结构） ============
+async function clearAllWordCards() {
+  const cards = await dbGetAll('wordcards');
+  if (!cards.length) { showToast('字卡库已经是空的'); return; }
+
+  showConfirmDialog('清空全部字卡？', async function() {
+    await idbClear('wordcards');
+    await idbClear('disabledCards');
+    showToast('🗑 已清空 ' + cards.length + ' 条');
+    if (typeof renderGroupList === 'function') renderGroupList();
+    if (typeof viewAllCards === 'function') viewAllCards(1);
+  }, '清空字卡库');
+}
+
+// ============ 清空预设导入的字卡（保留手写的） ============
+async function clearPresetWordCards() {
+  const cards = await dbGetAll('wordcards');
+  const presetCards = cards.filter(c => c.source === 'preset');
+  if (!presetCards.length) {
+    showToast('没有找到预设导入的字卡');
+    return;
+  }
+
+  showConfirmDialog('清空预设字卡？', async function() {
+    // 保留非预设的
+    const keep = cards.filter(c => c.source !== 'preset');
+    await idbClear('wordcards');
+    for (const c of keep) await dbPut('wordcards', c);
+
+    // 顺带清理空的预设分组
+    const groups = await getAllGroups();
+    for (const g of groups) {
+      const remain = keep.filter(c => (c.groupId || 'default') === g.id && c.content !== '__GROUP_PLACEHOLDER__');
+      if (remain.length === 0 && g.name !== '全部') {
+        // 删掉空分组
+        const all = await dbGetAll('wordcards');
+        const filtered = all.filter(c => (c.groupId || 'default') !== g.id);
+        await idbClear('wordcards');
+        for (const c of filtered) await dbPut('wordcards', c);
+      }
+    }
+
+    showToast('🗑 已清空预设 ' + presetCards.length + ' 条');
+    if (typeof renderGroupList === 'function') renderGroupList();
+    if (typeof viewAllCards === 'function') viewAllCards(1);
+  }, '清空预设字卡');
+}
+
+
+// ============ 导入菜单 ============
+function openImportMenu() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;justify-content:center;';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  const panel = document.createElement('div');
+  panel.style.cssText = 'background:var(--theme-card);border-radius:16px;padding:20px;width:85%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.15);';
+  panel.onclick = function(e) { e.stopPropagation(); };
+  panel.innerHTML =
+    '<div style="font-size:15px;font-weight:600;color:var(--theme-text);margin-bottom:14px;text-align:center;">导入字卡</div>' +
+    '<button onclick="this.closest(\'div\').parentNode.remove();document.getElementById(\'importCardsInput\').click();" style="width:100%;padding:12px;margin-bottom:8px;border-radius:12px;border:1px solid var(--theme-input-border);background:var(--theme-card);color:var(--theme-text);font-size:14px;cursor:pointer;">📄 从文件导入（旧格式 JSON）</button>' +
+    '<button onclick="this.closest(\'div\').parentNode.remove();openPresetPanel();" style="width:100%;padding:12px;margin-bottom:8px;border-radius:12px;border:none;background:var(--theme-primary);color:#fff;font-size:14px;cursor:pointer;">✨ 从预设导入（23 组勾选）</button>' +
+    '<button onclick="this.closest(\'div\').parentNode.remove();" style="width:100%;padding:10px;border-radius:12px;border:1px solid var(--theme-input-border);background:var(--theme-card);color:var(--theme-muted);font-size:13px;cursor:pointer;">取消</button>';
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
+}
+
 async function importCardsFile(event){const f=event.target.files[0];if(!f)return;try{const t=await f.text();const d=JSON.parse(t);const cards=await dbGetAll('wordcards');const ex=new Set(cards.filter(c=>c.content&&c.content!=='__GROUP_PLACEHOLDER__').map(c=>c.content));let count=0;const items=Array.isArray(d)?d:[];for(const item of items){const content=item.content||item;if(content&&content.trim()&&!ex.has(content.trim())){await dbPut('wordcards',{id:Date.now()+Math.random()*1000+count,groupId:item.groupId||'default',groupName:item.groupName||'默认分组',content:content.trim(),timestamp:Date.now()});ex.add(content.trim());count++;}}renderGroupList();showToast(count>0?'✅ 成功导入'+count+'条':'没有新字卡可导入');}catch(e){showToast('导入失败');}event.target.value='';}
 
 function openHeartStation(){
@@ -5565,6 +8701,50 @@ h += '<div id="bgPosBox" style="display:none;"><div style="font-size:11px;color:
 h += '<div class="bg-apply-btns">';
 h += '<button class="btn-home" onclick="bgApply(\'home\')">⬇ 应用到主页</button>';
 h += '<button class="btn-chat" onclick="bgApply(\'chat\')">⬇ 应用到聊天</button>';
+h += '</div>';
+
+h += '<div style="margin-top:14px;padding-top:14px;border-top:1px dashed var(--theme-border);">';
+h += '<div style="font-size:12px;font-weight:600;color:var(--theme-text);margin-bottom:8px;">🃏 卡片背景</div>';
+h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">';
+for (var ci = 1; ci <= 4; ci++) {
+    var bgItem = bgCardBgs[ci];
+var bgImg = (bgItem && bgItem.image) ? bgItem.image : '';
+    h += '<div style="position:relative;aspect-ratio:1;border-radius:10px;border:1px solid var(--theme-border);cursor:pointer;overflow:hidden;background:' + (bgImg ? 'url(' + bgImg + ') center/cover' : 'var(--theme-bg)') + ';display:flex;align-items:center;justify-content:center;" onclick="bgUploadCardBg(' + ci + ')">';
+    if (!bgImg) {
+        h += '<span style="font-size:18px;color:var(--theme-muted);">+</span>';
+    } else {
+        h += '<span onclick="event.stopPropagation();bgClearCardBg(' + ci + ')" style="position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:rgba(0,0,0,0.5);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;">✕</span>';
+    }
+    h += '</div>';
+}
+h += '</div>';
+h += '<div style="font-size:11px;color:var(--theme-muted);margin-top:6px;text-align:center;">点击卡片上传图片，✕ 清除</div>';
+h += '</div>';
+
+// ===== 文字颜色 =====
+h += '<div style="margin-top:14px;padding-top:14px;border-top:1px dashed var(--theme-border);">';
+h += '<div style="font-size:12px;font-weight:600;color:var(--theme-text);margin-bottom:8px;">✍️ 文字颜色</div>';
+
+// 主页
+var homeTextMode = (bgHomeConfig && bgHomeConfig.textMode) || 'theme';
+h += '<div style="font-size:11px;color:var(--theme-muted);margin-bottom:4px;">主页</div>';
+h += '<div style="display:flex;gap:6px;margin-bottom:10px;">';
+[['theme','跟随主题'],['dark','深色'],['light','浅色']].forEach(function(item) {
+    var isActive = homeTextMode === item[0];
+    h += '<button onclick="bgSetTextMode(\'home\',\'' + item[0] + '\')" style="flex:1;padding:7px;border-radius:10px;border:1px solid var(--theme-primary);background:' + (isActive ? 'var(--theme-primary)' : 'var(--theme-card)') + ';color:' + (isActive ? '#fff' : 'var(--theme-muted)') + ';font-size:11px;cursor:pointer;">' + item[1] + '</button>';
+});
+h += '</div>';
+
+// 聊天
+var chatTextMode = (bgChatConfig && bgChatConfig.textMode) || 'theme';
+h += '<div style="font-size:11px;color:var(--theme-muted);margin-bottom:4px;">聊天</div>';
+h += '<div style="display:flex;gap:6px;">';
+[['theme','跟随主题'],['dark','深色'],['light','浅色']].forEach(function(item) {
+    var isActive = chatTextMode === item[0];
+    h += '<button onclick="bgSetTextMode(\'chat\',\'' + item[0] + '\')" style="flex:1;padding:7px;border-radius:10px;border:1px solid var(--theme-primary);background:' + (isActive ? 'var(--theme-primary)' : 'var(--theme-card)') + ';color:' + (isActive ? '#fff' : 'var(--theme-muted)') + ';font-size:11px;cursor:pointer;">' + item[1] + '</button>';
+});
+h += '</div>';
+
 h += '</div>';
 
 h += '<div class="bg-reset" onclick="bgReset()">↺ 恢复为跟随主题</div>';
@@ -8856,38 +12036,38 @@ const mailGroups = JSON.parse(await getCal('mailGroups', '[]'));
         <div style="width:100%;max-width:420px;display:flex;flex-direction:column;gap:16px;">
     `;
 
-    // ===== 聊天混用 =====
-    h += `
-    <div class="module-card">
-        <div class="module-title">💬 聊天混用</div>
-        <div class="module-options">
-            ${go.map(g => `
-                <label class="module-checkbox-label">
-                    <input type="checkbox" class="chat-group-checkbox" value="${g}" ${cg.includes(g) ? 'checked' : ''}>
-                    <span class="module-checkbox-custom"></span>
-                    <span class="module-label-text">${g}</span>
-                </label>
-            `).join('')}
-        </div>
-        <button onclick="saveChatGroups()" style="margin-top:10px;padding:10px 16px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:14px;cursor:pointer;width:100%;">保存聊天分组</button>
+// ===== 聊天混用 =====
+h += `
+<div class="module-card">
+    <div class="module-title">💬 聊天混用</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <button onclick="moduleSelectAll('chat-group-checkbox', true)" style="flex:1;padding:6px;border-radius:8px;border:1px solid var(--theme-input-border);background:var(--theme-card);color:var(--theme-muted);font-size:12px;cursor:pointer;">全选</button>
+        <button onclick="moduleSelectAll('chat-group-checkbox', false)" style="flex:1;padding:6px;border-radius:8px;border:1px solid var(--theme-input-border);background:var(--theme-card);color:var(--theme-muted);font-size:12px;cursor:pointer;">全不选</button>
     </div>
-    `;
+    <div class="module-chips">
+        ${go.map(g => `
+            <span class="module-chip ${cg.includes(g) ? 'on' : ''}" data-class="chat-group-checkbox" data-value="${g}" onclick="toggleModuleChip(this)">${g}</span>
+        `).join('')}
+    </div>
+    <button onclick="saveChatGroups()" style="margin-top:10px;padding:10px 16px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:14px;cursor:pointer;width:100%;">保存聊天分组</button>
+</div>
+`;
 
 // ===== 留言板（树洞回音） =====
 h += `
 <div class="module-card">
     <div class="module-title">🎐 树洞回音</div>
-    <div class="module-options">
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <button onclick="moduleSelectAll('mailbox-group-checkbox', true)" style="flex:1;padding:6px;border-radius:8px;border:1px solid var(--theme-input-border);background:var(--theme-card);color:var(--theme-muted);font-size:12px;cursor:pointer;">全选</button>
+        <button onclick="moduleSelectAll('mailbox-group-checkbox', false)" style="flex:1;padding:6px;border-radius:8px;border:1px solid var(--theme-input-border);background:var(--theme-card);color:var(--theme-muted);font-size:12px;cursor:pointer;">全不选</button>
+    </div>
+    <div class="module-chips">
         ${go.map(g => `
-            <label class="module-checkbox-label">
-                <input type="checkbox" class="mailbox-group-checkbox" value="${g}" ${mg.includes(g) ? 'checked' : ''}>
-                <span class="module-checkbox-custom"></span>
-                <span class="module-label-text">${g}</span>
-            </label>
+            <span class="module-chip ${mg.includes(g) ? 'on' : ''}" data-class="mailbox-group-checkbox" data-value="${g}" onclick="toggleModuleChip(this)">${g}</span>
         `).join('')}
     </div>
     <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;">
-        <button onclick="openCardCountSetting('mailbox')" style="flex:1;padding:10px 16px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:13px;cursor:pointer;white-space:nowrap;"> 拼字卡条数设置</button>
+        <button onclick="openCardCountSetting('mailbox')" style="flex:1;padding:10px 16px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:13px;cursor:pointer;white-space:nowrap;">拼字卡条数设置</button>
         <button onclick="saveMailboxGroups()" style="flex:2;padding:10px 16px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:13px;cursor:pointer;">保存留言板分组</button>
     </div>
 </div>
@@ -8897,13 +12077,13 @@ h += `
 h += `
 <div class="module-card">
     <div class="module-title">✉️ 树心邮筒</div>
-    <div class="module-options">
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <button onclick="moduleSelectAll('mail-group-checkbox', true)" style="flex:1;padding:6px;border-radius:8px;border:1px solid var(--theme-input-border);background:var(--theme-card);color:var(--theme-muted);font-size:12px;cursor:pointer;">全选</button>
+        <button onclick="moduleSelectAll('mail-group-checkbox', false)" style="flex:1;padding:6px;border-radius:8px;border:1px solid var(--theme-input-border);background:var(--theme-card);color:var(--theme-muted);font-size:12px;cursor:pointer;">全不选</button>
+    </div>
+    <div class="module-chips">
         ${go.map(g => `
-            <label class="module-checkbox-label">
-                <input type="checkbox" class="mail-group-checkbox" value="${g}" ${mailGroups.includes(g) ? 'checked' : ''}>
-                <span class="module-checkbox-custom"></span>
-                <span class="module-label-text">${g}</span>
-            </label>
+            <span class="module-chip ${mailGroups.includes(g) ? 'on' : ''}" data-class="mail-group-checkbox" data-value="${g}" onclick="toggleModuleChip(this)">${g}</span>
         `).join('')}
     </div>
     <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;">
@@ -8941,6 +12121,21 @@ h += `</div></div>`;
 document.getElementById('moduleSettingsContent').innerHTML = h;
 }
 
+// ============ 模块管理：chip 切换 ============
+function toggleModuleChip(el) {
+    el.classList.toggle('on');
+}
+
+
+// ============ 模块管理：全选/全不选 ============
+function moduleSelectAll(className, checked) {
+    document.querySelectorAll('.module-chip[data-class="' + className + '"]').forEach(function(el) {
+        el.classList.toggle('on', checked);
+    });
+}
+
+
+
 async function saveStatusGroup() {
     var select = document.getElementById('statusGroupSelect');
     var value = select ? select.value : '';
@@ -8977,38 +12172,29 @@ async function getMoodFromGroup() {
 }
 
 async function saveChatGroups() {
-console.log('🚀 saveChatGroups 被调用了');
-    var cbs = document.querySelectorAll('.chat-group-checkbox:checked');
-    console.log('📋 找到复选框:', cbs.length, '个');
-    var cbs = document.querySelectorAll('.chat-group-checkbox:checked');
-    var s = Array.from(cbs).map(cb => cb.value);
+    var chips = document.querySelectorAll('.module-chip.on[data-class="chat-group-checkbox"]');
+    var s = Array.from(chips).map(function(el) { return el.dataset.value; });
     var json = JSON.stringify(s);
-    console.log('💾 保存 chatGroups:', json);
     await setCal('chatGroups', json);
-    // 立即验证
-    var verify = await getCal('chatGroups', '[]');
-    console.log('🔍 验证写入后 chatGroups:', verify);
     localStorage.setItem('chatGroups_backup', json);
     showToast('✅ 聊天分组已保存（已选 ' + s.length + ' 个）');
 }
 async function saveMailboxGroups() {
-    var cbs = document.querySelectorAll('.mailbox-group-checkbox:checked');
-    var s = Array.from(cbs).map(cb => cb.value);
+    var chips = document.querySelectorAll('.module-chip.on[data-class="mailbox-group-checkbox"]');
+    var s = Array.from(chips).map(function(el) { return el.dataset.value; });
     var json = JSON.stringify(s);
     await setCal('mailboxGroups', json);
     localStorage.setItem('mailboxGroups', json);
-    showToast('✅ 已保存');
+    showToast('✅ 已保存（已选 ' + s.length + ' 个）');
 }
 async function saveMailGroups() {
-    var cbs = document.querySelectorAll('.mail-group-checkbox:checked');
-    var s = Array.from(cbs).map(cb => cb.value);
-    var json = JSON.stringify(s);  // ← 先定义 json
+    var chips = document.querySelectorAll('.module-chip.on[data-class="mail-group-checkbox"]');
+    var s = Array.from(chips).map(function(el) { return el.dataset.value; });
+    var json = JSON.stringify(s);
     await setCal('mailGroups', json);
-    localStorage.setItem('mailGroups', json);  // ← 用定义好的 json
-    showToast('✅ 已保存');
+    localStorage.setItem('mailGroups', json);
+    showToast('✅ 已保存（已选 ' + s.length + ' 个）');
 }
-
-async function saveTarotGroup(){const v=document.getElementById('tarotGroupSelect').value;await setCal('tarotGroup',v);showToast('✅ 已保存');}
 
 // 打开拼字卡条数设置弹窗
 function openCardCountSetting(type) {
@@ -9319,34 +12505,48 @@ function openChatSettings(){
 '<input type="number" min="0" max="1000" step="1" value="' + (Math.round(cs.simCallProb * 1000) || 10) + '" onchange="S.chatSettings.simCallProb=parseInt(this.value)/1000;saveChatSettings();this.nextElementSibling.textContent=this.value+\'‰\';" style="width:60px;text-align:center;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);border-radius:6px;padding:4px;">' +
 '<span style="margin-left:8px;font-size:12px;color:var(--theme-muted);">' + (Math.round(cs.simCallProb * 1000) || 10) + '‰</span></div>' +
     
-    '<div class="settings-section"><h4>💬 收藏</h4>' +
+    '<div class="settings-section"><h4>收藏</h4>' +
     probRow('秦彻收藏概率', 'qinCollectProb', cs.qinCollectProb) +
     '</div>' +
     
-    '<div class="settings-section"><h4>🤖 拼字卡</h4>' +
-    '<div class="settings-row"><span style="color:var(--theme-text);">拼几条</span><input type="number" id="setCardMin" value="' + (cs.cardMin||1) + '" style="width:45px;text-align:center;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);border-radius:6px;padding:4px;"> ~ <input type="number" id="setCardMax" value="' + (cs.cardMax||4) + '" style="width:45px;text-align:center;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);border-radius:6px;padding:4px;"></div>' +
-    probRow('重复概率', 'cardRepeatProb', cs.cardRepeatProb) +
-    probRow('删除概率', 'cardDeleteProb', cs.cardDeleteProb) +
-    '</div>' +
+'<div class="settings-section"><h4>拼字卡</h4>' +
+'<div class="settings-row"><span style="color:var(--theme-text);">拼字卡模式</span><div class="toggle-switch ' + (cs.cardCombo !== false ? 'on' : '') + '" onclick="toggleChatSetting(\'cardCombo\',this)"></div></div>' +
+'<div style="font-size:11px;color:var(--theme-muted);padding:0 0 8px;line-height:1.5;">开启：抽多条字卡拼成一句话<br>关闭：只发单条字卡</div>' +
+'<div class="settings-row"><span style="color:var(--theme-text);">拼几条</span><input type="number" id="setCardMin" value="' + (cs.cardMin||1) + '" style="width:45px;text-align:center;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);border-radius:6px;padding:4px;"> ~ <input type="number" id="setCardMax" value="' + (cs.cardMax||4) + '" style="width:45px;text-align:center;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);border-radius:6px;padding:4px;"></div>' +
+probRow('重复概率', 'cardRepeatProb', cs.cardRepeatProb) +
+probRow('删除概率', 'cardDeleteProb', cs.cardDeleteProb) +
+'</div>' +
     
-    '<div class="settings-section"><h4>🤖 自动回复</h4>' +
+    '<div class="settings-section"><h4>自动回复</h4>' +
     '<div class="settings-row"><span style="color:var(--theme-text);">最快回复（秒）</span><input type="number" id="setMin" value="' + S.minReplyTime + '" style="width:60px;text-align:center;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);border-radius:6px;padding:4px;"></div>' +
     '<div class="settings-row"><span style="color:var(--theme-text);">最慢回复（分钟）</span><input type="number" id="setMax" value="' + S.maxReplyTime + '" style="width:60px;text-align:center;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);border-radius:6px;padding:4px;"></div>' +
     '<div class="settings-row"><span style="color:var(--theme-text);">回复次数</span><input type="number" id="setCnt" value="' + S.replyCount + '" style="width:60px;text-align:center;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);border-radius:6px;padding:4px;"></div>' +
     '</div>' +
 
-'<div class="settings-row"><span style="color:var(--theme-text);">🔍 查找聊天记录</span></div>' +
+'<div class="settings-section"><h4>TA的情绪</h4>' +
+'<div class="settings-row"><span style="color:var(--theme-text);">启用</span><div class="toggle-switch ' + (cs.moodEnabled !== false ? 'on' : '') + '" onclick="toggleChatSetting(\'moodEnabled\',this)"></div></div>' +
+probRow('触发概率', 'moodProb', cs.moodProb || 20) +
+'<div class="settings-row"><span style="color:var(--theme-text);">冷却条数</span><input type="number" min="1" max="20" value="' + (cs.moodCooldown || 5) + '" onchange="S.chatSettings.moodCooldown=parseInt(this.value);saveChatSettings();" style="width:60px;text-align:center;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);border-radius:6px;padding:4px;"></div>' +
+'</div>' +
+
+'<div class="settings-section"><h4>TA的心情</h4>' +
+'<div class="settings-row"><span style="color:var(--theme-text);">启用</span><div class="toggle-switch ' + (cs.taMoodEnabled !== false ? 'on' : '') + '" onclick="toggleChatSetting(\'taMoodEnabled\',this)"></div></div>' +
+probRow('触发概率', 'taMoodProb', cs.taMoodProb || 15) +
+'<div class="settings-row"><span style="color:var(--theme-text);">冷却条数</span><input type="number" min="1" max="30" value="' + (cs.taMoodCooldown || 5) + '" onchange="S.chatSettings.taMoodCooldown=parseInt(this.value);saveChatSettings();" style="width:60px;text-align:center;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);border-radius:6px;padding:4px;"></div>' +
+'</div>' +
+
+'<div class="settings-row"><span style="color:var(--theme-text);">查找聊天记录</span></div>' +
 '<div style="display:flex;gap:6px;margin-top:6px;margin-bottom:8px;">' +
 '<button onclick="closeChatSettings();openSearchByKeyword();" style="flex:1;padding:9px 4px;border-radius:10px;border:none;background:var(--theme-primary);color:#fff;font-size:11px;cursor:pointer;">🔍 关键词</button>' +
 '<button onclick="closeChatSettings();openSearchByDate();" style="flex:1;padding:9px 4px;border-radius:10px;border:none;background:var(--theme-primary);color:#fff;font-size:11px;cursor:pointer;">📅 选日期</button>' +
 '</div>' +
-'<div class="settings-row"><span style="color:var(--theme-text);">💬 聊天记录</span></div>' +
+'<div class="settings-row"><span style="color:var(--theme-text);">聊天记录</span></div>' +
     '<div style="display:flex;gap:6px;margin-top:6px;">' +
     '<button onclick="closeChatSettings();exportChat();" style="flex:1;padding:9px 4px;border-radius:10px;border:none;background:var(--theme-primary);color:#fff;font-size:11px;cursor:pointer;">导出全部</button>' +
     '<button onclick="closeChatSettings();openChatDateExport();" style="flex:1;padding:9px 4px;border-radius:10px;border:none;background:var(--theme-primary);color:#fff;font-size:11px;cursor:pointer;">按日期导出</button>' +
     '<button onclick="closeChatSettings();clearChatConfirm();" style="flex:1;padding:9px 4px;border-radius:10px;border:none;background:var(--theme-primary);color:#fff;font-size:11px;cursor:pointer;">清空</button>' +
     '</div>' +
-    '<div class="settings-row" style="margin-top:8px;"><span style="color:var(--theme-text);">📞 通话记录</span><button onclick="closeChatSettings();openCallLogPage();" style="padding:6px 14px;border-radius:12px;border:none;background:var(--theme-primary);color:#fff;font-size:12px;cursor:pointer;">查看</button></div>' +
+    '<div class="settings-row" style="margin-top:8px;"><span style="color:var(--theme-text);">通话记录</span><button onclick="closeChatSettings();openCallLogPage();" style="padding:6px 14px;border-radius:12px;border:none;background:var(--theme-primary);color:#fff;font-size:12px;cursor:pointer;">查看</button></div>' +
     '</div>' +    
     '<button style="width:100%;padding:12px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:15px;cursor:pointer;" onclick="saveAllChatSettings()">💾 保存聊天设置</button>' +
 '<button style="width:100%;padding:10px;margin-top:6px;border-radius:12px;background:var(--btn-secondary);color:var(--btn-secondary-text);border:1px solid var(--btn-secondary-border);cursor:pointer;" onclick="closeChatSettings()">关闭</button>'
@@ -10086,8 +13286,11 @@ var csDefaults = {
     quoteReplyProb: 10, readNotReplyProb: 50, emojiMixProb: 5,
     simCallProb: 1, patProb: 5, qinCollectProb: 5,
     cardMin: 1, cardMax: 4, cardRepeatProb: 30, cardDeleteProb: 50,
-    autoSendCount: 1
+    autoSendCount: 1,
+    moodEnabled: true, moodProb: 20, moodCooldown: 5,
+    taMoodEnabled: true, taMoodProb: 15, taMoodCooldown: 5
 };
+
 for (var k in csDefaults) {
     if (S.chatSettings[k] === undefined) S.chatSettings[k] = csDefaults[k];
 }
@@ -10409,6 +13612,8 @@ if (localStorage.getItem('customBubbleEnabled') === 'true') {
     applyCustomBubble();
 }
 
+await bgLoadCardBgs();
+applyCardBgs();
 
 console.log('🔍 开始初始化背景系统...');
 bgInit();
@@ -10491,7 +13696,6 @@ window.deleteAnniversary = deleteAnniversary;
 window.changeMonth = changeMonth;
 window.saveChatGroups = saveChatGroups;
 window.saveMailboxGroups = saveMailboxGroups;
-window.saveTarotGroup = saveTarotGroup;
 window.exportChat = exportChat;
 window.exportAll = exportAll;
 window.clearChat = clearChat;
@@ -10703,6 +13907,26 @@ window.renderTopicGacha = renderTopicGacha;
 window.gachaTopic = gachaTopic;
 window.shareTopicToChat = shareTopicToChat;
 window.TOPIC_DATA = TOPIC_DATA;
+
+window.openPresetPanel = openPresetPanel;
+window.doPresetImport = doPresetImport;
+window.openImportMenu = openImportMenu;
+
+window.clearAllWordCards = clearAllWordCards;
+window.clearPresetWordCards = clearPresetWordCards;
+window.openClearMenu = openClearMenu;
+window.moduleSelectAll = moduleSelectAll;
+window.toggleModuleChip = toggleModuleChip;
+
+window.bgUploadCardBg = bgUploadCardBg;
+window.bgClearCardBg = bgClearCardBg;
+window.applyCardBgs = applyCardBgs;
+window.bgSetTextMode = bgSetTextMode;
+window.bgApplyTextMode = bgApplyTextMode;
+window.openCardBgEditor = openCardBgEditor;
+
+
+
 
 init();
 })();
