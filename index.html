@@ -4448,7 +4448,206 @@ function updateHome(){
     if (moodPreview) moodPreview.textContent = S.contactMood || '';
 }
 function fileToDataUrl(f){return new Promise(r=>{const rd=new FileReader();rd.onload=function(){r(rd.result);};rd.readAsDataURL(f);});}
-function downloadBlob(content,filename){const b=new Blob([content],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(b);const a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),500);}
+async function downloadBlob(content, filename) {
+    var isText = typeof content === 'string';
+    var mimeType = 'application/octet-stream';
+    if (filename.endsWith('.json')) mimeType = 'text/plain;charset=utf-8';   // ← 改成 text/plain
+    else if (filename.endsWith('.txt')) mimeType = 'text/plain;charset=utf-8';
+    else if (isText) mimeType = 'text/plain;charset=utf-8';
+    var blob = new Blob([content], { type: mimeType });
+
+    // iOS / Android：优先走原生分享面板
+    var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile && navigator.canShare && typeof File !== 'undefined') {
+        try {
+            var file = new File([blob], filename, { type: mimeType });
+            if (navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    files: [file],
+                    title: filename
+                });
+                return;
+            }
+        } catch(e) {
+            // 用户主动取消，不降级
+            if (e && e.name === 'AbortError') return;
+            console.warn('Web Share 失败，降级到下载:', e);
+        }
+    }
+
+    // PC / 老浏览器：传统下载
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+}
+
+// ============ 存储注册表 ============
+var STORAGE_REGISTRY = [
+    // ===== IndexedDB =====
+    { id: 'messages',          label: '💬 聊天记录',     type: 'idb', group: '内容' },
+    { id: 'boardMessages',     label: '📌 留言板',       type: 'idb', group: '内容' },
+    { id: 'callLogs',          label: '📞 通话记录',     type: 'idb', group: '内容' },
+    { id: 'wordcards',         label: '📝 字卡库',       type: 'idb', group: '内容' },
+    { id: 'emojis',            label: '😊 表情包',       type: 'idb', group: '内容' },
+    { id: 'wishes',            label: '✨ 许愿',         type: 'idb', group: '内容' },
+    { id: 'anniversaries',     label: '🎀 纪念日',       type: 'idb', group: '内容' },
+    { id: 'tarotHistory',      label: '🔮 塔罗语录',     type: 'idb', group: '内容' },
+    { id: 'avatarHistory',     label: '📷 头像历史',     type: 'idb', group: '内容' },
+    { id: 'disabledCards',     label: '🚫 禁用字卡',     type: 'idb', group: '状态' },
+    { id: 'disabledGroups',    label: '🚫 禁用分组',     type: 'idb', group: '状态' },
+    { id: 'patOptions',        label: '👋 拍一拍',       type: 'idb', group: '状态' },
+    { id: 'statusOptions',     label: '💬 状态选项',     type: 'idb', group: '状态' },
+    { id: 'avatars',           label: '📷 头像',         type: 'idb', group: '设置' },
+    { id: 'settings',          label: '⚙️ 全局设置',     type: 'idb', group: '设置' },
+    { id: 'bgSettings',        label: '🖼️ 背景设置',     type: 'idb', group: '设置' },
+    { id: 'tarotSettings',     label: '🔮 塔罗设置',     type: 'idb', group: '设置' },
+    { id: 'calendarSettings',  label: '📅 日历设置',     type: 'idb', group: '设置' },
+
+    // ===== localStorage 固定 key =====
+    { id: 'echoMessages',        label: '🌳 树洞回音',   type: 'ls', key: 'echoMessages',        group: '内容' },
+    { id: 'mailLetters',         label: '✉️ 树心邮筒',   type: 'ls', key: 'mailLetters',         group: '内容' },
+    { id: 'collectedMessages',   label: '💎 收藏',       type: 'ls', key: 'collectedMessages',   group: '内容' },
+    { id: 'tideDays',            label: '🌊 潮汐记录',   type: 'ls', key: 'tideDays',            group: '内容' },
+    { id: 'cardOverridesCache',  label: '✏️ 卡片编辑',   type: 'ls', key: 'cardOverridesCache',  group: '状态' },
+    { id: 'customBubble',        label: '🎨 自定义气泡', type: 'ls', key: 'customBubble',        group: '设置' },
+    { id: 'currentBubblePreset', label: '🎈 气泡预设',   type: 'ls', key: 'currentBubblePreset', group: '设置' },
+    { id: 'customBubbleEnabled', label: '🎈 气泡开关',   type: 'ls', key: 'customBubbleEnabled', group: '设置' },
+    { id: 'treehole_theme',      label: '🎨 主题',       type: 'ls', key: 'treehole_theme',      group: '设置' },
+    { id: 'homeLightText',       label: '🎨 首页文字色', type: 'ls', key: 'homeLightText',       group: '设置' },
+    { id: 'tideCycle',           label: '🌊 潮汐周期',   type: 'ls', key: 'tideCycle',           group: '设置' },
+
+    // ===== localStorage 前缀 =====
+    { id: 'tm-off',              label: '💭 心情卡开关', type: 'ls-prefix', prefix: 'tm-off-',           group: '状态' },
+    { id: 'em-off',              label: '💗 情绪卡开关', type: 'ls-prefix', prefix: 'em-off-',           group: '状态' },
+    { id: 'holiday_triggered',   label: '🎉 节日已触发', type: 'ls-prefix', prefix: 'holiday_triggered_', group: '状态' }
+];
+
+function lsRead(key) {
+    var raw = localStorage.getItem(key);
+    if (raw === null) return null;
+    try { return JSON.parse(raw); } catch(e) { return raw; }
+}
+
+function lsWrite(key, value) {
+    if (typeof value === 'string') localStorage.setItem(key, value);
+    else localStorage.setItem(key, JSON.stringify(value));
+}
+
+async function collectStorageItem(entry) {
+    try {
+        if (entry.type === 'idb') return await dbGetAll(entry.id);
+        if (entry.type === 'ls') {
+            var v = lsRead(entry.key);
+            return v === null ? null : v;
+        }
+        if (entry.type === 'ls-prefix') {
+            var result = {};
+            for (var i = 0; i < localStorage.length; i++) {
+                var k = localStorage.key(i);
+                if (k && k.indexOf(entry.prefix) === 0) result[k] = lsRead(k);
+            }
+            return Object.keys(result).length > 0 ? result : null;
+        }
+    } catch(e) {
+        console.warn('导出 ' + entry.id + ' 失败:', e);
+    }
+    return null;
+}
+
+async function restoreStorageItem(entry, value) {
+    if (value === null || value === undefined) return;
+    try {
+        if (entry.type === 'idb') {
+            await dbClear(entry.id);
+            if (Array.isArray(value)) {
+                for (var i = 0; i < value.length; i++) {
+                    var item = value[i];
+                    if (entry.id === 'settings' && item && item.key && item.key.indexOf('__') === 0) continue;
+                    await dbPut(entry.id, item);
+                }
+            }
+        } else if (entry.type === 'ls') {
+            lsWrite(entry.key, value);
+        } else if (entry.type === 'ls-prefix') {
+            var toRemove = [];
+            for (var j = 0; j < localStorage.length; j++) {
+                var kk = localStorage.key(j);
+                if (kk && kk.indexOf(entry.prefix) === 0) toRemove.push(kk);
+            }
+            toRemove.forEach(function(k) { localStorage.removeItem(k); });
+            Object.keys(value).forEach(function(k) { lsWrite(k, value[k]); });
+        }
+    } catch(e) {
+        console.warn('导入 ' + entry.id + ' 失败:', e);
+    }
+}
+
+function showStoragePicker(title, desc, entries, confirmText, onConfirm) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;justify-content:center;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:var(--theme-card);border-radius:16px;padding:20px 22px;width:90%;max-width:400px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.15);';
+    dialog.onclick = function(e) { e.stopPropagation(); };
+
+    var groups = {};
+    entries.forEach(function(entry) {
+        var g = entry.group || '其他';
+        if (!groups[g]) groups[g] = [];
+        groups[g].push(entry);
+    });
+
+    var listHtml = '';
+    ['内容', '状态', '设置', '其他'].forEach(function(g) {
+        if (!groups[g]) return;
+        listHtml += '<div style="font-size:11px;color:var(--theme-muted);margin:10px 0 6px;padding-left:4px;">' + g + '</div>';
+        groups[g].forEach(function(entry) {
+            listHtml += '<label style="display:flex;align-items:center;gap:10px;padding:6px 4px;cursor:pointer;">' +
+                '<input type="checkbox" class="picker-checkbox" value="' + entry.id + '" checked style="width:16px;height:16px;accent-color:var(--theme-primary);flex-shrink:0;">' +
+                '<span style="font-size:13px;color:var(--theme-text);">' + entry.label + '</span>' +
+                '</label>';
+        });
+    });
+
+    dialog.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+        '<span style="font-size:15px;font-weight:600;color:var(--theme-text);">' + title + '</span>' +
+        '<span id="pickerToggleAll" style="font-size:12px;color:var(--theme-primary);cursor:pointer;">全选/取消</span>' +
+        '</div>' +
+        '<div style="font-size:11px;color:var(--theme-muted);margin-bottom:8px;">' + desc + '</div>' +
+        '<div style="flex:1;overflow-y:auto;border:1px solid var(--theme-border);border-radius:10px;padding:6px 10px;">' + listHtml + '</div>' +
+        '<div style="display:flex;gap:10px;margin-top:14px;">' +
+        '<button id="pickerCancel" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--theme-border);background:var(--theme-card);color:var(--theme-muted);font-size:14px;cursor:pointer;">取消</button>' +
+        '<button id="pickerConfirm" style="flex:2;padding:10px;border-radius:12px;border:none;background:var(--theme-primary);color:#fff;font-size:14px;cursor:pointer;">' + confirmText + '</button>' +
+        '</div>';
+
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    dialog.querySelector('#pickerToggleAll').onclick = function() {
+        var cbs = dialog.querySelectorAll('.picker-checkbox');
+        var anyUnchecked = false;
+        cbs.forEach(function(cb) { if (!cb.checked) anyUnchecked = true; });
+        cbs.forEach(function(cb) { cb.checked = anyUnchecked; });
+    };
+
+    dialog.querySelector('#pickerCancel').onclick = function() { overlay.remove(); };
+
+    dialog.querySelector('#pickerConfirm').onclick = function() {
+        var ids = [];
+        dialog.querySelectorAll('.picker-checkbox:checked').forEach(function(cb) { ids.push(cb.value); });
+        if (ids.length === 0) { showToast('⚠️ 请至少选一项'); return; }
+        overlay.remove();
+        onConfirm(ids);
+    };
+}
+
 function triggerPat(name,text){const el=document.createElement('div');el.className='pat-effect';el.textContent='👋 '+name+' '+(text||'拍了拍你');document.body.appendChild(el);setTimeout(()=>el.remove(),1600);}
 function compressImage(file,maxWidth,maxHeight){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=function(e){const img=new Image();img.onload=function(){const canvas=document.createElement('canvas');let width=img.width;let height=img.height;if(width>maxWidth||height>maxHeight){const ratio=Math.min(maxWidth/width,maxHeight/height);width=Math.floor(width*ratio);height=Math.floor(height*ratio);}canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,width,height);resolve(canvas.toDataURL('image/jpeg',0.6));};img.onerror=reject;img.src=e.target.result;};reader.onerror=reject;reader.readAsDataURL(file);});}
 
@@ -5270,14 +5469,14 @@ async function sendMessage() {
     await loadMessages();
     scrollBottom();
     input.value = '';
-    // 等加载完再触发回复
-    autoReply();
+    // 等加载完再触发回复（把刚发的内容作为触发词）
+    autoReply(c);
 }
 
-async function autoReply() {
-console.log('🔥 autoReply 被调用了');
+async function autoReply(triggerText) {
+    console.log('🔥 autoReply 被调用了，trigger:', triggerText);
     const cs = S.chatSettings;
-    
+
     if (cs.readReceipt !== 'none') {
         setTimeout(() => {
             if (cs.readReceipt === 'graphic') {
@@ -5296,7 +5495,7 @@ console.log('🔥 autoReply 被调用了');
             }
         }, 800 + Math.random() * 1200);
     }
-    
+
     if (cs.readNotReply) {
         var roll = Math.random();
         var noReplyProb = (cs.readNotReplyProb || 50) / 100;
@@ -5304,24 +5503,26 @@ console.log('🔥 autoReply 被调用了');
             return;
         }
     }
-    
+
     const min = parseInt(S.minReplyTime) || 1;
     const max = parseInt(S.maxReplyTime) || 5;
     const cnt = parseInt(S.replyCount) || 1;
-console.log('📊 autoReply cnt:', cnt);
     const delay = Math.floor(Math.random() * (max * 60000 - min * 1000 + 1)) + min * 1000;
-    const replyAt = Date.now() + delay;
 
-console.log('📝 设置 pendingReplyAt:', replyAt);
-    console.log('📊 cnt:', cnt, 'delay:', delay, '秒:', Math.floor(delay/1000));
-    localStorage.setItem('pendingReplyAt', String(replyAt));
-    localStorage.setItem('pendingReplyCount', String(cnt));
-    console.log('✅ 已保存 pendingReplyAt:', localStorage.getItem('pendingReplyAt'));
-    
-    // 存储待回复信息（用于补发）
-    localStorage.setItem('pendingReplyAt', String(replyAt));
-    localStorage.setItem('pendingReplyCount', String(cnt));
-    
+    var replyAt = Date.now() + delay;
+    var pendingId = Date.now() + Math.random();
+
+    // 存入 pending 数组（每条回复独立）
+    var pendings = JSON.parse(localStorage.getItem('pendingChatReplies') || '[]');
+    pendings.push({
+        id: pendingId,
+        replyAt: replyAt,
+        cnt: cnt,
+        triggerText: triggerText || '',
+        done: false
+    });
+    localStorage.setItem('pendingChatReplies', JSON.stringify(pendings));
+
     if (cs.typing) {
         setTimeout(() => {
             const ti = document.createElement('div');
@@ -5331,13 +5532,12 @@ console.log('📝 设置 pendingReplyAt:', replyAt);
             scrollBottom();
         }, Math.max(delay - 2000, 0));
     }
-    
-    // 正常定时触发
+
     setTimeout(async () => {
-        await executeReply(cnt, replyAt);
+        await executeReply(cnt, replyAt, triggerText, pendingId);
     }, delay);
 }
-async function executeReply(cnt, scheduledTime) {
+async function executeReply(cnt, scheduledTime, triggerText, pendingId) {
 console.log('🔥 executeReply 被调用，cnt:', cnt);
     // 移除"正在输入..."提示
     var ti = document.querySelector('.typing-indicator');
@@ -5346,7 +5546,7 @@ console.log('🔥 executeReply 被调用，cnt:', cnt);
     const cs = S.chatSettings;
     
     for (let i = 0; i < cnt; i++) {
-        let c = await smartComposeReply();
+        let c = await smartComposeReply(triggerText);
         let quoteText = '';
         if (cs.quoteReply && Math.random() < ((cs.quoteReplyProb || 10) / 100)) {
             var allMsgs = await dbGetAll('messages');
@@ -5456,22 +5656,34 @@ if (Math.random() < ((cs.qinCollectProb || 5) / 100)) {
         }
     }, 2000 + Math.random() * 3000);
     // ===== TA 的心情结束 =====
-
-    // 清除待回复标记
-    localStorage.removeItem('pendingReplyAt');
-    localStorage.removeItem('pendingReplyCount');
+    // 从 pending 数组里移除这条
+    if (pendingId) {
+        var pendings = JSON.parse(localStorage.getItem('pendingChatReplies') || '[]');
+        pendings = pendings.filter(function(p) { return p.id !== pendingId; });
+        localStorage.setItem('pendingChatReplies', JSON.stringify(pendings));
+    }
 }
 
 function checkPendingReply() {
-    var replyAt = parseInt(localStorage.getItem('pendingReplyAt'));
-    var cnt = parseInt(localStorage.getItem('pendingReplyCount') || '1');
-    
-    if (replyAt && Date.now() >= replyAt) {
-        console.log('⏰ 检测到超时未回复，补发');
-        var ti = document.querySelector('.typing-indicator');
-        if (ti) ti.remove();
-        executeReply(cnt, replyAt);
-    }
+    var pendings = JSON.parse(localStorage.getItem('pendingChatReplies') || '[]');
+    if (pendings.length === 0) return;
+
+    var now = Date.now();
+    var remaining = [];
+
+    pendings.forEach(function(p) {
+        if (now >= p.replyAt && !p.done) {
+            console.log('⏰ 补发 pending，trigger:', p.triggerText);
+            var ti = document.querySelector('.typing-indicator');
+            if (ti) ti.remove();
+            p.done = true;   // 标记，防止二次补发
+            executeReply(p.cnt, p.replyAt, p.triggerText, p.id);
+        } else {
+            remaining.push(p);
+        }
+    });
+
+    localStorage.setItem('pendingChatReplies', JSON.stringify(remaining));
 }
 // ============ 获取随机回复（未使用） ============
 async function getRandomReply(){
@@ -5585,14 +5797,13 @@ async function tryTaMoodShare() {
         : data.cards.filter(c => !isTaMoodCardOff(c.group, c.content));
     if (!pool.length) pool = data.cards;
     if (!pool.length) return null;
-
     const card = pool[Math.floor(Math.random() * pool.length)];
     if (!card) return null;
 
     taMoodCooldownLeft = parseInt(settings.taMoodCooldown) || 5;
 
     return {
-        text: card.content,
+        text: applyMoodOverride(card.group, card.content),
         group: card.group
     };
 }
@@ -5665,20 +5876,32 @@ async function getEmotionMoodCard() {
     const data = window.EMOTION_CARDS_DATA;
     if (!data || !data.mood || !data.mood.length) return null;
 
-    // 按组权重选组（忽略 minLevel，一对一不用）
-    const group = weightedPick(data.mood.map(g => [g, g.weight || 1]));
-    if (!group || !group.cards || !group.cards.length) return null;
+    // 组池：只保留有未关卡的组，并预过滤掉关掉的卡
+    const validGroups = data.mood.map(g => {
+        const available = (g.cards || []).filter(c => !isEmotionCardOff('mood', g.group, c.content));
+        return available.length > 0 ? { g: g, available: available } : null;
+    }).filter(Boolean);
+    if (validGroups.length === 0) return null;
+
+    const picked = weightedPick(validGroups.map(v => [v, v.g.weight || 1]));
+    if (!picked) return null;
+
+    const groupObj = picked.g;
+    // 应用覆盖（内容和稀有度都可能被改）
+    const pool = picked.available.map(c => {
+        const ov = applyEmotionOverride('mood', groupObj.group, c.content, c.rarity || 'normal');
+        return { content: ov.content, rarity: ov.rarity };
+    });
 
     // 按稀有度权重选卡
     const weights = data.weights?.rarity || { normal: 80, rare: 15, special: 5 };
     const rarity = weightedPick(Object.keys(weights).map(k => [k, weights[k]]));
-    let pool = group.cards.filter(c => c.rarity === rarity);
-    if (!pool.length) pool = group.cards;
+    let filtered = pool.filter(c => c.rarity === rarity);
+    if (!filtered.length) filtered = pool;
 
-    const card = pool[Math.floor(Math.random() * pool.length)];
-    return card ? { ...card, group: group.group } : null;
+    const card = filtered[Math.floor(Math.random() * filtered.length)];
+    return card ? { ...card, group: groupObj.group } : null;
 }
-
 // ============ 抽心意卡 ============
 async function getEmotionHeartCard(moodCard) {
     const data = window.EMOTION_CARDS_DATA;
@@ -5696,14 +5919,23 @@ async function getEmotionHeartCard(moodCard) {
     const adj = pool.map(p => [p[0], recent3.includes(p[0]) ? (p[1] || 1) * 0.5 : (p[1] || 1)]);
     const groupName = weightedPick(adj);
     if (!groupName) return null;
-
     const group = data.heart.find(g => g.group === groupName);
     if (!group || !group.cards?.length) return null;
 
-    // 最近 5 条不重复
+    // 过滤掉关掉的卡
+    const available = group.cards.filter(c => !isEmotionCardOff('heart', group.group, c.content));
+    if (!available.length) return null;
+
+    // 应用覆盖
+    const applied = available.map(c => {
+        const ov = applyEmotionOverride('heart', group.group, c.content, c.rarity || 'normal');
+        return { content: ov.content, rarity: ov.rarity, _original: c.content };
+    });
+
+    // 最近 5 条不重复（用原内容比对，避免改了内容后误判）
     const recent5 = heartHistory.slice(-5).map(h => h.content);
-    let pool2 = group.cards.filter(c => !recent5.includes(c.content));
-    if (!pool2.length) pool2 = group.cards;
+    let pool2 = applied.filter(c => !recent5.includes(c._original) && !recent5.includes(c.content));
+    if (!pool2.length) pool2 = applied;
 
     // 稀有度
     const weights = data.weights?.rarity || { normal: 80, rare: 15, special: 5 };
@@ -5737,17 +5969,27 @@ async function getEmotionIntentCard(heartCard) {
     const group = data.intent.find(g => g.group === groupName);
     if (!group || !group.cards?.length) return null;
 
+    // 过滤掉关掉的卡
+    const available = group.cards.filter(c => !isEmotionCardOff('intent', group.group, c.content));
+    if (!available.length) return null;
+
+    // 应用覆盖
+    const applied = available.map(c => {
+        const ov = applyEmotionOverride('intent', group.group, c.content, c.rarity || 'normal');
+        return { content: ov.content, rarity: ov.rarity };
+    });
+
     const weights = data.weights?.rarity || { normal: 80, rare: 15, special: 5 };
     const rarity = weightedPick(Object.keys(weights).map(k => [k, weights[k]]));
-    let pool2 = group.cards.filter(c => c.rarity === rarity);
-    if (!pool2.length) pool2 = group.cards;
+    let pool2 = applied.filter(c => c.rarity === rarity);
+    if (!pool2.length) pool2 = applied;
 
     const card = pool2[Math.floor(Math.random() * pool2.length)];
     return card ? { ...card, group: group.group, emoji: group.emoji } : null;
 }
 
 // ============ 拼字卡回复 ============
-async function smartComposeReply(){
+async function smartComposeReply(triggerText){
     const sg = JSON.parse(await getCal('chatGroups','[]'));
     const ac = await dbGetAll('wordcards');
     const dc = await dbGetAll('disabledCards');
@@ -5765,16 +6007,16 @@ async function smartComposeReply(){
 
     const cs = S.chatSettings;
 
-    // 2. 触发词优先：找最近一条用户消息，命中的池子优先
-    const allMsgs = await dbGetAll('messages');
-    const lastMyMsg = allMsgs.filter(m => m.sender === 'me' && m.type === 'text').sort((a,b)=>b.timestamp-a.timestamp)[0];
-    if (lastMyMsg && lastMyMsg.content) {
-        const userText = lastMyMsg.content;
+    // 2. 触发词优先：用传入的触发文本（带概率）
+    if (triggerText) {
         const hit = vc.filter(c => {
             const tw = c.triggerWords || [];
-            return tw.some(w => w && userText.includes(w));
+            return tw.some(w => w && triggerText.includes(w));
         });
-        if (hit.length > 0) vc = hit;
+        const triggerProb = (cs.triggerProb !== undefined ? cs.triggerProb : 100);
+        if (hit.length > 0 && Math.random() * 100 < triggerProb) {
+            vc = hit;
+        }
     }
 
     // 3. 拼字卡总开关
@@ -7019,6 +7261,16 @@ async function renderWordCardLibrary() {
     document.getElementById('wordcardContent').innerHTML =
     '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:var(--page-bg);min-height:100vh;">' +
 '<div style="width:100%;max-width:400px;">' +
+
+// ===== Tab 切换 =====
+'<div style="display:flex;gap:6px;margin-bottom:12px;">' +
+'<button id="wcTabNormal" onclick="switchWordcardTab(\'normal\')" style="flex:1;padding:10px 6px;border-radius:12px;border:1.5px solid var(--theme-primary);background:var(--theme-primary);color:#fff;font-size:13px;cursor:pointer;">聊天</button>' +
+'<button id="wcTabEmotion" onclick="switchWordcardTab(\'emotion\')" style="flex:1;padding:10px 6px;border-radius:12px;border:1.5px solid var(--theme-primary);background:var(--theme-card);color:var(--theme-muted);font-size:13px;cursor:pointer;">情绪</button>' +
+'<button id="wcTabMood" onclick="switchWordcardTab(\'mood\')" style="flex:1;padding:10px 6px;border-radius:12px;border:1.5px solid var(--theme-primary);background:var(--theme-card);color:var(--theme-muted);font-size:13px;cursor:pointer;">心情</button>' +
+'</div>' +
+
+'<div id="wcPanelNormal">' +
+
    // ===== 顶部按钮行 =====
 '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:10px;">' +
 '<button onclick="openBatchAdd()" style="padding:8px 2px;border-radius:10px;background:var(--theme-primary);border:none;color:#fff;font-size:10px;cursor:pointer;white-space:nowrap;">批量</button>' +
@@ -7037,6 +7289,18 @@ async function renderWordCardLibrary() {
     '<div id="groupList" style="margin:10px 0;"></div>' +
     // ===== 详情区域 =====
     '<div id="wordcardDetailArea"></div>' +
+'</div>' +
+
+// ===== 情绪卡 Tab =====
+'<div id="wcPanelEmotion" style="display:none;">' +
+'<div id="emotionTabContent"></div>' +
+'</div>' +
+
+// ===== 心情卡 Tab =====
+'<div id="wcPanelMood" style="display:none;">' +
+'<div id="moodTabContent"></div>' +
+'</div>' +
+
     '</div></div>';
     
     renderGroupList();
@@ -7044,6 +7308,538 @@ async function renderWordCardLibrary() {
 setTimeout(function() {
     viewAllCards(1);
 }, 100);
+}
+
+// ============ 笺语成册 · Tab 切换 ============
+var currentWordcardTab = 'normal';
+
+function switchWordcardTab(tab) {
+    currentWordcardTab = tab;
+    var tabMap = { normal: 'wcTabNormal', emotion: 'wcTabEmotion', mood: 'wcTabMood' };
+    Object.keys(tabMap).forEach(function(k) {
+        var el = document.getElementById(tabMap[k]);
+        if (!el) return;
+        if (k === tab) {
+            el.style.background = 'var(--theme-primary)';
+            el.style.color = '#fff';
+        } else {
+            el.style.background = 'var(--theme-card)';
+            el.style.color = 'var(--theme-muted)';
+        }
+    });
+    document.getElementById('wcPanelNormal').style.display = (tab === 'normal') ? 'block' : 'none';
+    document.getElementById('wcPanelEmotion').style.display = (tab === 'emotion') ? 'block' : 'none';
+    document.getElementById('wcPanelMood').style.display = (tab === 'mood') ? 'block' : 'none';
+    if (tab === 'mood') renderMoodTab();
+    if (tab === 'emotion') renderEmotionTab();
+}
+
+// ============ 心情字卡 Tab ============
+var currentMoodGroup = null;
+
+function renderMoodTab() {
+    var container = document.getElementById('moodTabContent');
+    if (!container) return;
+    if (!window.TA_MOOD_DATA || !window.TA_MOOD_DATA.cards) {
+        container.innerHTML = '<div style="text-align:center;color:var(--theme-muted);padding:40px;">数据未加载</div>';
+        return;
+    }
+    var groups = window.TA_MOOD_DATA.groups || [];
+    var cards = window.TA_MOOD_DATA.cards || [];
+
+    var groupStats = {};
+    groups.forEach(function(g) { groupStats[g.group] = { total: 0, off: 0 }; });
+    cards.forEach(function(c) {
+        if (!groupStats[c.group]) groupStats[c.group] = { total: 0, off: 0 };
+        groupStats[c.group].total++;
+        if (isTaMoodCardOff(c.group, c.content)) groupStats[c.group].off++;
+    });
+
+    if (!currentMoodGroup && groups.length > 0) currentMoodGroup = groups[0].group;
+
+    var h = '';
+
+    // 组 chip 横排
+    h += '<div style="display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px 0;-webkit-overflow-scrolling:touch;">';
+    groups.forEach(function(g) {
+        var st = groupStats[g.group] || { total: 0, off: 0 };
+        var isActive = (g.group === currentMoodGroup);
+        var countText = st.off > 0
+            ? '<span style="font-size:10px;opacity:0.85;">' + (st.total - st.off) + '/' + st.total + '</span>'
+            : '<span style="font-size:10px;opacity:0.7;">' + st.total + '</span>';
+        h += '<div onclick="selectMoodGroup(\'' + g.group.replace(/'/g, "\\'") + '\')" style="flex:0 0 auto;padding:8px 14px;border-radius:16px;border:1.5px solid ' + (isActive ? 'var(--theme-primary)' : 'var(--theme-border)') + ';background:' + (isActive ? 'var(--theme-primary)' : 'var(--theme-card)') + ';color:' + (isActive ? '#fff' : 'var(--theme-text)') + ';font-size:12px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;">' +
+            '<span>' + g.group + '</span>' + countText +
+            '</div>';
+    });
+    h += '</div>';
+
+    // 批量按钮 + 统计
+    var curStat = groupStats[currentMoodGroup] || { total: 0, off: 0 };
+    h += '<div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;">';
+    h += '<span style="font-size:11px;color:var(--theme-muted);flex:1;">本组 ' + (curStat.total - curStat.off) + ' / ' + curStat.total + ' 开</span>';
+    h += '<button onclick="toggleAllMoodCards(true)" style="padding:6px 12px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-card);color:var(--theme-text);font-size:11px;cursor:pointer;">全开</button>';
+    h += '<button onclick="toggleAllMoodCards(false)" style="padding:6px 12px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-card);color:var(--theme-text);font-size:11px;cursor:pointer;">全关</button>';
+    h += '</div>';
+
+    // 卡列表
+    h += renderMoodCardListHTML();
+
+    container.innerHTML = h;
+}
+
+function selectMoodGroup(g) {
+    currentMoodGroup = g;
+    renderMoodTab();
+}
+
+// ============ 情绪字卡 Tab ============
+var currentEmotionType = 'mood';
+var currentEmotionGroup = null;
+
+var EMOTION_TYPE_META = {
+    mood:   { label: '情绪', icon: '💭' },
+    heart:  { label: '心意', icon: '🤍' },
+    intent: { label: '意图', icon: '🌟' }
+};
+
+function isEmotionCardOff(type, group, content) {
+    return localStorage.getItem('em-off-' + type + ':' + group + ':' + content) === '1';
+}
+
+function renderEmotionTab() {
+    var container = document.getElementById('emotionTabContent');
+    if (!container) return;
+    if (!window.EMOTION_CARDS_DATA) {
+        container.innerHTML = '<div style="text-align:center;color:var(--theme-muted);padding:40px;">数据未加载</div>';
+        return;
+    }
+    var data = window.EMOTION_CARDS_DATA;
+
+    // ===== 类型 chip 行 =====
+    var h = '<div style="display:flex;gap:6px;margin-bottom:10px;">';
+    ['mood','heart','intent'].forEach(function(t) {
+        var meta = EMOTION_TYPE_META[t];
+        var isActive = (t === currentEmotionType);
+        var all = data[t] || [];
+        var totalCards = 0, offCards = 0;
+        all.forEach(function(g) {
+            (g.cards || []).forEach(function(c) {
+                totalCards++;
+                if (isEmotionCardOff(t, g.group, c.content)) offCards++;
+            });
+        });
+        h += '<div onclick="switchEmotionType(\'' + t + '\')" style="flex:1;padding:10px 6px;border-radius:12px;border:1.5px solid ' + (isActive ? 'var(--theme-primary)' : 'var(--theme-border)') + ';background:' + (isActive ? 'var(--theme-primary)' : 'var(--theme-card)') + ';color:' + (isActive ? '#fff' : 'var(--theme-text)') + ';font-size:12px;cursor:pointer;text-align:center;line-height:1.4;">' +
+            meta.icon + ' ' + meta.label + '<br><span style="font-size:10px;opacity:0.8;">' + (totalCards - offCards) + '/' + totalCards + '</span>' +
+            '</div>';
+    });
+    h += '</div>';
+
+    // ===== 组 chip 行 =====
+    var allGroups = data[currentEmotionType] || [];
+    if (allGroups.length === 0) {
+        container.innerHTML = h + '<div style="text-align:center;color:var(--theme-muted);padding:30px;">该类型暂无数据</div>';
+        return;
+    }
+    if (!currentEmotionGroup || !allGroups.some(function(g) { return g.group === currentEmotionGroup; })) {
+        currentEmotionGroup = allGroups[0].group;
+    }
+
+    h += '<div style="display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px 0;-webkit-overflow-scrolling:touch;">';
+    allGroups.forEach(function(g) {
+        var grpTotal = (g.cards || []).length;
+        var grpOff = (g.cards || []).filter(function(c) {
+            return isEmotionCardOff(currentEmotionType, g.group, c.content);
+        }).length;
+        var isActive = (g.group === currentEmotionGroup);
+        var countText = grpOff > 0
+            ? '<span style="font-size:10px;opacity:0.85;">' + (grpTotal - grpOff) + '/' + grpTotal + '</span>'
+            : '<span style="font-size:10px;opacity:0.7;">' + grpTotal + '</span>';
+        h += '<div class="emotion-group-chip" data-group="' + encodeURIComponent(g.group) + '" onclick="selectEmotionGroupByEl(this)" style="flex:0 0 auto;padding:8px 14px;border-radius:16px;border:1.5px solid ' + (isActive ? 'var(--theme-primary)' : 'var(--theme-border)') + ';background:' + (isActive ? 'var(--theme-primary)' : 'var(--theme-card)') + ';color:' + (isActive ? '#fff' : 'var(--theme-text)') + ';font-size:12px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;">' +
+            '<span>' + g.group + '</span>' + countText +
+            '</div>';
+    });
+    h += '</div>';
+
+    // ===== 批量按钮 =====
+    var curGroupObj = allGroups.find(function(g) { return g.group === currentEmotionGroup; });
+    var curCards = curGroupObj ? (curGroupObj.cards || []) : [];
+    var curOff = curCards.filter(function(c) {
+        return isEmotionCardOff(currentEmotionType, currentEmotionGroup, c.content);
+    }).length;
+
+    h += '<div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;">';
+    h += '<span style="font-size:11px;color:var(--theme-muted);flex:1;">本组 ' + (curCards.length - curOff) + ' / ' + curCards.length + ' 开</span>';
+    h += '<button onclick="toggleAllEmotionCards(true)" style="padding:6px 12px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-card);color:var(--theme-text);font-size:11px;cursor:pointer;">全开</button>';
+    h += '<button onclick="toggleAllEmotionCards(false)" style="padding:6px 12px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-card);color:var(--theme-text);font-size:11px;cursor:pointer;">全关</button>';
+    h += '</div>';
+
+    // ===== 卡列表 =====
+    h += renderEmotionCardListHTML();
+
+    container.innerHTML = h;
+}
+
+function switchEmotionType(t) {
+    currentEmotionType = t;
+    currentEmotionGroup = null;
+    renderEmotionTab();
+}
+
+function selectEmotionGroupByEl(el) {
+    currentEmotionGroup = decodeURIComponent(el.dataset.group);
+    renderEmotionTab();
+}
+
+function renderEmotionCardListHTML() {
+    if (!currentEmotionGroup || !window.EMOTION_CARDS_DATA) return '';
+    var allGroups = window.EMOTION_CARDS_DATA[currentEmotionType] || [];
+    var grp = allGroups.find(function(g) { return g.group === currentEmotionGroup; });
+    if (!grp || !grp.cards || grp.cards.length === 0) {
+        return '<div style="text-align:center;color:var(--theme-muted);padding:30px;font-size:13px;">本组暂无卡</div>';
+    }
+    var h = '';
+    grp.cards.forEach(function(c) {
+        var isOff = isEmotionCardOff(currentEmotionType, currentEmotionGroup, c.content);
+        var originalRarity = c.rarity || 'normal';
+        var ov = applyEmotionOverride(currentEmotionType, currentEmotionGroup, c.content, originalRarity);
+        var displayContent = ov.content;
+        var displayRarity = ov.rarity;
+        var isOverridden = (displayContent !== c.content) || (displayRarity !== originalRarity);
+
+        var rarityBadge = '';
+        if (displayRarity === 'rare') {
+            rarityBadge = '<span style="font-size:9px;padding:1px 6px;border-radius:8px;background:rgba(212,168,184,0.15);color:var(--theme-primary);margin-left:4px;">rare</span>';
+        } else if (displayRarity === 'special') {
+            rarityBadge = '<span style="font-size:9px;padding:1px 6px;border-radius:8px;background:rgba(212,168,184,0.3);color:var(--theme-primary);margin-left:4px;">special</span>';
+        }
+        h += '<div class="emotion-row" data-type="' + currentEmotionType + '" data-group="' + encodeURIComponent(currentEmotionGroup) + '" data-content="' + encodeURIComponent(c.content) + '" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:8px;' + (isOff ? 'opacity:0.45;' : '') + '">';
+        h += '<div style="flex:1;font-size:13px;color:var(--theme-text);line-height:1.5;word-break:break-word;">' + displayContent + rarityBadge;
+        if (isOverridden) {
+            h += '<span style="font-size:9px;color:var(--theme-primary);margin-left:6px;padding:1px 6px;border-radius:8px;background:rgba(212,168,184,0.12);">已改</span>';
+        }
+        h += '</div>';
+        h += '<span onclick="openEmotionCardEditorFromEl(this)" style="cursor:pointer;font-size:16px;color:var(--theme-primary);padding:2px 4px;flex-shrink:0;">✎</span>';
+        h += '<div class="toggle-switch ' + (isOff ? '' : 'on') + '" onclick="toggleEmotionCardByEl(this)" style="flex-shrink:0;"></div>';
+        h += '</div>';
+    });
+    return h;
+}
+
+function toggleEmotionCardByEl(el) {
+    var row = el.closest('.emotion-row');
+    if (!row) return;
+    var type = row.dataset.type;
+    var group = decodeURIComponent(row.dataset.group);
+    var content = decodeURIComponent(row.dataset.content);
+    toggleEmotionCard(type, group, content);
+}
+
+function toggleEmotionCard(type, group, content) {
+    var key = 'em-off-' + type + ':' + group + ':' + content;
+    if (localStorage.getItem(key) === '1') {
+        localStorage.removeItem(key);
+    } else {
+        localStorage.setItem(key, '1');
+    }
+    renderEmotionTab();
+}
+
+function toggleAllEmotionCards(on) {
+    if (!currentEmotionGroup || !window.EMOTION_CARDS_DATA) return;
+    var allGroups = window.EMOTION_CARDS_DATA[currentEmotionType] || [];
+    var grp = allGroups.find(function(g) { return g.group === currentEmotionGroup; });
+    if (!grp || !grp.cards) return;
+    grp.cards.forEach(function(c) {
+        var key = 'em-off-' + currentEmotionType + ':' + currentEmotionGroup + ':' + c.content;
+        if (on) localStorage.removeItem(key);
+        else localStorage.setItem(key, '1');
+    });
+    renderEmotionTab();
+}
+
+// ============ 情绪卡编辑 · 覆盖层 ============
+function applyEmotionOverride(type, group, content, originalRarity) {
+    var key = 'emotion:' + type + ':' + group + ':' + content;
+    var ov = cardOverridesCache[key];
+    if (ov && typeof ov === 'object') {
+        return {
+            content: ov.content !== undefined ? ov.content : content,
+            rarity: ov.rarity !== undefined ? ov.rarity : (originalRarity || 'normal')
+        };
+    }
+    return {
+        content: content,
+        rarity: originalRarity || 'normal'
+    };
+}
+
+function saveEmotionCardEdit(type, group, originalContent, originalRarity, newContent, newRarity) {
+    var key = 'emotion:' + type + ':' + group + ':' + originalContent;
+    if (newContent === originalContent && newRarity === originalRarity) {
+        delete cardOverridesCache[key];
+    } else {
+        cardOverridesCache[key] = { content: newContent, rarity: newRarity };
+    }
+    saveCardOverridesToStorage();
+    showToast('✅ 已保存');
+}
+
+function resetEmotionCardEdit(type, group, originalContent) {
+    var key = 'emotion:' + type + ':' + group + ':' + originalContent;
+    delete cardOverridesCache[key];
+    saveCardOverridesToStorage();
+    showToast('↺ 已恢复默认');
+}
+
+function openEmotionCardEditorFromEl(el) {
+    var row = el.closest('.emotion-row');
+    if (!row) return;
+    var type = row.dataset.type;
+    var group = decodeURIComponent(row.dataset.group);
+    var content = decodeURIComponent(row.dataset.content);
+    openEmotionCardEditor(type, group, content);
+}
+
+function openEmotionCardEditor(type, group, originalContent) {
+    var allGroups = (window.EMOTION_CARDS_DATA || {})[type] || [];
+    var grp = allGroups.find(function(g) { return g.group === group; });
+    var originalCard = grp ? (grp.cards || []).find(function(c) { return c.content === originalContent; }) : null;
+    var originalRarity = originalCard ? (originalCard.rarity || 'normal') : 'normal';
+
+    var ov = applyEmotionOverride(type, group, originalContent, originalRarity);
+    var currentContent = ov.content;
+    var currentRarity = ov.rarity;
+    var hasOverride = (currentContent !== originalContent) || (currentRarity !== originalRarity);
+
+    var typeMeta = EMOTION_TYPE_META[type] || { label: type, icon: '📝' };
+    var tempRarity = currentRarity;
+
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:var(--theme-card);border-radius:16px;padding:20px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.15);';
+    dialog.onclick = function(e) { e.stopPropagation(); };
+
+    var rarityChipsHtml = '';
+    ['normal', 'rare', 'special'].forEach(function(r) {
+        var isActive = (r === currentRarity);
+        rarityChipsHtml += '<div class="emotion-rarity-chip" data-rarity="' + r + '" onclick="selectEmotionRarityChip(this)" style="flex:1;padding:8px 4px;border-radius:10px;text-align:center;font-size:12px;cursor:pointer;border:1.5px solid ' + (isActive ? 'var(--theme-primary)' : 'var(--theme-border)') + ';background:' + (isActive ? 'var(--theme-primary)' : 'var(--theme-card)') + ';color:' + (isActive ? '#fff' : 'var(--theme-muted)') + ';transition:all 0.2s;">' + r + '</div>';
+    });
+
+    dialog.innerHTML =
+        '<div style="font-size:16px;font-weight:600;color:var(--theme-text);margin-bottom:4px;text-align:center;">✎ 编辑情绪卡</div>' +
+        '<div style="font-size:11px;color:var(--theme-muted);text-align:center;margin-bottom:14px;">' + typeMeta.icon + ' ' + typeMeta.label + ' · ' + group + '</div>' +
+        '<textarea id="emotionEditTextarea" style="width:100%;min-height:70px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:14px;line-height:1.6;outline:none;box-sizing:border-box;resize:vertical;font-family:inherit;"></textarea>' +
+        '<div style="font-size:11px;color:var(--theme-muted);margin-top:8px;padding-left:4px;">原文：' + originalContent + '</div>' +
+        '<div style="font-size:11px;color:var(--theme-muted);margin:12px 0 6px;">稀有度</div>' +
+        '<div style="display:flex;gap:6px;">' + rarityChipsHtml + '</div>' +
+        '<div style="display:flex;gap:8px;margin-top:16px;">' +
+        '<button id="emotionEditResetBtn" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--theme-primary);background:transparent;color:var(--theme-primary);font-size:13px;cursor:pointer;' + (hasOverride ? '' : 'opacity:0.35;pointer-events:none;') + '">↺ 恢复默认</button>' +
+        '<button id="emotionEditCancelBtn" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--theme-border);background:var(--theme-card);color:var(--theme-muted);font-size:13px;cursor:pointer;">取消</button>' +
+        '<button id="emotionEditSaveBtn" style="flex:1;padding:10px;border-radius:12px;border:none;background:var(--theme-primary);color:#fff;font-size:13px;cursor:pointer;">保存</button>' +
+        '</div>';
+
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    var textarea = dialog.querySelector('#emotionEditTextarea');
+    textarea.value = currentContent;
+    textarea.focus();
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+
+    dialog.querySelector('#emotionEditCancelBtn').onclick = function() { overlay.remove(); };
+
+    dialog.querySelector('#emotionEditSaveBtn').onclick = function() {
+        var newVal = textarea.value.trim();
+        if (!newVal) { showToast('⚠️ 内容不能为空'); return; }
+        var finalRarity = textarea.dataset.selectedRarity || currentRarity;
+        saveEmotionCardEdit(type, group, originalContent, originalRarity, newVal, finalRarity);
+        overlay.remove();
+        renderEmotionTab();
+    };
+
+    dialog.querySelector('#emotionEditResetBtn').onclick = function() {
+        resetEmotionCardEdit(type, group, originalContent);
+        overlay.remove();
+        renderEmotionTab();
+    };
+
+    textarea.dataset.selectedRarity = currentRarity;
+
+}
+
+function selectEmotionRarityChip(el) {
+    var container = el.parentNode;
+    var chips = container.querySelectorAll('.emotion-rarity-chip');
+    chips.forEach(function(c) {
+        var isActive = (c.dataset.rarity === el.dataset.rarity);
+        c.style.border = isActive ? '1.5px solid var(--theme-primary)' : '1.5px solid var(--theme-border)';
+        c.style.background = isActive ? 'var(--theme-primary)' : 'var(--theme-card)';
+        c.style.color = isActive ? '#fff' : 'var(--theme-muted)';
+    });
+    // 直接按 ID 找 textarea，最稳
+    var ta = document.getElementById('emotionEditTextarea');
+    if (ta) ta.dataset.selectedRarity = el.dataset.rarity;
+}
+
+function renderMoodCardListHTML() {
+    if (!currentMoodGroup) return '';
+    var cards = (window.TA_MOOD_DATA.cards || []).filter(function(c) { return c.group === currentMoodGroup; });
+    if (cards.length === 0) {
+        return '<div style="text-align:center;color:var(--theme-muted);padding:30px;font-size:13px;">本组暂无卡</div>';
+    }
+    var h = '';
+    cards.forEach(function(c) {
+        var isOff = isTaMoodCardOff(c.group, c.content);
+        var displayContent = applyMoodOverride(c.group, c.content);
+        var isOverridden = (displayContent !== c.content);
+        var safeGroup = encodeURIComponent(c.group);
+        var safeContent = encodeURIComponent(c.content);
+        h += '<div class="mood-row" data-group="' + safeGroup + '" data-content="' + safeContent + '" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:8px;' + (isOff ? 'opacity:0.45;' : '') + '">';
+        h += '<div style="flex:1;font-size:13px;color:var(--theme-text);line-height:1.5;word-break:break-word;">' + displayContent;
+        if (isOverridden) {
+            h += '<span style="font-size:9px;color:var(--theme-primary);margin-left:6px;padding:1px 6px;border-radius:8px;background:rgba(212,168,184,0.12);">已改</span>';
+        }
+        h += '</div>';
+        h += '<span onclick="openMoodCardEditorFromEl(this)" style="cursor:pointer;font-size:16px;color:var(--theme-primary);padding:2px 4px;flex-shrink:0;">✎</span>';
+        h += '<div class="toggle-switch ' + (isOff ? '' : 'on') + '" onclick="toggleMoodCardByEl(this)" style="flex-shrink:0;"></div>';
+        h += '</div>';
+    });
+    return h;
+}
+
+function toggleMoodCardByEl(el) {
+    var row = el.closest('.mood-row');
+    if (!row) return;
+    var group = decodeURIComponent(row.dataset.group);
+    var content = decodeURIComponent(row.dataset.content);
+    toggleMoodCard(group, content);
+}
+
+function toggleMoodCard(group, content) {
+    var key = 'tm-off-' + group + ':' + content;
+    if (localStorage.getItem(key) === '1') {
+        localStorage.removeItem(key);
+    } else {
+        localStorage.setItem(key, '1');
+    }
+    renderMoodTab();
+}
+
+function toggleAllMoodCards(on) {
+    if (!currentMoodGroup) return;
+    var cards = (window.TA_MOOD_DATA.cards || []).filter(function(c) { return c.group === currentMoodGroup; });
+    cards.forEach(function(c) {
+        var key = 'tm-off-' + c.group + ':' + c.content;
+        if (on) localStorage.removeItem(key);
+        else localStorage.setItem(key, '1');
+    });
+    renderMoodTab();
+}
+
+// ============ 心情卡编辑 · 覆盖层（localStorage 版） ============
+var CARD_OVERRIDES_KEY = 'cardOverridesCache';
+var cardOverridesCache = {};
+
+function loadCardOverrides() {
+    try {
+        var raw = localStorage.getItem(CARD_OVERRIDES_KEY);
+        cardOverridesCache = raw ? JSON.parse(raw) : {};
+    } catch(e) {
+        console.warn('加载覆盖层失败:', e);
+        cardOverridesCache = {};
+    }
+}
+
+function saveCardOverridesToStorage() {
+    try {
+        localStorage.setItem(CARD_OVERRIDES_KEY, JSON.stringify(cardOverridesCache));
+    } catch(e) {
+        console.warn('保存覆盖层失败:', e);
+        showToast('⚠️ 存储空间不足');
+    }
+}
+
+function applyMoodOverride(group, content) {
+    var key = 'mood:' + group + ':' + content;
+    if (cardOverridesCache[key] !== undefined) return cardOverridesCache[key];
+    return content;
+}
+
+function saveMoodCardEdit(group, originalContent, newContent) {
+    var key = 'mood:' + group + ':' + originalContent;
+    if (newContent === originalContent) {
+        delete cardOverridesCache[key];
+    } else {
+        cardOverridesCache[key] = newContent;
+    }
+    saveCardOverridesToStorage();
+    showToast('✅ 已保存');
+}
+
+function resetMoodCardEdit(group, originalContent) {
+    var key = 'mood:' + group + ':' + originalContent;
+    delete cardOverridesCache[key];
+    saveCardOverridesToStorage();
+    showToast('↺ 已恢复默认');
+}
+
+function openMoodCardEditorFromEl(el) {
+    var row = el.closest('.mood-row');
+    if (!row) return;
+    var group = decodeURIComponent(row.dataset.group);
+    var content = decodeURIComponent(row.dataset.content);
+    openMoodCardEditor(group, content);
+}
+
+function openMoodCardEditor(group, originalContent) {
+    var currentContent = applyMoodOverride(group, originalContent);
+    var hasOverride = (currentContent !== originalContent);
+
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:var(--theme-card);border-radius:16px;padding:20px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.15);';
+    dialog.onclick = function(e) { e.stopPropagation(); };
+
+    dialog.innerHTML =
+        '<div style="font-size:16px;font-weight:600;color:var(--theme-text);margin-bottom:4px;text-align:center;">✎ 编辑心情卡</div>' +
+        '<div style="font-size:11px;color:var(--theme-muted);text-align:center;margin-bottom:14px;">分组：' + group + '</div>' +
+        '<textarea id="moodEditTextarea" style="width:100%;min-height:80px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:14px;line-height:1.6;outline:none;box-sizing:border-box;resize:vertical;font-family:inherit;"></textarea>' +
+        '<div style="font-size:11px;color:var(--theme-muted);margin-top:8px;padding-left:4px;">原文：' + originalContent + '</div>' +
+        '<div style="display:flex;gap:8px;margin-top:16px;">' +
+        '<button id="moodEditResetBtn" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--theme-primary);background:transparent;color:var(--theme-primary);font-size:13px;cursor:pointer;' + (hasOverride ? '' : 'opacity:0.35;pointer-events:none;') + '">↺ 恢复默认</button>' +
+        '<button id="moodEditCancelBtn" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--theme-border);background:var(--theme-card);color:var(--theme-muted);font-size:13px;cursor:pointer;">取消</button>' +
+        '<button id="moodEditSaveBtn" style="flex:1;padding:10px;border-radius:12px;border:none;background:var(--theme-primary);color:#fff;font-size:13px;cursor:pointer;">保存</button>' +
+        '</div>';
+
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    var textarea = dialog.querySelector('#moodEditTextarea');
+    textarea.value = currentContent;
+    textarea.focus();
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+
+    dialog.querySelector('#moodEditCancelBtn').onclick = function() { overlay.remove(); };
+
+    dialog.querySelector('#moodEditSaveBtn').onclick = function() {
+        var newVal = textarea.value.trim();
+        if (!newVal) { showToast('⚠️ 内容不能为空'); return; }
+        saveMoodCardEdit(group, originalContent, newVal);
+        overlay.remove();
+        renderMoodTab();
+    };
+
+    dialog.querySelector('#moodEditResetBtn').onclick = function() {
+        resetMoodCardEdit(group, originalContent);
+        overlay.remove();
+        renderMoodTab();
+    };
 }
 
 function loadMoreAllCards() {
@@ -8123,7 +8919,24 @@ async function confirmBatchAddNew() {
 }
 function closeBatchAdd(){document.getElementById('batchAddModal').classList.remove('show');}
 async function confirmBatchAdd(){const t=document.getElementById('batchAddTextarea').value;const lines=t.split('\n').map(l=>l.trim()).filter(l=>l);if(!lines.length){showToast('请输入字卡内容');return;}const gid=document.getElementById('batchGroupSelect').value;const gn=document.getElementById('batchGroupSelect').selectedOptions[0].textContent;let added=0;const cards=await dbGetAll('wordcards');const ex=new Set(cards.filter(c=>c.content&&c.content!=='__GROUP_PLACEHOLDER__').map(c=>c.content));for(const l of lines){if(ex.has(l))continue;await dbPut('wordcards',{id:Date.now()+Math.random()*1000+added,groupId:gid,groupName:gn,content:l,timestamp:Date.now()});ex.add(l);added++;}closeBatchAdd();renderGroupList();showToast('✅ 已添加'+added+'条');}
-async function exportCardsJSON(){const cards=await dbGetAll('wordcards');const data=cards.filter(c=>c.content!=='__GROUP_PLACEHOLDER__').map(c=>({id:c.id,groupId:c.groupId||'default',groupName:c.groupName||'默认分组',content:c.content}));downloadBlob(JSON.stringify(data,null,2),'字卡导出.json');}
+async function exportCardsJSON(){
+    var cards = await dbGetAll('wordcards');
+    var data = cards
+        .filter(function(c) { return c.content && c.content !== '__GROUP_PLACEHOLDER__'; })
+        .map(function(c) {
+            return {
+                groupId: c.groupId || 'default',
+                groupName: c.groupName || '默认分组',
+                content: c.content,
+                triggerWords: c.triggerWords || [],
+                tags: c.tags || [],
+                weight: c.weight || 1,
+                enabled: c.enabled !== false,
+                type: c.type || 'chat'
+            };
+        });
+    downloadBlob(JSON.stringify(data, null, 2), '字卡导出.json');
+}
 // ============ 从预设导入（新版） ============
 async function openPresetPanel() {
   const data = window.PRESET_CARDS_DATA;
@@ -8355,7 +9168,51 @@ function openImportMenu() {
   document.body.appendChild(overlay);
 }
 
-async function importCardsFile(event){const f=event.target.files[0];if(!f)return;try{const t=await f.text();const d=JSON.parse(t);const cards=await dbGetAll('wordcards');const ex=new Set(cards.filter(c=>c.content&&c.content!=='__GROUP_PLACEHOLDER__').map(c=>c.content));let count=0;const items=Array.isArray(d)?d:[];for(const item of items){const content=item.content||item;if(content&&content.trim()&&!ex.has(content.trim())){await dbPut('wordcards',{id:Date.now()+Math.random()*1000+count,groupId:item.groupId||'default',groupName:item.groupName||'默认分组',content:content.trim(),timestamp:Date.now()});ex.add(content.trim());count++;}}renderGroupList();showToast(count>0?'✅ 成功导入'+count+'条':'没有新字卡可导入');}catch(e){showToast('导入失败');}event.target.value='';}
+async function importCardsFile(event) {
+    var f = event.target.files[0];
+    if (!f) return;
+    event.target.value = '';
+    try {
+        var text = await f.text();
+        var data = JSON.parse(text);
+        var cards = await dbGetAll('wordcards');
+        var existing = new Set(
+            cards.filter(function(c) { return c.content && c.content !== '__GROUP_PLACEHOLDER__'; })
+                 .map(function(c) { return c.content; })
+        );
+        var items = Array.isArray(data) ? data : [];
+        var count = 0;
+
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            // 兼容旧格式：可能是纯字符串，也可能是 {content: "..."}
+            var content = (typeof item === 'string') ? item : (item.content || '');
+            content = content.trim();
+            if (!content || existing.has(content)) continue;
+
+            await dbPut('wordcards', {
+                id: Date.now() + Math.random() * 1000 + count,
+                groupId: item.groupId || 'default',
+                groupName: item.groupName || '默认分组',
+                content: content,
+                triggerWords: Array.isArray(item.triggerWords) ? item.triggerWords : [],
+                tags: Array.isArray(item.tags) ? item.tags : [],
+                weight: parseInt(item.weight) || 1,
+                enabled: item.enabled !== false,
+                type: item.type || 'chat',
+                system: false,
+                timestamp: Date.now()
+            });
+            existing.add(content);
+            count++;
+        }
+        renderGroupList();
+        showToast(count > 0 ? '✅ 成功导入 ' + count + ' 条' : '没有新字卡可导入');
+    } catch(e) {
+        console.warn(e);
+        showToast('❌ 导入失败：文件格式错误');
+    }
+}
 
 function openHeartStation(){
     showPage('heartStationPage');
@@ -12302,135 +13159,115 @@ async function renderDataManage() {
 }
 async function exportChat(){const msgs=await dbGetAll('messages');msgs.sort((a,b)=>a.timestamp-b.timestamp);let t='秦彻和笑笑的时光树洞 2.0\n'+'='.repeat(30)+'\n\n';msgs.forEach(m=>{const s=m.sender==='me'?S.myName:S.contactName;const c=m.type==='text'?m.content:(m.type==='emoji'?'[表情]':'[图片]');t+='['+new Date(m.timestamp).toLocaleString('zh-CN')+'] '+s+': '+c+'\n';});downloadBlob(t,'聊天记录.txt');}
 
-async function exportAll() {
-    // ===== 弹出选择界面 =====
-    var overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:99999;display:flex;align-items:center;justify-content:center;';
-    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
-    
-    var dialog = document.createElement('div');
-    dialog.style.cssText = 'background:var(--theme-card);border-radius:16px;padding:24px;width:90%;max-width:380px;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.15);';
-    dialog.onclick = function(e) { e.stopPropagation(); };
-    
-    // ===== 备份选项列表 =====
-    var options = [
-        { key: 'messages', label: '💬 聊天记录' },
-        { key: 'wordcards', label: '📝 字卡库' },
-        { key: 'emojis', label: '😊 表情包' },
-        { key: 'callLogs', label: '📞 通话记录' },
-        { key: 'wishes', label: '✨ 许愿' },
-        { key: 'anniversaries', label: '🎀 纪念日' },
-        { key: 'tarotHistory', label: '🔮 塔罗语录' },
-        { key: 'avatarHistory', label: '📷 头像历史' },
-        { key: 'mailLetters', label: '✉️ 树心邮筒信件', storage: 'localStorage' },
-        { key: 'echoMessages', label: '🌳 树洞回音留言', storage: 'localStorage' },
-        { key: 'collectedMessages', label: '💎 许愿珍藏收藏', storage: 'localStorage' },
-        { key: 'settings_local', label: '⚙️ 本地设置（条数/预设等）', storage: 'localStorage' }
-    ];
-    
-    var checkboxesHtml = options.map(function(opt) {
-        return '<label style="display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid #f5f0eb;cursor:pointer;">' +
-            '<input type="checkbox" class="backup-checkbox" value="' + opt.key + '" data-storage="' + (opt.storage || 'indexeddb') + '" checked style="width:18px;height:18px;accent-color:var(--theme-primary);flex-shrink:0;">' +
-            '<span style="font-size:14px;color:var(--theme-text);">' + opt.label + '</span>' +
-            '</label>';
-    }).join('');
-    
-    dialog.innerHTML = `
-        <div style="font-size:17px;font-weight:600;color:var(--theme-text);margin-bottom:4px;">💾 全量备份</div>
-        <div style="font-size:12px;color:var(--theme-muted);margin-bottom:12px;">选择要备份的数据</div>
-        <div style="max-height:50vh;overflow-y:auto;">${checkboxesHtml}</div>
-        <div style="display:flex;gap:10px;margin-top:14px;">
-            <button id="backupCancel" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--theme-input-border);background:#f5f5f5;color:#666;font-size:14px;cursor:pointer;">取消</button>
-            <button id="backupConfirm" style="flex:1;padding:10px;border-radius:12px;border:none;background:var(--theme-primary);color:#fff;font-size:14px;cursor:pointer;">导出</button>
-        </div>
-    `;
-    
-    overlay.appendChild(dialog);
-    document.body.appendChild(overlay);
-    
-    document.getElementById('backupCancel').onclick = function() {
-        overlay.remove();
-    };
-    
-    document.getElementById('backupConfirm').onclick = async function() {
-        overlay.remove();
-        await doExportSelected();
-    };
+function exportAll() {
+    showStoragePicker(
+        '💾 全量备份',
+        '选择要备份的数据',
+        STORAGE_REGISTRY,
+        '导出',
+        doExportSelected
+    );
 }
 
-// ===== 执行选中的备份 =====
-async function doExportSelected() {
-    var checkboxes = document.querySelectorAll('.backup-checkbox:checked');
-    if (checkboxes.length === 0) {
-        showToast('⚠️ 请至少选择一项数据');
-        return;
-    }
-    
-    showToast('⏳ 正在打包数据...');
-    
-    var data = {};
+async function doExportSelected(selectedIds) {
+    var data = { version: '2.0', exportTime: new Date().toISOString(), idb: {}, ls: {}, lsPrefix: {} };
     var hasData = false;
-    
-    for (var i = 0; i < checkboxes.length; i++) {
-        var cb = checkboxes[i];
-        var key = cb.value;
-        var storage = cb.dataset.storage || 'indexeddb';
-        
-        try {
-            if (storage === 'localStorage') {
-                var val = localStorage.getItem(key);
-                if (val) {
-                    // 对 settings_local 特殊处理：备份多个 key
-                    if (key === 'settings_local') {
-                        var settingsKeys = [
-                            'mailbox_cardMin', 'mailbox_cardMax',
-                            'mail_cardMin', 'mail_cardMax',
-                            'currentBubblePreset', 'bubbleStyle',
-                            'chatGroups_backup'
-                        ];
-                        var settingsData = {};
-                        settingsKeys.forEach(function(sk) {
-                            var sv = localStorage.getItem(sk);
-                            if (sv) settingsData[sk] = sv;
-                        });
-                        if (Object.keys(settingsData).length > 0) {
-                            data[key] = settingsData;
-                            hasData = true;
-                        }
-                    } else {
-                        data[key] = JSON.parse(val);
-                        hasData = true;
-                    }
-                }
-            } else {
-                // IndexedDB
-                var storeData = await dbGetAll(key);
-                if (storeData && storeData.length > 0) {
-                    data[key] = storeData;
-                    hasData = true;
-                }
-            }
-        } catch(e) {
-            console.warn('⚠️ 备份 ' + key + ' 失败:', e);
-        }
+
+    for (var i = 0; i < selectedIds.length; i++) {
+        var entry = STORAGE_REGISTRY.find(function(e) { return e.id === selectedIds[i]; });
+        if (!entry) continue;
+        var value = await collectStorageItem(entry);
+        if (value === null) continue;
+        if (entry.type === 'idb') data.idb[entry.id] = value;
+        else if (entry.type === 'ls') data.ls[entry.key] = value;
+        else if (entry.type === 'ls-prefix') data.lsPrefix[entry.prefix] = value;
+        hasData = true;
     }
-    
-    if (!hasData) {
-        showToast('⚠️ 没有可备份的数据');
-        return;
-    }
-    
-    data.exportTime = new Date().toISOString();
-    data.version = '2.0';
-    
+
+    if (!hasData) { showToast('⚠️ 没有可导出的数据'); return; }
+
     var json = JSON.stringify(data, null, 2);
     var filename = '时光树洞_2.0_' + new Date().toLocaleDateString().replace(/\//g, '-') + '.json';
-    downloadBlob(json, filename);
+    await downloadBlob(json, filename);
     localStorage.setItem('lastBackupTime', Date.now());
-    showToast('✅ 备份成功！共 ' + checkboxes.length + ' 项数据');
+    showToast('✅ 备份成功');
 }
 
-async function importAllData(event){const f=event.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!confirm('导入将覆盖当前数据，确定？')){event.target.value='';return;}for(const s of ['messages','settings','wordcards','emojis','avatars','callLogs']){await dbClear(s);if(d[s])for(const item of d[s])await dbPut(s,item);}showToast('✅ 导入成功');}catch(e){showToast('导入失败');}event.target.value='';}
+async function importAllData(event) {
+    var f = event.target.files[0];
+    if (!f) return;
+    event.target.value = '';
+    try {
+        var d = JSON.parse(await f.text());
+        var isNewFormat = ('idb' in d) || ('ls' in d) || ('lsPrefix' in d);
+
+        var available = [];
+        STORAGE_REGISTRY.forEach(function(entry) {
+            if (isNewFormat) {
+                if (entry.type === 'idb' && d.idb && d.idb[entry.id]) available.push(entry);
+                else if (entry.type === 'ls' && d.ls && d.ls[entry.key] !== undefined) available.push(entry);
+                else if (entry.type === 'ls-prefix' && d.lsPrefix && d.lsPrefix[entry.prefix]) available.push(entry);
+            } else {
+                if (entry.type === 'idb' && d[entry.id]) available.push(entry);
+            }
+        });
+
+        if (available.length === 0) {
+            showToast('⚠️ 文件里没有可导入的数据');
+            return;
+        }
+
+        showStoragePicker(
+            '📥 导入数据',
+            '选择要恢复的项目，将覆盖当前数据',
+            available,
+            '导入',
+            function(ids) { doImportSelected(d, isNewFormat, ids); }
+        );
+    } catch(e) {
+        console.warn(e);
+        showToast('❌ 导入失败：文件格式错误');
+    }
+}
+
+async function doImportSelected(d, isNewFormat, ids) {
+    for (var i = 0; i < ids.length; i++) {
+        var entry = STORAGE_REGISTRY.find(function(e) { return e.id === ids[i]; });
+        if (!entry) continue;
+        var value = null;
+        if (isNewFormat) {
+            if (entry.type === 'idb') value = d.idb && d.idb[entry.id];
+            else if (entry.type === 'ls') value = d.ls && d.ls[entry.key];
+            else if (entry.type === 'ls-prefix') value = d.lsPrefix && d.lsPrefix[entry.prefix];
+        } else {
+            if (entry.type === 'idb') value = d[entry.id];
+        }
+        if (value === null || value === undefined) continue;
+        await restoreStorageItem(entry, value);
+    }
+
+    try {
+        loadCardOverrides();
+        var settings = await dbGetAll('settings');
+        settings.forEach(function(x) {
+            if (x.key === 'chatSettings') { try { S.chatSettings = JSON.parse(x.value); } catch(e) {} }
+            else if (x.key in S) S[x.key] = x.value;
+        });
+        var avatars = await dbGetAll('avatars');
+        avatars.forEach(function(x) {
+            if (x.key === 'myAvatar') S.myAvatar = x.data;
+            else if (x.key === 'contactAvatar') S.contactAvatar = x.data;
+        });
+        var savedTheme = localStorage.getItem('treehole_theme');
+        if (savedTheme !== null) applyTheme(parseInt(savedTheme) || 0);
+        updateHome();
+    } catch(e) {
+        console.warn('导入后刷新失败:', e);
+    }
+
+    showToast('✅ 导入完成，刷新页面后所有内容生效');
+}
+
 async function clearChat(){
     await dbClear('messages');
     var chatArea = document.getElementById('chatArea');
@@ -12513,6 +13350,8 @@ function openChatSettings(){
 '<div class="settings-row"><span style="color:var(--theme-text);">拼字卡模式</span><div class="toggle-switch ' + (cs.cardCombo !== false ? 'on' : '') + '" onclick="toggleChatSetting(\'cardCombo\',this)"></div></div>' +
 '<div style="font-size:11px;color:var(--theme-muted);padding:0 0 8px;line-height:1.5;">开启：抽多条字卡拼成一句话<br>关闭：只发单条字卡</div>' +
 '<div class="settings-row"><span style="color:var(--theme-text);">拼几条</span><input type="number" id="setCardMin" value="' + (cs.cardMin||1) + '" style="width:45px;text-align:center;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);border-radius:6px;padding:4px;"> ~ <input type="number" id="setCardMax" value="' + (cs.cardMax||4) + '" style="width:45px;text-align:center;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);border-radius:6px;padding:4px;"></div>' +
+probRow('触发词概率', 'triggerProb', cs.triggerProb !== undefined ? cs.triggerProb : 100) +
+'<div style="font-size:11px;color:var(--theme-muted);padding:0 12px 10px;line-height:1.5;text-align:right;">命中后有多少概率使用命中池，不受拼字卡开关影响</div>' +
 probRow('重复概率', 'cardRepeatProb', cs.cardRepeatProb) +
 probRow('删除概率', 'cardDeleteProb', cs.cardDeleteProb) +
 '</div>' +
@@ -13286,6 +14125,7 @@ var csDefaults = {
     quoteReplyProb: 10, readNotReplyProb: 50, emojiMixProb: 5,
     simCallProb: 1, patProb: 5, qinCollectProb: 5,
     cardMin: 1, cardMax: 4, cardRepeatProb: 30, cardDeleteProb: 50,
+    triggerProb: 100,
     autoSendCount: 1,
     moodEnabled: true, moodProb: 20, moodCooldown: 5,
     taMoodEnabled: true, taMoodProb: 15, taMoodCooldown: 5
@@ -13615,6 +14455,8 @@ if (localStorage.getItem('customBubbleEnabled') === 'true') {
 await bgLoadCardBgs();
 applyCardBgs();
 
+loadCardOverrides();
+
 console.log('🔍 开始初始化背景系统...');
 bgInit();
 console.log('✅ 背景系统初始化完成');
@@ -13856,6 +14698,31 @@ window.doEditCardContent = doEditCardContent;
 window.locateCard = locateCard;
 window.loadMoreAllCards = loadMoreAllCards;
 window.deleteEmojiConfirm = deleteEmojiConfirm;
+window.switchWordcardTab = switchWordcardTab;
+window.renderMoodTab = renderMoodTab;
+window.selectMoodGroup = selectMoodGroup;
+window.toggleMoodCardByEl = toggleMoodCardByEl;
+window.toggleMoodCard = toggleMoodCard;
+window.toggleAllMoodCards = toggleAllMoodCards;
+window.renderEmotionTab = renderEmotionTab;
+window.switchEmotionType = switchEmotionType;
+window.selectEmotionGroupByEl = selectEmotionGroupByEl;
+window.toggleEmotionCardByEl = toggleEmotionCardByEl;
+window.toggleEmotionCard = toggleEmotionCard;
+window.toggleAllEmotionCards = toggleAllEmotionCards;
+window.isEmotionCardOff = isEmotionCardOff;
+window.applyEmotionOverride = applyEmotionOverride;
+window.openEmotionCardEditorFromEl = openEmotionCardEditorFromEl;
+window.openEmotionCardEditor = openEmotionCardEditor;
+window.saveEmotionCardEdit = saveEmotionCardEdit;
+window.resetEmotionCardEdit = resetEmotionCardEdit;
+window.selectEmotionRarityChip = selectEmotionRarityChip;
+window.openMoodCardEditorFromEl = openMoodCardEditorFromEl;
+window.openMoodCardEditor = openMoodCardEditor;
+window.saveMoodCardEdit = saveMoodCardEdit;
+window.resetMoodCardEdit = resetMoodCardEdit;
+window.loadCardOverrides = loadCardOverrides;
+window.applyMoodOverride = applyMoodOverride;
 window.confirmBatchAddNew = confirmBatchAddNew;
 window.addEmojiToGroup = addEmojiToGroup;
 window.loadPatPanel = loadPatPanel;
@@ -13907,7 +14774,9 @@ window.renderTopicGacha = renderTopicGacha;
 window.gachaTopic = gachaTopic;
 window.shareTopicToChat = shareTopicToChat;
 window.TOPIC_DATA = TOPIC_DATA;
-
+window.STORAGE_REGISTRY = STORAGE_REGISTRY;
+window.showStoragePicker = showStoragePicker;
+window.doImportSelected = doImportSelected;
 window.openPresetPanel = openPresetPanel;
 window.doPresetImport = doPresetImport;
 window.openImportMenu = openImportMenu;
