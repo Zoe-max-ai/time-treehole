@@ -4772,11 +4772,39 @@ async function openChatPage(){
 }
 function toggleMorePanel() {
     var panel = document.getElementById('morePanel');
-    if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    if (!panel) return;
+    var isOpening = (panel.style.display === 'none' || !panel.style.display);
+    if (isOpening) {
+        panel.style.display = 'block';
+        // 延迟注册，避免当前点击立即触发
+        setTimeout(function() {
+            document.addEventListener('click', closeMorePanelOnOutside);
+        }, 0);
+    } else {
+        panel.style.display = 'none';
+        document.removeEventListener('click', closeMorePanelOnOutside);
+    }
+}
+
+function closeMorePanelOnOutside(e) {
+    var panel = document.getElementById('morePanel');
+    var btn = document.getElementById('btnMore');
+    if (!panel) return;
+    // 点在面板内 / 点在 + 按钮上 → 不关
+    if (panel.contains(e.target) || (btn && btn.contains(e.target))) return;
+    panel.style.display = 'none';
+    document.removeEventListener('click', closeMorePanelOnOutside);
+}
+
+function hideMorePanel() {
+    var panel = document.getElementById('morePanel');
+    if (panel) panel.style.display = 'none';
+    document.removeEventListener('click', closeMorePanelOnOutside);
 }
 function hideMorePanel() {
     var panel = document.getElementById('morePanel');
     if (panel) panel.style.display = 'none';
+    document.removeEventListener('click', closeMorePanelOnOutside);
 }
 function openDeliverEditor() {
     hideMorePanel();
@@ -5006,7 +5034,7 @@ w._msgData = m;  // 存消息数据到 DOM 元素上
     av.className = 'message-avatar';
     av.src = m.sender === 'me' ? getAvatar('me') : getAvatar('contact');
     if(m.sender === 'other') av.onclick = function(){ openProfile(); };
-const b = document.createElement('div');
+let b = document.createElement('div');
 b.className = 'bubble ' + (m.sender === 'me' ? 'sent preset-my' : 'received preset-other');
    // 预设样式由 CSS 控制，不设置内联样式
 // const preset = BUBBLE_PRESETS.find(p => p.id === S.bubbleStyle) || BUBBLE_PRESETS[0];
@@ -5032,15 +5060,27 @@ b.className = 'bubble ' + (m.sender === 'me' ? 'sent preset-my' : 'received pres
 } else if (m.type === 'deliver_reply') {
     b.innerHTML = '<div style="font-size:11px;color:#b59a9e;margin-bottom:6px;">✉️ 秦彻的回话</div>' +
         '<div style="font-size:14px;line-height:1.6;">' + m.content + '</div>';
-} else if(m.type === 'emoji' || m.type === 'image'){
-    const img = document.createElement('img');
-    img.src = m.content;
-    img.style.maxWidth = '150px';
-    img.style.maxHeight = '150px';
-    img.style.objectFit = 'contain';
-    img.style.borderRadius = '6px';
-    b.appendChild(img);
-} else if (m.quote) {
+    } else if (m.type === 'emoji') {
+        // 表情：不套气泡，直接显示图片
+        const img = document.createElement('img');
+        img.src = m.content;
+        img.style.maxWidth = '120px';
+        img.style.maxHeight = '120px';
+        img.style.objectFit = 'contain';
+        img.style.display = 'block';
+        img.style.marginTop = '2px';
+        w._emojiImg = img;   // 暂存，稍后 append
+        b.style.display = 'none';
+    } else if (m.type === 'image') {
+        // 用户发的图片：保留气泡
+        const img = document.createElement('img');
+        img.src = m.content;
+        img.style.maxWidth = '150px';
+        img.style.maxHeight = '150px';
+        img.style.objectFit = 'contain';
+        img.style.borderRadius = '6px';
+        b.appendChild(img);
+    }else if (m.quote) {
     // 引用回复：上面小字引用，下面大字正文
     const quoteEl = document.createElement('div');
     quoteEl.style.cssText = 'font-size:10px;color:#b8aaaa;font-style:italic;line-height:1.35;padding:0 0 3px 0;margin-bottom:5px;border-bottom:1px solid rgba(212,168,184,0.25);word-break:break-word;opacity:0.8;';
@@ -5055,8 +5095,9 @@ b.className = 'bubble ' + (m.sender === 'me' ? 'sent preset-my' : 'received pres
 } else {
     b.textContent = m.content;
 }
-   w.appendChild(av);
-w.appendChild(b);
+    w.appendChild(av);
+    w.appendChild(b);
+    if (w._emojiImg) w.appendChild(w._emojiImg);
 
 // ===== 情绪链渲染 =====
 if (m.mood && m.mood.length) {
@@ -5073,20 +5114,22 @@ if (m.mood && m.mood.length) {
 // ===== 情绪链渲染结束 =====
 
     // 长按/右键菜单
-    b.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-        showMessageMenu(m, b, e);
-    });
-   b.addEventListener('touchstart', function(e) {
-    var startTime = Date.now();
-    var bubble = this;
-    var touch = e.touches[0];
-    var timer = setTimeout(function() {
-        showMessageMenu(m, bubble, touch);
-    }, 600);
-    bubble.addEventListener('touchend', function() { clearTimeout(timer); }, { once: true });
-    bubble.addEventListener('touchmove', function() { clearTimeout(timer); }, { once: true });
-});
+    if (b) {
+        b.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            showMessageMenu(m, b, e);
+        });
+        b.addEventListener('touchstart', function(e) {
+            var startTime = Date.now();
+            var bubble = this;
+            var touch = e.touches[0];
+            var timer = setTimeout(function() {
+                showMessageMenu(m, bubble, touch);
+            }, 600);
+            bubble.addEventListener('touchend', function() { clearTimeout(timer); }, { once: true });
+            bubble.addEventListener('touchmove', function() { clearTimeout(timer); }, { once: true });
+        });
+    }
 
     ca.appendChild(w);
     scrollBottom();
@@ -5628,10 +5671,20 @@ async function autoReply(triggerText) {
     }, delay);
 }
 async function executeReply(cnt, scheduledTime, triggerText, pendingId, triggerTime) {
-console.log('🔥 executeReply 被调用，cnt:', cnt);
-    // 移除"正在输入..."提示
-    var ti = document.querySelector('.typing-indicator');
-    if (ti) ti.remove();
+    // ===== 加锁：防同一 pendingId 并发执行 =====
+    if (pendingId) {
+        if (!window._executingReplies) window._executingReplies = new Set();
+        if (window._executingReplies.has(pendingId)) {
+            console.log('🔒 pending 已在执行中，跳过:', pendingId);
+            return;
+        }
+        window._executingReplies.add(pendingId);
+    }
+
+    try {
+        // 移除"正在输入..."提示
+        var ti = document.querySelector('.typing-indicator');
+        if (ti) ti.remove();
     
     const cs = S.chatSettings;
     
@@ -5669,47 +5722,72 @@ console.log('🔥 executeReply 被调用，cnt:', cnt);
     }
 
     for (let i = 0; i < cnt; i++) {
-        let c = await smartComposeReply(triggerText);
-        const m = { sender: 'other', content: c, type: 'text', timestamp: scheduledTime || Date.now() };
-        if (quoteText) m.quote = quoteText;
+        // ===== 判断这一条的形态：文字 or 表情 =====
+        var isEmoji = cs.emojiMix && Math.random() < ((cs.emojiMixProb || 5) / 100);
 
-        // ===== 情绪链 =====
-        const emotionChain = await triggerEmotionChain();
-        if (emotionChain) {
-            m.mood = emotionChain;
-        }
-        // ===== 情绪链结束 =====
+        if (isEmoji) {
+            var emojiList = await dbGetAll('emojis');
+            if (emojiList && emojiList.length > 0) {
+                var emoji = emojiList[Math.floor(Math.random() * emojiList.length)];
+                if (emoji && emoji.data) {
+                    var emojiMsg = { sender: 'other', content: emoji.data, type: 'emoji', timestamp: scheduledTime || Date.now() };
+                    var emojiId = await dbPut('messages', emojiMsg);
+                    emojiMsg.id = emojiId;
+                    renderMsg(emojiMsg);
+                    scrollBottom();
+                }
+            }
+        } else {
+            let c = await smartComposeReply(triggerText);
+            const m = { sender: 'other', content: c, type: 'text', timestamp: scheduledTime || Date.now() };
+            if (quoteText) m.quote = quoteText;
 
-        const id = await dbPut('messages', m);
-        m.id = id;
-        renderMsg(m);
-        scrollBottom();
+            // ===== 情绪链 =====
+            const emotionChain = await triggerEmotionChain();
+            if (emotionChain) {
+                m.mood = emotionChain;
+            }
+            // ===== 情绪链结束 =====
 
-        // 秦彻随机收藏（保持原逻辑不变）
-        if (Math.random() < ((cs.qinCollectProb || 5) / 100)) {
-            // ...原收藏逻辑...
+            const id = await dbPut('messages', m);
+            m.id = id;
+            renderMsg(m);
+            scrollBottom();
+
+            // ===== 秦彻随机收藏 =====
+            if (Math.random() < ((cs.qinCollectProb || 5) / 100)) {
+                var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
+                var allMsgs = await dbGetAll('messages');
+
+                var today = new Date();
+                today.setHours(0, 0, 0, 0);
+                var todayMsgs = allMsgs.filter(function(x) {
+                    return x.sender === 'me' &&
+                           x.type === 'text' &&
+                           x.timestamp >= today.getTime();
+                });
+
+                if (todayMsgs.length > 0) {
+                    var pick = todayMsgs[Math.floor(Math.random() * todayMsgs.length)];
+                    collected.push({
+                        id: Date.now(),
+                        sender: 'me',
+                        content: pick.content,
+                        time: fmtTime(pick.timestamp),
+                        timestamp: pick.timestamp,
+                        collectedBy: 'qin'
+                    });
+                    localStorage.setItem('collectedMessages', JSON.stringify(collected));
+                    addSysMsg('📌 秦彻收藏了你的一条消息', scheduledTime || Date.now());
+                }
+            }
+            // ===== 收藏结束 =====
         }
 
         if (i < cnt - 1) await new Promise(r => setTimeout(r, 800 + Math.random() * 3000));
     }
 
-    // ===== 循环外：表情、拍一拍、来电（整个回复结束只触发一次） =====
-    // 发表情
-    if (cs.emojiMix && Math.random() < ((cs.emojiMixProb || 5) / 100)) {
-        var emojiList = await dbGetAll('emojis');
-        if (emojiList && emojiList.length > 0) {
-            var emoji = emojiList[Math.floor(Math.random() * emojiList.length)];
-            if (emoji && emoji.data) {
-                var emojiMsg = { sender: 'other', content: emoji.data, type: 'emoji', timestamp: scheduledTime || Date.now() };
-                var emojiId = await dbPut('messages', emojiMsg);
-                emojiMsg.id = emojiId;
-                renderMsg(emojiMsg);
-                scrollBottom();
-            }
-        }
-    }
-
-    // 拍一拍
+    // ===== 循环外：拍一拍、来电（不再有表情） =====
     if (Math.random() < ((cs.patProb || 5) / 100) && patOptions.length > 0) {
         var pat = patOptions[Math.floor(Math.random() * patOptions.length)];
         var patMsg = { sender: 'other', content: pat, type: 'pat', timestamp: scheduledTime || Date.now() };
@@ -5720,12 +5798,11 @@ console.log('🔥 executeReply 被调用，cnt:', cnt);
         triggerPat(S.contactName, pat);
     }
 
-    // 模拟来电
     if (cs.simCall && Math.random() < ((cs.simCallProb || 1) / 100) && callState === 'idle') {
         setTimeout(function() { startCallFromQinChe(); }, 2000);
     }
     // ===== 循环外结束 =====
-    
+
     // ===== TA 的心情：回复完成后，额外判断一次 =====
     setTimeout(async function() {
         const moodShare = await tryTaMoodShare();
@@ -5751,25 +5828,50 @@ console.log('🔥 executeReply 被调用，cnt:', cnt);
         pendings = pendings.filter(function(p) { return p.id !== pendingId; });
         localStorage.setItem('pendingChatReplies', JSON.stringify(pendings));
     }
+
+    } finally {
+        // 无论成败，从锁集合移除
+        if (pendingId && window._executingReplies) {
+            window._executingReplies.delete(pendingId);
+        }
+    }
 }
 
 function checkPendingReply() {
+    // 页面不可见 → 不补发（用户看不到，等可见再说）
+    if (document.visibilityState !== 'visible') return;
+
     var pendings = JSON.parse(localStorage.getItem('pendingChatReplies') || '[]');
     if (pendings.length === 0) return;
 
     var now = Date.now();
+    var grace = 15 * 1000;   // 15 秒宽限：给 setTimeout 恢复执行的时间
     var remaining = [];
 
     pendings.forEach(function(p) {
-        if (now >= p.replyAt && !p.done) {
-            console.log('⏰ 补发 pending，trigger:', p.triggerText);
-            var ti = document.querySelector('.typing-indicator');
-            if (ti) ti.remove();
-            p.done = true;   // 标记，防止二次补发
-            executeReply(p.cnt, p.replyAt, p.triggerText, p.id, p.triggerTime);
-        } else {
+        if (p.done) {
             remaining.push(p);
+            return;
         }
+
+        // 未到点 → 保留
+        if (now < p.replyAt) {
+            remaining.push(p);
+            return;
+        }
+
+        // 15 秒内 → 信 setTimeout
+        if (now < p.replyAt + grace) {
+            remaining.push(p);
+            return;
+        }
+
+        // 超期 → 补发
+        console.log('⏰ 补发 pending:', p.triggerText);
+        var ti = document.querySelector('.typing-indicator');
+        if (ti) ti.remove();
+        p.done = true;
+        executeReply(p.cnt, p.replyAt, p.triggerText, p.id, p.triggerTime);
     });
 
     localStorage.setItem('pendingChatReplies', JSON.stringify(remaining));
@@ -6570,6 +6672,9 @@ async function handleImageMessage(event){
     renderMsg(msg);
     autoReply();
     event.target.value = '';
+    // 关闭 + 面板
+    const morePanel = document.getElementById('morePanel');
+    if (morePanel) morePanel.style.display = 'none';
 }
 // ============ 表情面板 ============
 async function getEmojiGroups() {
@@ -6615,7 +6720,23 @@ async function switchManageGroup(group) {
     }
     renderEmojiManage();
 }
-async function sendEmoji(id){const emojis=await dbGetAll('emojis');const e=emojis.find(item=>item.id==id);if(e&&e.data){const m={sender:'me',content:e.data,type:'emoji',timestamp:Date.now()};const newId=await dbPut('messages',m);m.id=newId;renderMsg(m);scrollBottom();autoReply();}}
+async function sendEmoji(id){
+    const emojis = await dbGetAll('emojis');
+    const e = emojis.find(item => item.id == id);
+    if (e && e.data) {
+        const m = {sender:'me', content:e.data, type:'emoji', timestamp:Date.now()};
+        const newId = await dbPut('messages', m);
+        m.id = newId;
+        renderMsg(m);
+        scrollBottom();
+        autoReply();
+        // 发送后自动关闭面板
+        const panel = document.getElementById('emojiPanel');
+        if (panel && panel.classList.contains('show')) {
+            panel.classList.remove('show');
+        }
+    }
+}
 async function loadEmojiPanel(force){
     // 非强制刷新时，如果已渲染过就跳过
     if (!force) {
@@ -6704,11 +6825,44 @@ function addEmojiToGroup() {
     document.getElementById('emojiInput').click();
 }
 async function addPatChat(){const v=document.getElementById('newPatChat').value.trim();if(!v)return;if(patOptions.includes(v)){showToast('已存在');return;}patOptions.push(v);await dbPut('patOptions',{content:v,timestamp:Date.now()});loadPatPanel();}
-function switchEmojiTab(tab){document.querySelectorAll('.emoji-tab').forEach(t=>{t.classList.toggle('active',t.textContent.includes(tab==='emoji'?'表情':'拍一拍'));});if(tab==='emoji')loadEmojiPanel();else loadPatPanel();}
+function switchEmojiTab(tab){
+    document.querySelectorAll('.emoji-tab').forEach(t=>{
+        t.classList.toggle('active',t.textContent.includes(tab==='emoji'?'表情':'拍一拍'));
+    });
+    if(tab==='emoji')loadEmojiPanel(true);
+    else loadPatPanel();
+}
 function toggleEmojiPanel(){
     const p = document.getElementById('emojiPanel');
+    const isOpening = !p.classList.contains('show');
     p.classList.toggle('show');
-    if (p.classList.contains('show')) switchEmojiTab('emoji');
+    if (isOpening) {
+        switchEmojiTab('emoji');
+        setTimeout(function() {
+            document.addEventListener('click', closeEmojiPanelOnOutside);
+        }, 0);
+    } else {
+        document.removeEventListener('click', closeEmojiPanelOnOutside);
+    }
+}
+
+function closeEmojiPanelOnOutside(e) {
+    var panel = document.getElementById('emojiPanel');
+    if (!panel) return;
+    // 点在面板内 / 点在更多面板内 → 不关
+    var morePanel = document.getElementById('morePanel');
+    if (panel.contains(e.target)) return;
+    if (morePanel && morePanel.contains(e.target)) return;
+    // 点在输入框、发送按钮、+ 按钮上 → 不关
+    var input = document.getElementById('messageInput');
+    if (input && input.contains(e.target)) return;
+    var btnMore = document.getElementById('btnMore');
+    if (btnMore && btnMore.contains(e.target)) return;
+    var sendBtn = document.getElementById('sendBtn');
+    if (sendBtn && sendBtn.contains(e.target)) return;
+
+    panel.classList.remove('show');
+    document.removeEventListener('click', closeEmojiPanelOnOutside);
 }
 
 async function addEmojiGroup() {
@@ -6808,7 +6962,49 @@ async function addEmojiGroupFromManage() {
     loadEmojiPanel(true);
     showToast('✅ 已创建');
 }
-async function handleEmojiUpload(event){const files=event.target.files;if(!files||files.length===0)return;const g=JSON.parse(await getCal('emojiGroups','["全部"]'));const group=await new Promise(r=>{const s='<select id="egs" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-bottom:12px;"><option value="">新建...</option>'+g.map(x=>'<option value="'+x+'">'+x+'</option>').join('')+'</select><input type="text" id="egni" placeholder="新分组名" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-bottom:12px;display:none;">';const ov=document.createElement('div');ov.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';ov.innerHTML='<div style="background:var(--home-card-bg);border-radius:16px;padding:20px;width:300px;"><h4>选择分组</h4>'+s+'<div style="display:flex;gap:8px;"><button id="ecb" style="flex:1;padding:10px;border-radius:8px;background:#f0f0f0;">取消</button><button id="eok" style="flex:1;padding:10px;border-radius:8px;background:var(--theme-primary);color:#fff;">确定</button></div></div>';document.body.appendChild(ov);const sel=document.getElementById('egs');const ni=document.getElementById('egni');sel.onchange=()=>ni.style.display=sel.value===''?'block':'none';document.getElementById('ecb').onclick=()=>{ov.remove();r(null);};document.getElementById('eok').onclick=()=>{let v=sel.value;if(v===''){v=ni.value.trim();if(!v){alert('请输入分组名称');return;}}ov.remove();r(v);};});if(group===null){event.target.value='';return;}const fg=group||'全部';let ac=0,sc=0;for(let f of files){let d;if(f.size>100*1024)d=await compressImage(f,150,150);else d=await fileToDataUrl(f);if(d.length>300*1024){sc++;continue;}try{await dbPut('emojis',{data:d,group:fg,timestamp:Date.now()});ac++;}catch(e){sc++;}}if(fg!=='全部'&&!g.includes(fg)){g.push(fg);await setCal('emojiGroups',JSON.stringify(g));}loadEmojiPanel();if(typeof renderEmojiManage==='function')renderEmojiManage();showToast('✅ 已添加'+ac+'个'+(sc>0?'，跳过'+sc+'个':''));event.target.value='';}
+async function handleEmojiUpload(event){
+    const files=event.target.files;
+    if(!files||files.length===0)return;
+    const g=JSON.parse(await getCal('emojiGroups','["全部"]'));
+    const group=await new Promise(r=>{
+        const s='<select id="egs" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-bottom:12px;"><option value="">新建...</option>'+g.map(x=>'<option value="'+x+'">'+x+'</option>').join('')+'</select><input type="text" id="egni" placeholder="新分组名" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-bottom:12px;display:none;">';
+        const ov=document.createElement('div');
+        ov.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+        ov.innerHTML='<div style="background:var(--home-card-bg);border-radius:16px;padding:20px;width:300px;"><h4>选择分组</h4>'+s+'<div style="display:flex;gap:8px;"><button id="ecb" style="flex:1;padding:10px;border-radius:8px;background:#f0f0f0;">取消</button><button id="eok" style="flex:1;padding:10px;border-radius:8px;background:var(--theme-primary);color:#fff;">确定</button></div></div>';
+        document.body.appendChild(ov);
+        const sel=document.getElementById('egs');
+        const ni=document.getElementById('egni');
+        sel.onchange=()=>ni.style.display=sel.value===''?'block':'none';
+        document.getElementById('ecb').onclick=()=>{ov.remove();r(null);};
+        document.getElementById('eok').onclick=()=>{
+            let v=sel.value;
+            if(v===''){v=ni.value.trim();if(!v){alert('请输入分组名称');return;}}
+            ov.remove();
+            r(v);
+        };
+    });
+    if(group===null){event.target.value='';return;}
+    const fg=group||'全部';
+    let ac=0,sc=0;
+    for(let f of files){
+        let d;
+        if(f.size>100*1024)d=await compressImage(f,150,150);
+        else d=await fileToDataUrl(f);
+        if(d.length>300*1024){sc++;continue;}
+        try{
+            await dbPut('emojis',{data:d,group:fg,timestamp:Date.now()});
+            ac++;
+        }catch(e){sc++;}
+    }
+    if(fg!=='全部'&&!g.includes(fg)){
+        g.push(fg);
+        await setCal('emojiGroups',JSON.stringify(g));
+    }
+    loadEmojiPanel(true);
+    if(typeof renderEmojiManage==='function')renderEmojiManage();
+    showToast('✅ 已添加'+ac+'个'+(sc>0?'，跳过'+sc+'个':''));
+    event.target.value='';
+}
 
 // ============ 表情包管理 ============
 function openEmojiManage(){showPage('emojiManagePage');renderEmojiManage();}
