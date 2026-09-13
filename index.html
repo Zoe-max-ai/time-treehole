@@ -323,7 +323,14 @@ html body.custom-bubble-active .message-wrapper.left .bubble {
 .bottombar .icon-btn{width:38px;height:38px;border-radius:50%;background:var(--theme-primary);border:1px solid var(--theme-primary);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:#fff;transition:all .15s;flex-shrink:0;}
 .bottombar input{flex:1;border:1px solid var(--theme-input-border);border-radius:24px;padding:10px 16px;font-size:14px;outline:none;background:var(--theme-input-bg);color:var(--theme-text);min-width:0;}
 .bottombar .send-btn{width:38px;height:38px;border-radius:50%;background:var(--theme-primary);color:#fff;border:none;font-size:15px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-        .emoji-panel{display:none;background:var(--theme-card);border-top:1px solid var(--theme-border);flex-shrink:0;max-height:240px;flex-direction:column;}
+.emoji-panel{
+    display:none;
+    background:var(--theme-card);
+    border-top:none;
+    flex-shrink:0;
+    max-height:240px;
+    flex-direction:column;
+}
         .emoji-panel.show{display:flex;}
         .emoji-panel .emoji-tabs{display:flex;border-bottom:1px solid var(--theme-border);flex-shrink:0;}
         .emoji-panel .emoji-tab{flex:1;padding:9px;text-align:center;font-size:12px;cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;color:var(--text-light);}
@@ -906,6 +913,61 @@ html body.custom-bubble-active .message-wrapper.left .bubble {
     border-color: var(--theme-primary);
 }
 
+/* ===== 底部 + 号面板（微信风格，撑在输入栏下方） ===== */
+.more-panel {
+    display: none;
+    background: var(--theme-card);
+    border-top: none;
+    padding: 16px 8px calc(16px + env(safe-area-inset-bottom, 0px));
+    grid-template-columns: repeat(5, 1fr);
+    gap: 18px 10px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+.more-panel.show {
+    display: grid;
+}
+
+.more-panel-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+.more-panel-item .icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--theme-input-bg);
+    border: 1px solid var(--theme-input-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    transition: transform 0.12s, background 0.15s;
+}
+.more-panel-item:active .icon {
+    background: rgba(0, 0, 0, 0.06);
+    transform: scale(0.94);
+}
+.more-panel-item .icon svg {
+    width: 22px;
+    height: 22px;
+    stroke: var(--theme-text);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+}
+.more-panel-item .label {
+    font-size: 11px;
+    color: var(--theme-muted);
+    letter-spacing: 0.3px;
+}
+
     </style>
 <!-- ===== 农历库 ===== -->
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.min.js"></script>
@@ -1068,21 +1130,47 @@ html body.custom-bubble-active .message-wrapper.left .bubble {
 <span class="chat-settings-cat" onclick="openChatSettings()">😸</span>
 </div>
     <div class="chat-area" id="chatArea"><div style="text-align:center;color:#ccc;padding:40px;">💬 开始你们的对话吧</div></div>
-    <div class="emoji-panel" id="emojiPanel"><div class="emoji-tabs"><button class="emoji-tab active" onclick="switchEmojiTab('emoji')">😊 表情包</button><button class="emoji-tab" onclick="switchEmojiTab('pat')">👋 拍一拍</button></div><div class="tab-content" id="emojiTabContent"></div></div>
-    <div class="bottombar" style="position:relative;">
+
+<div class="bottombar" style="position:relative;">
     <button class="icon-btn" id="btnMore" onclick="toggleMorePanel()" style="font-size:22px;">＋</button>
     <input type="text" id="messageInput" placeholder="说点什么..." onkeydown="if(event.key==='Enter'){sendMessage();}">
     <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
 </div>
-<div id="morePanel" style="display:none;position:absolute;bottom:60px;left:12px;background:#fff;border:1px solid #f0d9dc;border-radius:12px;padding:10px;z-index:100;flex-direction:column;gap:12px;">
-    <button onclick="startCall();hideMorePanel();" style="padding:8px 14px;border:1px solid var(--theme-primary);background:var(--theme-card);border-radius:20px;cursor:pointer;font-size:13px;color:var(--theme-primary);display:flex;align-items:center;gap:8px;">📞 通话</button>
-    <button onclick="toggleEmojiPanel();hideMorePanel();" style="padding:8px 14px;border:1px solid var(--theme-primary);background:var(--theme-card);border-radius:20px;cursor:pointer;font-size:13px;color:var(--theme-primary);display:flex;align-items:center;gap:8px;">😊 表情</button>
-    <button onclick="document.getElementById('imageMsgInput').click();hideMorePanel();" style="padding:8px 14px;border:1px solid var(--theme-primary);background:var(--theme-card);border-radius:20px;cursor:pointer;font-size:13px;color:var(--theme-primary);display:flex;align-items:center;gap:8px;">🖼️ 图片</button>
-    <button onclick="openDeliverEditor();" style="padding:8px 14px;border:1px solid var(--theme-primary);background:var(--theme-card);border-radius:20px;cursor:pointer;font-size:13px;color:var(--theme-primary);display:flex;align-items:center;gap:8px;">✉️ 递话</button>
-<button onclick="openHeartStation();hideMorePanel();" style="padding:8px 14px;border:1px solid var(--theme-primary);background:var(--theme-card);border-radius:20px;cursor:pointer;font-size:13px;color:var(--theme-primary);display:flex;align-items:center;gap:8px;">💗 更多</button>
-</div>
-</div></div>
 
+    <div class="emoji-panel" id="emojiPanel"><div class="emoji-tabs"><button class="emoji-tab active" onclick="switchEmojiTab('emoji')">😊 表情包</button><button class="emoji-tab" onclick="switchEmojiTab('pat')">👋 拍一拍</button></div><div class="tab-content" id="emojiTabContent"></div></div>
+
+<div id="morePanel" class="more-panel">
+    <div class="more-panel-item" onclick="startCall();hideMorePanel();">
+        <div class="icon">
+            <svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.4 2.1L8 9.7a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/></svg>
+        </div>
+        <div class="label">通话</div>
+    </div>
+    <div class="more-panel-item" onclick="toggleEmojiPanel();hideMorePanel();">
+        <div class="icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        </div>
+        <div class="label">表情</div>
+    </div>
+    <div class="more-panel-item" onclick="document.getElementById('imageMsgInput').click();hideMorePanel();">
+        <div class="icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <div class="label">图片</div>
+    </div>
+    <div class="more-panel-item" onclick="openDeliverEditor();">
+        <div class="icon">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div class="label">递话</div>
+    </div>
+    <div class="more-panel-item" onclick="openHeartStation();hideMorePanel();">
+        <div class="icon">
+            <svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        </div>
+        <div class="label">更多</div>
+    </div>
+</div>
 <div class="call-fullscreen" id="callFullscreen">
     <button id="callMinBtn" onclick="minimizeCall()" style="display:none;position:absolute;top:24px;right:20px;background:rgba(255,255,255,0.2);border:none;color:#fff;padding:8px 18px;border-radius:20px;cursor:pointer;font-size:13px;">▼ 最小化</button>
     <img class="call-avatar-lg ringing" id="callAvatarLg" src=""><div id="callNameLg" style="font-size:24px;font-weight:600;margin-bottom:8px;">秦彻</div>
@@ -1098,6 +1186,8 @@ html body.custom-bubble-active .message-wrapper.left .bubble {
 <div class="chat-settings-overlay" id="chatSettingsOverlay" onclick="if(event.target===this)closeChatSettings()"><div class="chat-settings-panel" id="chatSettingsPanel"></div></div>
 <div class="batch-add-modal" id="batchAddModal"><div class="modal-content"><h4 style="text-align:center;margin-bottom:12px;">📝 批量添加</h4><textarea id="batchAddTextarea" placeholder="输入字卡内容，每行一个..." style="border:1.5px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);"></textarea><select id="batchGroupSelect" style="margin:8px 0;border:1.5px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);"></select><div style="display:flex;gap:8px;"><button style="flex:1;padding:10px;border-radius:20px;background:var(--btn-secondary);color:var(--btn-secondary-text);border:1px solid var(--btn-secondary-border);cursor:pointer;" onclick="closeBatchAdd()">取消</button><button style="flex:1;padding:10px;border-radius:20px;background:var(--theme-primary);color:#fff;border:none;cursor:pointer;" onclick="confirmBatchAdd()">确认</button></div></div></div>
 <div class="profile-overlay" id="profileOverlay" onclick="if(event.target===this)closeProfile()"><div class="profile-card"><img id="pfAvatar" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 10px;border:3px solid #f0f0f0;"><div id="pfName" style="font-size:18px;font-weight:700;"></div><div style="display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:16px;font-size:13px;margin:6px 0 14px;background:#f0f9f0;color:#4a8a4a;"><span style="width:6px;height:6px;border-radius:50%;background:#4cd964;"></span><span id="pfStatus"></span></div><div style="background:#fdf8ff;border-radius:14px;padding:14px;margin-bottom:16px;"><div style="font-size:11px;color:#b0a0c0;">💭 秦彻想说</div><div id="pfMood" style="font-size:14px;color:#5a4a6a;"></div></div><button onclick="triggerPat(S.contactName)" style="padding:8px 20px;border-radius:20px;background:var(--theme-primary);color:#fff;border:none;cursor:pointer;">👋 拍一拍</button><button onclick="closeProfile()" style="display:block;width:100%;padding:10px;border-radius:16px;background:#f0f0f0;color:#666;border:none;cursor:pointer;margin-top:8px;">关闭</button></div></div>
+</div> 
+</div> 
 <div class="page" id="heartStationPage">
     <div class="navbar">
         <button class="back-btn" onclick="goHome()">←</button>
@@ -6763,44 +6853,86 @@ async function openChatPage(){
             bgApplyVars('chat', bgChatConfig);
         }, 50);
     }
-}
-function toggleMorePanel() {
-    var panel = document.getElementById('morePanel');
-    if (!panel) return;
-    var isOpening = (panel.style.display === 'none' || !panel.style.display);
-    if (isOpening) {
-        panel.style.display = 'block';
-        // 延迟注册，避免当前点击立即触发
-        setTimeout(function() {
-            document.addEventListener('click', closeMorePanelOnOutside);
-        }, 0);
-    } else {
-        panel.style.display = 'none';
-        document.removeEventListener('click', closeMorePanelOnOutside);
+// ↓↓↓ 加在这里 ↓↓↓
+    // 点聊天区收起面板
+    var chatAreaEl = document.getElementById('chatArea');
+    if (chatAreaEl && !chatAreaEl.dataset.panelBound) {
+        chatAreaEl.dataset.panelBound = '1';
+        chatAreaEl.addEventListener('click', function() {
+            if (openBottomPanel) closeAllBottomPanels();
+        });
+    }
+
+    // 点输入框收起面板
+    var inputEl = document.getElementById('messageInput');
+    if (inputEl && !inputEl.dataset.panelBound) {
+        inputEl.dataset.panelBound = '1';
+        inputEl.addEventListener('focus', function() {
+            if (openBottomPanel) closeAllBottomPanels();
+        });
     }
 }
 
-function closeMorePanelOnOutside(e) {
+
+// 全局：追踪当前打开的底部面板（null / 'more' / 'emoji'）
+var openBottomPanel = null;
+
+function closeAllBottomPanels() {
+    var morePanel = document.getElementById('morePanel');
+    var emojiPanel = document.getElementById('emojiPanel');
+    if (morePanel) morePanel.classList.remove('show');
+    if (emojiPanel) emojiPanel.classList.remove('show');
+    openBottomPanel = null;
+}
+
+function toggleMorePanel() {
     var panel = document.getElementById('morePanel');
-    var btn = document.getElementById('btnMore');
     if (!panel) return;
-    // 点在面板内 / 点在 + 按钮上 → 不关
-    if (panel.contains(e.target) || (btn && btn.contains(e.target))) return;
-    panel.style.display = 'none';
-    document.removeEventListener('click', closeMorePanelOnOutside);
+
+    // 已经打开 → 收起
+    if (openBottomPanel === 'more') {
+        closeAllBottomPanels();
+        return;
+    }
+
+    // 打开 + 面板（先关掉其他）
+    closeAllBottomPanels();
+    panel.classList.add('show');
+    openBottomPanel = 'more';
 }
 
 function hideMorePanel() {
-    var panel = document.getElementById('morePanel');
-    if (panel) panel.style.display = 'none';
-    document.removeEventListener('click', closeMorePanelOnOutside);
+    if (openBottomPanel === 'more') {
+        var panel = document.getElementById('morePanel');
+        if (panel) panel.classList.remove('show');
+        openBottomPanel = null;
+    }
 }
-function hideMorePanel() {
-    var panel = document.getElementById('morePanel');
-    if (panel) panel.style.display = 'none';
-    document.removeEventListener('click', closeMorePanelOnOutside);
+
+function closeMorePanelOnOutside() {
+    // 保留空函数，防止旧引用报错
 }
+
+function toggleEmojiPanel(){
+    var p = document.getElementById('emojiPanel');
+    if (!p) return;
+
+    // 已经打开 → 收起
+    if (openBottomPanel === 'emoji') {
+        closeAllBottomPanels();
+        return;
+    }
+
+    // 打开表情面板（先关掉其他）
+    closeAllBottomPanels();
+    p.classList.add('show');
+    openBottomPanel = 'emoji';
+    switchEmojiTab('emoji');
+}
+
+
 function openDeliverEditor() {
+closeAllBottomPanels();
     hideMorePanel();
     var editor = document.getElementById('deliverEditor');
     if (!editor) {
@@ -7093,15 +7225,16 @@ b.className = 'bubble ' + (m.sender === 'me' ? 'sent preset-my' : 'received pres
     w.appendChild(b);
     if (w._emojiImg) w.appendChild(w._emojiImg);
 
+
 // ===== 情绪链渲染 =====
 if (m.mood && m.mood.length) {
     const moodBox = document.createElement('div');
-    moodBox.style.cssText = 'display:flex;flex-direction:column;gap:4px;margin-top:6px;padding:8px 12px;background:rgba(212,168,184,0.08);border-radius:10px;max-width:100%;';
-    m.mood.forEach(function(item) {
-        const line = document.createElement('div');
-        line.style.cssText = 'font-size:12px;color:var(--theme-muted);line-height:1.5;';
-        line.innerHTML = '<span style="color:var(--theme-primary);margin-right:4px;">' + item.tag + '</span>' + item.content;
-        moodBox.appendChild(line);
+    moodBox.style.cssText = 'display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:6px;padding:0;background:transparent;max-width:100%;font-size:12px;line-height:1.6;';
+    m.mood.forEach(function(item, idx) {
+        const span = document.createElement('span');
+        span.style.cssText = 'color:var(--theme-muted);white-space:nowrap;';
+        span.innerHTML = '<span style="color:var(--theme-primary);margin-right:3px;font-size:10px;letter-spacing:0.5px;">' + item.tag + '</span>' + item.content;
+        moodBox.appendChild(span);
     });
     w.appendChild(moodBox);
 }
@@ -7590,6 +7723,7 @@ async function sendMessage() {
     await loadMessages();
     scrollBottom();
     input.value = '';
+closeAllBottomPanels();  // ← 加这行
     // 等加载完再触发回复（把刚发的内容作为触发词）
     autoReply(c);
 }
@@ -8794,10 +8928,7 @@ async function sendEmoji(id){
         scrollBottom();
         autoReply();
         // 发送后自动关闭面板
-        const panel = document.getElementById('emojiPanel');
-        if (panel && panel.classList.contains('show')) {
-            panel.classList.remove('show');
-        }
+closeAllBottomPanels();
     }
 }
 async function loadEmojiPanel(force){
@@ -8895,19 +9026,7 @@ function switchEmojiTab(tab){
     if(tab==='emoji')loadEmojiPanel(true);
     else loadPatPanel();
 }
-function toggleEmojiPanel(){
-    const p = document.getElementById('emojiPanel');
-    const isOpening = !p.classList.contains('show');
-    p.classList.toggle('show');
-    if (isOpening) {
-        switchEmojiTab('emoji');
-        setTimeout(function() {
-            document.addEventListener('click', closeEmojiPanelOnOutside);
-        }, 0);
-    } else {
-        document.removeEventListener('click', closeEmojiPanelOnOutside);
-    }
-}
+
 
 function closeEmojiPanelOnOutside(e) {
     var panel = document.getElementById('emojiPanel');
@@ -13224,6 +13343,7 @@ async function doImportCards(fileCats, selectedKeys, dupMode, importMode) {
 }
 
 function openHeartStation(){
+closeAllBottomPanels();
     showPage('heartStationPage');
     renderHeartStation();
 }
@@ -14936,14 +15056,26 @@ async function renderWishSubContent() {
             h += '<div style="background:var(--theme-card);border-radius:16px;padding:40px 20px;text-align:center;border:1px solid var(--theme-border);color:var(--theme-muted);font-size:14px;">✨ 还没有愿望，写一个吧</div>';
         } else {
             wishes.slice().reverse().forEach(function(w) {
-                h += '<div style="background:var(--theme-card);border-radius:16px;padding:14px 18px;border:1px solid var(--theme-border);box-shadow:0 2px 8px rgba(0,0,0,0.04);display:flex;align-items:center;gap:12px;">' +
-                   '<span onclick="toggleWish(' + w.id + ')" style="cursor:pointer;font-size:16px;color:' + (w.done ? 'var(--theme-primary)' : 'var(--theme-muted)') + ';">' + (w.done ? '●' : '○') + '</span>'+
-                    '<div style="flex:1;">' +
-                    '<div style="font-size:15px;color:var(--theme-text);text-decoration:' + (w.done ? 'line-through' : 'none') + ';word-break:break-word;">' + w.content + '</div>' +
-                    '<div style="font-size:10px;color:var(--theme-muted);margin-top:2px;">' + w.time + '</div>' +
-                    '</div>' +
-                    '<span onclick="deleteWish(' + w.id + ')" style="cursor:pointer;color:var(--theme-primary);font-size:16px;flex-shrink:0;">✕</span>' +
-                    '</div>';
+h += '<div style="background:var(--theme-card);border-radius:16px;padding:14px 18px;border:1px solid var(--theme-border);box-shadow:0 2px 8px rgba(0,0,0,0.04);display:flex;align-items:center;gap:12px;">' +
+    '<span onclick="toggleWish(' + w.id + ')" style="cursor:pointer;font-size:16px;color:' + (w.done ? 'var(--theme-primary)' : 'var(--theme-muted)') + ';flex-shrink:0;width:20px;text-align:center;">' + (w.done ? '●' : '○') + '</span>' +
+    '<div style="flex:1;min-width:0;word-break:break-word;overflow-wrap:anywhere;">' +
+        '<div style="font-size:15px;color:var(--theme-text);text-decoration:' + (w.done ? 'line-through' : 'none') + ';line-height:1.5;">' + w.content + '</div>' +
+        '<div style="font-size:10px;color:var(--theme-muted);margin-top:2px;">' + w.time + '</div>' +
+    '</div>' +
+    '<span onclick="shareWishToChat(\'' + w.id + '\')" style="cursor:pointer;color:var(--theme-muted);flex-shrink:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;">' +
+        '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:block;">' +
+            '<path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/>' +
+            '<polyline points="16 6 12 2 8 6"/>' +
+            '<line x1="12" y1="2" x2="12" y2="15"/>' +
+        '</svg>' +
+    '</span>' +
+    '<span onclick="deleteWish(' + w.id + ')" style="cursor:pointer;color:var(--theme-primary);flex-shrink:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;">' +
+        '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;">' +
+            '<line x1="6" y1="6" x2="18" y2="18"/>' +
+            '<line x1="18" y1="6" x2="6" y2="18"/>' +
+        '</svg>' +
+    '</span>' +
+'</div>';
             });
         }
         h += '</div></div>';
@@ -15080,6 +15212,24 @@ async function deleteWish(id) {
         renderWishSubContent();
         showToast('🗑 已删除');
     }, '删除愿望');
+}
+
+async function shareWishToChat(wishId) {
+    var wishes = await dbGetAll('wishes');
+    var w = wishes.find(function (x) { return String(x.id) === String(wishId); });
+    if (!w) { showToast('愿望不存在'); return; }
+
+    var content = '✨ 我的愿望：' + w.content;
+    var msg = { sender: 'me', content: content, type: 'text', timestamp: Date.now() };
+    var id = await dbPut('messages', msg);
+    msg.id = id;
+
+    // 直接进聊天页，loadMessages 会自动把这条渲染出来
+    await openChatPage();
+    showToast('已分享到聊天');
+
+    // 需要秦彻回复就保留这行
+    autoReply();
 }
 
 async function checkQinDailyMessage() {
@@ -15489,7 +15639,7 @@ async function renderAnniversaryView() {
             const days = Math.floor((Date.now() - new Date(item.date)) / (1000 * 60 * 60 * 24));
             h += '<div style="background:var(--theme-card);border-radius:14px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;border:1px solid var(--theme-border);">' +
                 '<span>📅</span>' +
-                '<div style="flex:1;">' +
+                '<div style="flex:1;min-width:0;overflow-wrap:break-word;word-break:break-word;">' +
                 '<div style="font-size:14px;color:var(--theme-text);">' + item.name + '</div>' +
                 // 5. 纪念日期
                 '<div style="font-size:11px;color:var(--theme-muted);">' + item.date + '</div>' +
@@ -16805,17 +16955,30 @@ async function renderTarotQuotes() {
             var ctx = ctxLabels[q.context] || '';
             var dateStr = new Date(q.timestamp).toLocaleDateString('zh-CN') + ' ' + new Date(q.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
             
-            html += '<div style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:16px;padding:14px;margin-bottom:12px;">' +
-            '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--theme-muted);margin-bottom:6px;">' +
-            '<span>' + dateStr + '</span>' +
-            '<span>' + ctx + '</span>' +
-            '</div>' +
-            (q.question ? '<div style="font-size:13px;color:var(--theme-text);margin-bottom:4px;">问题：' + q.question + '</div>' : '') +
-            '<div style="font-size:12px;color:#555;margin-bottom:4px;white-space:pre-wrap;line-height:1.6;">🃏 ' + q.card + '</div>' +
-            '<div style="font-size:13px;color:var(--theme-primary);font-style:italic;">回应：“' + q.response + '”</div>' +
-            '<div style="text-align:right;margin-top:8px;">' +
-            '<span onclick="deleteTarotQuote(\'' + q.id + '\')" style="font-size:11px;color:var(--theme-primary);cursor:pointer;">删除</span>' +
-            '</div></div>';
+html += '<div style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:16px;padding:14px;margin-bottom:12px;">' +
+'<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--theme-muted);margin-bottom:6px;gap:8px;">' +
+'<span style="flex-shrink:0;">' + dateStr + '</span>' +
+'<span style="flex-shrink:0;">' + ctx + '</span>' +
+'</div>' +
+(q.question ? '<div style="font-size:13px;color:var(--theme-text);margin-bottom:4px;word-break:break-word;line-height:1.5;">问题：' + q.question + '</div>' : '') +
+'<div style="font-size:12px;color:#555;margin-bottom:4px;white-space:pre-wrap;line-height:1.6;word-break:break-word;">🃏 ' + q.card + '</div>' +
+'<div style="font-size:13px;color:var(--theme-primary);font-style:italic;word-break:break-word;line-height:1.5;">回应：“' + q.response + '”</div>' +
+'<div style="text-align:right;margin-top:8px;display:flex;justify-content:flex-end;gap:14px;">' +
+'<span onclick="shareTarotQuoteToChat(\'' + q.id + '\')" style="color:var(--theme-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;width:24px;height:24px;flex-shrink:0;">' +
+    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:block;">' +
+        '<path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/>' +
+        '<polyline points="16 6 12 2 8 6"/>' +
+        '<line x1="12" y1="2" x2="12" y2="15"/>' +
+    '</svg>' +
+'</span>' +
+'<span onclick="deleteTarotQuote(\'' + q.id + '\')" style="color:var(--theme-primary);cursor:pointer;display:flex;align-items:center;justify-content:center;width:24px;height:24px;flex-shrink:0;">' +
+    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;">' +
+        '<line x1="6" y1="6" x2="18" y2="18"/>' +
+        '<line x1="18" y1="6" x2="6" y2="18"/>' +
+    '</svg>' +
+'</span>' +
+'</div></div>';
+
         });
     }
     
@@ -16834,6 +16997,29 @@ async function deleteTarotQuote(id) {
         renderTarotQuotes();
         showToast('🗑 已删除');
     }, '删除语录');
+}
+
+async function shareTarotQuoteToChat(quoteId) {
+    var quotes = await dbGetAll('tarotHistory');
+    var q = quotes.find(function (x) { return String(x.id) === String(quoteId); });
+    if (!q) { showToast('语录不存在'); return; }
+
+    var ctxLabels = { love: '感情人际', career: '现实发展', self: '内心日常' };
+    var ctx = ctxLabels[q.context] || '';
+    var lines = [];
+    if (q.question) lines.push('问题：' + q.question);
+    lines.push('🃏 ' + q.card);
+    lines.push('回应：“' + q.response + '”');
+    if (ctx) lines.push('【' + ctx + '】');
+    var content = lines.join('\n');
+
+    var msg = { sender: 'me', content: content, type: 'text', timestamp: Date.now() };
+    var id = await dbPut('messages', msg);
+    msg.id = id;
+
+    await openChatPage();
+    showToast('已分享到聊天');
+    autoReply();
 }
 
 // 获取牌面 SVG
@@ -18918,6 +19104,8 @@ window.openCardBgEditor = openCardBgEditor;
 window.viewCategoryCards = viewCategoryCards;
 window.viewCategoryCards = viewCategoryCards;
 window.renderModuleSettings = renderModuleSettings;
+window.shareWishToChat = shareWishToChat;
+window.shareTarotQuoteToChat = shareTarotQuoteToChat;
 
 
 
