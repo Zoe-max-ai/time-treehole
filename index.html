@@ -516,7 +516,7 @@ html body.custom-bubble-active .message-wrapper.left .bubble {
     position: absolute;
     top: 74%;
     left: 0; right: 0;
-    padding: 0 28%;
+    padding: 0 16%;
     opacity: 0;
     animation: dLineIn .8s ease 2.2s forwards,
                dLineOut .5s ease 4.0s forwards;
@@ -532,11 +532,12 @@ html body.custom-bubble-active .message-wrapper.left .bubble {
 }
 .splash-dialogue .line-cat {
     display: block;
-    font-size: 14px;
+    font-size: 13px;
     color: #a98c6f;
     line-height: 1.9;
-    letter-spacing: .12em;
+    letter-spacing: .08em;
     font-weight: 300;
+    white-space: nowrap;
 }
 .splash-dialogue .speaker-dragon {
     color: #6a5038;
@@ -991,7 +992,7 @@ html body.custom-bubble-active .message-wrapper.left .bubble {
   </div>
   <div class="splash-dialogue">
     <div class="line-dragon"><span class="speaker-dragon">龙：</span>小猫又不等我</div>
-    <div class="line-cat"><span class="speaker-cat">猫：</span>龙你飞得快，自己跟上</div>
+    <div class="line-cat" style="white-space:nowrap;"><span class="speaker-cat">猫：</span>龙你飞得快，自己跟上</div>
   </div>
 </div>
 
@@ -6613,6 +6614,26 @@ function updateHome(){
     if (moodPreview) moodPreview.textContent = S.contactMood || '';
 }
 function fileToDataUrl(f){return new Promise(r=>{const rd=new FileReader();rd.onload=function(){r(rd.result);};rd.readAsDataURL(f);});}
+
+// ===== 每日计数（用于每日上限） =====
+function getDailyCount(key) {
+    var today = new Date().toDateString();
+    var data = JSON.parse(localStorage.getItem('dailyCounts') || '{}');
+    if (!data[key] || data[key].date !== today) return 0;
+    return data[key].count;
+}
+function incDailyCount(key) {
+    var today = new Date().toDateString();
+    var data = JSON.parse(localStorage.getItem('dailyCounts') || '{}');
+    if (!data[key] || data[key].date !== today) data[key] = { date: today, count: 0 };
+    data[key].count++;
+    localStorage.setItem('dailyCounts', JSON.stringify(data));
+    return data[key].count;
+}
+function isDailyLimitReached(key, max) {
+    return getDailyCount(key) >= max;
+}
+
 async function downloadBlob(content, filename) {
     var isText = typeof content === 'string';
     var mimeType = 'application/octet-stream';
@@ -7818,7 +7839,12 @@ async function executeReply(cnt, scheduledTime, triggerText, pendingId, triggerT
     
     // ===== 引用回复：整个回复只决定一次 =====
     let quoteText = '';
-    if (cs.quoteReply && Math.random() < ((cs.quoteReplyProb || 10) / 100)) {
+    var quoteMax = parseInt(cs.quoteReplyDailyMax);
+    if (isNaN(quoteMax)) quoteMax = 3;
+    if (cs.quoteReply
+        && quoteMax > 0
+        && !isDailyLimitReached('quoteReply', quoteMax)
+        && Math.random() < ((cs.quoteReplyProb || 10) / 100)) {
         var allMsgs = await dbGetAll('messages');
         var now = Date.now();
         var cutoff = now - 2 * 24 * 60 * 60 * 1000;  // 2天内
@@ -7845,6 +7871,7 @@ async function executeReply(cnt, scheduledTime, triggerText, pendingId, triggerT
             var randomMsg = myMsgs[Math.floor(Math.random() * myMsgs.length)];
             if (randomMsg && randomMsg.content) {
                 quoteText = randomMsg.content;
+                incDailyCount('quoteReply');
             }
         }
     }
@@ -7883,7 +7910,11 @@ async function executeReply(cnt, scheduledTime, triggerText, pendingId, triggerT
             scrollBottom();
 
             // ===== 秦彻随机收藏 =====
-            if (Math.random() < ((cs.qinCollectProb || 5) / 100)) {
+            var collectMax = parseInt(cs.qinCollectDailyMax);
+            if (isNaN(collectMax)) collectMax = 2;
+            if (collectMax > 0
+                && !isDailyLimitReached('qinCollect', collectMax)
+                && Math.random() < ((cs.qinCollectProb || 5) / 100)) {
                 var collected = JSON.parse(localStorage.getItem('collectedMessages') || '[]');
                 var allMsgs = await dbGetAll('messages');
 
@@ -7906,6 +7937,7 @@ async function executeReply(cnt, scheduledTime, triggerText, pendingId, triggerT
                         collectedBy: 'qin'
                     });
                     localStorage.setItem('collectedMessages', JSON.stringify(collected));
+                    incDailyCount('qinCollect');
                     addSysMsg('📌 秦彻收藏了你的一条消息', scheduledTime || Date.now());
                 }
             }
@@ -17584,6 +17616,11 @@ function openChatSettings(){
     '<div class="settings-section"><h4>💬 消息交互</h4>' +
     '<div class="settings-row"><span style="color:var(--theme-text);">引用回复</span><div class="toggle-switch ' + (cs.quoteReply?'on':'') + '" onclick="toggleChatSetting(\'quoteReply\',this)"></div></div>' +
     probRow('引用回复概率', 'quoteReplyProb', cs.quoteReplyProb) +
+    '<div class="settings-row"><span style="color:var(--theme-text);">每天最多引用</span>' +
+    '<input type="number" min="0" max="20" value="' + (cs.quoteReplyDailyMax !== undefined ? cs.quoteReplyDailyMax : 3) + '" ' +
+    'onchange="S.chatSettings.quoteReplyDailyMax=parseInt(this.value)||0;saveChatSettings();" ' +
+    'style="width:60px;text-align:center;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);border-radius:6px;padding:4px;">' +
+    '<span style="margin-left:8px;font-size:12px;color:var(--theme-muted);">次/天</span></div>' +
     '<div class="settings-row"><span style="color:var(--theme-text);">已读回执</span><select onchange="S.chatSettings.readReceipt=this.value;saveChatSettings();" style="padding:6px;border-radius:8px;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);">' +
     '<option value="none" ' + (cs.readReceipt==='none'?'selected':'') + '>关闭</option>' +
     '<option value="text" ' + (cs.readReceipt==='text'?'selected':'') + '>文字提示</option>' +
@@ -17603,6 +17640,13 @@ function openChatSettings(){
 '<span style="margin-left:8px;font-size:12px;color:var(--theme-muted);">' + (Math.round(cs.simCallProb * 1000) || 10) + '‰</span></div>' +
     
     '<div class="settings-section"><h4>收藏</h4>' +
+    probRow('秦彻收藏概率', 'qinCollectProb', cs.qinCollectProb) +
+    '<div class="settings-row"><span style="color:var(--theme-text);">每天最多收藏</span>' +
+    '<input type="number" min="0" max="20" value="' + (cs.qinCollectDailyMax !== undefined ? cs.qinCollectDailyMax : 2) + '" ' +
+    'onchange="S.chatSettings.qinCollectDailyMax=parseInt(this.value)||0;saveChatSettings();" ' +
+    'style="width:60px;text-align:center;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);border-radius:6px;padding:4px;">' +
+    '<span style="margin-left:8px;font-size:12px;color:var(--theme-muted);">次/天</span></div>' +
+    '</div>' +
     probRow('秦彻收藏概率', 'qinCollectProb', cs.qinCollectProb) +
     '</div>' +
 
@@ -18396,8 +18440,8 @@ if (S.chatSettings.autoSendCount === undefined) S.chatSettings.autoSendCount = 1
 
 // 旧数据补全新参数
 var csDefaults = {
-    quoteReplyProb: 10, readNotReplyProb: 50, emojiMixProb: 5,
-    simCallProb: 1, patProb: 5, qinCollectProb: 5,
+    quoteReplyProb: 10, quoteReplyDailyMax: 3, readNotReplyProb: 50, emojiMixProb: 5,
+    simCallProb: 1, patProb: 5, qinCollectProb: 5, qinCollectDailyMax: 2,
     cardCombo: true, cardComboProb: 30,
     cardMin: 2, cardMax: 4, cardRepeatProb: 30, cardDeleteProb: 50,
     triggerProb: 100,
@@ -18947,6 +18991,9 @@ window.checkPendingReply = checkPendingReply;
 window.applyBubblePreset = applyBubblePreset;
 window.BUBBLE_PRESET_STYLES = BUBBLE_PRESET_STYLES;
 window.getCallNote = getCallNote;
+window.getDailyCount = getDailyCount;
+window.incDailyCount = incDailyCount;
+window.isDailyLimitReached = isDailyLimitReached;
 window.openSearchByKeyword = openSearchByKeyword;
 window.jumpToMessage = jumpToMessage;
 window.openSearchByDate = openSearchByDate;
