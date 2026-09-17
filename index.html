@@ -409,6 +409,18 @@ html body.custom-bubble-active .message-wrapper.left .bubble {
   color:var(--theme-text) !important;
 }
 
+/* 水墨风主题：朱红点缀 */
+body.theme-shuimo .home-page-inner .card .num {
+    color: #8b2a20 !important;   /* 卡片编号用朱红 */
+}
+body.theme-shuimo .home-page-inner .dot {
+    background: #8b2a20 !important;
+    box-shadow: 0 0 8px #8b2a20 !important;
+}
+body.theme-shuimo .home-page-inner .status span:last-child {
+    color: #8b2a20 !important;
+}
+
 /* ===== 开屏动画 v2 ===== */
 .splash {
     position: fixed; inset: 0;
@@ -1004,56 +1016,7 @@ html body.custom-bubble-active .message-wrapper.left .bubble {
     <span style="font-size:13px;letter-spacing:.32em;color:var(--theme-muted);font-weight:500;">我们的时光</span>
 </div>
 
-    <div class="hero">
-      <div class="arch">
-        <svg viewBox="0 0 300 64" fill="none" stroke="currentColor" stroke-width="1">
-          <path d="M10 56 Q150 6 290 56" />
-          <line x1="150" y1="4" x2="150" y2="18"/>
-          <circle cx="150" cy="22" r="2.5" fill="currentColor"/>
-          <circle cx="95" cy="34" r="1.5" fill="currentColor"/>
-          <circle cx="205" cy="34" r="1.5" fill="currentColor"/>
-          <path d="M55 50 L60 42 L65 50" />
-          <path d="M235 50 L240 42 L245 50" />
-          <circle cx="150" cy="48" r="1.5" fill="currentColor"/>
-        </svg>
-      </div>
-
-      <div class="avatars">
-        <div class="ava" onclick="document.getElementById('contactAvatarInput').click()">
-          <img id="homeContactAvatar" src="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">
-        </div>
-        <div class="ava" onclick="document.getElementById('myAvatarInput').click()">
-          <img id="homeMyAvatar" src="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">
-        </div>
-      </div>
-
-      <div class="status">
-        <span class="dot"></span>
-        <span id="homeStatusText">在线</span>
-      </div>
-      <div class="quote-line" id="homeMoodPreview"></div>
-<div class="creature" aria-hidden="true">
-    <svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M10 72 Q40 68 70 74 T112 70" />
-        <path d="M58 60 L52 48 L56 38 L68 34 L78 38 L84 46 L92 44 L86 52 L90 60 L78 62 L72 70 L62 70 Z"/>
-        <path d="M68 34 L76 28 L78 38"/>
-        <circle cx="72" cy="42" r="1.2" fill="currentColor"/>
-        <path d="M58 60 L50 66"/>
-        <path d="M84 60 L90 66"/>
-        <circle cx="98" cy="22" r="8"/>
-        <circle cx="28" cy="24" r="1.2" fill="currentColor"/>
-        <circle cx="38" cy="18" r="1" fill="currentColor"/>
-    </svg>
-</div>
-      <div class="divider">
-        <svg viewBox="0 0 240 18" fill="none" stroke="currentColor" stroke-width="1">
-          <path d="M2 9 Q60 2 120 9 T238 9"/>
-          <circle cx="120" cy="9" r="1.6" fill="currentColor"/>
-          <circle cx="90" cy="8" r="1" fill="currentColor"/>
-          <circle cx="150" cy="8" r="1" fill="currentColor"/>
-        </svg>
-      </div>
-    </div>
+<div class="hero" id="heroComponent"></div>
 
     <div class="grid">
 <div class="card" onclick="checkLock(this, openChatPage)">
@@ -5743,6 +5706,203 @@ const SYSTEM_GROUPS=[];
 const BUBBLE_PRESETS=[{id:'default',name:'默认粉白',myBg:'#ffe0e6',myText:'#333',otherBg:'#ffffff',otherText:'#333'},{id:'warm',name:'暖阳橘',myBg:'#ffe8cc',myText:'#5a3a1a',otherBg:'#fffdf5',otherText:'#5a3a1a'},{id:'ocean',name:'海洋蓝',myBg:'#d4e8ff',myText:'#1a3a5a',otherBg:'#f5f8ff',otherText:'#1a3a5a'},{id:'mint',name:'薄荷绿',myBg:'#d4f0e0',myText:'#1a4a2a',otherBg:'#f5fff7',otherText:'#1a4a2a'},{id:'purple',name:'薰衣草',myBg:'#e8d8f8',myText:'#3a1a5a',otherBg:'#fdf5ff',otherText:'#3a1a5a'},{id:'dark',name:'暗夜模式',myBg:'#3d3d3d',myText:'#e0e0e0',otherBg:'#2a2a2a',otherText:'#d0d0d0'}];
 
 // ============ 主题系统 ============
+// ===== 主页 hero 组件模板 =====
+var HERO_TEMPLATES = {
+    'default': function() {
+        return `
+            <div class="arch">
+                <svg viewBox="0 0 300 64" fill="none" stroke="currentColor" stroke-width="1">
+                    <path d="M10 56 Q150 6 290 56" />
+                    <line x1="150" y1="4" x2="150" y2="18"/>
+                    <circle cx="150" cy="22" r="2.5" fill="currentColor"/>
+                    <circle cx="95" cy="34" r="1.5" fill="currentColor"/>
+                    <circle cx="205" cy="34" r="1.5" fill="currentColor"/>
+                    <path d="M55 50 L60 42 L65 50" />
+                    <path d="M235 50 L240 42 L245 50" />
+                    <circle cx="150" cy="48" r="1.5" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="avatars">
+                <div class="ava" onclick="document.getElementById('contactAvatarInput').click()">
+                    <img id="homeContactAvatar" src="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">
+                </div>
+                <div class="ava" onclick="document.getElementById('myAvatarInput').click()">
+                    <img id="homeMyAvatar" src="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">
+                </div>
+            </div>
+            <div class="status">
+                <span class="dot"></span>
+                <span id="homeStatusText">在线</span>
+            </div>
+            <div class="quote-line" id="homeMoodPreview"></div>
+            <div class="creature" aria-hidden="true">
+                <svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 72 Q40 68 70 74 T112 70" />
+                    <path d="M58 60 L52 48 L56 38 L68 34 L78 38 L84 46 L92 44 L86 52 L90 60 L78 62 L72 70 L62 70 Z"/>
+                    <path d="M68 34 L76 28 L78 38"/>
+                    <circle cx="72" cy="42" r="1.2" fill="currentColor"/>
+                    <path d="M58 60 L50 66"/>
+                    <path d="M84 60 L90 66"/>
+                    <circle cx="98" cy="22" r="8"/>
+                    <circle cx="28" cy="24" r="1.2" fill="currentColor"/>
+                    <circle cx="38" cy="18" r="1" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="divider">
+                <svg viewBox="0 0 240 18" fill="none" stroke="currentColor" stroke-width="1">
+                    <path d="M2 9 Q60 2 120 9 T238 9"/>
+                    <circle cx="120" cy="9" r="1.6" fill="currentColor"/>
+                    <circle cx="90" cy="8" r="1" fill="currentColor"/>
+                    <circle cx="150" cy="8" r="1" fill="currentColor"/>
+                </svg>
+            </div>
+        `;
+    },
+'shuimo': function() {
+    return `
+        <div class="arch"></div>
+        <div class="avatars">
+            <div class="ava" onclick="document.getElementById('contactAvatarInput').click()">
+                <img id="homeContactAvatar" src="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">
+            </div>
+            <div class="ava" onclick="document.getElementById('myAvatarInput').click()">
+                <img id="homeMyAvatar" src="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">
+            </div>
+        </div>
+        <div class="status">
+            <span class="dot"></span>
+            <span id="homeStatusText">在线</span>
+        </div>
+        <div class="quote-line" id="homeMoodPreview"></div>
+        <div class="creature" aria-hidden="true">
+            <svg viewBox="0 0 200 60" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M50 28 Q53 24 56 28"/>
+                <path d="M70 22 Q73 18 76 22"/>
+                <path d="M90 18 Q93 14 96 18"/>
+                <path d="M110 22 Q113 18 116 22"/>
+                <path d="M130 28 Q133 24 136 28"/>
+            </svg>
+        </div>
+        <div class="divider"></div>
+    `;
+},
+'fengwan': function() {
+    return `
+        <div class="arch"></div>
+        <div class="avatars">
+            <div class="ava" onclick="document.getElementById('contactAvatarInput').click()">
+                <img id="homeContactAvatar" src="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">
+            </div>
+            <div class="ava" onclick="document.getElementById('myAvatarInput').click()">
+                <img id="homeMyAvatar" src="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">
+            </div>
+        </div>
+        <div class="status">
+            <span class="dot"></span>
+            <span id="homeStatusText">在线</span>
+        </div>
+        <div class="quote-line" id="homeMoodPreview"></div>
+        <div class="creature" aria-hidden="true">
+<svg viewBox="0 0 220 160" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 枫叶 1（左上，大，斜飘） -->
+    <g transform="translate(55,35) rotate(-32) scale(1.5)">
+        <path d="M0 -12 L-3 -4 L-8 -5 Q-10 -3 -6 -2 L-12 2 Q-8 5 -6 4 L-8 8 L-2 6 L0 12 L2 6 L7 8 Q9 6 6 4 L12 2 Q8 -1 6 -2 L8 -5 L3 -4 Z" fill="currentColor" opacity="0.9"/>
+        <path d="M0 -12 Q-2 0 0 10" stroke="currentColor" stroke-width="0.6" fill="none" opacity="0.5"/>
+    </g>
+
+    <!-- 枫叶 2（右上，中，侧飘） -->
+    <g transform="translate(165,30) rotate(-68) scale(1.1)">
+        <path d="M0 -12 L-3 -4 L-8 -6 L-6 -2 L-12 2 L-6 4 L-8 8 L-2 6 L0 12 L2 6 L8 8 L6 4 L12 2 L6 -2 L8 -6 L3 -4 Z" fill="currentColor" opacity="0.82"/>
+        <path d="M0 -12 Q1 0 0 10" stroke="currentColor" stroke-width="0.6" fill="none" opacity="0.5"/>
+    </g>
+
+    <!-- 枫叶 3（中，小，翻面） -->
+    <g transform="translate(120,70) rotate(45) scale(0.85)">
+        <path d="M0 -10 L-2.5 -3 L-7 -4 Q-8 -2 -5 -1.5 L-10 1.5 Q-6 4 -5 3 L-7 6.5 L-2 5 L0 10 L2 5 L6.5 6.5 Q8 4 5 3 L10 1.5 Q6 -1 5 -1.5 L7 -4 L2.5 -3 Z" fill="currentColor" opacity="0.7"/>
+    </g>
+
+    <!-- 枫叶 4（左下，大，正面） -->
+    <g transform="translate(85,120) rotate(22) scale(1.35)">
+        <path d="M0 -12 L-3 -4 L-8 -6 L-6 -2 L-12 2 L-6 4 L-8 8 L-2 6 L0 12 L2 6 L8 8 L6 4 L12 2 L6 -2 L8 -6 L3 -4 Z" fill="currentColor" opacity="0.85"/>
+        <path d="M0 -12 L0 10" stroke="currentColor" stroke-width="0.6" fill="none" opacity="0.45"/>
+    </g>
+
+    <!-- 枫叶 5（右中，中，侧翻） -->
+    <g transform="translate(180,95) rotate(-58) scale(1.0)">
+        <path d="M0 -12 L-3 -4 L-8 -6 L-6 -2 L-12 2 L-6 4 L-8 8 L-2 6 L0 12 L2 6 L8 8 L6 4 L12 2 L6 -2 L8 -6 L3 -4 Z" fill="currentColor" opacity="0.75"/>
+        <path d="M0 -12 L-5 -2 M0 -12 L5 -3" stroke="currentColor" stroke-width="0.4" fill="none" opacity="0.3"/>
+    </g>
+
+    <!-- 枫叶 6（右下，小，快落地） -->
+    <g transform="translate(155,140) rotate(-80) scale(0.9)">
+        <path d="M0 -10 L-2.5 -3 L-7 -5 L-5 -1.5 L-10 1.5 L-5 3 L-7 6.5 L-2 5 L0 10 L2 5 L7 6.5 L5 3 L10 1.5 L5 -1.5 L7 -5 L2.5 -3 Z" fill="currentColor" opacity="0.6"/>
+    </g>
+
+    <!-- 远景小枫叶（散落） -->
+    <g transform="translate(75,140) rotate(-15) scale(0.45)">
+        <path d="M0 -10 L-2 -3 L-6 -4 L-4 -1 L-8 2 L-4 3 L-6 5 L-1 4 L0 8 L1 4 L6 5 L4 3 L8 2 L4 -1 L6 -4 L2 -3 Z" fill="currentColor" opacity="0.32"/>
+    </g>
+    <g transform="translate(200,20) rotate(30) scale(0.4)">
+        <path d="M0 -10 L-2 -3 L-6 -4 L-4 -1 L-8 2 L-4 3 L-6 5 L-1 4 L0 8 L1 4 L6 5 L4 3 L8 2 L4 -1 L6 -4 L2 -3 Z" fill="currentColor" opacity="0.28"/>
+    </g>
+
+    <!-- 微尘 -->
+    <circle cx="100" cy="100" r="0.7" fill="currentColor" opacity="0.22"/>
+    <circle cx="170" cy="120" r="0.6" fill="currentColor" opacity="0.2"/>
+    <circle cx="130" cy="145" r="0.5" fill="currentColor" opacity="0.18"/>
+</svg>
+<img src="images/fengwan-big.png" style="position:absolute;left:50%;top:83%;transform:translate(-50%,-50%) rotate(-15deg);width:80px;height:80px;object-fit:contain;pointer-events:none;opacity:0.95;"></div>
+        </div>
+        <div class="divider"></div>
+    `;
+},
+
+    'cuizhu': function() {
+        return `
+            <div class="arch">
+                <svg viewBox="0 0 300 64" fill="none" stroke="currentColor" stroke-width="1">
+                    <path d="M10 56 Q150 6 290 56" />
+                    <line x1="150" y1="4" x2="150" y2="18"/>
+                    <circle cx="150" cy="22" r="2.5" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="avatars">
+                <div class="ava" onclick="document.getElementById('contactAvatarInput').click()">
+                    <img id="homeContactAvatar" src="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">
+                </div>
+                <div class="ava" onclick="document.getElementById('myAvatarInput').click()">
+                    <img id="homeMyAvatar" src="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">
+                </div>
+            </div>
+            <div class="status">
+                <span class="dot"></span>
+                <span id="homeStatusText">在线</span>
+            </div>
+            <div class="quote-line" id="homeMoodPreview"></div>
+            <div class="creature" aria-hidden="true">
+                <img src="images/cuizhu-umb.png" style="width:66px;height:66px;object-fit:contain;opacity:0.9;display:block;">
+            </div>
+            <div class="divider">
+                <svg viewBox="0 0 240 18" fill="none" stroke="currentColor" stroke-width="1">
+                    <path d="M2 9 Q60 2 120 9 T238 9"/>
+                    <circle cx="120" cy="9" r="1.6" fill="currentColor"/>
+                </svg>
+            </div>
+        `;
+    }
+};
+
+// ===== 渲染 hero =====
+function renderHero() {
+    var hero = document.getElementById('heroComponent');
+    if (!hero) return;
+    var t = themes[currentTheme];
+    var key = (t && t.heroKey) ? t.heroKey : 'default';
+    var tmpl = HERO_TEMPLATES[key] || HERO_TEMPLATES['default'];
+    hero.innerHTML = tmpl();
+    
+}
+
 var themes = [
   {
     name: '零摩卡',
@@ -5917,7 +6077,97 @@ var themes = [
 '--tarot-strip':'rgba(62,50,44,.8)',
 '--tarot-ink':'#F0E6D8'
     }
-  }
+  },
+{
+    name: '青翠竹',
+    heroKey: 'cuizhu', 
+    vars: {
+        '--theme-primary':'#3A5A4A',
+        '--theme-bg':'#F5F5EF',
+        '--theme-card':'#FBFBF5',
+        '--theme-border':'#C8D0C0',
+        '--theme-text':'#2C3A2E',
+        '--theme-muted':'#7A8A78',
+        '--theme-input-bg':'#FFFFFF',
+        '--theme-input-border':'#B8C4B0',
+        '--theme-on-primary':'#FFFFFF',
+        '--btn-primary':'#3A5A4A',
+        '--btn-primary-text':'#FFFFFF',
+        '--btn-secondary':'#EEF2EA',
+        '--btn-secondary-text':'#4A5A4A',
+        '--stage-bg-1':'rgba(255,255,255,.75)',
+        '--stage-bg-2':'rgba(58,90,74,.10)',
+        '--chat-bg':'#F5F8F2',
+'--home-card-bg':'linear-gradient(180deg, rgba(255,255,255,.55), rgba(220,235,225,.35))',
+        '--tarot-bg':'#F5F8F2',
+        '--tarot-border':'rgba(58,90,74,.25)',
+        '--tarot-shadow':'rgba(58,90,74,.12)',
+        '--tarot-text':'#2C3A2E',
+        '--tarot-muted':'#7A8A78',
+        '--tarot-strip':'rgba(240,244,236,.8)',
+        '--tarot-ink':'#2C3A2E'
+    }
+},
+{
+    name: '水墨风',
+    heroKey: 'shuimo',    // 用新的 hero 模板（下一步会加）
+vars: {
+    '--theme-primary':'#2a2420',      
+'--theme-bg':'#f5f1e8',            
+'--theme-card':'#faf7f0',         
+ '--theme-border':'#d4ccbc',        
+    '--theme-text':'#1a1410',           
+    '--theme-muted':'#7a6a55',         
+'--theme-input-bg':'#fcfaf5',      
+    '--theme-input-border':'#c8b89a',
+    '--theme-on-primary':'#f0e6d2',
+    '--btn-primary':'#2a2420',
+    '--btn-primary-text':'#f0e6d2',
+    '--btn-secondary':'#e8dcc4',
+    '--btn-secondary-text':'#4a3e30',
+    '--stage-bg-1':'rgba(255,250,235,.7)',
+    '--stage-bg-2':'rgba(120,90,60,.08)',
+    '--chat-bg':'#f0e6d2',
+'--home-card-bg':'linear-gradient(180deg, rgba(255,255,255,.55), rgba(230,230,230,.35))',
+    '--tarot-bg':'#f5ecd9',
+    '--tarot-border':'rgba(42,36,32,.2)',
+    '--tarot-shadow':'rgba(42,36,32,.1)',
+    '--tarot-text':'#1a1410',
+    '--tarot-muted':'#7a6a55',
+    '--tarot-strip':'rgba(245,236,217,.85)',
+    '--tarot-ink':'#1a1410'
+}
+},
+{
+    name: '等枫晚',
+    heroKey: 'fengwan',
+    vars: {
+        '--theme-primary':'#c8544a',
+        '--theme-bg':'#ede6d6',
+        '--theme-card':'#f5eedf',
+        '--theme-border':'#e0b8b0',
+        '--theme-text':'#3a2418',
+        '--theme-muted':'#8a6a50',
+        '--theme-input-bg':'#f7f0e2',
+        '--theme-input-border':'#e0b8b0',
+        '--theme-on-primary':'#fdf8ee',
+        '--btn-primary':'#c8544a',
+        '--btn-primary-text':'#fdf8ee',
+        '--btn-secondary':'#f0e2d2',
+        '--btn-secondary-text':'#6a4a35',
+        '--stage-bg-1':'rgba(255,250,240,.75)',
+        '--stage-bg-2':'rgba(200,84,74,.08)',
+        '--chat-bg':'#ede6d6',
+        '--home-card-bg':'linear-gradient(180deg, rgba(255,250,240,.55), rgba(240,226,208,.35))',
+        '--tarot-bg':'#f5eedf',
+        '--tarot-border':'rgba(200,84,74,.2)',
+        '--tarot-shadow':'rgba(200,84,74,.1)',
+        '--tarot-text':'#3a2418',
+        '--tarot-muted':'#8a6a50',
+        '--tarot-strip':'rgba(245,238,223,.8)',
+        '--tarot-ink':'#3a2418'
+    }
+}
 ];
 
 var currentTheme = 0;
@@ -5929,6 +6179,21 @@ function applyTheme(index) {
     for (var key in t.vars) {
         root.style.setProperty(key, t.vars[key]);
     }
+
+    // 主题专用 class
+    document.body.classList.remove('theme-cuizhu');
+    if (t.name ==='青翠竹') {
+        document.body.classList.add('theme-cuizhu');
+    }
+
+    // 等枫晚主题 class
+    document.body.classList.remove('theme-fengwan');
+    if (t.name === '等枫晚') {
+        document.body.classList.add('theme-fengwan');
+    }
+
+    // ★ 切换 hero 组件（新增这行）
+    if (typeof renderHero === 'function') renderHero();
 
     var pageBg = 'radial-gradient(circle at 50% 18%, ' + t.vars['--stage-bg-1'] + ', transparent 55%),radial-gradient(circle at 50% 105%, ' + t.vars['--stage-bg-2'] + ', transparent 45%),' + t.vars['--theme-bg'];
     root.style.setProperty('--page-bg', pageBg);
@@ -5951,6 +6216,7 @@ function applyTheme(index) {
 
     if (document.getElementById('ourUniversePage').classList.contains('active')) {
         renderOurUniverse();
+
     }
 }
 
@@ -6603,6 +6869,12 @@ function fmtTime(ts){const d=new Date(ts),n=new Date();const h=d.getHours().toSt
 function scrollBottom(){requestAnimationFrame(()=>{const ca=document.getElementById('chatArea');if(ca)ca.scrollTop=ca.scrollHeight;});}
 function applyBubbleStyle(){if (localStorage.getItem('customBubbleEnabled') === 'true') return;const preset=BUBBLE_PRESETS.find(p=>p.id===S.bubbleStyle)||BUBBLE_PRESETS[0];const ca=document.getElementById('chatArea');if(ca){ca.querySelectorAll('.message-wrapper.right .bubble').forEach(el=>{el.style.background=preset.myBg;el.style.color=preset.myText;});ca.querySelectorAll('.message-wrapper.left .bubble').forEach(el=>{el.style.background=preset.otherBg;el.style.color=preset.otherText;});}}
 function updateHome(){
+    // 先确保 hero 已渲染（只在还没渲染过的时候渲染）
+    var hero = document.getElementById('heroComponent');
+    if (hero && hero.innerHTML.trim() === '') {
+        renderHero();
+    }
+    
     var contactAvatar = document.getElementById('homeContactAvatar');
     var myAvatar = document.getElementById('homeMyAvatar');
     var statusText = document.getElementById('homeStatusText');
@@ -13521,6 +13793,8 @@ function renderTopicGacha() {
                 animation: planetSpin 12s linear infinite;
                 cursor: pointer;
             }
+
+
         </style>
 
         <div style="width:100%;height:100%;position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 30%, #1a1a3e 0%, #0d0d2b 50%, #050518 100%);">
@@ -14657,7 +14931,173 @@ var BUBBLE_PRESET_STYLES = {
             background-size: 4px 4px !important;
         }
     `
+},
+'青翠竹': {
+    css: `
+        /* 竹叶主题气泡：秦彻（左气泡）—— 竹枝在左 */
+        .bubble.received {
+            background: #d9e2d4 !important;
+            color: #2C3A2E !important;
+            border: 1px solid #9db89a !important;
+            border-radius: 6px 6px 6px 0 !important;
+            position: relative !important;
+            overflow: visible !important;
+        }
+        .bubble.received::before {
+            content: '' !important;
+            position: absolute !important;
+            left: -10px !important;
+            bottom: -4px !important;
+            width: 38px !important;
+            height: 52px !important;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 85'%3E%3Cg transform='translate(50,0) scale(-1,1)'%3E%3Cpath d='M38 5 Q42 25 36 45 Q32 65 34 80' stroke='%234a6a4a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3Cpath d='M36 22 L39 21 M35 42 L38 41 M33 62 L36 61' stroke='%234a6a4a' stroke-width='1.2' stroke-linecap='round'/%3E%3Cpath d='M38 8 Q44 4 46 10 Q42 14 38 12 Z' fill='%237a9e6a'/%3E%3Cpath d='M37 15 Q43 12 45 18 Q41 20 37 18 Z' fill='%236a8a5a'/%3E%3Cpath d='M36 28 Q26 26 22 32 Q28 36 36 32 Z' fill='%235a7a4a'/%3E%3Cpath d='M35 38 Q25 36 21 42 Q27 46 35 42 Z' fill='%237a9e6a'/%3E%3Cpath d='M34 50 Q20 48 16 56 Q24 60 34 54 Z' fill='%234a6a4a'/%3E%3Cpath d='M33 64 Q20 62 17 70 Q25 74 33 68 Z' fill='%235a7a4a'/%3E%3Cpath d='M34 78 Q28 76 26 82 Q30 84 34 80 Z' fill='%236a8a5a' opacity='0.8'/%3E%3C/g%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-size: contain !important;
+            opacity: 0.8 !important;
+            pointer-events: none !important;
+        }
+
+        /* 竹叶主题气泡：用户（右气泡）—— 竹枝在右 */
+        .bubble.sent {
+            background: #ffffff !important;
+            color: #2C3A2E !important;
+            border: 1px solid #9db89a !important;
+            border-radius: 6px 6px 0 6px !important;
+            position: relative !important;
+            overflow: visible !important;
+        }
+        .bubble.sent::before {
+            content: '' !important;
+            position: absolute !important;
+            right: -18px !important;
+            bottom: -4px !important;
+            width: 38px !important;
+            height: 52px !important;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 85'%3E%3Cpath d='M38 5 Q42 25 36 45 Q32 65 34 80' stroke='%234a6a4a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3Cpath d='M36 22 L39 21 M35 42 L38 41 M33 62 L36 61' stroke='%234a6a4a' stroke-width='1.2' stroke-linecap='round'/%3E%3Cpath d='M38 8 Q44 4 46 10 Q42 14 38 12 Z' fill='%237a9e6a'/%3E%3Cpath d='M37 15 Q43 12 45 18 Q41 20 37 18 Z' fill='%236a8a5a'/%3E%3Cpath d='M36 28 Q26 26 22 32 Q28 36 36 32 Z' fill='%235a7a4a'/%3E%3Cpath d='M35 38 Q25 36 21 42 Q27 46 35 42 Z' fill='%237a9e6a'/%3E%3Cpath d='M34 50 Q20 48 16 56 Q24 60 34 54 Z' fill='%234a6a4a'/%3E%3Cpath d='M33 64 Q20 62 17 70 Q25 74 33 68 Z' fill='%235a7a4a'/%3E%3Cpath d='M34 78 Q28 76 26 82 Q30 84 34 80 Z' fill='%236a8a5a' opacity='0.8'/%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-size: contain !important;
+            opacity: 0.8 !important;
+            pointer-events: none !important;
+        }
+    `
+},
+'水墨风': {
+    css: `
+        /* 秦彻（左侧）气泡本体 */
+        .bubble.received {
+            background: #f2f0eb !important;
+            color: #1a1a1a !important;
+            border: 1px solid #222 !important;
+            border-radius: 0 !important;
+            position: relative !important;
+            overflow: visible !important;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.05) !important;
+            padding: 12px 18px !important;
+        }
+        /* 秦彻的剑：挂在气泡右侧 */
+        .bubble.received::before {
+            content: '' !important;
+            position: absolute !important;
+            top: -18px !important;
+            right: -14px !important;
+            left: auto !important;
+            width: 34px !important;
+            height: 80px !important;
+            z-index: 3 !important;
+            pointer-events: none !important;
+            transform: scaleX(-1) !important;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 140'%3E%3Cdefs%3E%3ClinearGradient id='bl' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0%25' stop-color='%23fff'/%3E%3Cstop offset='50%25' stop-color='%23bbb'/%3E%3Cstop offset='100%25' stop-color='%23222'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg transform='translate(22, 5)'%3E%3Cpath d='M8 0 L8 85 L5 85 L8 95 L11 85 L8 85' fill='url(%23bl)' stroke='%23111' stroke-width='1'/%3E%3Cpath d='M-2 88 L18 88 L18 95 L-2 95 Z' fill='%234a3a2a' stroke='%23111' stroke-width='1'/%3E%3Cpath d='M5 95 L11 95 L11 108 L5 108 Z' fill='%232a2a2a'/%3E%3Ccircle cx='8' cy='111' r='3' fill='%232a2a2a'/%3E%3Cpath d='M8 88 Q25 100 15 115 Q5 125 20 135' stroke='%23cc0000' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3Cpath d='M8 88 Q-5 105 12 115' stroke='%23990000' stroke-width='1.5' fill='none' stroke-linecap='round' opacity='0.8'/%3E%3C/g%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-size: contain !important;
+            background-position: center !important;
+        }
+
+        /* 用户（右侧）气泡本体 */
+        .bubble.sent {
+            background: #f2f0eb !important;
+            color: #1a1a1a !important;
+            border: 1px solid #222 !important;
+            border-radius: 0 !important;
+            position: relative !important;
+            overflow: visible !important;
+            box-shadow: -2px 2px 5px rgba(0,0,0,0.05) !important;
+            padding: 12px 18px !important;
+        }
+        /* 用户的剑：挂在气泡左侧（不翻转，保持剑在原位） */
+        .bubble.sent::before {
+            content: '' !important;
+            position: absolute !important;
+            top: -18px !important;
+            left: -14px !important;
+            right: auto !important;
+            width: 34px !important;
+            height: 80px !important;
+            z-index: 3 !important;
+            pointer-events: none !important;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 140'%3E%3Cdefs%3E%3ClinearGradient id='bl' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0%25' stop-color='%23fff'/%3E%3Cstop offset='50%25' stop-color='%23bbb'/%3E%3Cstop offset='100%25' stop-color='%23222'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg transform='translate(22, 5)'%3E%3Cpath d='M8 0 L8 85 L5 85 L8 95 L11 85 L8 85' fill='url(%23bl)' stroke='%23111' stroke-width='1'/%3E%3Cpath d='M-2 88 L18 88 L18 95 L-2 95 Z' fill='%234a3a2a' stroke='%23111' stroke-width='1'/%3E%3Cpath d='M5 95 L11 95 L11 108 L5 108 Z' fill='%232a2a2a'/%3E%3Ccircle cx='8' cy='111' r='3' fill='%232a2a2a'/%3E%3Cpath d='M8 88 Q25 100 15 115 Q5 125 20 135' stroke='%23cc0000' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3Cpath d='M8 88 Q-5 105 12 115' stroke='%23990000' stroke-width='1.5' fill='none' stroke-linecap='round' opacity='0.8'/%3E%3C/g%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-size: contain !important;
+            background-position: center !important;
+        }
+    `
+},
+'等枫晚': {
+    css: `
+        /* 秦彻气泡：右上角枫叶 */
+        .bubble.received {
+            background: #f2efe9 !important;
+            color: #2a1f18 !important;
+            border: 1px solid #2a1f18 !important;
+            border-radius: 2px !important;
+            position: relative !important;
+            overflow: visible !important;
+            box-shadow: 2px 2px 5px rgba(42,31,24,0.06) !important;
+            padding: 12px 18px !important;
+        }
+        .bubble.received::after {
+            content: '' !important;
+            position: absolute !important;
+            top: -22px !important;
+            right: -18px !important;
+            width: 52px !important;
+            height: 52px !important;
+            z-index: 2 !important;
+            pointer-events: none !important;
+            background-image: url("images/maple.png") !important;
+            background-repeat: no-repeat !important;
+            background-size: contain !important;
+            background-position: center !important;
+        }
+
+        /* 用户气泡：左上角枫叶（镜像） */
+        .bubble.sent {
+            background: #f2efe9 !important;
+            color: #2a1f18 !important;
+            border: 1px solid #2a1f18 !important;
+            border-radius: 2px !important;
+            position: relative !important;
+            overflow: visible !important;
+            box-shadow: -2px 2px 5px rgba(42,31,24,0.06) !important;
+            padding: 12px 18px !important;
+        }
+        .bubble.sent::after {
+            content: '' !important;
+            position: absolute !important;
+            top: -22px !important;
+            left: -18px !important;
+            width: 52px !important;
+            height: 52px !important;
+            z-index: 2 !important;
+            pointer-events: none !important;
+            transform: scaleX(-1) !important;
+            background-image: url("images/maple.png") !important;
+            background-repeat: no-repeat !important;
+            background-size: contain !important;
+            background-position: center !important;
+        }
+    `
 }
+
 };
 function applyBubblePreset(name, silent) {
     // 1. ★★★ 清除自定义：移除 style 标签 + 清除 CSS 变量 + 移除 class ★★★
