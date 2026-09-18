@@ -1070,6 +1070,19 @@ body.theme-shuimo .home-page-inner .status span:last-child {
 }
 .music-btn.on { color: var(--theme-primary); border-color: var(--theme-primary); }
 
+.music-float-btn svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+}
+.music-btn svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
+
 /* 列表 */
 .music-list {
     width: 100%;
@@ -1118,33 +1131,125 @@ body.theme-shuimo .home-page-inner .status span:last-child {
     margin-top: 2px;
 }
 
-/* 悬浮球 */
+/* ===== 迷你播放条（替换悬浮球） ===== */
 .music-float {
     position: fixed;
-    right: 16px;
-    bottom: 88px;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: #1a1410;
-    color: #fff;
+    left: 60px;
+    right: 60px;
+    bottom: 12px;
+    max-width: 340px;
+    margin: 0 auto;
+    height: 52px;
+    background: var(--theme-card);
+    border: 1px solid var(--theme-border);
+    border-radius: 26px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
     display: none;
     align-items: center;
-    justify-content: center;
-    cursor: pointer;
+    gap: 6px;
+    padding: 6px 8px 6px 6px;
     z-index: 200;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-    font-size: 18px;
-    animation: musicFloatSpin 2s linear infinite;
+    cursor: pointer;
+    transition: transform 0.15s, opacity 0.15s;
+    touch-action: none;
+    user-select: none;
+    box-sizing: border-box;
+    width: auto;
+}
+.music-float.show { display: flex; }
+.music-float:active { transform: scale(0.98); }
+.music-float.dragging {
+    cursor: grabbing;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    transition: none;
+}
+
+/* 左侧小唱片 */
+.music-float-cover {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #1a1410;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.music-float-cover::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: repeating-radial-gradient(#0a0a0a 0px, #141414 2px, #0a0a0a 4px);
+    animation: musicFloatSpin 3s linear infinite;
     animation-play-state: paused;
 }
-.music-float.spinning { animation-play-state: running; }
+.music-float.playing .music-float-cover::before {
+    animation-play-state: running;
+}
+.music-float-cover::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--theme-primary);
+    z-index: 2;
+}
+
+/* 中间信息 */
+.music-float-info {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+.music-float-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--theme-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.music-float-artist {
+    font-size: 11px;
+    color: var(--theme-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+}
+
+/* 右侧按钮 */
+.music-float-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: var(--theme-text);
+    font-size: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+.music-float-btn:active {
+    background: var(--theme-bg);
+}
+.music-float-btn.close {
+    font-size: 18px;
+    color: var(--theme-muted);
+}
+
 @keyframes musicFloatSpin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
-.music-float.show { display: flex; }
-
 /* ===== 黑胶唱片 · 3-1 补充 ===== */
 
 /* 顶部栏的 ＋ 按钮 */
@@ -20347,13 +20452,13 @@ function renderMusicPage() {
     html += '<div class="music-time"><span id="musicTimeCur">0:00</span><span id="musicTimeDur">0:00</span></div>';
 
     // 控制
-    html += '<div class="music-controls">';
-    html += '  <button class="music-btn" onclick="musicPrev()">⏮</button>';
-    html += '  <button class="music-btn music-btn-play" id="musicPlayBtn" onclick="musicToggle()">' + (playing ? '⏸' : '▶') + '</button>';
-    html += '  <button class="music-btn" onclick="musicNext()">⏭</button>';
-    html += '  <button class="music-btn" id="musicModeBtn" onclick="musicCycleMode()">' + modeIcon() + '</button>';
-    html += '  <button class="music-btn' + (cur && isFav(cur.id) ? ' on' : '') + '" id="musicFavBtn" onclick="musicToggleFav()">♡</button>';
-    html += '</div>';
+html += '<div class="music-controls">';
+html += '  <button class="music-btn" onclick="musicPrev()">' + svgPrev() + '</button>';
+html += '  <button class="music-btn music-btn-play" id="musicPlayBtn" onclick="musicToggle()">' + (playing ? svgPause() : svgPlay()) + '</button>';
+html += '  <button class="music-btn" onclick="musicNext()">' + svgNext() + '</button>';
+html += '  <button class="music-btn" id="musicModeBtn" onclick="musicCycleMode()">' + modeIcon() + '</button>';
+html += '  <button class="music-btn' + (cur && isFav(cur.id) ? ' on' : '') + '" id="musicFavBtn" onclick="musicToggleFav()">♡</button>';
+html += '</div>';
 
     // tabs
     html += '<div class="music-tabs">';
@@ -20398,6 +20503,20 @@ function renderMusicPage() {
     updateProgress();
 }
 
+// SVG 图标（线条风格，跟主题色走）
+function svgPlay() {
+    return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6,4 20,12 6,20" fill="currentColor" stroke="currentColor"/></svg>';
+}
+function svgPause() {
+    return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16" fill="currentColor" stroke="currentColor"/><rect x="14" y="4" width="4" height="16" fill="currentColor" stroke="currentColor"/></svg>';
+}
+function svgPrev() {
+    return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="19,20 9,12 19,4" fill="currentColor" stroke="currentColor"/><line x1="5" y1="4" x2="5" y2="20"/></svg>';
+}
+function svgNext() {
+    return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,4 15,12 5,20" fill="currentColor" stroke="currentColor"/><line x1="19" y1="4" x2="19" y2="20"/></svg>';
+}
+
 function modeIcon() {
     if (mode === 'shuffle') return '⤨';
     if (mode === 'single') return '↻';
@@ -20412,9 +20531,10 @@ function ensureAudio() {
     audio.addEventListener('play', function() {
         syncPlayBtn(); syncVinyl(true); startProgress(); updateFloatVisibility();
     });
-    audio.addEventListener('pause', function() {
-        syncPlayBtn(); syncVinyl(false); updateFloatVisibility();
-    });
+audio.addEventListener('pause', function() {
+    syncPlayBtn(); syncVinyl(false);
+    // 不调 updateFloatVisibility，由 syncPlayBtn 里统一处理
+});
     audio.addEventListener('ended', function() {
         onTrackEnded();
     });
@@ -20591,9 +20711,22 @@ window.musicClearSearch = function() {
 // ===== 状态同步 =====
 function syncPlayBtn() {
     var btn = document.getElementById('musicPlayBtn');
-    if (!btn) return;
-    btn.textContent = (audio && !audio.paused) ? '⏸' : '▶';
+    if (btn) btn.innerHTML = (audio && !audio.paused) ? svgPause() : svgPlay();
+
+    var fplay = document.getElementById('musicFloatPlay');
+    if (fplay) fplay.innerHTML = (audio && !audio.paused) ? svgPauseSmall() : svgPlaySmall();
+
+var fel = document.getElementById('musicFloat');
+if (fel) {
+    fel.classList.toggle('playing', audio && !audio.paused);
+    // 如果迷你条正在显示，也更新一下按钮图标
+    if (fel.classList.contains('show')) {
+        var fplay = document.getElementById('musicFloatPlay');
+        if (fplay) fplay.innerHTML = (audio && !audio.paused) ? svgPauseSmall() : svgPlaySmall();
+    }
 }
+}
+
 function syncVinyl(playing) {
     var v = document.getElementById('musicVinyl');
     var a = document.getElementById('musicVinylArm');
@@ -21035,44 +21168,159 @@ async function doDeleteTrack(id, t) {
     toast('已删除');
 }
 
-// ===== 悬浮球 =====
+// ===== 迷你播放条 =====
 function updateFloatVisibility() {
     var el = document.getElementById('musicFloat');
     if (!el) {
         el = document.createElement('div');
         el.id = 'musicFloat';
         el.className = 'music-float';
-        el.innerHTML = '<span>♪</span>';
-        el.onclick = function() {
-            if (typeof showPage === 'function') {
-                showPage('musicPage');
-                renderMusicPage();
-                updateFloatVisibility();
-            }
-        };
+        el.innerHTML =
+            '<div class="music-float-cover"></div>' +
+            '<div class="music-float-info">' +
+            '  <div class="music-float-name" id="musicFloatName">未在播放</div>' +
+            '  <div class="music-float-artist" id="musicFloatArtist">—</div>' +
+            '</div>' +
+'<button class="music-float-btn" id="musicFloatPlay" onclick="event.stopPropagation();musicToggle();">' + svgPlaySmall() + '</button>' +
+'<button class="music-float-btn" onclick="event.stopPropagation();musicNext();">' + svgNextSmall() + '</button>' +
+'<button class="music-float-btn close" onclick="event.stopPropagation();musicCloseFloat();">✕</button>';
+
+        // 点信息区 → 回音乐页
+el.addEventListener('click', function(e) {
+    if (e.target.closest('.music-float-btn')) return;
+    if (el.__justDragged) return;   // ← 刚刚拖动过，不响应点击
+    if (typeof showPage === 'function') {
+        showPage('musicPage');
+        if (typeof renderMusicPage === 'function') renderMusicPage();
+        updateFloatVisibility();
+    }
+});
+
+        // 拖动
+        makeFloatDraggable(el);
+
         document.body.appendChild(el);
     }
+
     var musicPage = document.getElementById('musicPage');
     var onMusicPage = musicPage && musicPage.classList.contains('active');
-    if (currentId && audio && !audio.paused && !onMusicPage) {
-        el.classList.add('show');
-        el.classList.add('spinning');
-    } else {
-        el.classList.remove('show');
-        el.classList.remove('spinning');
+    var playing = audio && !audio.paused;
+    var cur = currentId ? findTrack(currentId) : null;
+
+if (currentId && audio && !onMusicPage) {
+    el.classList.add('show');
+    el.classList.toggle('playing', playing);
+    var nameEl = document.getElementById('musicFloatName');
+    var artistEl = document.getElementById('musicFloatArtist');
+    var playBtn = document.getElementById('musicFloatPlay');
+    if (nameEl) nameEl.textContent = cur ? cur.name : '未在播放';
+    if (artistEl) artistEl.textContent = cur ? (cur.artist || '未知歌手') : '—';
+    if (playBtn) playBtn.innerHTML = playing ? svgPauseSmall() : svgPlaySmall();
+} else {
+    el.classList.remove('show');
+    el.classList.remove('playing');
+}
+}
+
+function svgPlaySmall() {
+    return '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg>';
+}
+function svgPauseSmall() {
+    return '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+}
+function svgNextSmall() {
+    return '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="5,4 15,12 5,20"/><rect x="17" y="4" width="2" height="16"/></svg>';
+}
+
+// 关闭迷你条（停止播放）
+window.musicCloseFloat = function() {
+    if (audio) {
+        audio.pause();
+        audio.src = '';
+    }
+    currentId = null;
+    updateFloatVisibility();
+};
+
+// 拖动逻辑
+function makeFloatDraggable(el) {
+    var startX = 0, startY = 0;
+    var startLeft = 0, startTop = 0;
+    var dragging = false;
+    var moved = false;
+
+    function getPos(e) {
+        var t = e.touches ? e.touches[0] : e;
+        return { x: t.clientX, y: t.clientY };
+    }
+
+function onDown(e) {
+    if (e.target.closest('.music-float-btn')) return;
+    var p = getPos(e);
+    startX = p.x;
+    startY = p.y;
+    var r = el.getBoundingClientRect();
+    startLeft = r.left;
+    startTop = r.top;
+    dragging = true;
+    moved = false;
+    el.classList.add('dragging');
+    el.style.left = startLeft + 'px';
+    el.style.top = startTop + 'px';
+    el.style.width = r.width + 'px';   // ★ 加这行：锁住宽度
+    el.style.right = 'auto';
+    el.style.bottom = 'auto';
+    el.style.margin = '0';
+}
+
+    function onMove(e) {
+        if (!dragging) return;
+        var p = getPos(e);
+        var dx = p.x - startX;
+        var dy = p.y - startY;
+        if (Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+        var newLeft = Math.max(4, Math.min(window.innerWidth - el.offsetWidth - 4, startLeft + dx));
+        var newTop = Math.max(4, Math.min(window.innerHeight - el.offsetHeight - 4, startTop + dy));
+        el.style.left = newLeft + 'px';
+        el.style.top = newTop + 'px';
+        if (moved) e.preventDefault();
+    }
+
+function onUp() {
+    if (!dragging) return;
+    dragging = false;
+    el.classList.remove('dragging');
+    // 如果移动过，标记刚刚是拖动，短暂阻止点击
+    if (moved) {
+        el.__justDragged = true;
+        setTimeout(function() { el.__justDragged = false; }, 200);
     }
 }
 
-// ===== 页面切换 hook =====
+    el.addEventListener('touchstart', onDown, { passive: true });
+    el.addEventListener('touchmove', onMove, { passive: false });
+    el.addEventListener('touchend', onUp);
+    el.addEventListener('mousedown', onDown);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+}
+
+// 页面切换 hook（MutationObserver，不依赖 window.showPage）
 (function() {
-    var _origShowPage = window.showPage;
-    if (typeof _origShowPage === 'function' && !_origShowPage.__musicHooked) {
-        window.showPage = function(id) {
-            _origShowPage(id);
-            setTimeout(updateFloatVisibility, 50);
-        };
-        window.showPage.__musicHooked = true;
+    function checkVisible() {
+        if (typeof updateFloatVisibility === 'function') {
+            updateFloatVisibility();
+        }
     }
+    // 监听所有 .page 的 class 变化
+    var observer = new MutationObserver(function() {
+        setTimeout(checkVisible, 30);
+    });
+    document.querySelectorAll('.page').forEach(function(p) {
+        observer.observe(p, { attributes: true, attributeFilter: ['class'] });
+    });
+    // 兜底：每 1.5 秒查一次
+    setInterval(checkVisible, 1500);
 })();
 
 // 初始化标记
