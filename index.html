@@ -1509,6 +1509,256 @@ body.theme-shuimo .home-page-inner .status span:last-child {
     resize: vertical;
 }
 
+/* ===== 快捷表情面板 ===== */
+.quick-emoji-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--theme-primary);
+    border: 1px solid var(--theme-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    color: #fff;
+    flex-shrink: 0;
+    transition: all .15s;
+}
+.quick-emoji-btn:active { transform: scale(0.94); }
+.quick-emoji-btn svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    stroke: #fff;
+}
+
+.quick-emoji-panel {
+    display: none;
+    background: var(--theme-card);
+    border-top: 1px solid var(--theme-border);
+    flex-direction: column;
+    flex-shrink: 0;
+    max-height: 280px;
+    overflow: hidden;
+}
+.quick-emoji-panel.show { display: flex; }
+
+/* 主 tab */
+.quick-emoji-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--theme-border);
+    flex-shrink: 0;
+    padding: 0 4px;
+}
+.quick-emoji-tab {
+    flex: 1;
+    padding: 10px 8px;
+    text-align: center;
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: none;
+    color: var(--theme-muted);
+    font-family: inherit;
+}
+.quick-emoji-tab.active {
+    color: var(--theme-primary);
+    border-bottom-color: var(--theme-primary);
+    font-weight: 500;
+}
+
+/* 内容区 */
+.quick-emoji-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    min-height: 100px;
+}
+.quick-emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+}
+.quick-emoji-grid.kao-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+.quick-emoji-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 22px;
+    transition: background 0.12s;
+    user-select: none;
+    word-break: break-all;
+    text-align: center;
+    color: var(--theme-text);
+    font-family: inherit;
+    line-height: 1.2;
+}
+.quick-emoji-item:active {
+    background: var(--theme-bg);
+    transform: scale(0.94);
+}
+.quick-emoji-item.kao-item {
+    font-size: 12px;
+    padding: 8px 4px;
+}
+
+/* 底部子分类 */
+.quick-emoji-subcats {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 8px 10px;
+    border-top: 1px solid var(--theme-border);
+    flex-shrink: 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    cursor: grab;
+}
+.quick-emoji-subcats:active {
+    cursor: grabbing;
+}
+.quick-emoji-subcats::-webkit-scrollbar {
+    height: 4px;
+    display: block;
+}
+.quick-emoji-subcats::-webkit-scrollbar-thumb {
+    background: var(--theme-border);
+    border-radius: 2px;
+}
+.quick-emoji-subcats::-webkit-scrollbar { display: none; }
+.quick-emoji-subcat {
+    flex: 0 0 auto;
+    padding: 5px 12px;
+    border-radius: 14px;
+    border: 1px solid var(--theme-border);
+    background: var(--theme-card);
+    color: var(--theme-muted);
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+}
+.quick-emoji-subcat.active {
+    background: var(--theme-primary);
+    color: #fff;
+    border-color: var(--theme-primary);
+}
+
+/* ===== 塔罗传讯 · 消息卡片 ===== */
+.tarot-msg-wrap {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: nowrap;
+    margin: 6px 0;
+}
+.tarot-mini-card {
+    width: 108px;
+    flex-shrink: 0;
+    background: var(--tarot-bg);
+    border: 1px solid var(--tarot-border);
+    border-radius: 8px;
+    padding: 6px 4px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    box-shadow: 0 2px 6px var(--tarot-shadow);
+}
+.tarot-mini-card .tmc-rank {
+    font-size: 8px;
+    letter-spacing: 0.3px;
+    color: var(--tarot-muted);
+    align-self: flex-start;
+    margin-left: 2px;
+    margin-top: 1px;
+    line-height: 11px;
+    max-width: 55%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.tarot-mini-card .tmc-orient {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 9px;
+    color: #8C4433;
+    letter-spacing: 0.5px;
+    line-height: 11px;
+}
+.tarot-mini-card .tmc-svg {
+    width: 70%;
+    height: auto;
+    margin: 6px auto 4px;
+    display: block;
+}
+.tarot-mini-card .tmc-name {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--tarot-text);
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+    text-align: center;
+}
+.tarot-mini-card .tmc-summary {
+    font-size: 10px;
+    line-height: 1.4;
+    color: var(--tarot-text);
+    opacity: 0.75;
+    text-align: center;
+    margin-top: 6px;
+    padding: 0 4px;
+    word-break: break-word;
+}
+/* 收尾句 */
+.tarot-tail {
+    font-size: 12px;
+    font-style: italic;
+    color: var(--theme-primary);
+    text-align: center;
+    margin-top: 8px;
+    padding: 0 8px;
+    line-height: 1.5;
+}
+
+/* ===== 塔罗模式 · 输入框上方横条 ===== */
+.tarot-bar {
+    display: none;
+    padding: 6px 12px;
+    background: var(--theme-card);
+    border-top: 1px solid var(--theme-border);
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+.tarot-bar.show { display: flex; }
+.tarot-bar-chip {
+    padding: 5px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--theme-border);
+    background: var(--theme-card);
+    color: var(--theme-muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.tarot-bar-chip.active {
+    background: var(--theme-primary);
+    color: #fff;
+    border-color: var(--theme-primary);
+}
+
     </style>
 <!-- ===== 农历库 ===== -->
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.min.js"></script>
@@ -1621,8 +1871,20 @@ body.theme-shuimo .home-page-inner .status span:last-child {
 <span class="chat-settings-cat" onclick="openChatSettings()">😸</span>
 </div>
     <div class="chat-area" id="chatArea"><div style="text-align:center;color:#ccc;padding:40px;">💬 开始你们的对话吧</div></div>
+<div class="tarot-bar" id="tarotBar">
+    <button class="tarot-bar-chip active" id="tarotChip1" onclick="setTarotCount(1)">牌阵：1 张</button>
+    <button class="tarot-bar-chip" id="tarotChip3" onclick="setTarotCount(3)">牌阵：3 张</button>
+</div>
 
 <div class="bottombar" style="position:relative;">
+    <button class="quick-emoji-btn" id="btnQuickEmoji" onclick="toggleQuickEmojiPanel()" aria-label="表情">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M8.5 14.5s1.3 1.8 3.5 1.8 3.5-1.8 3.5-1.8"/>
+        <line x1="9" y1="9.5" x2="9.01" y2="9.5"/>
+        <line x1="15" y1="9.5" x2="15.01" y2="9.5"/>
+    </svg>
+</button>
     <button class="icon-btn" id="btnMore" onclick="toggleMorePanel()" style="font-size:22px;">＋</button>
     <input type="text" id="messageInput" placeholder="说点什么..." onkeydown="if(event.key==='Enter'){sendMessage();}">
     <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
@@ -1637,6 +1899,7 @@ body.theme-shuimo .home-page-inner .status span:last-child {
         </div>
         <div class="label">通话</div>
     </div>
+
     <div class="more-panel-item" onclick="toggleEmojiPanel();hideMorePanel();">
         <div class="icon">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
@@ -1672,6 +1935,7 @@ body.theme-shuimo .home-page-inner .status span:last-child {
         <button onclick="endCall()" style="width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;font-size:24px;background:var(--theme-primary);color:#fff;">📞</button>
     </div>
 </div>
+<div class="quick-emoji-panel" id="quickEmojiPanel"></div>
 <div class="call-float-ball" id="callFloatBall"><img id="ballAvatar" src="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;"><div id="ballTimer" style="position:absolute;bottom:-8px;background:#4cd964;color:#fff;font-size:9px;padding:2px 8px;border-radius:10px;">00:00</div><div class="ball-end" onclick="event.stopPropagation();endCall()">✕</div></div>
 
 <div class="chat-settings-overlay" id="chatSettingsOverlay" onclick="if(event.target===this)closeChatSettings()"><div class="chat-settings-panel" id="chatSettingsPanel"></div></div>
@@ -5064,7 +5328,6 @@ window.PRESET_CARDS_DATA = {
         {content:'😊',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'☺️',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'😌',triggerWords:[],tags:[],weight:1,type:'material'},
-        {content:'🥹',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'🥺',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'🥰',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'😗',triggerWords:[],tags:[],weight:1,type:'material'},
@@ -5073,9 +5336,7 @@ window.PRESET_CARDS_DATA = {
         {content:'😎',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'😉',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'🤔',triggerWords:[],tags:[],weight:1,type:'material'},
-        {content:'🫡',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'🤫',triggerWords:[],tags:[],weight:1,type:'material'},
-        {content:'🫢',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'😳',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'😞',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'😔',triggerWords:[],tags:[],weight:1,type:'material'},
@@ -5085,10 +5346,9 @@ window.PRESET_CARDS_DATA = {
         {content:'😴',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'🥱',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'🤗',triggerWords:[],tags:[],weight:1,type:'material'},
-        {content:'🫂',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'🙃',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'😏',triggerWords:[],tags:[],weight:1,type:'material'},
-        {content:'😮‍💨',triggerWords:[],tags:[],weight:1,type:'material'},
+        {content:'😪',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'😅',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'😁',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'😄',triggerWords:[],tags:[],weight:1,type:'material'},
@@ -5106,14 +5366,12 @@ window.PRESET_CARDS_DATA = {
         {content:'✌🏻',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'🤏🏻',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'🙏🏻',triggerWords:[],tags:[],weight:1,type:'material'},
-        {content:'🫶🏻',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'💪🏻',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'✍🏻',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'👉🏻',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'👉👈',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'👉🏻👈🏻',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'🤲🏻',triggerWords:[],tags:[],weight:1,type:'material'},
-        {content:'🫳🏻',triggerWords:[],tags:[],weight:1,type:'material'}
       ]},
       { id:'emoji_heart', label:'爱心', cards:[
         {content:'💖',triggerWords:[],tags:[],weight:1,type:'material'},
@@ -5121,7 +5379,6 @@ window.PRESET_CARDS_DATA = {
         {content:'💞',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'💝',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'❤️‍🩹',triggerWords:[],tags:[],weight:1,type:'material'},
-        {content:'🩷',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'🤍',triggerWords:[],tags:[],weight:1,type:'material'},
         {content:'✨',triggerWords:[],tags:[],weight:1,type:'material'}
       ]},
@@ -5934,7 +6191,7 @@ function tarotSvgCup(name){
   if(name==="圣杯十") return wrap(`${tarotCupsGroup([{x:42,y:96},{x:60,y:84},{x:80,y:74},{x:100,y:70},{x:120,y:74},{x:140,y:84},{x:158,y:96},{x:100,y:88},{x:118,y:92},{x:134,y:92}])}<g ${g}><path d="M28 108 Q60 56 100 76 Q140 56 172 108"/><path d="M34 110 Q64 62 100 82 Q136 62 166 110"/><path d="M64 130 Q64 144 70 148"/><path d="M70 148 Q76 144 76 130"/><circle cx="70" cy="124" r="4"/><path d="M120 130 Q120 144 126 148"/><path d="M126 148 Q132 144 132 130"/><circle cx="126" cy="124" r="4"/><path d="M70 130 Q98 122 126 130"/></g>`);
   if(name==="圣杯侍从") return wrap(`<g ${g}><path d="M86 130 Q100 100 114 130"/><path d="M100 100 L100 70"/><path d="M100 70 Q92 56 96 48"/><path d="M100 70 Q108 56 104 48"/><path d="M100 70 Q100 82 106 86"/><path d="M100 70 Q94 82 98 86"/><circle cx="100" cy="44" r="4"/><path d="M96 40 Q100 30 104 40"/><path d="M100 100 Q84 112 80 130"/><path d="M100 100 Q116 112 120 130"/><path d="M80 130 L120 130"/></g>`);
   if(name==="圣杯骑士") return wrap(`<g ${g}><path d="M50 120 Q66 86 90 90 Q114 86 130 120"/><path d="M68 120 L68 140"/><path d="M112 120 L112 140"/><path d="M90 90 L90 70"/><path d="M90 70 Q82 56 86 48"/><path d="M90 70 Q98 56 94 48"/><circle cx="90" cy="62" r="6"/><path d="M84 56 Q90 44 96 56"/><path d="M90 70 L90 90"/><path d="M86 48 Q80 38 84 30"/><path d="M94 48 Q100 38 96 30"/><path d="M84 30 Q90 22 96 30"/><path d="M68 140 Q90 134 112 140"/></g>`);
-  if(name==="圣杯王后") return wrap(`<g ${g}><path d="M70 100 Q100 78 130 100"/><path d="M70 100 L70 132"/><path d="M130 100 L130 132"/><path d="M68 132 L132 132"/><circle cx="100" cy="92" r="6"/><path d="M94 86 L97 80 L100 86 L103 80 L106 86"/><path d="M100 92 L100 70"/><path d="M100 70 Q92 56 96 48"/><path d="M100 70 Q108 56 104 48"/><path d="M96 48 Q100 40 104 48"/><path d="M76 138 Q82 134 88 138"/><path d="M112 138 Q118 134 124 138"/><path d="M88 140 Q100 146 112 140"/></g>`);
+if(name==="圣杯王后") return wrap(`<g transform="translate(0, 20)"><g ${g}><path d="M70 100 Q100 78 130 100"/><path d="M70 100 L70 132"/><path d="M130 100 L130 132"/><path d="M68 132 L132 132"/><circle cx="100" cy="92" r="6"/><path d="M94 86 L97 80 L100 86 L103 80 L106 86"/><path d="M100 92 L100 70"/><path d="M100 70 Q92 56 96 48"/><path d="M100 70 Q108 56 104 48"/><path d="M96 48 Q100 40 104 48"/><path d="M76 138 Q82 134 88 138"/><path d="M112 138 Q118 134 124 138"/><path d="M88 140 Q100 146 112 140"/></g></g>`);
   if(name==="圣杯国王") return wrap(`<g ${g}><path d="M50 108 Q100 78 150 108"/><path d="M70 108 L70 134"/><path d="M130 108 L130 134"/><path d="M68 134 L132 134"/><circle cx="100" cy="100" r="7"/><path d="M86 92 L89 80 L93 92 L97 78 L100 92 L103 78 L107 92 L111 80 L114 92"/><path d="M100 100 L100 76"/><path d="M100 76 Q92 62 96 54"/><path d="M100 76 Q108 62 104 54"/><path d="M96 54 Q100 46 104 54"/><path d="M60 120 Q80 112 100 120 Q120 112 140 120"/><path d="M64 128 Q84 122 100 128 Q116 122 136 128"/></g>`);
   return wrap(`<g ${g}><circle cx="100" cy="80" r="20"/></g>`);
 }
@@ -5975,7 +6232,7 @@ function tarotCoinsGroup(n,x0,x1,cy,r){
 }
 function tarotSvgPent(num){
   const g=TAROT_G,c=TAROT_C_END;
-  if(num==="ACE") return g+tarotCoin(100,56,22)+`<path d="M86 104 Q100 96 114 104"/><line x1="100" y1="30" x2="100" y2="14"/><line x1="100" y1="30" x2="86" y2="16"/><line x1="100" y1="30" x2="114" y2="16"/>`+c;
+if(num==="ACE") return g+tarotCoin(100,90,22)+`<path d="M86 138 Q100 130 114 138"/><line x1="100" y1="64" x2="100" y2="48"/><line x1="100" y1="64" x2="86" y2="50"/><line x1="100" y1="64" x2="114" y2="50"/>`+c;
   if(num==="II") return g+tarotCoin(78,52,16)+tarotCoin(122,78,16)+`<path d="M78 70 Q100 90 122 66"/><path d="M70 120 Q100 100 130 120"/><line x1="78" y1="70" x2="70" y2="120"/><line x1="122" y1="66" x2="130" y2="120"/>`+c;
   if(num==="III") return g+tarotCoin(100,46,15)+tarotCoin(78,82,15)+tarotCoin(122,82,15)+`<path d="M70 118 Q100 100 130 118"/><line x1="78" y1="82" x2="70" y2="118"/><line x1="122" y1="82" x2="130" y2="118"/>`+c;
   if(num==="IV") return g+tarotCoin(62,52,14)+tarotCoin(138,52,14)+tarotCoin(62,108,14)+tarotCoin(138,108,14)+`<path d="M100 80 Q92 96 100 110 Q108 96 100 80 Z"/><circle cx="100" cy="92" r="3" fill="${TAROT_INK}" stroke="none"/>`+c;
@@ -7736,8 +7993,10 @@ var openBottomPanel = null;
 function closeAllBottomPanels() {
     var morePanel = document.getElementById('morePanel');
     var emojiPanel = document.getElementById('emojiPanel');
+    var quickPanel = document.getElementById('quickEmojiPanel');
     if (morePanel) morePanel.classList.remove('show');
     if (emojiPanel) emojiPanel.classList.remove('show');
+    if (quickPanel) quickPanel.classList.remove('show');
     openBottomPanel = null;
 }
 
@@ -7755,6 +8014,172 @@ function toggleMorePanel() {
     closeAllBottomPanels();
     panel.classList.add('show');
     openBottomPanel = 'more';
+}
+
+// ===== 快捷表情面板 =====
+var quickEmojiActiveTab = 'emoji';     // emoji | kao
+var quickEmojiActiveSub = {};          // { emoji: '表情', kao: '开心' }
+var QUICK_EMOJI_LOADED = false;
+
+function toggleQuickEmojiPanel() {
+    var panel = document.getElementById('quickEmojiPanel');
+    if (!panel) return;
+    if (panel.classList.contains('show')) {
+        panel.classList.remove('show');
+        return;
+    }
+    // 关掉其他面板
+    var mp = document.getElementById('morePanel');
+    var ep = document.getElementById('emojiPanel');
+    if (mp) mp.classList.remove('show');
+    if (ep) ep.classList.remove('show');
+
+    // 每次打开都重新渲染（数据可能变了）
+    renderQuickEmojiPanel();
+    panel.classList.add('show');
+}
+
+// 点面板外任何地方 → 关闭快捷面板
+document.addEventListener('click', function(e) {
+    var panel = document.getElementById('quickEmojiPanel');
+    if (!panel || !panel.classList.contains('show')) return;
+    if (panel.contains(e.target)) return;
+    var btn = document.getElementById('btnQuickEmoji');
+    if (btn && btn.contains(e.target)) return;
+    panel.classList.remove('show');
+}, true);
+
+// 从字卡库 08 里读数据，按子组分类
+async function loadQuickEmojiData() {
+    var all = await dbGetAll('wordcards');
+    var data = { emoji: {}, kao: {} };
+    var dc = await dbGetAll('disabledCards');
+    var dids = new Set(dc.map(function(d) { return String(d.cardId); }));
+
+    // emoji 子分类（按你的实际名字）
+    var EMOJI_GROUPS = ['表情', '爱心', '手势', '花草自然', '食物饮品', '日常物品'];
+
+    all.forEach(function(c) {
+        if (!c || !c.content || c.content === '__GROUP_PLACEHOLDER__') return;
+        if (dids.has(String(c.id))) return;
+        if (String(c.categoryId) !== '08') return;
+
+// ★ 加这一段：过滤空 / 不可见字符
+    var content = String(c.content).trim();
+    if (!content) return;                              // 空 / 全空白
+    if (content.length === 0) return;
+    // 去掉零宽字符后再判断
+    var clean = content.replace(/[\u200B-\u200D\uFEFF]/g, '');
+    if (!clean) return;
+
+      // ★ 下面用 clean 代替 c.content
+    var gn = c.groupName || '';
+
+        // kaomoji·xxx → 颜文字
+        if (gn.indexOf('kaomoji·') === 0) {
+            var sub = gn.replace('kaomoji·', '') || '其他';
+            if (!data.kao[sub]) data.kao[sub] = [];
+            data.kao[sub].push({ content: c.content });
+            return;
+        }
+
+        // 纯中文组名 → emoji
+        if (EMOJI_GROUPS.indexOf(gn) !== -1) {
+            if (!data.emoji[gn]) data.emoji[gn] = [];
+            data.emoji[gn].push({ content: c.content });
+        }
+    });
+
+    return data;
+}
+
+// 中英文名映射
+// 从 groupName 里提取简短中文名
+function getQuickSubLabel(tab, groupName) {
+    // 你现在的子分类名已经是中文了，直接用
+    return groupName;
+}
+
+async function renderQuickEmojiPanel() {
+    var panel = document.getElementById('quickEmojiPanel');
+    if (!panel) return;
+    var data = await loadQuickEmojiData();
+
+    // 如果没有子分类，直接返回
+    var EMOJI_ORDER = ['表情', '爱心', '手势', '花草自然', '食物饮品', '日常物品'];
+var emojiSubs = EMOJI_ORDER.filter(function(k) { return data.emoji[k]; });
+    var kaoSubs = Object.keys(data.kao).sort();
+    if (emojiSubs.length === 0 && kaoSubs.length === 0) {
+        panel.innerHTML = '<div style="padding:30px;text-align:center;color:var(--theme-muted);font-size:13px;">字卡库 08 里还没有素材</div>';
+        return;
+    }
+
+    // 当前 tab 与子分类
+    var tab = quickEmojiActiveTab;
+    var subs = tab === 'emoji' ? emojiSubs : kaoSubs;
+    if (subs.length === 0) {
+        // 当前 tab 无数据，切另一个
+        tab = (tab === 'emoji') ? 'kao' : 'emoji';
+        quickEmojiActiveTab = tab;
+        subs = (tab === 'emoji') ? emojiSubs : kaoSubs;
+    }
+    var activeSub = quickEmojiActiveSub[tab];
+    if (!activeSub || subs.indexOf(activeSub) === -1) {
+        activeSub = subs[0];
+        quickEmojiActiveSub[tab] = activeSub;
+    }
+
+    // 拼 HTML
+    var h = '';
+
+    // 主 tab
+    h += '<div class="quick-emoji-tabs">';
+    h += '<button class="quick-emoji-tab' + (tab === 'emoji' ? ' active' : '') + '" onclick="switchQuickEmojiTab(\'emoji\')">Emoji</button>';
+    h += '<button class="quick-emoji-tab' + (tab === 'kao' ? ' active' : '') + '" onclick="switchQuickEmojiTab(\'kao\')">颜文字</button>';
+    h += '</div>';
+
+    // 内容
+    var items = (tab === 'emoji' ? data.emoji : data.kao)[activeSub] || [];
+    h += '<div class="quick-emoji-body">';
+    h += '<div class="quick-emoji-grid' + (tab === 'kao' ? ' kao-grid' : '') + '">';
+    items.forEach(function(item) {
+        var cls = 'quick-emoji-item' + (tab === 'kao' ? ' kao-item' : '');
+        var content = item.content.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        h += '<div class="' + cls + '" onclick="insertQuickEmoji(\'' + content + '\')">' + item.content + '</div>';
+    });
+    h += '</div></div>';
+
+    // 底部子分类
+    h += '<div class="quick-emoji-subcats">';
+    subs.forEach(function(sub) {
+        var label = getQuickSubLabel(tab, sub);
+        h += '<button class="quick-emoji-subcat' + (sub === activeSub ? ' active' : '') + '" onclick="switchQuickEmojiSub(\'' + sub + '\')">' + label + '</button>';
+    });
+    h += '</div>';
+
+    panel.innerHTML = h;
+}
+
+function switchQuickEmojiTab(tab) {
+    quickEmojiActiveTab = tab;
+    renderQuickEmojiPanel();
+}
+
+function switchQuickEmojiSub(sub) {
+    quickEmojiActiveSub[quickEmojiActiveTab] = sub;
+    renderQuickEmojiPanel();
+}
+
+// 插入到输入框末尾
+function insertQuickEmoji(text) {
+    var input = document.getElementById('messageInput');
+    if (!input) return;
+    input.value += text;
+    input.focus();
+    // 光标移到末尾
+    setTimeout(function() {
+        input.setSelectionRange(input.value.length, input.value.length);
+    }, 0);
 }
 
 function hideMorePanel() {
@@ -8042,6 +8467,32 @@ b.className = 'bubble ' + (m.sender === 'me' ? 'sent preset-my' : 'received pres
 } else if (m.type === 'deliver_reply') {
     b.innerHTML = '<div style="font-size:11px;color:#b59a9e;margin-bottom:6px;">✉️ 秦彻的回话</div>' +
         '<div style="font-size:14px;line-height:1.6;">' + m.content + '</div>';
+
+    } else if (m.type === 'tarot_draw') {
+        var inner = '';
+
+        // 牌阵
+        inner += '<div class="tarot-msg-wrap">';
+        m.cards.forEach(function(item) {
+            var card = item.card;
+            var isRev = item.isReversed;
+            var data = isRev ? card.reversed : card.upright;
+            var summary = (data && data.summary) ? data.summary : '';
+            var rankText = (card.rank || '') + ' · ' + ((card.suit || '').toUpperCase());
+
+            inner += '<div class="tarot-mini-card">';
+            inner += '  <div class="tmc-rank">' + rankText + '</div>';
+            inner += '  <div class="tmc-orient">' + (isRev ? '逆位' : '正位') + '</div>';
+            inner += '  <div class="tmc-svg">' + getTarotCardSvg(card) + '</div>';
+            inner += '  <div class="tmc-name">' + card.name + '</div>';
+            if (summary) inner += '<div class="tmc-summary">' + summary + '</div>';
+            inner += '</div>';
+        });
+        inner += '</div>';
+
+
+        b.innerHTML = inner;
+    
     } else if (m.type === 'emoji') {
         // 表情：不套气泡，直接显示图片
         const img = document.createElement('img');
@@ -8580,8 +9031,203 @@ async function sendMessage() {
     scrollBottom();
     input.value = '';
 closeAllBottomPanels();  // ← 加这行
-    // 等加载完再触发回复（把刚发的内容作为触发词）
+
+// ★ 塔罗模式分流
+    if (currentTopicModeId === 'tarot') {
+        await doTarotSend(c);
+        return;
+    }
     autoReply(c);
+}
+
+// ===== 塔罗传讯 =====
+var TAROT_COUNT_KEY = 'tarotSpreadCount';
+
+function setTarotCount(n) {
+    localStorage.setItem(TAROT_COUNT_KEY, String(n));
+    document.getElementById('tarotChip1').classList.toggle('active', n === 1);
+    document.getElementById('tarotChip3').classList.toggle('active', n === 3);
+}
+
+function refreshTarotBar() {
+    var bar = document.getElementById('tarotBar');
+    if (!bar) return;
+
+    if (currentTopicModeId === 'tarot') {
+        bar.classList.add('show');
+        var n = parseInt(localStorage.getItem(TAROT_COUNT_KEY) || '1');
+        setTarotCount(n);
+        // ★ 切到塔罗模式
+        onEnterTarotMode();
+    } else {
+        bar.classList.remove('show');
+        // ★ 从塔罗模式切走
+        onLeaveTarotMode();
+    }
+}
+
+// 切到塔罗模式 → 开场白
+async function onEnterTarotMode() {
+    // 防止连续触发（比如聊天页刷新时）
+    if (sessionStorage.getItem('tarotSessionActive') === '1') return;
+    sessionStorage.setItem('tarotSessionActive', '1');
+
+    var txt = '秦彻塔罗师已上线。';
+    var m = {
+        sender: 'other',
+        type: 'text',
+        content: txt,
+        timestamp: Date.now()
+    };
+    var id = await dbPut('messages', m);
+    m.id = id;
+    // 如果聊天页打开着，立刻渲染
+    if (document.getElementById('chatPage').classList.contains('active')) {
+        renderMsg(m);
+        scrollBottom();
+    }
+}
+
+// 从塔罗模式切走 → 结束语
+async function onLeaveTarotMode() {
+    if (sessionStorage.getItem('tarotSessionActive') !== '1') return;
+    sessionStorage.removeItem('tarotSessionActive');
+
+    var txt = '本次塔罗传讯已结束。';
+    var m = {
+        sender: 'other',
+        type: 'text',
+        content: txt,
+        timestamp: Date.now()
+    };
+    var id = await dbPut('messages', m);
+    m.id = id;
+    if (document.getElementById('chatPage').classList.contains('active')) {
+        renderMsg(m);
+        scrollBottom();
+    }
+}
+
+// 从「塔罗传讯」组随机取一句
+async function pickTarotCard() {
+    var groupName = '塔罗传讯';
+    var all = await dbGetAll('wordcards');
+    var dc = await dbGetAll('disabledCards');
+    var dids = new Set(dc.map(function(d) { return String(d.cardId); }));
+    var pool = all.filter(function(c) {
+        if (!c || !c.content || c.content === '__GROUP_PLACEHOLDER__') return false;
+        if (dids.has(String(c.id))) return false;
+        return c.groupName === groupName;
+    });
+    if (pool.length === 0) return '';
+    return pool[Math.floor(Math.random() * pool.length)].content;
+}
+
+// 抽 n 张牌
+function drawTarotCards(n) {
+    var picked = [];
+    var used = new Set();
+    var total = (typeof TAROT_CARDS !== 'undefined' && TAROT_CARDS.length) ? TAROT_CARDS.length : 0;
+    if (total === 0) return picked;
+    for (var i = 0; i < n && i < total; i++) {
+        var card;
+        var tries = 0;
+        do {
+            card = TAROT_CARDS[Math.floor(Math.random() * TAROT_CARDS.length)];
+            tries++;
+        } while (used.has(card.id) && tries < 50);
+        used.add(card.id);
+        picked.push({
+            card: card,
+            isReversed: Math.random() < 0.3
+        });
+    }
+    return picked;
+}
+
+// 塔罗模式：发消息后的处理
+async function doTarotSend(userText) {
+    // 通用等待：15~30 秒
+    function tarotWait() {
+        return 15000 + Math.random() * 15000;
+    }
+
+    // 显示提示
+    function showTarotTyping(text) {
+        var old = document.querySelector('.typing-indicator');
+        if (old) old.remove();
+        var ti = document.createElement('div');
+        ti.className = 'typing-indicator';
+        ti.textContent = text;
+        document.getElementById('chatArea').appendChild(ti);
+        scrollBottom();
+    }
+    function hideTarotTyping() {
+        var old = document.querySelector('.typing-indicator');
+        if (old) old.remove();
+    }
+
+    // 20% 字卡 / 80% 抽牌
+    if (Math.random() < 0.2) {
+        showTarotTyping('秦彻塔罗师正在洗牌中…');
+        await new Promise(function(r) { setTimeout(r, tarotWait()); });
+        hideTarotTyping();
+
+        var txt = await pickTarotCard();
+        if (!txt) txt = '……';
+        var m1 = {
+            sender: 'other',
+            type: 'text',
+            content: txt,
+            timestamp: Date.now()
+        };
+        var id1 = await dbPut('messages', m1);
+        m1.id = id1;
+        renderMsg(m1);
+        scrollBottom();
+        return;
+    }
+
+    // 抽牌
+    var n = parseInt(localStorage.getItem(TAROT_COUNT_KEY) || '1');
+    var cards = drawTarotCards(n);
+    if (cards.length === 0) return;
+
+    showTarotTyping('秦彻塔罗师正在洗牌中…');
+    await new Promise(function(r) { setTimeout(r, tarotWait()); });
+    hideTarotTyping();
+
+    // 第 1 条：牌阵
+    var mCard = {
+        sender: 'other',
+        type: 'tarot_draw',
+        question: userText,
+        cards: cards,
+        timestamp: Date.now()
+    };
+    var idCard = await dbPut('messages', mCard);
+    mCard.id = idCard;
+    renderMsg(mCard);
+    scrollBottom();
+
+    // 50% 概率，第 2 条：收尾句
+    if (Math.random() < 0.5) {
+        await new Promise(function(r) { setTimeout(r, tarotWait()); });
+
+        var tail = await pickTarotCard();
+        if (tail) {
+            var mTail = {
+                sender: 'other',
+                type: 'text',
+                content: tail,
+                timestamp: Date.now()
+            };
+            var idTail = await dbPut('messages', mTail);
+            mTail.id = idTail;
+            renderMsg(mTail);
+            scrollBottom();
+        }
+    }
 }
 
 async function autoReply(triggerText) {
@@ -9248,6 +9894,15 @@ var TOPIC_MODES = [
     categoryWeights: { '03': 40, '04': 30, '02': 15, '05': 10, '08': 5 },
     emojiRatio: 0.1
   },
+{
+    id: 'tarot',
+    label: '塔罗传讯',
+    icon: '🔮',
+    desc: '你问一句，秦彻塔罗师抽牌回你',
+    categoryWeights: null,
+    emojiRatio: 0,
+    isTarot: true
+},
   {
     id: 'custom',
     label: '自定义',
@@ -9336,6 +9991,8 @@ function refreshTopicModeBadge() {
   var mode = getTopicMode(currentTopicModeId);
   el.textContent = mode.icon || '🌸';
   el.style.color = (currentTopicModeId === 'auto') ? 'var(--theme-muted)' : 'var(--theme-primary)';
+// ★ 加这一行
+    if (typeof refreshTarotBar === 'function') refreshTarotBar();
 }
 
 function openTopicModePicker() {
@@ -20159,6 +20816,12 @@ window.renderModuleSettings = renderModuleSettings;
 window.shareWishToChat = shareWishToChat;
 window.shareTarotQuoteToChat = shareTarotQuoteToChat;
 
+window.toggleQuickEmojiPanel = toggleQuickEmojiPanel;
+window.switchQuickEmojiTab = switchQuickEmojiTab;
+window.switchQuickEmojiSub = switchQuickEmojiSub;
+window.insertQuickEmoji = insertQuickEmoji;
+window.renderQuickEmojiPanel = renderQuickEmojiPanel;
+
 // ===== 暴露给音乐 script 用 =====
 window.showConfirmDialog = showConfirmDialog;
 window.showToast = showToast;
@@ -20168,6 +20831,12 @@ window.dbPut = dbPut;
 window.dbDelete = dbDelete;
 window.dbClear = dbClear;
 window.createDialog = createDialog;
+
+window.setTarotCount = setTarotCount;
+window.refreshTarotBar = refreshTarotBar;
+window.pickTarotCard = pickTarotCard;
+window.drawTarotCards = drawTarotCards;
+window.doTarotSend = doTarotSend;
 
 
 
