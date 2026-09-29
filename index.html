@@ -1884,8 +1884,10 @@ body.theme-shuimo .home-page-inner .status span:last-child {
 </div>
     <div class="chat-area" id="chatArea"><div style="text-align:center;color:#ccc;padding:40px;">💬 开始你们的对话吧</div></div>
 <div class="tarot-bar" id="tarotBar">
-    <button class="tarot-bar-chip active" id="tarotChip1" onclick="setTarotCount(1)">牌阵：1 张</button>
-    <button class="tarot-bar-chip" id="tarotChip3" onclick="setTarotCount(3)">牌阵：3 张</button>
+    <button class="tarot-bar-chip active" data-spread="single" onclick="setTarotSpread('single')">单牌</button>
+    <button class="tarot-bar-chip" data-spread="fsr" onclick="setTarotSpread('fsr')">三牌·想法</button>
+    <button class="tarot-bar-chip" data-spread="deep" onclick="setTarotSpread('deep')">三牌·深浅</button>
+    <button class="tarot-bar-chip" data-spread="dual" onclick="setTarotSpread('dual')">三牌·对照</button>
 </div>
 
 <div class="bottombar" style="position:relative;">
@@ -8480,32 +8482,76 @@ b.className = 'bubble ' + (m.sender === 'me' ? 'sent preset-my' : 'received pres
     b.innerHTML = '<div style="font-size:11px;color:#b59a9e;margin-bottom:6px;">✉️ 秦彻的回话</div>' +
         '<div style="font-size:14px;line-height:1.6;">' + m.content + '</div>';
 
-    } else if (m.type === 'tarot_draw') {
-        var inner = '';
+} else if (m.type === 'tarot_draw') {
+    var inner = '';
+    inner += '<div class="tarot-msg-wrap">';
+    m.cards.forEach(function(item, idx) {
+        var card = item.card;
+        var isRev = item.isReversed;
+        var data = isRev ? card.reversed : card.upright;
+        var ctx = m.context || 'love';
+var summary = (data && (data[ctx] || data.summary)) ? (data[ctx] || data.summary) : '';
+        var rankText = (card.rank || '') + ' · ' + ((card.suit || '').toUpperCase());
 
-        // 牌阵
-        inner += '<div class="tarot-msg-wrap">';
-        m.cards.forEach(function(item) {
-            var card = item.card;
-            var isRev = item.isReversed;
-            var data = isRev ? card.reversed : card.upright;
-            var summary = (data && data.summary) ? data.summary : '';
-            var rankText = (card.rank || '') + ' · ' + ((card.suit || '').toUpperCase());
-
-            inner += '<div class="tarot-mini-card">';
-            inner += '  <div class="tmc-rank">' + rankText + '</div>';
-            inner += '  <div class="tmc-orient">' + (isRev ? '逆位' : '正位') + '</div>';
-            inner += '  <div class="tmc-svg">' + getTarotCardSvg(card) + '</div>';
-            inner += '  <div class="tmc-name">' + card.name + '</div>';
-            if (summary) inner += '<div class="tmc-summary">' + summary + '</div>';
-            inner += '</div>';
-        });
+        inner += '<div class="tarot-mini-card">';
+        inner += '  <div class="tmc-rank">' + rankText + '</div>';
+        inner += '  <div class="tmc-orient">' + (isRev ? '逆位' : '正位') + '</div>';
+        inner += '  <div class="tmc-svg">' + getTarotCardSvg(card) + '</div>';
+        inner += '  <div class="tmc-name">' + card.name + '</div>';
+        if (summary) inner += '<div class="tmc-summary">' + summary + '</div>';
         inner += '</div>';
+    });
+    inner += '</div>';
+    b.innerHTML = inner;
 
+} else if (m.type === 'tarot_text') {
+    var pos = m.positions || [''];
+    var posConnect = {
+        '想法': '我的想法是',
+        '状态': '我的状态落在',
+        '回应': '我给你的回应，是',
+        '表层': '最表层的是',
+        '中层': '再往里一层，是',
+        '深层': '最深处，是',
+        '现在': '现在的位置是',
+        '未来': '未来会走到',
+        '变化': '中间会经历的是',
+        '核心问题': '核心的问题是',
+        '阻碍': '挡在前面的，是',
+        '建议': '我想给你的建议，是',
+        '可能的结果': '最后可能走到的是'
+    };
 
-        b.innerHTML = inner;
-    
-    } else if (m.type === 'emoji') {
+    var sentences = m.cards.map(function(item, idx) {
+        var card = item.card;
+        var isRev = item.isReversed;
+        var data = isRev ? card.reversed : card.upright;
+        var position = pos[idx] || '';
+        var ctx = m.context || 'love';
+        var summary = data[ctx] || data.summary || '';
+        // ★ 去掉 summary 末尾的句号，避免拼接后出现"。。"
+        summary = summary.replace(/[。．\.]+$/, '');
+
+        if (!position) {
+            return '你问我的时候，我翻到的是' + card.name + (isRev ? '逆位' : '正位') + '——' + summary;
+        }
+        var connect = posConnect[position] || '';
+        var isLast = (idx === m.cards.length - 1);
+        var prefix = (idx === 0) ? '你问我的时候，' : (isLast && m.cards.length > 1 ? '而' : '');
+        return prefix + connect + card.name + (isRev ? '逆位' : '正位') + '——' + summary;
+    }).join('。') + '。';
+
+    var inner2 = '';
+    if (m.question) {
+        inner2 += '<div style="font-size:12px;color:#999;line-height:1.6;margin-bottom:8px;">问题：' + m.question + '</div>';
+    }
+    inner2 += '<div style="font-size:13.5px;color:#444;line-height:1.75;">' + sentences + '</div>';
+    if (m.response) {
+        inner2 += '<div style="font-size:13.5px;color:#444;line-height:1.75;margin-top:8px;">最后，我想和你说：' + m.response + '</div>';
+    }
+    b.innerHTML = inner2;
+
+} else if (m.type === 'emoji') {
         // 表情：不套气泡，直接显示图片
         const img = document.createElement('img');
         img.src = m.content;
@@ -9055,10 +9101,13 @@ closeAllBottomPanels();  // ← 加这行
 // ===== 塔罗传讯 =====
 var TAROT_COUNT_KEY = 'tarotSpreadCount';
 
-function setTarotCount(n) {
-    localStorage.setItem(TAROT_COUNT_KEY, String(n));
-    document.getElementById('tarotChip1').classList.toggle('active', n === 1);
-    document.getElementById('tarotChip3').classList.toggle('active', n === 3);
+// 塔罗传讯：按牌阵 id 选
+function setTarotSpread(id) {
+    localStorage.setItem('tarotSpreadId', id);
+    // 高亮
+    document.querySelectorAll('#tarotBar .tarot-bar-chip').forEach(function(btn) {
+        btn.classList.toggle('active', btn.dataset.spread === id);
+    });
 }
 
 function refreshTarotBar() {
@@ -9067,13 +9116,15 @@ function refreshTarotBar() {
 
     if (currentTopicModeId === 'tarot') {
         bar.classList.add('show');
-        var n = parseInt(localStorage.getItem(TAROT_COUNT_KEY) || '1');
-        setTarotCount(n);
-        // ★ 切到塔罗模式
+        // 读上次选过的牌阵，默认 single
+        var id = localStorage.getItem('tarotSpreadId') || 'single';
+        // 兼容旧值
+        if (id === '1') id = 'single';
+        if (id === '3') id = 'fsr';
+        setTarotSpread(id);
         onEnterTarotMode();
     } else {
         bar.classList.remove('show');
-        // ★ 从塔罗模式切走
         onLeaveTarotMode();
     }
 }
@@ -9179,42 +9230,32 @@ async function doTarotSend(userText) {
         if (old) old.remove();
     }
 
-    // 20% 字卡 / 80% 抽牌
-    if (Math.random() < 0.2) {
-        showTarotTyping('秦彻塔罗师正在洗牌中…');
-        await new Promise(function(r) { setTimeout(r, tarotWait()); });
-        hideTarotTyping();
-
-        var txt = await pickTarotCard();
-        if (!txt) txt = '……';
-        var m1 = {
-            sender: 'other',
-            type: 'text',
-            content: txt,
-            timestamp: Date.now()
-        };
-        var id1 = await dbPut('messages', m1);
-        m1.id = id1;
-        renderMsg(m1);
-        scrollBottom();
-        return;
-    }
-
     // 抽牌
-    var n = parseInt(localStorage.getItem(TAROT_COUNT_KEY) || '1');
+    var spreadId = localStorage.getItem('tarotSpreadId') || 'single';
+    if (spreadId === '1') spreadId = 'single';
+    if (spreadId === '3') spreadId = 'fsr';
+    var spread = getSpreadById(spreadId);
+    var n = spread.count;
     var cards = drawTarotCards(n);
     if (cards.length === 0) return;
 
+    // 从 TAROT_RESPONSE_POOL 抽一句秦彻的回应
+    var responsePool = TAROT_RESPONSE_POOL.qinche.concat(TAROT_RESPONSE_POOL.shared);
+    var tarotResponse = responsePool[Math.floor(Math.random() * responsePool.length)];
+
+    // ===== 第 1 条：牌阵卡片 =====
     showTarotTyping('秦彻塔罗师正在洗牌中…');
     await new Promise(function(r) { setTimeout(r, tarotWait()); });
     hideTarotTyping();
 
-    // 第 1 条：牌阵
     var mCard = {
         sender: 'other',
         type: 'tarot_draw',
         question: userText,
         cards: cards,
+        spreadId: spreadId,
+        positions: spread.positions,
+       context: 'love',     
         timestamp: Date.now()
     };
     var idCard = await dbPut('messages', mCard);
@@ -9222,24 +9263,23 @@ async function doTarotSend(userText) {
     renderMsg(mCard);
     scrollBottom();
 
-    // 50% 概率，第 2 条：收尾句
-    if (Math.random() < 0.5) {
-        await new Promise(function(r) { setTimeout(r, tarotWait()); });
+    // ===== 第 2 条：问题 + 自然话总结 + 最后我想说 =====
+    await new Promise(function(r) { setTimeout(r, tarotWait()); });
 
-        var tail = await pickTarotCard();
-        if (tail) {
-            var mTail = {
-                sender: 'other',
-                type: 'text',
-                content: tail,
-                timestamp: Date.now()
-            };
-            var idTail = await dbPut('messages', mTail);
-            mTail.id = idTail;
-            renderMsg(mTail);
-            scrollBottom();
-        }
-    }
+    var mText = {
+        sender: 'other',
+        type: 'tarot_text',
+        question: userText,
+        cards: cards,
+        positions: spread.positions,
+        response: tarotResponse,
+        context: 'love',      
+        timestamp: Date.now()
+    };
+    var idText = await dbPut('messages', mText);
+    mText.id = idText;
+    renderMsg(mText);
+    scrollBottom();
 }
 
 async function autoReply(triggerText) {
@@ -18356,7 +18396,9 @@ function setEchoTab(tab) {
 
 // ============ 塔罗占卜（新版完整流程） ============
 var tarotState = {
+    mode: 'dream',         // dream | normal
     context: 'love',
+    spreadId: 'single',
     spreadCount: 1,
     question: '',
     cards: [],
@@ -18364,6 +18406,58 @@ var tarotState = {
     isAllow: false
 };
 window.tarotState = tarotState;
+
+// ===== 牌阵配置 =====
+var TAROT_SPREADS = {
+    single: {
+        id: 'single', name: '只占这一件事', count: 1,
+        positions: [''],
+        desc: '直接回答你问的那件事'
+    },
+    fsr: {
+        id: 'fsr', name: '想法·状态·回应', count: 3,
+        positions: ['想法', '状态', '回应'],
+        desc: '我想什么、我在什么状态、我会怎么回应',
+        descByMode: {
+            dream:  '他想什么、他在什么状态、他会怎么回应',
+            normal: '我想什么、我在什么状态、我会怎么回应'
+        }
+    },
+    deep: {
+        id: 'deep', name: '深浅三层', count: 3,
+        positions: ['表层', '中层', '深层'],
+        desc: '从表面到核心，层层看进去'
+    },
+    dual: {
+        id: 'dual', name: '双牌对照', count: 3,
+        positions: ['现在', '未来', '变化'],
+        desc: '现在什么样、未来什么样、中间会有什么变化'
+    },
+    core: {
+        id: 'core', name: '直指核心', count: 4,
+        positions: ['核心问题', '阻碍', '建议', '可能的结果'],
+        desc: '核心问题、阻碍、建议、可能的结果'
+    }
+};
+
+function getSpreadById(id) {
+    return TAROT_SPREADS[id] || TAROT_SPREADS.single;
+}
+
+// 按当前模式取牌阵说明
+function getSpreadDesc(spreadId) {
+    var sp = getSpreadById(spreadId);
+    if (!sp) return '';
+    if (sp.descByMode) {
+        return sp.descByMode[tarotState.mode] || sp.desc;
+    }
+    return sp.desc;
+}
+
+// 当前模式的主语（用于牌义解读）
+function getSubject() {
+    return (tarotState.mode === 'dream') ? '他' : '你';
+}
 
 function openTarotPage() {
     showPage('tarotPage');
@@ -18392,17 +18486,36 @@ function renderTarotMain() {
     document.getElementById('tarotContent').innerHTML =
     '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:var(--page-bg);min-height:100vh;">' +
     '<div style="width:100%;max-width:400px;">' +
- getTarotBackHTML() +
-'<div style="font-size:20px;font-weight:600;color:var(--theme-text);margin:0 0 28px;text-align:center;letter-spacing:1px;">以光为引 · 链接你我</div>' +
-    '<div style="display:flex;flex-direction:column;gap:12px;">' +
-'<div onclick="showTarotAllowDeny()" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:16px;padding:20px 16px;cursor:pointer;text-align:center;">' +
-'<div style="font-size:15px;font-weight:500;color:var(--theme-text);">占卜</div>' +
-'<div style="font-size:11px;color:var(--theme-muted);margin-top:4px;">征求秦彻的意见</div>' +
-'</div>' +
-'<div onclick="renderTarotQuotes()" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:16px;padding:20px 16px;cursor:pointer;text-align:center;">' +
-'<div style="font-size:15px;font-weight:500;color:var(--theme-text);">语录</div>' +
-'<div style="font-size:11px;color:var(--theme-muted);margin-top:4px;">翻牌后存下的记录</div>' +
-  '</div></div></div></div>';
+    getTarotBackHTML() +
+    '<div style="font-size:20px;font-weight:600;color:var(--theme-text);margin:0 0 24px;text-align:center;letter-spacing:1px;">以光为引 · 链接你我</div>' +
+
+    '<div onclick="startDreamTarot()" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:16px;padding:20px 18px;cursor:pointer;margin-bottom:12px;">' +
+    '<div style="font-size:16px;font-weight:500;color:var(--theme-text);margin-bottom:6px;">梦占</div>' +
+    '<div style="font-size:12px;color:var(--theme-muted);line-height:1.6;">只占他那边此刻是什么情形。需先选一位角色，征求他的意见</div>' +
+    '</div>' +
+
+    '<div onclick="startNormalTarot()" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:16px;padding:20px 18px;cursor:pointer;margin-bottom:12px;">' +
+    '<div style="font-size:16px;font-weight:500;color:var(--theme-text);margin-bottom:6px;">普通</div>' +
+    '<div style="font-size:12px;color:var(--theme-muted);line-height:1.6;">什么都占，为你自己翻牌，不需要角色参与</div>' +
+    '</div>' +
+
+    '<div onclick="renderTarotQuotes()" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:16px;padding:20px 18px;cursor:pointer;">' +
+    '<div style="font-size:16px;font-weight:500;color:var(--theme-text);margin-bottom:6px;">语录</div>' +
+    '<div style="font-size:12px;color:var(--theme-muted);line-height:1.6;">翻牌后存下的记录</div>' +
+    '</div>' +
+
+    '</div></div>';
+}
+
+function startDreamTarot() {
+    tarotState.mode = 'dream';
+    showTarotAllowDeny();
+}
+
+function startNormalTarot() {
+    tarotState.mode = 'normal';
+    tarotState.isAllow = true;
+    showTarotContext();
 }
 
 // 征求秦彻意见
@@ -18427,10 +18540,30 @@ function showTarotAllowDeny() {
 
 // 占卜设置：分区+牌阵+问题
 function showTarotContext() {
+    var isDream = (tarotState.mode === 'dream');
+    var title = isDream ? '选择你关心的方向' : '为自己选一个方向';
+
+    // 生成牌阵按钮（2列，含张数）
+    var spreadHtml = '';
+    var spreadKeys = ['single', 'fsr', 'deep', 'dual', 'core'];
+    spreadKeys.forEach(function(key) {
+        var sp = TAROT_SPREADS[key];
+        spreadHtml += '<div onclick="selectTarotSpreadById(\'' + key + '\')" ontouchstart="selectTarotSpreadById(\'' + key + '\')" data-spread-id="' + key + '" style="flex:0 0 48%;padding:12px 12px;background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;cursor:pointer;box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;">' +
+            '<span style="font-size:13px;font-weight:500;color:var(--theme-text);">' + sp.name + '</span>' +
+            '<span style="font-size:11px;color:var(--theme-muted);">' + sp.count + '张</span>' +
+            '</div>';
+    });
+
+    var descHtml = '<div id="spreadDesc" style="font-size:11px;color:var(--theme-muted);line-height:1.6;margin-bottom:20px;padding-left:4px;">' + getSpreadDesc(tarotState.spreadId || 'single') + '</div>';
+
     document.getElementById('tarotContent').innerHTML =
     '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:var(--page-bg);min-height:100vh;">' +
     '<div style="width:100%;max-width:400px;">' +
-    '<div style="font-size:20px;font-weight:600;color:var(--theme-text);margin:20px 0 28px;text-align:center;letter-spacing:1px;">选择你关心的方向</div>' +
+
+    '<div style="font-size:20px;font-weight:600;color:var(--theme-text);margin:20px 0 24px;text-align:center;letter-spacing:1px;">' + title + '</div>' +
+
+    // 方向
+    '<div style="font-size:13px;color:var(--theme-muted);margin-bottom:10px;">方向</div>' +
     '<div style="display:flex;gap:8px;margin-bottom:20px;">' +
     '<div onclick="selectTarotContext(\'love\')" data-ctx="love" style="flex:1;padding:14px 6px;background:var(--theme-card);border:2px solid var(--theme-primary);border-radius:12px;text-align:center;cursor:pointer;">' +
     '<div style="font-size:10px;color:var(--theme-muted);letter-spacing:2px;">AFFECTION</div>' +
@@ -18442,39 +18575,55 @@ function showTarotContext() {
     '<div style="font-size:10px;color:var(--theme-muted);letter-spacing:2px;">WITHIN</div>' +
     '<div style="font-size:14px;font-weight:500;color:var(--theme-text);margin-top:4px;">内心日常</div></div>' +
     '</div>' +
-    '<div style="font-size:18px;font-weight:600;color:var(--theme-text);margin-bottom:16px;">选择牌阵</div>' +
-    '<div style="display:flex;gap:8px;margin-bottom:20px;">' +
-   '<div onclick="selectTarotSpread(1)" ontouchstart="selectTarotSpread(1)" data-spread="1" style="flex:1;padding:14px 6px;background:var(--theme-card);border:2px solid var(--theme-primary);border-radius:12px;text-align:center;cursor:pointer;">' +
-    '<div style="font-size:14px;font-weight:500;color:var(--theme-text);">单张</div></div>' +
-'<div onclick="selectTarotSpread(3)" ontouchstart="selectTarotSpread(3)" data-spread="3" style="flex:1;padding:14px 6px;background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;text-align:center;cursor:pointer;">' +
-    '<div style="font-size:14px;font-weight:500;color:var(--theme-text);">三张</div></div>' +
-    '</div>' +
-    '<textarea id="tarotQuestionInput" placeholder="想问什么？（可不填）" style="width:100%;height:60px;padding:10px;border:1px solid var(--theme-input-border);border-radius:10px;font-size:13px;background:var(--theme-input-bg);color:var(--theme-text);resize:vertical;box-sizing:border-box;margin-bottom:20px;"></textarea>' +
+
+    // 牌阵
+    '<div style="font-size:13px;color:var(--theme-muted);margin-bottom:10px;">牌阵</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;">' + spreadHtml + '</div>' +
+    descHtml +
+
+    // 问题
+    '<div style="font-size:13px;color:var(--theme-muted);margin-bottom:10px;">想问什么（可留空）</div>' +
+    '<textarea id="tarotQuestionInput" placeholder="写下你的问题..." style="width:100%;height:70px;padding:10px;border:1px solid var(--theme-input-border);border-radius:10px;font-size:13px;background:var(--theme-input-bg);color:var(--theme-text);resize:vertical;box-sizing:border-box;margin-bottom:20px;font-family:inherit;"></textarea>' +
+
     '<button onclick="renderTarotDeck()" style="width:100%;padding:12px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:15px;cursor:pointer;">翻牌</button>' +
     '</div></div>';
-    // ===== 双重保险：用 addEventListener 绑定牌阵切换 =====
-    document.querySelectorAll('[data-spread]').forEach(function(el) {
-        el.addEventListener('click', function() {
-            selectTarotSpread(parseInt(el.dataset.spread));
-        });
-        el.addEventListener('touchstart', function() {
-            selectTarotSpread(parseInt(el.dataset.spread));
-        });
-    });
-    // ===== 绑定结束 =====
-}
-function selectTarotContext(context) {
-    tarotState.context = context;
-    document.querySelectorAll('[data-ctx]').forEach(function(b) {
-        b.style.border = b.dataset.ctx === context ? '2px solid var(--theme-primary)' : '1px solid var(--theme-border)';
+
+    selectTarotSpreadById(tarotState.spreadId || 'single');
+    selectTarotContext(tarotState.context || 'love');
+
+    document.querySelectorAll('[data-spread-id]').forEach(function(el) {
+        el.addEventListener('click', function() { selectTarotSpreadById(el.dataset.spreadId); });
     });
 }
 
-function selectTarotSpread(count) {
-    tarotState.spreadCount = count;
-    document.querySelectorAll('[data-spread]').forEach(function(b) {
-        b.style.border = b.dataset.spread == count ? '2px solid var(--theme-primary)' : '1px solid var(--theme-border)';
+// 选方向
+function selectTarotContext(context) {
+    tarotState.context = context;
+    document.querySelectorAll('[data-ctx]').forEach(function(b) {
+        var on = (b.dataset.ctx === context);
+        b.style.border = on ? '2px solid var(--theme-primary)' : '1px solid var(--theme-border)';
     });
+}
+
+function selectTarotSpreadById(id) {
+    var sp = getSpreadById(id);
+    tarotState.spreadId = id;
+    tarotState.spreadCount = sp.count;
+
+    document.querySelectorAll('[data-spread-id]').forEach(function(b) {
+        var on = (b.dataset.spreadId === id);
+        b.style.border = on ? '2px solid var(--theme-primary)' : '1px solid var(--theme-border)';
+    });
+
+    var descEl = document.getElementById('spreadDesc');
+    if (descEl) descEl.textContent = getSpreadDesc(id);
+}
+
+// 兼容旧调用（塔罗传讯横条用）
+function selectTarotSpread(count) {
+    if (count === 1) selectTarotSpreadById('single');
+    else if (count === 3) selectTarotSpreadById('fsr');
+    else if (count === 4) selectTarotSpreadById('core');
 }
 
 // 牌堆背面
@@ -18518,21 +18667,36 @@ function doTarotFlip() {
     renderTarotResult();
 }
 // 翻牌结果
+// 给牌义解读加主语前缀
+// 原文案多为"可以勇敢开启新关系"这类省略主语的短句
+// 这里统一在句子开头加"他"/"你"，句末加句号处理
+function applySubject(text, subject) {
+    if (!text) return '';
+    var t = String(text).trim();
+    // 如果已经带主语，不重复加
+    if (t.indexOf('他') === 0 || t.indexOf('你') === 0) return t;
+    return subject + t;
+}
+
 function renderTarotResult() {
     var ctxLabels = {love:'感情人际', career:'现实发展', self:'内心日常'};
     var ctx = ctxLabels[tarotState.context] || '感情人际';
-    var positions = tarotState.spreadCount === 3 ? ['过去','现在','未来'] : [''];
-    
+    var sp = getSpreadById(tarotState.spreadId);
+    var positions = sp.positions;
+    var subject = getSubject();
+
     var cardsHtml = tarotState.cards.map(function(item, idx) {
         var card = item.card;
         var isRev = item.isReversed;
         var data = isRev ? card.reversed : card.upright;
-        var contextKey = tarotState.context;
-        var contextText = data[contextKey] || data.summary;
-        var tipKey = contextKey + '_tip';
-        var tipText = data[tipKey] || '';
+        var rawSummary = data.summary || '';
+        var rawContext = data[tarotState.context] || data.summary || '';
+        var rawTip = data[tarotState.context + '_tip'] || '';
+        var summaryText = applySubject(rawSummary, subject);
+        var contextText = applySubject(rawContext, subject);
+        var tipText = rawTip;
         var badge = isRev ? '<div class="tarot-orient-badge">逆位</div>' : '';
-        
+
         return '<div class="tarot-card-wrapper" style="flex:0 0 260px;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;">' +
             (positions[idx] ? '<div style="font-size:10px;color:var(--theme-muted);letter-spacing:2px;">' + positions[idx] + '</div>' : '') +
             '<div style="width:260px;height:440px;position:relative;background:var(--tarot-bg);border-radius:10px 12px 9px 11px;border:1px solid var(--tarot-border);box-shadow:0 4px 14px var(--tarot-shadow);display:flex;flex-direction:column;overflow:hidden;">' +
@@ -18542,7 +18706,7 @@ function renderTarotResult() {
             '<div style="width:78%;">' + getTarotCardSvg(card) + '</div>' +
             '<div style="margin-top:8px;font-size:15px;font-weight:600;letter-spacing:4px;color:var(--tarot-text);">' + card.name + '</div>' +
             '</div>' +
-            '<div style="height:64px;display:flex;align-items:center;justify-content:center;padding:0 18px;text-align:center;font-size:12px;line-height:1.5;color:var(--tarot-text);opacity:.82;">' + data.summary + '</div>' +
+            '<div style="height:64px;display:flex;align-items:center;justify-content:center;padding:0 18px;text-align:center;font-size:12px;line-height:1.5;color:var(--tarot-text);opacity:.82;">' + summaryText + '</div>' +
             '</div>' +
             '<div class="tarot-strip" style="width:260px;padding:12px 16px 14px;text-align:center;background:var(--tarot-strip);border:1px dashed var(--tarot-border);border-radius:8px;">' +
             '<div style="font-size:8px;letter-spacing:3px;color:var(--tarot-muted);">' + ctx + '</div>' +
@@ -18550,55 +18714,171 @@ function renderTarotResult() {
             (tipText ? '<div style="font-size:11px;color:var(--tarot-muted);line-height:1.5;margin-top:2px;font-style:italic;">' + tipText + '</div>' : '') +
             '</div></div>';
     }).join('');
-    
+
     var spreadHtml = tarotState.spreadCount > 1 ?
         '<div style="display:flex;overflow-x:auto;gap:16px;padding:8px 0;scroll-snap-type:x mandatory;">' + cardsHtml + '</div>' :
         '<div style="display:flex;flex-direction:column;align-items:center;">' + cardsHtml + '</div>';
-    
+
+    var isDream = (tarotState.mode === 'dream');
+    var btnHtml = isDream
+        ? '<button onclick="submitTarotToRole()" style="padding:12px 36px;border-radius:24px;font-size:14px;background:var(--theme-primary);color:#fff;border:none;cursor:pointer;">递给他看</button>'
+        : '<button onclick="renderNormalTarotResult()" style="padding:12px 36px;border-radius:24px;font-size:14px;background:var(--theme-primary);color:#fff;border:none;cursor:pointer;">下一步</button>';
+
     document.getElementById('tarotContent').innerHTML =
     '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:var(--page-bg);min-height:100vh;">' +
     '<div style="width:100%;max-width:400px;">' +
     spreadHtml +
-    '<div style="text-align:center;margin-top:16px;">' +
-    '<button onclick="submitTarotToRole()" style="padding:12px 36px;border-radius:24px;font-size:14px;background:var(--theme-primary);color:#fff;border:none;cursor:pointer;">递给他看</button>' +
-    '</div></div></div>';
+    '<div style="text-align:center;margin-top:16px;">' + btnHtml + '</div>' +
+    '</div></div>';
+}
+
+function renderNormalTarotResult() {
+    var ctxLabels = {love:'感情人际', career:'现实发展', self:'内心日常'};
+    var ctx = ctxLabels[tarotState.context] || '感情人际';
+    var sp = getSpreadById(tarotState.spreadId);
+    var subject = getSubject();
+
+    var cardsText = tarotState.cards.map(function(item, idx) {
+        var card = item.card;
+        var isRev = item.isReversed;
+        var data = isRev ? card.reversed : card.upright;
+        var position = sp.positions[idx] || '';
+var mainText = applySubject(data[contextKey] || data.summary, getSubject());
+        var tipText = data[tarotState.context + '_tip'] || '';
+        var result = (position ? position + '：' : '') + card.name + ' · ' + (isRev ? '逆位' : '正位') + '｜' + mainText;
+        if (tipText) result += '（' + tipText + '）';
+        result += '｜【' + ctx + '】';
+        return result;
+    }).join('\n');
+
+    document.getElementById('tarotContent').innerHTML =
+    '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:var(--page-bg);min-height:100vh;">' +
+    '<div style="width:100%;max-width:400px;">' +
+
+    (tarotState.question
+        ? '<div style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--theme-text);line-height:1.6;">' +
+          '<span style="color:var(--theme-muted);font-size:11px;">你的问题</span><br>' + tarotState.question +
+          '</div>'
+        : '') +
+
+    '<div style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:16px;padding:16px;margin-bottom:16px;">' +
+    '<div style="font-size:11px;color:var(--theme-muted);margin-bottom:8px;">' + new Date().toLocaleDateString('zh-CN') + ' ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + '</div>' +
+    '<div style="font-size:13px;color:#555;white-space:pre-wrap;line-height:1.8;">' + cardsText + '</div>' +
+    '</div>' +
+
+    '<div style="display:flex;gap:10px;justify-content:center;">' +
+    '<button onclick="saveNormalTarotQuote()" style="flex:1;padding:12px 20px;border-radius:20px;font-size:14px;background:var(--theme-primary);color:#fff;border:none;cursor:pointer;">存为语录</button>' +
+    '<button onclick="renderTarotMain()" style="flex:1;padding:12px 20px;border-radius:20px;font-size:14px;border:1px solid var(--theme-border);color:var(--theme-muted);background:var(--theme-card);cursor:pointer;">不存，再来一次</button>' +
+    '</div>' +
+
+    '</div></div>';
+}
+
+async function saveNormalTarotQuote() {
+    var ctxLabels = {love:'感情人际', career:'现实发展', self:'内心日常'};
+    var ctx = ctxLabels[tarotState.context] || '感情人际';
+    var sp = getSpreadById(tarotState.spreadId);
+    var subject = getSubject();
+
+    var cardDetails = tarotState.cards.map(function(item, idx) {
+        var card = item.card;
+        var isRev = item.isReversed;
+        var data = isRev ? card.reversed : card.upright;
+        var mainText = applySubject(data[tarotState.context] || data.summary, subject);
+        var tipText = data[tarotState.context + '_tip'] || '';
+        var position = sp.positions[idx] || '';
+        var result = (position ? position + '：' : '') + card.name + ' · ' + (isRev ? '逆位' : '正位');
+        result += '｜' + mainText;
+        if (tipText) result += '（' + tipText + '）';
+        result += '｜【' + ctx + '】';
+        return result;
+    }).join('\n');
+
+    await dbPut('tarotHistory', {
+        question: tarotState.question || '未写问题',
+        card: cardDetails,
+        response: '',
+        mode: 'normal',
+        context: tarotState.context,
+        spreadCount: tarotState.spreadCount,
+        spreadId: tarotState.spreadId,
+        timestamp: Date.now()
+    });
+
+    showToast('✅ 已存入语录');
+    renderTarotQuotes();
 }
 
 // 递给他看 → 回应页
 async function submitTarotToRole() {
     var pool = TAROT_RESPONSE_POOL.qinche.concat(TAROT_RESPONSE_POOL.shared);
     tarotState.response = pool[Math.floor(Math.random() * pool.length)];
-    
+
     var ctxLabels = {love:'感情人际', career:'现实发展', self:'内心日常'};
     var ctx = ctxLabels[tarotState.context] || '感情人际';
-    
-    var cardsText = tarotState.cards.map(function(item, idx) {
-    var card = item.card;
-    var isRev = item.isReversed;
-    var data = isRev ? card.reversed : card.upright;
-    var position = tarotState.spreadCount === 3 ? ['过去','现在','未来'][idx] : '';
-    var mainText = data[tarotState.context] || data.summary;
-    var tipText = data[tarotState.context + '_tip'] || '';
-    var result = (position ? position + '：' : '') + card.name + ' · ' + (isRev ? '逆位' : '正位') + '｜' + mainText;
-    if (tipText) {
-        result += '（' + tipText + '）';
-    }
-    result += '｜【' + ctx + '】';
-    return result;
-}).join('\n');
-    
+
+    // 新牌阵 positions + 主语注入
+    var sp = getSpreadById(tarotState.spreadId);
+
+    // ===== 牌阵 → 自然话 =====
+    // 位置 → 口语化的引导语
+    var posConnect = {
+        '想法': '我的想法是',
+        '状态': '我的状态落在',
+        '回应': '我给你的回应，是',
+        '表层': '最表层的是',
+        '中层': '再往里一层，是',
+        '深层': '最深处，是',
+        '现在': '现在的位置是',
+        '未来': '未来会走到',
+        '变化': '中间会经历的是',
+        '核心问题': '核心的问题是',
+        '阻碍': '挡在前面的，是',
+        '建议': '我想给你的建议，是',
+        '可能的结果': '最后可能走到的是'
+    };
+
+    var sentences = tarotState.cards.map(function(item, idx) {
+        var card = item.card;
+        var isRev = item.isReversed;
+        var data = isRev ? card.reversed : card.upright;
+        var position = sp.positions[idx] || '';
+        // 用用户选的方向牌义
+        var summary = data[tarotState.context] || data.summary || '';
+        // ★ 去掉 summary 末尾的句号，避免拼接后出现"。。"
+        summary = summary.replace(/[。．\.]+$/, '');
+
+        // 单牌（无位置标签）
+        if (!position) {
+            return '你问我的时候，我翻到的是' + card.name + (isRev ? '逆位' : '正位') + '——' + summary;
+        }
+
+        // 有位置标签 → 拼成自然话
+        var connect = posConnect[position] || '';
+        var isLast = (idx === tarotState.cards.length - 1);
+        var prefix = (idx === 0) ? '你问我的时候，' : (isLast && tarotState.cards.length > 1 ? '而' : '');
+        return prefix + connect + card.name + (isRev ? '逆位' : '正位') + '——' + summary;
+    }).join('。') + '。';
+
     document.getElementById('tarotContent').innerHTML =
     '<div style="padding:16px;display:flex;flex-direction:column;align-items:center;background:var(--page-bg);min-height:100vh;">' +
     '<div style="width:100%;max-width:400px;">' +
+
+    // 问题 + 牌阵自然话
     '<div style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:16px;padding:16px;margin-bottom:16px;">' +
-    '<div style="font-size:11px;color:var(--theme-muted);margin-bottom:8px;">' + new Date().toLocaleDateString('zh-CN') + ' ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + '</div>' +
-    (tarotState.question ? '<div style="font-size:13px;color:var(--theme-text);margin-bottom:8px;">问题：' + tarotState.question + '</div>' : '') +
-    '<div style="font-size:13px;color:#555;white-space:pre-wrap;line-height:1.8;">' + cardsText + '</div>' +
+    '<div style="font-size:11px;color:var(--theme-muted);margin-bottom:10px;">' + new Date().toLocaleDateString('zh-CN') + ' ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + '</div>' +
+    (tarotState.question ? '<div style="font-size:13px;color:var(--theme-text);margin-bottom:12px;line-height:1.7;">问题：' + tarotState.question + '</div>' : '') +
+    '<div style="font-size:13px;color:#555;white-space:pre-wrap;line-height:2;">' + sentences + '</div>' +
     '</div>' +
-    '<div style="text-align:center;padding:16px;">' +
-    '<div style="font-size:15px;color:var(--theme-primary);line-height:2;font-style:italic;">秦彻：“' + tarotState.response + '”</div>' +
+
+    // 秦彻回应：最后，我想和你说：
+    '<div style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:16px;padding:18px 16px;margin-bottom:16px;">' +
+    '<div style="font-size:13px;color:#555;line-height:2;">最后，我想和你说：</div>' +
+    '<div style="font-size:15px;color:var(--theme-primary);line-height:2;font-style:italic;margin-top:6px;">“' + tarotState.response + '”</div>' +
     '</div>' +
-    '<div style="display:flex;gap:10px;justify-content:center;margin-top:16px;">' +
+
+    // 按钮
+    '<div style="display:flex;gap:10px;justify-content:center;">' +
     '<button onclick="saveTarotQuote()" style="padding:10px 24px;border-radius:20px;font-size:13px;background:var(--theme-primary);color:#fff;border:none;cursor:pointer;">存为语录</button>' +
     '<button onclick="renderTarotMain()" style="padding:10px 24px;border-radius:20px;font-size:13px;border:1px solid var(--theme-border);color:var(--theme-muted);background:var(--theme-card);cursor:pointer;">不存，再次占卜</button>' +
     '</div></div></div>';
@@ -18617,7 +18897,8 @@ async function saveTarotQuote() {
         var contextKey = tarotState.context;
         var mainText = data[contextKey] || data.summary;
         var tipText = data[contextKey + '_tip'] || '';
-        var position = tarotState.spreadCount === 3 ? ['过去','现在','未来'][idx] : '';
+        var position = getSpreadById(tarotState.spreadId).positions[idx] || '';
+
         
         var result = (position ? position + '：' : '') + card.name + ' · ' + (isRev ? '逆位' : '正位');
         result += '｜' + mainText;
@@ -18668,7 +18949,7 @@ html += '<div style="background:var(--theme-card);border:1px solid var(--theme-b
 '</div>' +
 (q.question ? '<div style="font-size:13px;color:var(--theme-text);margin-bottom:4px;word-break:break-word;line-height:1.5;">问题：' + q.question + '</div>' : '') +
 '<div style="font-size:12px;color:#555;margin-bottom:4px;white-space:pre-wrap;line-height:1.6;word-break:break-word;">🃏 ' + q.card + '</div>' +
-'<div style="font-size:13px;color:var(--theme-primary);font-style:italic;word-break:break-word;line-height:1.5;">回应：“' + q.response + '”</div>' +
+(q.response ? '<div style="font-size:13px;color:var(--theme-primary);font-style:italic;word-break:break-word;line-height:1.5;">回应：“' + q.response + '”</div>' : '') +
 '<div style="text-align:right;margin-top:8px;display:flex;justify-content:flex-end;gap:14px;">' +
 '<span onclick="shareTarotQuoteToChat(\'' + q.id + '\')" style="color:var(--theme-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;width:24px;height:24px;flex-shrink:0;">' +
     '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:block;">' +
@@ -20667,6 +20948,16 @@ window.showTarotAllowDeny = showTarotAllowDeny;
 window.showTarotContext = showTarotContext;
 window.selectTarotContext = selectTarotContext;
 window.selectTarotSpread = selectTarotSpread;
+window.startDreamTarot = startDreamTarot;
+window.startNormalTarot = startNormalTarot;
+window.selectTarotSpreadById = selectTarotSpreadById;
+window.renderNormalTarotResult = renderNormalTarotResult;
+window.saveNormalTarotQuote = saveNormalTarotQuote;
+window.TAROT_SPREADS = TAROT_SPREADS;
+window.getSpreadById = getSpreadById;
+window.getSpreadDesc = getSpreadDesc;
+window.getSubject = getSubject;
+window.applySubject = applySubject;
 window.renderTarotDeck = renderTarotDeck;
 window.doTarotFlip = doTarotFlip;
 window.submitTarotToRole = submitTarotToRole;
@@ -20894,13 +21185,14 @@ window.dbDelete = dbDelete;
 window.dbClear = dbClear;
 window.createDialog = createDialog;
 
-window.setTarotCount = setTarotCount;
+window.setTarotSpread = setTarotSpread;
 window.refreshTarotBar = refreshTarotBar;
 window.pickTarotCard = pickTarotCard;
 window.drawTarotCards = drawTarotCards;
 window.doTarotSend = doTarotSend;
 window.openPatPicker = openPatPicker;
 window.doPatQin = doPatQin;
+
 
 
 
