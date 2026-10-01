@@ -17776,26 +17776,73 @@ async function renderTideView() {
     var cy = parseInt(await getCal('calendarYear', String(now.getFullYear())));
     var cm = parseInt(await getCal('calendarMonth', String(now.getMonth())));
     var todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
-    
-    // 找上次来潮
-    var lastTide = null;
-    for (var i = tideDays.length - 1; i >= 0; i--) {
-        var td = new Date(tideDays[i]);
-        if (td.getTime() <= now.getTime()) {
-            lastTide = tideDays[i];
-            break;
+
+    // ===== 1. 把 tideDays 排序，并合并成"连续段"（每段视为一次经期） =====
+    var sorted = tideDays.slice().sort();
+    var periods = [];   // [{start:'2026-09-24', end:'2026-10-01'}]
+    for (var i = 0; i < sorted.length; i++) {
+        var d = new Date(sorted[i] + 'T00:00:00');
+        if (periods.length === 0) {
+            periods.push({ start: sorted[i], end: sorted[i] });
+        } else {
+            var lastPeriod = periods[periods.length - 1];
+            var lastEndDate = new Date(lastPeriod.end + 'T00:00:00');
+            var diffDays = Math.round((d.getTime() - lastEndDate.getTime()) / 86400000);
+            if (diffDays === 1) {
+                lastPeriod.end = sorted[i];   // 连续，接上
+            } else {
+                periods.push({ start: sorted[i], end: sorted[i] });  // 断开，新一段
+            }
         }
     }
-    
+
+    // ===== 2. 找今天所在的段 / 今天之前的最后一个段 =====
+    var currentPeriod = null;   // 今天正处于的经期段
+    var lastPeriod = null;      // 上一次经期段（若今天在经期内，就是当前段）
+    for (var j = 0; j < periods.length; j++) {
+        var p = periods[j];
+        if (todayStr >= p.start && todayStr <= p.end) {
+            currentPeriod = p;
+            lastPeriod = p;
+            break;
+        }
+        if (p.end < todayStr) {
+            lastPeriod = p;
+        }
+    }
+
+    // ===== 3. 计算下次来潮、天数差、当前状态 =====
     var nextTide = null;
     var dayDiff = null;
-    if (lastTide) {
-        var nextDate = new Date(lastTide);
-        nextDate.setDate(nextDate.getDate() + tideCycle);
-        nextTide = nextDate.getFullYear() + '-' + String(nextDate.getMonth()+1).padStart(2,'0') + '-' + String(nextDate.getDate()).padStart(2,'0');
-        dayDiff = Math.ceil((nextDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    var phaseText = '';
+
+    if (lastPeriod) {
+        // 下次来潮 = 上次第一天 + 周期
+        var lastStartDate = new Date(lastPeriod.start + 'T00:00:00');
+        var nextStart = new Date(lastStartDate.getTime() + tideCycle * 86400000);
+        nextTide = nextStart.getFullYear() + '-' + String(nextStart.getMonth()+1).padStart(2,'0') + '-' + String(nextStart.getDate()).padStart(2,'0');
+
+        var todayDate = new Date(todayStr + 'T00:00:00');
+        dayDiff = Math.ceil((nextStart.getTime() - todayDate.getTime()) / 86400000);
+
+        if (currentPeriod) {
+            // 今天正在经期内
+            var periodDay = Math.round(
+                (todayDate.getTime() - new Date(currentPeriod.start + 'T00:00:00').getTime()) / 86400000
+            ) + 1;
+            phaseText = '今天来潮 · 第 ' + periodDay + ' 天';
+        } else if (dayDiff <= 0) {
+            phaseText = '预计来潮期';
+        } else if (dayDiff <= 5) {
+            phaseText = '临近来潮期 · 还有 ' + dayDiff + ' 天';
+        } else {
+            phaseText = '间歇期 · 还有 ' + dayDiff + ' 天';
+        }
+    } else {
+        phaseText = '还没有记录来潮日';
     }
-    
+
+    // ===== 4. 渲染 =====
     var h = '<div style="font-size:11px;color:var(--theme-muted);margin-bottom:10px;text-align:center;">点日历里的日子，标为来潮第一天</div>' +
     '<div style="background:var(--theme-card);border-radius:16px;padding:20px;border:1px solid var(--theme-border);">' +
     '<div style="display:flex;justify-content:space-between;margin-bottom:14px;">' +
@@ -17805,41 +17852,42 @@ async function renderTideView() {
     '</div>' +
     '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;">' +
     ['一','二','三','四','五','六','日'].map(function(d) { return '<div style="font-size:11px;color:var(--theme-muted);padding:4px 0;">' + d + '</div>'; }).join('');
-    
+
     var firstDay = new Date(cy, cm, 1).getDay();
     var daysInMonth = new Date(cy, cm + 1, 0).getDate();
     var startOffset = firstDay === 0 ? 6 : firstDay - 1;
-    
-    for (var j = 0; j < startOffset; j++) {
+
+    for (var jj = 0; jj < startOffset; jj++) {
         h += '<div></div>';
     }
-    
+
     for (var d = 1; d <= daysInMonth; d++) {
         var dateStr = cy + '-' + String(cm+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
         var isTide = tideDays.includes(dateStr);
         var isToday = dateStr === todayStr;
-        
-        // 8. 日历普通数字（潮汐日）
+
         h += '<div style="display:flex;justify-content:center;">' +
         '<div onclick="toggleTideDay(\'' + dateStr + '\')" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:14px;cursor:pointer;' +
         'color:' + (isToday ? 'var(--theme-primary)' : 'var(--theme-text)') + ';' +
         (isTide ? 'background:#fdf5f7;border:2px solid var(--theme-primary);' : '') +
         '">' + d + '</div></div>';
     }
-    
+
     h += '</div></div>' +
     '<div style="background:var(--theme-card);border-radius:16px;padding:16px;margin-top:12px;border:1px solid var(--theme-border);">' +
     '<div style="font-size:14px;font-weight:600;color:var(--theme-text);margin-bottom:8px;">🌊 潮汐日</div>' +
-    // 9. 潮汐日信息
-    (lastTide ? '<div style="font-size:13px;color:var(--theme-text);margin-bottom:4px;">上次来潮：' + lastTide + '</div>' : '') +
-    (nextTide ? '<div style="font-size:13px;color:var(--theme-text);margin-bottom:4px;">预计下次：' + nextTide + ' 左右</div>' : '<div style="font-size:13px;color:var(--theme-text);margin-bottom:4px;">还没有记录来潮日</div>') +
-    (dayDiff !== null ? '<div style="font-size:13px;color:var(--theme-primary);">当前：' + (dayDiff > 0 ? '间歇期 · 还有 ' + dayDiff + ' 天' : '预计来潮期') + '</div>' : '') +
+    (lastPeriod ? '<div style="font-size:13px;color:var(--theme-text);margin-bottom:4px;">' +
+        (currentPeriod ? '本次来潮：' : '上次来潮：') +
+        lastPeriod.start +
+        (lastPeriod.end !== lastPeriod.start ? ' ~ ' + lastPeriod.end : '') +
+        '</div>' : '') +
+    (nextTide ? '<div style="font-size:13px;color:var(--theme-text);margin-bottom:4px;">预计下次：' + nextTide + ' 左右</div>' : '') +
+    '<div style="font-size:13px;color:var(--theme-primary);">当前：' + phaseText + '</div>' +
     '<div style="display:flex;align-items:center;gap:8px;margin-top:10px;">' +
     '<span style="font-size:12px;color:var(--theme-muted);">周期（天）</span>' +
-    // 10. 潮汐周期输入框
     '<input type="number" id="tideCycleInput" value="' + tideCycle + '" min="20" max="45" onchange="updateTideCycle(this.value)" style="width:60px;padding:6px;border-radius:8px;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:13px;text-align:center;outline:none;">' +
     '</div></div>';
-    
+
     return h;
 }
 
@@ -18304,10 +18352,20 @@ async function checkMailReply() {
         var count = Math.min(Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount, pool.length);
         // ===== 改完了 =====
         
-        var shuffled = pool.sort(function() { return Math.random() - 0.5; });
-        var selected = shuffled.slice(0, count);
-        var body = selected.map(function(c) { return c.content; }).join('\n');
-      
+var shuffled = pool.slice().sort(function() { return Math.random() - 0.5; });
+var selected = shuffled.slice(0, count);
+
+var delProb = parseInt(localStorage.getItem('mail_cardDeleteProb') || '50');
+if (selected.length > 1 && Math.random() * 100 < delProb) {
+    selected.splice(Math.floor(Math.random() * selected.length), 1);
+}
+var repeatProb = parseInt(localStorage.getItem('mail_cardRepeatProb') || '30');
+if (selected.length > 0 && Math.random() * 100 < repeatProb) {
+    selected.push(selected[Math.floor(Math.random() * selected.length)]);
+}
+
+var body = selected.map(function(c) { return c.content; }).join('\n');
+  
             var now = new Date();
             var dateStr = now.getFullYear() + '.' + (now.getMonth()+1) + '.' + now.getDate();
             
@@ -18630,9 +18688,17 @@ if (maxCount < minCount) maxCount = minCount;
 if (maxCount > 30) maxCount = 30;
 var count = Math.min(Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount, pool.length);
 // ===== 改完了 =====
-
-var shuffled = pool.sort(function() { return Math.random() - 0.5; });
+var shuffled = pool.slice().sort(function() { return Math.random() - 0.5; });
 var selected = shuffled.slice(0, count);
+
+var delProb = parseInt(localStorage.getItem('mailbox_cardDeleteProb') || '50');
+if (selected.length > 1 && Math.random() * 100 < delProb) {
+    selected.splice(Math.floor(Math.random() * selected.length), 1);
+}
+var repeatProb = parseInt(localStorage.getItem('mailbox_cardRepeatProb') || '30');
+if (selected.length > 0 && Math.random() * 100 < repeatProb) {
+    selected.push(selected[Math.floor(Math.random() * selected.length)]);
+}
 
 var content = selected.map(function(c) { return c.content; }).join(' ');
     
@@ -19624,14 +19690,29 @@ async function saveMailGroups() {
 function openCardCountSetting(type) {
     var modal = document.getElementById('cardCountModal');
     if (!modal) return;
-    
+
     var prefix = type === 'mail' ? 'mail' : 'mailbox';
     var min = parseInt(localStorage.getItem(prefix + '_cardMin') || '1');
     var max = parseInt(localStorage.getItem(prefix + '_cardMax') || '4');
-    
+    var repeat = parseInt(localStorage.getItem(prefix + '_cardRepeatProb') || '30');
+    var del = parseInt(localStorage.getItem(prefix + '_cardDeleteProb') || '50');
+
     document.getElementById('cardMinInput').value = min;
     document.getElementById('cardMaxInput').value = max;
-    
+    document.getElementById('cardRepeatInput').value = repeat;
+    document.getElementById('cardRepeatVal').textContent = repeat + '%';
+    document.getElementById('cardDeleteInput').value = del;
+    document.getElementById('cardDeleteVal').textContent = del + '%';
+    document.getElementById('cardCountModalTitle').textContent =
+        type === 'mail' ? '树心邮筒 · 拼字卡设置' : '树洞回音 · 拼字卡设置';
+
+    document.getElementById('cardRepeatInput').oninput = function() {
+        document.getElementById('cardRepeatVal').textContent = this.value + '%';
+    };
+    document.getElementById('cardDeleteInput').oninput = function() {
+        document.getElementById('cardDeleteVal').textContent = this.value + '%';
+    };
+
     modal.dataset.type = type;
     modal.style.display = 'flex';
 }
@@ -19647,19 +19728,23 @@ function saveCardCountSetting() {
     var modal = document.getElementById('cardCountModal');
     var type = modal ? modal.dataset.type || 'mailbox' : 'mailbox';
     var prefix = type === 'mail' ? 'mail' : 'mailbox';
-    
+
     var min = parseInt(document.getElementById('cardMinInput').value) || 1;
     var max = parseInt(document.getElementById('cardMaxInput').value) || 4;
-    
+    var repeat = parseInt(document.getElementById('cardRepeatInput').value) || 0;
+    var del = parseInt(document.getElementById('cardDeleteInput').value) || 0;
+
     if (min < 1) min = 1;
     if (max < min) max = min;
     if (max > 30) max = 30;
-    
+
     localStorage.setItem(prefix + '_cardMin', min);
     localStorage.setItem(prefix + '_cardMax', max);
-    
+    localStorage.setItem(prefix + '_cardRepeatProb', repeat);
+    localStorage.setItem(prefix + '_cardDeleteProb', del);
+
     closeCardCountModal();
-    showToast('✅ 已保存：最少 ' + min + ' 条，最多 ' + max + ' 条');
+    showToast('✅ 已保存：' + min + '~' + max + ' 条，重复 ' + repeat + '%，删除 ' + del + '%');
 }
 
 // ============ 数据管理 ============
@@ -21528,11 +21613,11 @@ init();
 </div>
 
 <div id="cardCountModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:var(--theme-card);border-radius:16px;padding:24px;width:90%;max-width:340px;box-shadow:0 8px 30px rgba(0,0,0,0.2);">
-        <div style="font-size:16px;font-weight:600;color:var(--theme-text);margin-bottom:4px;text-align:center;">拼字卡条数设置</div>
-        <div style="font-size:12px;color:var(--theme-muted);text-align:center;margin-bottom:16px;">秦彻每次回复会用多少条字卡拼成一句话</div>
-        
-        <div style="display:flex;gap:12px;margin-bottom:16px;align-items:center;justify-content:center;">
+    <div style="background:var(--theme-card);border-radius:16px;padding:24px;width:90%;max-width:360px;box-shadow:0 8px 30px rgba(0,0,0,0.2);">
+        <div id="cardCountModalTitle" style="font-size:16px;font-weight:600;color:var(--theme-text);margin-bottom:4px;text-align:center;">拼字卡设置</div>
+        <div style="font-size:12px;color:var(--theme-muted);text-align:center;margin-bottom:16px;">每次回复用多少条字卡拼成</div>
+
+        <div style="display:flex;gap:12px;margin-bottom:14px;align-items:center;justify-content:center;">
             <div style="text-align:center;">
                 <div style="font-size:11px;color:var(--theme-muted);margin-bottom:4px;">最少</div>
                 <input type="number" id="cardMinInput" min="1" max="30" value="1" style="width:60px;padding:8px;border-radius:8px;border:1.5px solid var(--theme-input-border);text-align:center;font-size:16px;outline:none;">
@@ -21543,7 +21628,23 @@ init();
                 <input type="number" id="cardMaxInput" min="1" max="30" value="4" style="width:60px;padding:8px;border-radius:8px;border:1.5px solid var(--theme-input-border);text-align:center;font-size:16px;outline:none;">
             </div>
         </div>
-        
+
+        <div style="margin-bottom:10px;">
+            <div style="font-size:12px;color:var(--theme-text);margin-bottom:4px;">随机重复</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <input type="range" id="cardRepeatInput" min="0" max="100" value="30" style="flex:1;accent-color:var(--theme-primary);">
+                <span id="cardRepeatVal" style="font-size:12px;color:var(--theme-muted);width:38px;text-align:right;">30%</span>
+            </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+            <div style="font-size:12px;color:var(--theme-text);margin-bottom:4px;">随机删除</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <input type="range" id="cardDeleteInput" min="0" max="100" value="50" style="flex:1;accent-color:var(--theme-primary);">
+                <span id="cardDeleteVal" style="font-size:12px;color:var(--theme-muted);width:38px;text-align:right;">50%</span>
+            </div>
+        </div>
+
         <div style="display:flex;gap:10px;">
             <button onclick="closeCardCountModal()" style="flex:1;padding:10px;border-radius:10px;border:1px solid #ddd;background:#f5f5f5;color:#666;font-size:14px;cursor:pointer;">取消</button>
             <button onclick="saveCardCountSetting()" style="flex:1;padding:10px;border-radius:10px;border:none;background:var(--theme-primary);color:#fff;font-size:14px;cursor:pointer;">保存</button>
