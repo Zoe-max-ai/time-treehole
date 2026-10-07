@@ -9695,16 +9695,19 @@ async function executeReply(cnt, scheduledTime, triggerText, pendingId, triggerT
         && quoteMax > 0
         && !isDailyLimitReached('quoteReply', quoteMax)
         && Math.random() < ((cs.quoteReplyProb || 10) / 100)) {
-        var allMsgs = await dbGetAll('messages');
-        var now = Date.now();
-        var cutoff = now - 2 * 24 * 60 * 60 * 1000;  // 2天内
-        var upperBound = triggerTime || now;          // 只引用触发消息之前的
-        var myMsgs = allMsgs.filter(function(x) {
-            return x.sender === 'me'
-                && x.type === 'text'
-                && x.timestamp >= cutoff
-                && x.timestamp <= upperBound;
-        });
+      var allMsgs = await dbGetAll('messages');
+var now = Date.now();
+// ★ 改成"只引用当天"
+var todayStart = new Date();
+todayStart.setHours(0, 0, 0, 0);
+var cutoff = todayStart.getTime();          // 今天 00:00
+var upperBound = triggerTime || now;        // 只引用触发消息之前的
+var myMsgs = allMsgs.filter(function(x) {
+    return x.sender === 'me'
+        && x.type === 'text'
+        && x.timestamp >= cutoff
+        && x.timestamp <= upperBound;
+});
         // 兜底：如果 2 天内没消息，从最近 20 条里找（同样限制在触发时间之前）
         if (myMsgs.length === 0) {
             var recent = allMsgs
@@ -18212,7 +18215,7 @@ addSysMsg('📨 你给秦彻寄了一封信', Date.now());
         var pending = JSON.parse(localStorage.getItem('pendingReplies') || '[]');
         pending.push({
             letterId: newLetter,
-            replyAt: Date.now() + randHours(12, 24),
+    replyAt: Date.now() + randHours(12, 24),
             accelerated: false
         });
         localStorage.setItem('pendingReplies', JSON.stringify(pending));
@@ -18350,21 +18353,39 @@ async function checkMailReply() {
         if (maxCount < minCount) maxCount = minCount;
         if (maxCount > 30) maxCount = 30;
         var count = Math.min(Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount, pool.length);
-        // ===== 改完了 =====
-        
-var shuffled = pool.slice().sort(function() { return Math.random() - 0.5; });
+// ===== 超强去重：去掉零宽字符 + 所有空白 + 中英文标点差异 =====
+function _normalizeCardKey(s) {
+    return String(s || '')
+        .replace(/[\u200B-\u200D\uFEFF]/g, '')   // 去零宽字符
+        .replace(/\s+/g, '')                      // 去所有空白
+        .replace(/[。．\.，,！!？?、；;：:]/g, ''); // 去中英文标点
+}
+var seenContent = {};
+var dedupedPool = [];
+pool.forEach(function(c) {
+    var key = _normalizeCardKey(c.content);
+    if (!key) return;
+    if (!seenContent[key]) {
+        seenContent[key] = true;
+        dedupedPool.push(c);
+    }
+});
+
+var shuffled = dedupedPool.slice().sort(function() { return Math.random() - 0.5; });
 var selected = shuffled.slice(0, count);
 
 var delProb = parseInt(localStorage.getItem('mail_cardDeleteProb') || '50');
 if (selected.length > 1 && Math.random() * 100 < delProb) {
     selected.splice(Math.floor(Math.random() * selected.length), 1);
 }
+
 var repeatProb = parseInt(localStorage.getItem('mail_cardRepeatProb') || '30');
 if (selected.length > 0 && Math.random() * 100 < repeatProb) {
     selected.push(selected[Math.floor(Math.random() * selected.length)]);
 }
 
-var body = selected.map(function(c) { return c.content; }).join('\n');
+
+var body = finalSelected.map(function(c) { return c.content; }).join('\n');
   
             var now = new Date();
             var dateStr = now.getFullYear() + '.' + (now.getMonth()+1) + '.' + now.getDate();
@@ -18661,56 +18682,104 @@ document.getElementById('echoCancel').onclick = function() { overlay.remove(); }
     overlay.remove();
     renderEchoPage();
     showToast('已贴上去');
-    var delay = Math.floor(Math.random() * (120 - 5 + 1)) + 5;
-    setTimeout(function() {
-        autoReplyToEcho();
-    }, delay * 60000);
+var delay = Math.floor(Math.random() * (120 - 5 + 1)) + 5;
+setTimeout(function() {
+    autoReplyToEcho();
+}, delay * 60000);
 };
 }
 
+var _echoReplyingLock = false;   // ★ 防止并发触发
+
 async function autoReplyToEcho() {
-    var groupStr = localStorage.getItem('mailboxGroups') || '[]';
-    var groups = JSON.parse(groupStr);
-    if (!groups || groups.length === 0) return;
-    
-   var cards = await dbGetAll('wordcards');
-var pool = cards.filter(function(c) {
-    return groups.some(function(g) { return c.groupName === g || c.groupId === g; }) &&
-        c.content && c.content !== '__GROUP_PLACEHOLDER__' && c.content.length > 1;
+    // ★ 如果正在处理中，直接跳过
+    if (_echoReplyingLock) {
+        console.log('🔒 autoReplyToEcho 正在执行中，跳过本次');
+        return;
+    }
+    _echoReplyingLock = true;
+
+    try {
+        var groupStr = localStorage.getItem('mailboxGroups') || '[]';
+        var groups = JSON.parse(groupStr);
+        if (!groups || groups.length === 0) return;
+
+        var cards = await dbGetAll('wordcards');
+        var pool = cards.filter(function(c) {
+            return groups.some(function(g) { return c.groupName === g || c.groupId === g; }) &&
+                c.content && c.content !== '__GROUP_PLACEHOLDER__' && c.content.length > 1;
+        });
+        if (pool.length === 0) return;
+
+        // ===== 读取用户设置的条数 =====
+        var minCount = parseInt(localStorage.getItem('mailbox_cardMin') || '1');
+        var maxCount = parseInt(localStorage.getItem('mailbox_cardMax') || '4');
+        if (minCount < 1) minCount = 1;
+        if (maxCount < minCount) maxCount = minCount;
+        if (maxCount > 30) maxCount = 30;
+        var count = Math.min(Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount, pool.length);
+
+
+// ===== 超强去重：去掉零宽字符 + 所有空白 + 中英文标点差异 =====
+function _normalizeCardKey(s) {
+    return String(s || '')
+        .replace(/[\u200B-\u200D\uFEFF]/g, '')   // 去零宽字符
+        .replace(/\s+/g, '')                      // 去所有空白
+        .replace(/[。．\.，,！!？?、；;：:]/g, ''); // 去中英文标点
+}
+var seenContent = {};
+var dedupedPool = [];
+pool.forEach(function(c) {
+    var key = _normalizeCardKey(c.content);
+    if (!key) return;
+    if (!seenContent[key]) {
+        seenContent[key] = true;
+        dedupedPool.push(c);
+    }
 });
-if (pool.length === 0) return;
 
-// ===== 读取用户设置的条数 =====
-var minCount = parseInt(localStorage.getItem('mailbox_cardMin') || '1');
-var maxCount = parseInt(localStorage.getItem('mailbox_cardMax') || '4');
-if (minCount < 1) minCount = 1;
-if (maxCount < minCount) maxCount = minCount;
-if (maxCount > 30) maxCount = 30;
-var count = Math.min(Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount, pool.length);
-// ===== 改完了 =====
-var shuffled = pool.slice().sort(function() { return Math.random() - 0.5; });
-var selected = shuffled.slice(0, count);
+        var shuffled = dedupedPool.slice().sort(function() { return Math.random() - 0.5; });
+        var selected = shuffled.slice(0, count);
 
-var delProb = parseInt(localStorage.getItem('mailbox_cardDeleteProb') || '50');
-if (selected.length > 1 && Math.random() * 100 < delProb) {
-    selected.splice(Math.floor(Math.random() * selected.length), 1);
-}
-var repeatProb = parseInt(localStorage.getItem('mailbox_cardRepeatProb') || '30');
-if (selected.length > 0 && Math.random() * 100 < repeatProb) {
-    selected.push(selected[Math.floor(Math.random() * selected.length)]);
-}
+        // ===== 随机删除 =====
+        var delProb = parseInt(localStorage.getItem('mailbox_cardDeleteProb') || '50');
+        if (selected.length > 1 && Math.random() * 100 < delProb) {
+            selected.splice(Math.floor(Math.random() * selected.length), 1);
+        }
+
+        // ===== 随机重复 =====
+        var repeatProb = parseInt(localStorage.getItem('mailbox_cardRepeatProb') || '30');
+        if (selected.length > 0 && Math.random() * 100 < repeatProb) {
+            selected.push(selected[Math.floor(Math.random() * selected.length)]);
+        }
+
 
 var content = selected.map(function(c) { return c.content; }).join(' ');
-    
-    // 找没被回复过的你的留言
-    var unreplied = echoMessages.filter(function(m) { return m.who === 'me' && !m.repliedByHim; });
-    if (unreplied.length > 0) {
-        var target = unreplied[0];
-        target.replies = target.replies || [];
-        target.replies.push({ who: 'him', name: S.contactName, text: content });
-        target.repliedByHim = true;
-        await saveEchoMessages();
-        renderEchoPage();
+
+        // ===== 找没被回复过的你的留言 =====
+        var unreplied = echoMessages.filter(function(m) { return m.who === 'me' && !m.repliedByHim; });
+        if (unreplied.length > 0) {
+            var target = unreplied.sort(function(a,b){ return a.timestamp - b.timestamp; })[0];
+
+            // ★ 再检查一遍：这条回复是不是已经存在了
+            target.replies = target.replies || [];
+            var alreadyReplied = target.replies.some(function(r) {
+                return r.who === 'him' && r.text === content;
+            });
+
+            if (!alreadyReplied) {
+                target.replies.push({ who: 'him', name: S.contactName, text: content });
+                target.repliedByHim = true;
+                await saveEchoMessages();
+                renderEchoPage();
+                console.log('✅ 已回复留言，内容：', content);
+            } else {
+                console.log('⚠️ 相同回复已存在，跳过 push');
+            }
+        }
+    } finally {
+        // ★ 无论成功失败，都释放锁
+        _echoReplyingLock = false;
     }
 }
 
@@ -21132,8 +21201,8 @@ setInterval(function() {
     });
     if (unreplied.length > 0) {
         var oldest = unreplied.sort(function(a, b) { return a.timestamp - b.timestamp; })[0];
-        // 超过 5 分钟未回复，自动触发
-        if (Date.now() - oldest.timestamp > 5 * 60 * 1000) {
+
+        if (Date.now() - oldest.timestamp > 3 * 60 * 60 * 1000) {  // 超过 3 小时才兜底
             console.log('⏰ 发现未回复留言，自动补发回复');
             autoReplyToEcho();
         }
@@ -22683,13 +22752,21 @@ function svgNextSmall() {
 // 关闭迷你条（停止播放）
 window.musicCloseFloat = function() {
     if (audio) {
+        // 先移除 error 监听，避免清空 src 触发假报错
+        audio.onerror = null;
+        // 用 removeAttribute 而不是 src=''，浏览器不会触发 error 事件
         audio.pause();
-        audio.src = '';
+        audio.removeAttribute('src');
+        audio.load();
+        // 如果有 blob URL 也顺便释放
+        if (audio.dataset && audio.dataset.blobUrl) {
+            try { URL.revokeObjectURL(audio.dataset.blobUrl); } catch(e) {}
+            audio.dataset.blobUrl = '';
+        }
     }
     currentId = null;
     updateFloatVisibility();
 };
-
 // 拖动逻辑
 function makeFloatDraggable(el) {
     var startX = 0, startY = 0;
