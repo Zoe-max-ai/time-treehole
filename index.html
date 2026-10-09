@@ -1986,6 +1986,17 @@ body.theme-shuimo .home-page-inner .status span:last-child {
     </div>
     <div id="topicGachaContent" style="flex:1;position:relative;overflow:hidden;"></div>
 </div>
+
+<div class="page" id="storyHomePage">
+    <div id="storyHomeInner" style="height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;"></div>
+</div>
+<div class="page" id="storyListPage">
+    <div id="storyListInner" style="height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;"></div>
+</div>
+
+<div class="page" id="storyReaderPage">
+    <div id="storyReaderInner" style="height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;"></div>
+</div>
 <div class="page" id="anniversaryPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">朝夕纪念</span></div><div id="anniversaryContent" style="flex:1;overflow-y:auto;background:var(--page-bg);"></div></div>
 <div class="page" id="choicePage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">见字如晤</span></div><div class="generic-content" id="choiceContent" style="padding:0;background:transparent;height:calc(100vh - 48px);"></div></div>
 <div class="page" id="tarotPage"><div class="navbar"><button class="back-btn" onclick="goHome()">←</button><span class="title">观牌叙言</span></div><div id="tarotContent" style="flex:1;overflow-y:auto;"></div></div>
@@ -2022,6 +2033,7 @@ body.theme-shuimo .home-page-inner .status span:last-child {
 <input type="file" id="contactAvatarInput" accept="image/*" onchange="handleContactAvatarUpload(event)">
 <input type="file" id="importFileInput" accept=".json" onchange="importAllData(event)">
 <input type="file" id="importCardsInput" accept=".json,.txt" onchange="importCardsFile(event)">
+<input type="file" id="storyImportFile" accept=".json,application/json" onchange="handleStoryImport(event)">
 
 <script>
 // ============ 完整2.0代码 ============
@@ -6164,6 +6176,2614 @@ function toIdbKey(id) {
     var n = Number(id);
     return isNaN(n) ? id : n;
 }
+
+// ============ 倾心之约 · 工具函数 ============
+
+// 默认一级目录
+var STORY_DEFAULT_CATEGORIES = [
+    { id: 'cat_yiwen',    name: '逸闻',   order: 1, isDefault: true },
+    { id: 'cat_main',     name: '主线',   order: 2, isDefault: true },
+    { id: 'cat_sinian',   name: '思念',   order: 3, isDefault: true },
+    { id: 'cat_erchuang', name: '二创文', order: 4, isDefault: true }
+];
+
+// 默认秦彻信息卡
+var STORY_DEFAULT_META = {
+    id: 'story_meta',
+    coverImage: '',
+    fields: [
+        { key: '姓名',   value: '秦彻' },
+        { key: '英文名', value: 'Sylus' },
+        { key: '年龄',   value: '' },
+        { key: '性格',   value: '' },
+        { key: '喜好',   value: '' },
+        { key: '经历',   value: '' }
+    ],
+    cropping: {
+        frontX: 50, frontY: 50,
+        closeX: 50, closeY: 25,
+        closeScale: 300
+    },
+    quote: '不要走近我，也不要离我远去',
+    quoteEn: 'DETECTED // SYLUS',
+    decorLeft: '和你一起跨越明暗交界',
+    decorRight: '/ 等待夜色降临 /',
+    decorBottom: 'SYLUS'
+};
+
+// 默认阅读设置
+var STORY_DEFAULT_READER = {
+    bgColor: '#FAF7F0',
+    textColor: '#3A3020',
+    fontSize: 17,
+    fontFamily: 'serif'
+};
+
+// 初始化倾心之约数据（首次使用时调用）
+async function initStoryData() {
+    try {
+        // 一级目录
+        var cats = await dbGetAll('story_categories');
+        if (!cats || cats.length === 0) {
+            for (var i = 0; i < STORY_DEFAULT_CATEGORIES.length; i++) {
+                await dbPut('story_categories', STORY_DEFAULT_CATEGORIES[i]);
+            }
+            console.log('✅ 倾心之约：已初始化默认目录');
+        }
+
+        // 信息卡
+        var meta = await kvGet('story_meta', 'story_meta', null);
+        if (!meta) {
+            await kvSet('story_meta', 'story_meta', STORY_DEFAULT_META);
+            console.log('✅ 倾心之约：已初始化信息卡');
+        }
+
+        // 阅读设置
+        var settings = await kvGet('story_settings', 'story_reader', null);
+        if (!settings) {
+            await kvSet('story_settings', 'story_reader', STORY_DEFAULT_READER);
+            console.log('✅ 倾心之约：已初始化阅读设置');
+        }
+    } catch(e) {
+        console.warn('倾心之约初始化失败:', e);
+    }
+}
+
+// 获取所有一级目录（按 order 排序）
+async function getStoryCategories() {
+    var cats = await dbGetAll('story_categories');
+    if (!Array.isArray(cats)) cats = [];
+    cats.sort(function(a, b) { return (a.order || 0) - (b.order || 0); });
+    return cats;
+}
+
+// 获取某目录下所有剧情（不读正文，用于列表展示）
+async function getStoriesByCategory(categoryId) {
+    var all = await dbGetAll('stories');
+    if (!Array.isArray(all)) all = [];
+    return all
+        .filter(function(s) { return s.categoryId === categoryId; })
+        .sort(function(a, b) {
+            if (a.pinned && !b.pinned) return -1;
+            if (!a.pinned && b.pinned) return 1;
+            return (b.updatedAt || 0) - (a.updatedAt || 0);
+        });
+}
+
+// 获取单条剧情
+async function getStoryById(id) {
+    var all = await dbGetAll('stories');
+    return all.find(function(s) { return String(s.id) === String(id); }) || null;
+}
+
+// 自动字数统计（中文按字算，不含空白）
+function countStoryWords(text) {
+    if (!text) return 0;
+    return String(text).replace(/\s/g, '').length;
+}
+
+// 读取阅读设置
+async function getStoryReaderSettings() {
+    var s = await kvGet('story_settings', 'story_reader', null);
+    return Object.assign({}, STORY_DEFAULT_READER, s || {});
+}
+
+// 保存阅读设置
+async function saveStoryReaderSettings(settings) {
+    await kvSet('story_settings', 'story_reader', settings);
+}
+
+// 读取秦彻信息卡
+async function getStoryMeta() {
+    var m = await kvGet('story_meta', 'story_meta', null);
+    return Object.assign({}, STORY_DEFAULT_META, m || {});
+}
+
+// 保存秦彻信息卡
+async function saveStoryMeta(meta) {
+    await kvSet('story_meta', 'story_meta', meta);
+}
+
+// 图片压缩（通用）
+function compressStoryImage(file, maxWidth, maxHeight, quality) {
+    return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var img = new Image();
+            img.onload = function() {
+                var canvas = document.createElement('canvas');
+                var width = img.width;
+                var height = img.height;
+                if (width > maxWidth || height > maxHeight) {
+                    var ratio = Math.min(maxWidth / width, maxHeight / height);
+                    width = Math.floor(width * ratio);
+                    height = Math.floor(height * ratio);
+                }
+                canvas.width = width;
+                canvas.height = height;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL('image/jpeg', quality || 0.8));
+            };
+            img.onerror = reject;
+            img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+console.log('✅ 倾心之约工具函数已加载');
+
+// ============ 倾心之约 · 主界面 ============
+
+// 侧边栏是否打开
+var storyDrawerOpen = false;
+
+// 打开主界面
+async function openStoryHome() {
+    showPage('storyHomePage');
+    storyDrawerOpen = false;
+    await renderStoryHome();
+}
+
+function toggleStoryTrait() {
+    var meta = window._storyTraitMeta || {};
+    // 简化：直接从 IDB 再读一次
+    getStoryMeta().then(function(m) {
+        var fieldMap = {};
+        (m.fields || []).forEach(function(f) { fieldMap[f.key] = f.value || ''; });
+        var fullTrait = fieldMap['性格'] || '';
+        var el = document.getElementById('storyTraitText');
+        var btn = document.querySelector('.story-trait-toggle');
+        if (!el || !btn) return;
+
+        var isOpen = btn.dataset.open === '1';
+        if (isOpen) {
+            el.textContent = fullTrait.slice(0, 30) + '…';
+            btn.textContent = '展开 ▼';
+            btn.dataset.open = '0';
+        } else {
+            el.textContent = fullTrait;
+            btn.textContent = '收起 ▲';
+            btn.dataset.open = '1';
+        }
+    });
+}
+
+// 渲染主界面
+async function renderStoryHome() {
+    var container = document.getElementById('storyHomeInner');
+    if (!container) return;
+
+    await initStoryData();
+    var meta = await getStoryMeta();
+    var cats = await getStoryCategories();
+
+    var coverUrl = meta.coverImage || '';
+    var cropping = meta.cropping || { frontX: 50, frontY: 50, closeX: 50, closeY: 25, closeScale: 100 };
+
+    // 字段映射
+    var fieldMap = {};
+    (meta.fields || []).forEach(function(f) { fieldMap[f.key] = f.value || ''; });
+    var nameVal = fieldMap['姓名'] || '秦彻';
+    var enNameVal = fieldMap['英文名'] || '';
+    var ageVal = fieldMap['年龄'] || '';
+    var traitVal = fieldMap['性格'] || '';
+    // 性格折叠（超过 30 字就折叠）
+    var TRAIT_LIMIT = 30;
+    var traitNeedFold = traitVal.length > TRAIT_LIMIT;
+    var traitShort = traitNeedFold ? traitVal.slice(0, TRAIT_LIMIT) + '…' : traitVal;
+    var likesVal = fieldMap['喜好'] || '';
+    var storyVal = fieldMap['经历'] || '';
+
+    // 喜好拆成标签（支持 、，, / 空格）
+    var likeTags = likesVal
+        ? likesVal.split(/[、，,/\s]+/).filter(function(s) { return s.trim(); })
+        : [];
+
+    // 没有封面时的占位
+    var hasCover = !!coverUrl;
+
+    // 立绘 CSS 值
+    var bgUrl = hasCover ? 'url("' + coverUrl + '")' : 'none';
+    var frontPos = cropping.frontX + '% ' + cropping.frontY + '%';
+    var closePos = cropping.closeX + '% ' + cropping.closeY + '%';
+    var closeSize = cropping.closeScale + '% auto';
+
+    // 经历折叠
+    var storyLines = (storyVal || '').split('\n');
+    var storyFirstTwo = storyLines.slice(0, 2).join('\n');
+    var storyHasMore = storyLines.length > 2;
+
+    container.innerHTML = `
+        <style>
+            .story-page * { box-sizing: border-box; }
+            .story-page {
+                position: absolute; inset: 0;
+                background: #000;
+                color: #fff;
+                font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+            .story-page::before {
+                content: '';
+                position: fixed; inset: 0;
+                background-image: ${bgUrl};
+                background-size: cover;
+                background-position: center;
+                filter: blur(28px) brightness(0.28) saturate(0.7);
+                transform: scale(1.15);
+                z-index: 0;
+                pointer-events: none;
+            }
+            .story-page > * { position: relative; z-index: 1; }
+
+            /* 顶部栏 */
+            .story-topbar {
+                display: flex; align-items: center;
+                padding: 14px 16px;
+                background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+            }
+            .story-topbar .back-btn {
+                width: 36px; height: 36px;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.08);
+                border: 1px solid rgba(255,42,42,0.4);
+                color: #fff; font-size: 16px;
+                display: flex; align-items: center; justify-content: center;
+                cursor: pointer; padding: 0;
+            }
+            .story-topbar .title {
+                flex: 1; text-align: center;
+                font-size: 15px; font-weight: 600;
+                letter-spacing: 4px; color: #fff;
+                text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+            }
+            .story-topbar .spacer { width: 36px; }
+
+            /* ☰ 按钮 */
+            .story-menu-btn {
+                margin: 4px 0 0 16px;
+                width: 40px; height: 40px;
+                border-radius: 6px;
+                background: rgba(0,0,0,0.4);
+                border: 1px solid rgba(255,42,42,0.4);
+                display: flex; align-items: center; justify-content: center;
+                cursor: pointer; padding: 0;
+                transition: all 0.2s;
+            }
+            .story-menu-btn:active { background: rgba(255,42,42,0.2); }
+            .story-menu-btn svg { display: block; }
+
+            /* 主内容区 */
+            .story-content {
+                padding: 20px 16px 60px;
+                max-width: 480px;
+                margin: 0 auto;
+            }
+
+            /* 上半部：左图右文 */
+            .story-top-section {
+                display: flex;
+                gap: 14px;
+                align-items: flex-start;
+                margin-bottom: 20px;
+            }
+
+            /* 左侧：前景立绘 */
+            .story-front-zone {
+                flex: 0 0 42%;
+                aspect-ratio: 3/4.2;
+                position: relative;
+                overflow: hidden;
+                background: #0a0a0a;
+                box-shadow: 0 0 0 1px rgba(255,42,42,0.5), 0 8px 24px rgba(0,0,0,0.6);
+            }
+            .story-front-zone .front-img {
+                position: absolute; inset: 0;
+                background-image: ${bgUrl};
+                background-size: cover;
+                background-position: ${frontPos};
+                background-color: #111;
+                filter: contrast(1.1) brightness(0.92) grayscale(0.15);
+            }
+            .story-front-zone .corner-tl {
+                position: absolute; top: 0; left: 0;
+                width: 16px; height: 16px;
+                border-top: 2px solid #ff2a2a;
+                border-left: 2px solid #ff2a2a;
+            }
+            .story-front-zone .corner-br {
+                position: absolute; bottom: 0; right: 0;
+                width: 16px; height: 16px;
+                border-bottom: 2px solid #ff2a2a;
+                border-right: 2px solid #ff2a2a;
+            }
+
+            /* 右侧：信息 */
+            .story-info-zone {
+                flex: 1;
+                min-width: 0;
+            }
+
+            /* 姓名行 */
+            .story-name-row {
+                display: flex; align-items: baseline;
+                gap: 10px;
+                padding-left: 10px;
+                border-left: 3px solid #ff2a2a;
+                margin-bottom: 14px;
+            }
+            .story-name {
+                font-size: 22px; font-weight: 700;
+                color: #fff; letter-spacing: 2px;
+                line-height: 1.1;
+            }
+            .story-age {
+                font-size: 11px; color: #999;
+                letter-spacing: 1px;
+            }
+
+            /* 英文字段行 */
+            .story-field-row {
+                border-bottom: 1px dashed rgba(255,42,42,0.35);
+                padding: 6px 0;
+                margin-bottom: 2px;
+                font-size: 12px;
+                line-height: 1.4;
+            }
+            .story-field-row .label {
+                color: #ff2a2a;
+                font-family: 'Courier New', monospace;
+                font-weight: bold;
+                letter-spacing: 1px;
+                font-size: 11px;
+            }
+            .story-field-row .value {
+                color: #e0e0e0;
+                margin-left: 6px;
+            }
+
+            /* 特写框 */
+            .story-close-zone {
+                margin: 14px 0 0 10px;
+                position: relative;
+                display: inline-block;
+            }
+            .story-close-zone .close-img {
+                width: 120px; height: 68px;
+                background-image: ${bgUrl};
+                background-size: ${closeSize};
+                background-position: ${closePos};
+                background-color: #111;
+                filter: grayscale(0.7) contrast(1.3);
+                border: 1px solid rgba(255,255,255,0.25);
+                display: block;
+            }
+            .story-close-zone .offset-border {
+                position: absolute;
+                top: 6px; left: -8px;
+                width: 120px; height: 68px;
+                border: 1px solid #ff2a2a;
+                pointer-events: none;
+            }
+
+            /* 引语 */
+            .story-quote {
+                margin: 20px 0 6px;
+                text-align: center;
+                color: #ccc;
+                font-size: 12px;
+                font-style: italic;
+                line-height: 1.6;
+                padding: 0 12px;
+            }
+            .story-quote::before { content: '“'; color: #666; margin-right: 2px; }
+            .story-quote::after { content: '”'; color: #666; margin-left: 2px; }
+
+            .story-quote-en {
+                text-align: right;
+                color: #ff2a2a;
+                font-family: 'Courier New', monospace;
+                font-size: 10px;
+                font-style: italic;
+                letter-spacing: 2px;
+                padding-right: 4px;
+                margin-bottom: 16px;
+            }
+
+            /* 标签区 */
+            .story-tags-section {
+                margin-top: 16px;
+                padding-left: 4px;
+            }
+            .story-tags-title {
+                color: #ff2a2a;
+                font-family: 'Courier New', monospace;
+                font-size: 11px;
+                font-weight: bold;
+                letter-spacing: 1px;
+                margin-bottom: 8px;
+                opacity: 0.9;
+            }
+            .story-tags-grid {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .story-tag {
+                padding: 4px 12px;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.15);
+                color: #e0e0e0;
+                font-size: 12px;
+                border-radius: 2px;
+                letter-spacing: 1px;
+            }
+
+            /* 斜红线（交叉成 X） */
+            .story-slash-area {
+                position: relative;
+                height: 40px;
+                margin: 20px 0 10px;
+                pointer-events: none;
+            }
+            .story-slash-line {
+                position: absolute;
+                left: 0; right: 0;
+                top: 50%;
+                height: 1px;
+                background: linear-gradient(90deg, transparent, #ff2a2a 15%, #ff2a2a 85%, transparent);
+            }
+            .story-slash-line.line-a {
+                transform: rotate(-2.5deg);
+                opacity: 0.75;
+            }
+            .story-slash-line.line-b {
+                transform: rotate(2.5deg);
+                opacity: 0.5;
+            }
+
+            /* 经历 */
+            .story-experience {
+                margin-top: 8px;
+            }
+            .story-exp-title {
+                color: #ff2a2a;
+                font-family: 'Courier New', monospace;
+                font-size: 11px;
+                font-weight: bold;
+                letter-spacing: 2px;
+                margin-bottom: 10px;
+            }
+            .story-exp-text {
+                color: #ccc;
+                font-size: 13px;
+                line-height: 1.9;
+                white-space: pre-wrap;
+                word-break: break-word;
+            }
+            .story-exp-fold {
+                display: none;
+            }
+            .story-exp-fold.show { display: inline; }
+            .story-exp-toggle {
+                display: inline-block;
+                color: #ff2a2a;
+                font-size: 11px;
+                margin-top: 6px;
+                cursor: pointer;
+                letter-spacing: 1px;
+            }
+
+            /* 底部装饰 */
+            .story-footer {
+                margin-top: 40px;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-end;
+                padding: 0 4px;
+                font-size: 11px;
+                color: #888;
+                letter-spacing: 1px;
+                line-height: 1.6;
+                position: relative;
+            }
+
+            /* 左侧：主文字 + 虚影装饰 */
+            .story-footer .left-zone {
+                position: relative;
+                padding-top: 22px;
+                max-width: 55%;
+                overflow: visible;
+            }
+            .story-footer .left {
+                position: relative;
+                z-index: 2;
+                color: #999;
+                font-style: italic;
+                white-space: nowrap;
+                overflow: visible;
+            }
+           /* 虚影：只在上方 + 左侧，右侧淡出 */
+            .story-footer .left-ghost {
+                position: absolute;
+                left: -6px;
+                top: -6px;
+                font-size: 22px;
+                font-weight: 900;
+                font-style: italic;
+                color: rgba(255, 42, 42, 0.28);
+                letter-spacing: 2px;
+                white-space: nowrap;
+                pointer-events: none;
+                user-select: none;
+                z-index: 1;
+                filter: blur(1.6px);
+                transform: scale(1.05);
+                transform-origin: left center;
+                -webkit-mask-image: linear-gradient(to right, #000 0%, #000 70%, transparent 100%);
+                mask-image: linear-gradient(to right, #000 0%, #000 70%, transparent 100%);
+            }
+
+            /* 虚影：放大 + 模糊 + 极淡 + 上移 */
+            .story-footer .left-ghost {
+                position: absolute;
+                left: 0;
+                top: -10px;
+                font-size: 16px;
+                font-weight: 900;
+                font-style: italic;
+                color: rgba(255, 42, 42, 0.3);
+                letter-spacing: 6px;
+                white-space: nowrap;
+                pointer-events: none;
+                user-select: none;
+                z-index: 1;
+                filter: blur(1.5px);
+            }
+
+            .story-footer .right { text-align: right; }
+            .story-footer .right .line1 { color: #ff2a2a; font-style: italic; }
+            .story-footer .right .line2 {
+                color: #666;
+                font-family: 'Arial Black', sans-serif;
+                font-size: 13px;
+                letter-spacing: 4px;
+                margin-top: 2px;
+            }
+
+        </style>
+
+        <div class="story-page">
+
+            <!-- 顶部栏 -->
+            <div class="story-topbar">
+                <button class="back-btn" onclick="goHome()">←</button>
+                <div class="title">倾心之约</div>
+                <div class="spacer"></div>
+            </div>
+
+            <!-- ☰ 按钮 -->
+            <button class="story-menu-btn" onclick="openStoryDrawer()">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">
+                    <line x1="4" y1="7" x2="20" y2="7"/>
+                    <line x1="4" y1="12" x2="20" y2="12"/>
+                    <line x1="4" y1="17" x2="20" y2="17"/>
+                </svg>
+            </button>
+            <!-- 主内容 -->
+            <div class="story-content">
+
+                <!-- 上半部：左图 + 右信息（姓名/年龄/NAME/LIKES/特写/性格） -->
+                <div class="story-top-section">
+                    <!-- 左侧前景 -->
+                    <div class="story-front-zone" onclick="openStoryHomeMenu()">
+                        <div class="front-img"></div>
+                        <div class="corner-tl"></div>
+                        <div class="corner-br"></div>
+                    </div>
+
+                    <!-- 右侧信息 -->
+                    <div class="story-info-zone">
+                        <!-- 姓名 + 年龄 -->
+                        <div class="story-name-row">
+                            <span class="story-name">${nameVal}</span>
+                            ${ageVal ? '<span class="story-age">' + ageVal + '</span>' : ''}
+                        </div>
+
+                        <!-- NAME -->
+                        ${enNameVal ? '<div class="story-field-row"><span class="label">NAME:</span><span class="value">' + enNameVal + '</span></div>' : ''}
+
+                        <!-- LIKES 标签 -->
+                        ${likeTags.length > 0 ? (
+                            '<div style="margin-top:14px;">' +
+                                '<div style="color:#ff2a2a;font-family:monospace;font-size:11px;font-weight:bold;letter-spacing:1px;margin-bottom:8px;">/ LIKES</div>' +
+                                '<div style="display:flex;flex-wrap:wrap;gap:6px;">' +
+                                    likeTags.map(function(t) { return '<div style="padding:3px 10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);color:#e0e0e0;font-size:11px;border-radius:2px;letter-spacing:1px;">' + t + '</div>'; }).join('') +
+                                '</div>' +
+                            '</div>'
+                        ) : ''}
+
+                        <!-- 特写框 -->
+                        <div style="margin-top:16px;margin-left:auto;margin-right:0;position:relative;display:block;width:170px;" onclick="openStoryCloseup()">                            <div style="position:absolute;top:5px;left:-6px;width:118px;height:66px;border:1px solid #ff2a2a;pointer-events:none;"></div>
+                            <div style="width:118px;height:66px;background:#111;border:1px solid rgba(255,255,255,0.25);overflow:hidden;position:relative;">
+                                <img src="${coverUrl}"
+                                     style="position:absolute;
+                                            width:${cropping.closeScale}%;
+                                            height:auto;
+                                            left:${cropping.closeX}%;
+                                            top:${cropping.closeY}%;
+                                            transform:translate(-${cropping.closeX}%, -${cropping.closeY}%);
+                                            filter:grayscale(0.7) contrast(1.3);
+                                            display:block;" />
+                            </div>
+                        </div>
+
+                        <!-- TRAIT 性格（折叠） -->
+                        ${traitVal ? (
+                            '<div style="margin-top:16px;">' +
+                                '<div style="font-size:11px;line-height:1.6;">' +
+                                    '<span class="label" style="color:#ff2a2a;font-family:monospace;font-weight:bold;letter-spacing:1px;">TRAIT:</span>' +
+                                    '<span style="color:#e0e0e0;margin-left:6px;" id="storyTraitText">' + traitShort + '</span>' +
+                                '</div>' +
+                                (traitNeedFold
+                                    ? '<div style="text-align:right;margin-top:4px;">' +
+                                        '<span class="story-trait-toggle" data-open="0" onclick="toggleStoryTrait()" style="color:#ff2a2a;font-size:11px;cursor:pointer;letter-spacing:1px;text-decoration:underline;text-underline-offset:2px;opacity:0.75;">展开 ▼</span>' +
+                                      '</div>'
+                                    : '') +
+                            '</div>'
+                        ) : ''}
+                    </div>
+                </div>
+
+                <!-- 引语 -->
+                ${meta.quote ? '<div class="story-quote" style="margin-top:28px;">' + meta.quote + '</div>' : ''}
+                ${meta.quoteEn ? '<div class="story-quote-en">' + meta.quoteEn + '</div>' : ''}
+
+                <!-- 斜红线（交叉成 X） -->
+                <div class="story-slash-area">
+                    <div class="story-slash-line line-a"></div>
+                    <div class="story-slash-line line-b"></div>
+                </div>
+
+                <!-- 经历 -->
+                ${storyVal ? (
+                    '<div class="story-experience">' +
+                        '<div class="story-exp-title">/ EXPERIENCE</div>' +
+                        '<div class="story-exp-text">' + storyFirstTwo + '<span class="story-exp-fold" id="storyExpFold">' + (storyHasMore ? '\n' + storyLines.slice(2).join('\n') : '') + '</span></div>' +
+                        (storyHasMore ? '<span class="story-exp-toggle" onclick="toggleStoryExp()">展开 ▼</span>' : '') +
+                    '</div>'
+                ) : ''}
+
+                <!-- 底部装饰 -->
+                <div class="story-footer">
+                    <div class="left-zone">
+                        <div class="left-ghost">${meta.decorLeft || '和你一起跨越明暗交界'}</div>
+                        <div class="left">${meta.decorLeft || '和你一起跨越明暗交界'}</div>
+                    </div>
+                    <div class="right">
+                        <div class="line1">${meta.decorRight || '/ 等待夜色降临 /'}</div>
+                        <div class="line2">${meta.decorBottom || 'SYLUS'}</div>
+                    </div>
+                </div>
+
+            </div>
+
+<!-- 侧边栏遮罩 -->
+<div id="storyDrawerMask" onclick="closeStoryDrawer()" style="position:absolute;inset:0;background:rgba(0,0,0,0.6);z-index:100;opacity:0;pointer-events:none;transition:opacity 0.25s;"></div>
+
+<!-- 侧边栏 -->
+<div id="storyDrawer" style="position:absolute;top:0;left:0;bottom:0;width:260px;max-width:80%;background:#0a0a0a;border-right:1px solid rgba(255,42,42,0.3);z-index:101;transform:translateX(-100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);box-shadow:4px 0 24px rgba(0,0,0,0.6);display:flex;flex-direction:column;">
+                <div style="padding:24px 20px 16px;border-bottom:1px solid rgba(255,42,42,0.25);">
+                    <div style="font-size:16px;font-weight:600;color:#fff;letter-spacing:3px;">倾心之约</div>
+                    <div style="font-size:10px;color:#ff2a2a;letter-spacing:4px;margin-top:6px;font-family:monospace;">STORY · COLLECTION</div>
+                </div>
+                <div id="storyDrawerList" style="flex:1;overflow-y:auto;padding:12px 0;"></div>
+                <div style="padding:12px 20px 20px;border-top:1px solid rgba(255,42,42,0.25);">
+                    <button onclick="closeStoryDrawer()" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,42,42,0.4);background:transparent;color:#ff2a2a;font-size:13px;cursor:pointer;letter-spacing:2px;">关闭</button>
+                </div>
+            </div>
+
+        </div>
+    `;
+
+    renderStoryDrawerList(cats);
+}
+
+// ============ 倾心之约 · 剧情列表 ============
+
+var storyListCategoryId = null;
+var storyListCategoryName = '';
+
+async function renderStoryList(catId, catName) {
+    storyListCategoryId = catId;
+    storyListCategoryName = catName || '';
+
+    var container = document.getElementById('storyListInner');
+    if (!container) return;
+
+    var stories = await getStoriesByCategory(catId);
+
+    // 列表项
+    var listHtml = '';
+    if (stories.length === 0) {
+        listHtml =
+            '<div style="text-align:center;padding:80px 20px;color:#555;">' +
+                '<div style="font-size:36px;opacity:0.2;margin-bottom:12px;">📖</div>' +
+                '<div style="font-size:13px;letter-spacing:2px;">还没有故事</div>' +
+                '<div style="font-size:11px;margin-top:6px;color:#444;">去「编辑」里添加</div>' +
+            '</div>';
+    } else {
+        stories.forEach(function(s) {
+            var wordCount = s.wordCount || 0;
+            var timeStr = formatStoryTime(s.updatedAt || s.createdAt);
+            var pinnedMark = s.pinned ? '<span style="color:#ff2a2a;margin-right:6px;font-size:11px;">📌</span>' : '';
+
+            listHtml +=
+                '<div onclick="openStoryReader(\'' + s.id + '\')" ' +
+                    'style="position:relative;padding:16px 18px 16px 22px;margin-bottom:12px;background:#0d0d0d;border:1px solid rgba(255,42,42,0.25);border-left:3px solid #ff2a2a;cursor:pointer;transition:all 0.2s;" ' +
+                    'onmouseover="this.style.background=\'#131313\';this.style.borderColor=\'rgba(255,42,42,0.5)\';" ' +
+                    'onmouseout="this.style.background=\'#0d0d0d\';this.style.borderColor=\'rgba(255,42,42,0.25)\';">' +
+                    '<div style="font-size:15px;color:#fff;font-weight:500;letter-spacing:1px;margin-bottom:8px;line-height:1.4;word-break:break-word;">' + pinnedMark + (s.title || '无标题') + '</div>' +
+                    '<div style="display:flex;justify-content:space-between;font-size:11px;color:#666;font-family:monospace;letter-spacing:1px;">' +
+                        '<span>' + wordCount + ' 字</span>' +
+                        '<span>' + timeStr + '</span>' +
+                    '</div>' +
+                '</div>';
+        });
+    }
+
+    container.innerHTML = `
+        <style>
+            .story-list-page {
+                position: absolute; inset: 0;
+                background: #000;
+                color: #fff;
+                display: flex; flex-direction: column;
+                font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            }
+            .story-list-page::before {
+                content: '';
+                position: absolute; inset: 0;
+                background: radial-gradient(circle at 50% 0%, rgba(255,42,42,0.08), transparent 60%);
+                pointer-events: none;
+            }
+            .story-list-topbar {
+                display: flex; align-items: center;
+                padding: 14px 16px;
+                background: rgba(0,0,0,0.6);
+                border-bottom: 1px solid rgba(255,42,42,0.25);
+                position: relative; z-index: 2;
+            }
+            .story-list-topbar .back-btn {
+                width: 36px; height: 36px;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.06);
+                border: 1px solid rgba(255,42,42,0.4);
+                color: #fff; font-size: 16px;
+                display: flex; align-items: center; justify-content: center;
+                cursor: pointer; padding: 0;
+            }
+            .story-list-topbar .title-wrap {
+                flex: 1; text-align: center;
+            }
+            .story-list-topbar .title {
+                font-size: 16px; font-weight: 600;
+                color: #fff; letter-spacing: 4px;
+            }
+            .story-list-topbar .subtitle {
+                font-size: 9px; color: #ff2a2a;
+                font-family: monospace; letter-spacing: 3px;
+                margin-top: 2px;
+            }
+            .story-list-topbar .spacer { width: 36px; }
+
+            .story-list-content {
+                flex: 1; overflow-y: auto;
+                padding: 20px 16px 40px;
+                max-width: 480px; width: 100%;
+                margin: 0 auto;
+                position: relative; z-index: 1;
+            }
+            .story-list-head {
+                display: flex; justify-content: space-between; align-items: baseline;
+                margin-bottom: 16px;
+                padding-bottom: 10px;
+                border-bottom: 1px dashed rgba(255,42,42,0.3);
+            }
+            .story-list-head .label {
+                font-size: 11px; color: #ff2a2a;
+                font-family: monospace; letter-spacing: 2px;
+            }
+            .story-list-head .count {
+                font-size: 11px; color: #666;
+                font-family: monospace;
+            }
+        </style>
+
+        <div class="story-list-page">
+            <div class="story-list-topbar">
+                <button class="back-btn" onclick="openStoryHome()">←</button>
+                <div class="title-wrap">
+                    <div class="title">${catName}</div>
+                    <div class="subtitle">/ ARCHIVE</div>
+                </div>
+                <div class="spacer"></div>
+            </div>
+
+            <div class="story-list-content">
+                <div class="story-list-head">
+                    <span class="label">/ STORIES</span>
+                    <span class="count">${stories.length} 篇</span>
+                </div>
+                ${listHtml}
+            </div>
+        </div>
+    `;
+}
+
+// 格式化时间
+function formatStoryTime(ts) {
+    if (!ts) return '';
+    var d = new Date(ts);
+    var now = new Date();
+    var diff = now - d;
+    var day = 24 * 3600 * 1000;
+    if (diff < day) return '今天';
+    if (diff < 2 * day) return '昨天';
+    if (diff < 7 * day) return Math.floor(diff / day) + ' 天前';
+    return (d.getMonth() + 1) + '/' + d.getDate();
+}
+
+
+// ============ 倾心之约 · 阅读器 ============
+
+var currentReadingStoryId = null;
+
+// ============ 倾心之约 · 阅读进度 ============
+
+// 读取所有进度
+async function getStoryReadingProgress() {
+    try {
+        var data = await kvGet('story_settings', 'story_reading_progress', {});
+        return (data && typeof data === 'object') ? data : {};
+    } catch(e) {
+        return {};
+    }
+}
+
+// 读单篇进度（返回 0~1）
+async function getStoryProgress(storyId) {
+    var all = await getStoryReadingProgress();
+    var item = all[String(storyId)];
+    if (!item) return 0;
+    return item.p || 0;
+}
+
+// 保存单篇进度
+async function saveStoryProgress(storyId, percent) {
+    try {
+        var all = await getStoryReadingProgress();
+        all[String(storyId)] = {
+            p: Math.max(0, Math.min(1, percent)),
+            t: Date.now()
+        };
+        // 清理：保留最近 200 篇的记录
+        var keys = Object.keys(all);
+        if (keys.length > 200) {
+            keys.sort(function(a, b) { return (all[a].t || 0) - (all[b].t || 0); });
+            for (var i = 0; i < keys.length - 200; i++) {
+                delete all[keys[i]];
+            }
+        }
+        await kvSet('story_settings', 'story_reading_progress', all);
+    } catch(e) {
+        console.warn('保存阅读进度失败:', e);
+    }
+}
+
+// 清空单篇进度
+async function clearStoryProgress(storyId) {
+    try {
+        var all = await getStoryReadingProgress();
+        delete all[String(storyId)];
+        await kvSet('story_settings', 'story_reading_progress', all);
+    } catch(e) {}
+}
+
+async function openStoryReader(storyId) {
+    currentReadingStoryId = storyId;
+    showPage('storyReaderPage');
+    await renderStoryReader();
+}
+
+async function renderStoryReader() {
+    var container = document.getElementById('storyReaderInner');
+    if (!container) return;
+
+    var story = await getStoryById(currentReadingStoryId);
+    if (!story) {
+        container.innerHTML = '<div style="padding:40px;color:#fff;text-align:center;">故事不存在</div>';
+        return;
+    }
+
+    var settings = await getStoryReaderSettings();
+
+    // 字体映射
+    var fontMap = {
+        'system': '-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif',
+        'serif': '"Songti SC", "SimSun", "Noto Serif SC", serif',
+        'kai': '"Kaiti SC", "KaiTi", "STKaiti", serif',
+        'yuan': '"Yuanti SC", "YouYuan", "STYuanti", sans-serif'
+    };
+    var fontFamily = fontMap[settings.fontFamily] || fontMap['system'];
+
+    // 正文按段落分
+    var paragraphs = (story.content || '').split('\n').filter(function(p) {
+        return p.trim() !== '';
+    });
+    var paragraphHtml = paragraphs.map(function(p) {
+        return '<p style="margin:0 0 0.6em 0;text-indent:2em;">' + (p || '&nbsp;') + '</p>';
+    }).join('');
+
+    // ===== 找上一篇/下一篇 =====
+    var siblings = await getSiblingStories(currentReadingStoryId);
+    var hasPrev = !!siblings.prev;
+    var hasNext = !!siblings.next;
+
+    var navBar = '<div class="story-reader-navbar">' +
+        '<div class="story-nav-btn' + (hasPrev ? '' : ' disabled') + '" ' +
+            (hasPrev ? 'onclick="gotoSiblingStory(\'' + siblings.prev.id + '\')"' : '') + '>' +
+            '<span style="font-size:14px;">←</span> 上一篇' +
+        '</div>' +
+        '<div class="story-nav-btn' + (hasNext ? '' : ' disabled') + '" ' +
+            (hasNext ? 'onclick="gotoSiblingStory(\'' + siblings.next.id + '\')"' : '') + '>' +
+            '下一篇 <span style="font-size:14px;">→</span>' +
+        '</div>' +
+    '</div>';
+
+    container.innerHTML = `
+        <style>
+            .story-reader-page {
+                position: absolute; inset: 0;
+                display: flex; flex-direction: column;
+                font-family: ${fontFamily};
+                background: ${settings.bgColor};
+                color: ${settings.textColor};
+                transition: background 0.3s, color 0.3s;
+            }
+            .story-reader-topbar {
+                display: flex; align-items: center;
+                padding: 12px 16px;
+                background: ${settings.bgColor};
+border-bottom: 1px solid rgba(128,128,128,0.15);
+                flex-shrink: 0;
+            }
+            .story-reader-topbar .back-btn {
+                width: 34px; height: 34px;
+                border-radius: 50%;
+                background: transparent;
+                border: 1px solid rgba(128,128,128,0.3);
+                color: ${settings.textColor};
+                font-size: 16px;
+                display: flex; align-items: center; justify-content: center;
+                cursor: pointer; padding: 0;
+            }
+            .story-reader-topbar .title {
+                flex: 1; text-align: center;
+                font-size: 14px; font-weight: 500;
+                color: ${settings.textColor};
+                letter-spacing: 2px;
+                overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+                padding: 0 8px;
+            }
+            .story-reader-topbar .setting-btn {
+                width: 34px; height: 34px;
+                border-radius: 50%;
+                background: transparent;
+                border: 1px solid rgba(128,128,128,0.3);
+                color: ${settings.textColor};
+                font-size: 14px;
+                display: flex; align-items: center; justify-content: center;
+                cursor: pointer; padding: 0;
+            }
+
+            .story-reader-content {
+                flex: 1; overflow-y: auto;
+                padding: 28px 24px 40px;
+                max-width: 720px; width: 100%;
+                margin: 0 auto;
+                font-size: ${settings.fontSize}px;
+                line-height: 1.85;
+                letter-spacing: 0.5px;
+            }
+
+            .story-reader-title {
+                font-size: ${settings.fontSize + 4}px;
+                font-weight: 600;
+                text-align: center;
+                margin: 10px 0 30px;
+                letter-spacing: 3px;
+                line-height: 1.5;
+            }
+
+            .story-reader-meta {
+                text-align: center;
+                font-size: 11px;
+                opacity: 0.5;
+                margin-top: 40px;
+                letter-spacing: 1px;
+            }
+
+            /* 底部导航栏 */
+            .story-reader-navbar {
+                flex-shrink: 0;
+                display: flex;
+                border-top: 1px solid rgba(128,128,128,0.15);
+                background: ${settings.bgColor};
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+            }
+            .story-nav-btn {
+                flex: 1;
+                padding: 14px 16px;
+                text-align: center;
+                font-size: 13px;
+                color: ${settings.textColor};
+                opacity: 0.75;
+                cursor: pointer;
+                letter-spacing: 1px;
+                transition: all 0.15s;
+                user-select: none;
+            }
+            .story-nav-btn:active:not(.disabled) {
+                background: rgba(0,0,0,0.05);
+            }
+            .story-nav-btn.disabled {
+                opacity: 0.25;
+                cursor: not-allowed;
+            }
+            .story-nav-btn:first-child {
+                border-right: 1px solid rgba(0,0,0,0.06);
+            }
+        </style>
+
+        <div class="story-reader-page">
+            <div class="story-reader-topbar">
+                <button class="back-btn" onclick="backFromReader()">←</button>
+                <div class="title">${story.title || '无标题'}</div>
+                <button class="setting-btn" onclick="openStoryReaderSettings()">Aa</button>
+            </div>
+
+            <div class="story-reader-content">
+                <div class="story-reader-title">${story.title || '无标题'}</div>
+                <div class="story-reader-body">${paragraphHtml || '<p style="text-align:center;opacity:0.5;">（暂无内容）</p>'}</div>
+                <div class="story-reader-meta">
+                    — 共 ${story.wordCount || 0} 字 —
+                </div>
+            </div>
+
+            ${navBar}
+        </div>
+    `;
+
+    // ===== 恢复阅读位置 =====
+    var contentEl = container.querySelector('.story-reader-content');
+    if (contentEl) {
+        var savedPercent = await getStoryProgress(currentReadingStoryId);
+
+        // 读完过（>=95%）→ 从头开始
+        if (savedPercent >= 0.95) {
+            savedPercent = 0;
+            clearStoryProgress(currentReadingStoryId);
+        }
+
+        if (savedPercent > 0) {
+            requestAnimationFrame(function() {
+                setTimeout(function() {
+                    var maxScroll = contentEl.scrollHeight - contentEl.clientHeight;
+                    if (maxScroll > 0) {
+                        contentEl.scrollTop = maxScroll * savedPercent;
+                    }
+                }, 50);
+            });
+        }
+
+        // ===== 监听滚动，节流保存 =====
+        var saveTimer = null;
+        var lastSavePercent = savedPercent;
+
+        contentEl.addEventListener('scroll', function() {
+            if (saveTimer) return;
+            saveTimer = setTimeout(function() {
+                saveTimer = null;
+                var maxScroll = contentEl.scrollHeight - contentEl.clientHeight;
+                if (maxScroll <= 0) return;
+                var percent = contentEl.scrollTop / maxScroll;
+                if (Math.abs(percent - lastSavePercent) >= 0.01) {
+                    lastSavePercent = percent;
+                    saveStoryProgress(currentReadingStoryId, percent);
+                }
+            }, 800);
+        }, { passive: true });
+
+        // ===== 关闭时保存 =====
+        window._storyReaderCleanup = function() {
+            if (contentEl) {
+                var maxScroll = contentEl.scrollHeight - contentEl.clientHeight;
+                if (maxScroll > 0) {
+                    var percent = contentEl.scrollTop / maxScroll;
+                    saveStoryProgress(currentReadingStoryId, percent);
+                }
+            }
+        };
+    }
+}
+
+
+// 返回列表
+function backFromReader() {
+    currentReadingStoryId = null;
+    showPage('storyListPage');
+    if (storyListCategoryId) {
+        renderStoryList(storyListCategoryId, storyListCategoryName);
+    } else {
+        openStoryHome();
+    }
+}
+
+// 跳到相邻剧情（保存当前进度后跳转）
+async function gotoSiblingStory(targetId) {
+    // 先保存当前进度
+    if (window._storyReaderCleanup) {
+        window._storyReaderCleanup();
+    }
+    // 切换 id，重新渲染
+    currentReadingStoryId = targetId;
+    await renderStoryReader();
+}
+
+// ============ 阅读设置面板 ============
+
+// ============ 倾心之约 · 上下章 ============
+
+// 找同目录下的上一篇/下一篇
+async function getSiblingStories(currentStoryId) {
+    var story = await getStoryById(currentStoryId);
+    if (!story) return { prev: null, next: null };
+
+    var siblings = await getStoriesByCategory(story.categoryId);
+    var idx = siblings.findIndex(function(s) {
+        return String(s.id) === String(currentStoryId);
+    });
+
+    if (idx < 0) return { prev: null, next: null };
+
+    return {
+        prev: idx > 0 ? siblings[idx - 1] : null,
+        next: idx < siblings.length - 1 ? siblings[idx + 1] : null
+    };
+}
+
+async function openStoryReaderSettings() {
+    var settings = await getStoryReaderSettings();
+
+    // 预设
+    var BG_PRESETS = [
+        { name: '米黄', value: '#FAF7F0' },
+        { name: '白',   value: '#FFFFFF' },
+        { name: '灰',   value: '#EDEDED' },
+        { name: '淡粉', value: '#FBF0F0' },
+        { name: '淡蓝', value: '#EEF4F8' },
+        { name: '护眼', value: '#E8F0DC' },
+        { name: '深灰', value: '#2A2A2A' },
+        { name: '黑',   value: '#111111' }
+    ];
+
+    var TEXT_PRESETS = [
+        { name: '黑',   value: '#1A1A1A' },
+        { name: '灰',   value: '#5A5A5A' },
+        { name: '米白', value: '#F5EFE5' },
+        { name: '白',   value: '#FFFFFF' },
+        { name: '红棕', value: '#6A3A2A' }
+    ];
+
+    var FONT_PRESETS = [
+        { id: 'system', name: '默认' },
+        { id: 'serif',  name: '宋体' },
+        { id: 'kai',    name: '楷体' },
+        { id: 'yuan',   name: '圆体' }
+    ];
+
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+    var panel = document.createElement('div');
+    panel.style.cssText = 'background:#1A1A1A;border-radius:20px 20px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom, 0px));width:100%;max-width:480px;max-height:80vh;overflow-y:auto;color:#E5E5E5;';
+    panel.onclick = function(e) { e.stopPropagation(); };
+
+    var bgChips = BG_PRESETS.map(function(p) {
+        var active = p.value === settings.bgColor;
+        return '<div onclick="applyReaderBg(\'' + p.value + '\')" data-bg="' + p.value + '" style="flex:0 0 auto;width:36px;height:36px;border-radius:50%;background:' + p.value + ';border:2px solid ' + (active ? '#ff2a2a' : 'rgba(255,255,255,0.15)') + ';cursor:pointer;transition:all 0.2s;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>';
+    }).join('');
+
+    var textChips = TEXT_PRESETS.map(function(p) {
+        var active = p.value === settings.textColor;
+        return '<div onclick="applyReaderText(\'' + p.value + '\')" data-text="' + p.value + '" style="flex:0 0 auto;width:36px;height:36px;border-radius:50%;background:' + p.value + ';border:2px solid ' + (active ? '#ff2a2a' : 'rgba(255,255,255,0.15)') + ';cursor:pointer;transition:all 0.2s;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>';
+    }).join('');
+
+    var fontChips = FONT_PRESETS.map(function(f) {
+        var active = f.id === settings.fontFamily;
+        return '<div onclick="applyReaderFont(\'' + f.id + '\')" data-font="' + f.id + '" style="flex:1;padding:10px 8px;border-radius:10px;background:' + (active ? '#ff2a2a' : 'rgba(255,255,255,0.06)') + ';color:' + (active ? '#fff' : '#bbb') + ';border:1px solid ' + (active ? '#ff2a2a' : 'rgba(255,255,255,0.1)') + ';cursor:pointer;font-size:13px;text-align:center;letter-spacing:1px;">' + f.name + '</div>';
+    }).join('');
+
+    panel.innerHTML =
+        '<div style="width:36px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;margin:0 auto 16px;"></div>' +
+        '<div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;text-align:center;margin-bottom:18px;">/ READER SETTINGS</div>' +
+
+        '<div style="font-size:12px;color:#888;margin-bottom:10px;letter-spacing:1px;">背景色</div>' +
+        '<div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin-bottom:18px;-webkit-overflow-scrolling:touch;">' + bgChips + '</div>' +
+
+        '<div style="font-size:12px;color:#888;margin-bottom:10px;letter-spacing:1px;">文字色</div>' +
+        '<div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin-bottom:18px;-webkit-overflow-scrolling:touch;">' + textChips + '</div>' +
+
+        '<div style="font-size:12px;color:#888;margin-bottom:10px;letter-spacing:1px;">字号</div>' +
+        '<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">' +
+            '<span style="font-size:12px;color:#888;">A</span>' +
+            '<input type="range" id="readerFontSlider" min="14" max="28" value="' + settings.fontSize + '" style="flex:1;accent-color:#ff2a2a;">' +
+            '<span style="font-size:20px;color:#888;">A</span>' +
+            '<span id="readerFontVal" style="font-size:11px;color:#888;width:36px;text-align:right;">' + settings.fontSize + 'px</span>' +
+        '</div>' +
+
+        '<div style="font-size:12px;color:#888;margin-bottom:10px;letter-spacing:1px;">字体</div>' +
+        '<div style="display:flex;gap:8px;margin-bottom:20px;">' + fontChips + '</div>' +
+
+        '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:#ccc;font-size:13px;cursor:pointer;letter-spacing:2px;">完成</button>';
+
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+
+    // 字号滑条
+    var slider = panel.querySelector('#readerFontSlider');
+    slider.oninput = function() {
+        var v = parseInt(this.value);
+        panel.querySelector('#readerFontVal').textContent = v + 'px';
+        // 实时改字号
+        var contentEl = document.querySelector('.story-reader-content');
+        if (contentEl) contentEl.style.fontSize = v + 'px';
+        var titleEl = document.querySelector('.story-reader-title');
+        if (titleEl) titleEl.style.fontSize = (v + 4) + 'px';
+    };
+    slider.onchange = async function() {
+        var v = parseInt(this.value);
+        var s = await getStoryReaderSettings();
+        s.fontSize = v;
+        await saveStoryReaderSettings(s);
+    };
+}
+
+// 设置背景色
+async function applyReaderBg(color) {
+    var s = await getStoryReaderSettings();
+    s.bgColor = color;
+    await saveStoryReaderSettings(s);
+    var page = document.querySelector('.story-reader-page');
+    if (page) page.style.background = color;
+    var topbar = document.querySelector('.story-reader-topbar');
+    if (topbar) topbar.style.background = color;
+    // ★ 新增：底部导航栏
+    var navbar = document.querySelector('.story-reader-navbar');
+    if (navbar) navbar.style.background = color;
+    document.querySelectorAll('[data-bg]').forEach(function(el) {
+        el.style.borderColor = el.dataset.bg === color ? '#ff2a2a' : 'rgba(255,255,255,0.15)';
+    });
+}
+
+async function applyReaderText(color) {
+    var s = await getStoryReaderSettings();
+    s.textColor = color;
+    await saveStoryReaderSettings(s);
+    var page = document.querySelector('.story-reader-page');
+    if (page) page.style.color = color;
+    var content = document.querySelector('.story-reader-content');
+    if (content) content.style.color = color;
+    // ★ 新增：顶部栏按钮 + 底部导航按钮
+    document.querySelectorAll('.story-reader-topbar .back-btn, .story-reader-topbar .title, .story-reader-topbar .setting-btn').forEach(function(el) {
+        el.style.color = color;
+    });
+    document.querySelectorAll('.story-nav-btn').forEach(function(el) {
+        el.style.color = color;
+    });
+    document.querySelectorAll('[data-text]').forEach(function(el) {
+        el.style.borderColor = el.dataset.text === color ? '#ff2a2a' : 'rgba(255,255,255,0.15)';
+    });
+}
+
+// 设置字体
+async function applyReaderFont(fontId) {
+    var s = await getStoryReaderSettings();
+    s.fontFamily = fontId;
+    await saveStoryReaderSettings(s);
+    var fontMap = {
+        'system': '-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif',
+        'serif': '"Songti SC", "SimSun", "Noto Serif SC", serif',
+        'kai': '"Kaiti SC", "KaiTi", "STKaiti", serif',
+        'yuan': '"Yuanti SC", "YouYuan", "STYuanti", sans-serif'
+    };
+    var page = document.querySelector('.story-reader-page');
+    if (page) page.style.fontFamily = fontMap[fontId] || fontMap['system'];
+    document.querySelectorAll('[data-font]').forEach(function(el) {
+        var on = el.dataset.font === fontId;
+        el.style.background = on ? '#ff2a2a' : 'rgba(255,255,255,0.06)';
+        el.style.color = on ? '#fff' : '#bbb';
+        el.style.borderColor = on ? '#ff2a2a' : 'rgba(255,255,255,0.1)';
+    });
+}
+
+// 打开特写放大预览
+async function openStoryCloseup() {
+    var meta = await getStoryMeta();
+    if (!meta.coverImage) {
+        if (typeof showToast === 'function') showToast('还没有上传立绘');
+        return;
+    }
+
+    var cropping = meta.cropping || { closeX: 50, closeY: 25, closeScale: 100 };
+    var coverUrl = meta.coverImage;
+
+    // 弹全屏
+    var overlay = document.createElement('div');
+    overlay.id = 'storyCloseupOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+    // 点击背景关闭
+    overlay.onclick = function(e) {
+        if (e.target === overlay) overlay.remove();
+    };
+
+    // 大图框
+    var box = document.createElement('div');
+    box.style.cssText = 'position:relative;width:100%;max-width:420px;aspect-ratio:16/9;background:#0a0a0a;overflow:hidden;border:1px solid rgba(255,42,42,0.6);box-shadow:0 0 0 6px rgba(255,42,42,0.08), 0 12px 60px rgba(0,0,0,0.8);';
+    box.onclick = function(e) { e.stopPropagation(); };
+
+    // 大图
+    var bigImg = document.createElement('div');
+    bigImg.style.cssText = 'position:absolute;inset:0;background-image:url("' + coverUrl + '");background-size:' + (cropping.closeScale * 1.6) + '% auto;background-position:' + cropping.closeX + '% ' + cropping.closeY + '%;background-color:#111;filter:grayscale(0.5) contrast(1.2);';
+    box.appendChild(bigImg);
+
+    // 红色角标
+    ['top left', 'top right', 'bottom left', 'bottom right'].forEach(function(pos) {
+        var dot = document.createElement('div');
+        var s = 20;
+        var styles = 'position:absolute;width:' + s + 'px;height:' + s + 'px;';
+        if (pos.indexOf('top') === 0) styles += 'top:0;border-top:2px solid #ff2a2a;';
+        else styles += 'bottom:0;border-bottom:2px solid #ff2a2a;';
+        if (pos.indexOf('left') > -1) styles += 'left:0;border-left:2px solid #ff2a2a;';
+        else styles += 'right:0;border-right:2px solid #ff2a2a;';
+        dot.style.cssText = styles;
+        box.appendChild(dot);
+    });
+
+    // 底部小字
+    var caption = document.createElement('div');
+    caption.style.cssText = 'position:absolute;bottom:8px;right:10px;font-size:10px;color:rgba(255,42,42,0.7);font-family:monospace;letter-spacing:2px;';
+    caption.textContent = 'CLOSE-UP // ' + (meta.fields && meta.fields[0] ? meta.fields[0].value : 'SYLUS');
+    box.appendChild(caption);
+
+    overlay.appendChild(box);
+
+    // 关闭按钮（右上角）
+    var closeBtn = document.createElement('div');
+    closeBtn.textContent = '✕';
+    closeBtn.style.cssText = 'position:absolute;top:24px;right:24px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,42,42,0.4);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+    closeBtn.onclick = function(e) {
+        e.stopPropagation();
+        overlay.remove();
+    };
+    overlay.appendChild(closeBtn);
+
+    // 底部提示
+    var hint = document.createElement('div');
+    hint.textContent = '点击任意处关闭';
+    hint.style.cssText = 'position:absolute;bottom:24px;left:50%;transform:translateX(-50%);font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:2px;';
+    overlay.appendChild(hint);
+
+    document.body.appendChild(overlay);
+}
+
+// 渲染侧边栏目录列表
+function renderStoryDrawerList(cats) {
+    var listEl = document.getElementById('storyDrawerList');
+    if (!listEl) return;
+
+    var html = '';
+    cats.forEach(function(cat) {
+        html += '<div onclick="storyOpenCategory(\'' + cat.id + '\',\'' + (cat.name || '').replace(/'/g, "\\'") + '\')" ' +
+            'style="padding:14px 24px;font-size:14px;color:#e0e0e0;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all 0.15s;border-left:2px solid transparent;" ' +
+            'onmouseover="this.style.background=\'rgba(255,42,42,0.08)\';this.style.borderLeftColor=\'#ff2a2a\';" ' +
+            'onmouseout="this.style.background=\'transparent\';this.style.borderLeftColor=\'transparent\';">' +
+            '<span style="font-size:10px;color:#ff2a2a;font-family:monospace;">▸</span>' +
+            '<span style="letter-spacing:2px;">' + cat.name + '</span>' +
+            '</div>';
+    });
+
+    // 编辑入口
+    html += '<div style="margin:12px 20px;border-top:1px dashed rgba(255,42,42,0.3);"></div>';
+    html += '<div onclick="storyOpenEdit()" style="padding:14px 24px;font-size:14px;color:#ff2a2a;cursor:pointer;display:flex;align-items:center;gap:12px;font-weight:500;letter-spacing:2px;border-left:2px solid transparent;" ' +
+        'onmouseover="this.style.background=\'rgba(255,42,42,0.1)\';this.style.borderLeftColor=\'#ff2a2a\';" ' +
+        'onmouseout="this.style.background=\'transparent\';this.style.borderLeftColor=\'transparent\';">' +
+        '<span style="font-size:10px;font-family:monospace;">⚙</span>' +
+        '<span>编辑</span>' +
+        '</div>';
+
+    listEl.innerHTML = html;
+}
+
+// 经历折叠/展开
+function toggleStoryExp() {
+    var fold = document.getElementById('storyExpFold');
+    var btn = document.querySelector('.story-exp-toggle');
+    if (!fold || !btn) return;
+    var isOpen = fold.classList.toggle('show');
+    btn.textContent = isOpen ? '收起 ▲' : '展开 ▼';
+}
+
+// 打开侧边栏
+function openStoryDrawer() {
+    var drawer = document.getElementById('storyDrawer');
+    var mask = document.getElementById('storyDrawerMask');
+    if (!drawer || !mask) return;
+    storyDrawerOpen = true;
+    drawer.style.transform = 'translateX(0)';
+    mask.style.opacity = '1';
+    mask.style.pointerEvents = 'auto';
+}
+
+// 关闭侧边栏
+function closeStoryDrawer() {
+    var drawer = document.getElementById('storyDrawer');
+    var mask = document.getElementById('storyDrawerMask');
+    if (!drawer || !mask) return;
+    storyDrawerOpen = false;
+    drawer.style.transform = 'translateX(-100%)';
+    mask.style.opacity = '0';
+    mask.style.pointerEvents = 'none';
+}
+
+// 主界面菜单（点立绘/长按立绘触发）
+function openStoryHomeMenu() {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:flex-end;justify-content:center;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+    var panel = document.createElement('div');
+    panel.style.cssText = 'background:#0f0f0f;border-top:1px solid rgba(255,42,42,0.35);border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom, 0px));width:100%;max-width:480px;';
+    panel.onclick = function(e) { e.stopPropagation(); };
+
+    panel.innerHTML =
+        '<div style="width:36px;height:4px;background:rgba(255,42,42,0.3);border-radius:2px;margin:0 auto 14px;"></div>' +
+        '<div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;text-align:center;margin-bottom:14px;">/ EDIT MENU</div>' +
+        '<div onclick="openCoverEditorTrigger()" style="padding:14px 16px;font-size:14px;color:#fff;cursor:pointer;border-radius:10px;background:rgba(255,42,42,0.08);border:1px solid rgba(255,42,42,0.3);margin-bottom:8px;letter-spacing:1px;">更换立绘 · 调整裁剪</div>' +
+        '<div onclick="storyEditMeta()" style="padding:14px 16px;font-size:14px;color:#fff;cursor:pointer;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);margin-bottom:8px;letter-spacing:1px;">编辑信息卡</div>' +
+        '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:#888;font-size:13px;cursor:pointer;margin-top:6px;letter-spacing:1px;">取消</button>';
+
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+}
+
+// 触发立绘编辑器（选图 → 进编辑器）
+function openCoverEditorTrigger() {
+    // 关掉菜单
+    var menu = document.querySelector('div[style*="position: fixed"][style*="z-index: 9999"]');
+    if (menu) menu.remove();
+
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async function(e) {
+        var f = e.target.files[0];
+        if (!f) return;
+        await openCoverEditor(f);
+    };
+    input.click();
+}
+
+// 立绘上传
+async function storyUploadCover() {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async function(e) {
+        var f = e.target.files[0];
+        if (!f) return;
+        await openCoverEditor(f);
+    };
+    input.click();
+}
+
+// ============ 倾心之约 · 立绘编辑器 ============
+
+async function openCoverEditor(file) {
+    // 读原图
+    var dataUrl = await new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function(e) { resolve(e.target.result); };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+
+    // 压缩到 1200×1600 以内（保留细节但控制体积）
+    var compressed = await compressStoryImage(file, 1200, 1600, 0.85);
+    var meta = await getStoryMeta();
+    var cropping = JSON.parse(JSON.stringify(meta.cropping || {
+        frontX: 50, frontY: 50, closeX: 50, closeY: 25, closeScale: 100
+    }));
+
+    // 弹全屏编辑器
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:99999;display:flex;flex-direction:column;';
+
+    overlay.innerHTML = `
+        <div style="display:flex;align-items:center;padding:14px 16px;background:#0a0a0a;border-bottom:1px solid rgba(255,42,42,0.3);">
+            <button id="coverCancelBtn" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,42,42,0.3);color:#fff;font-size:16px;cursor:pointer;">←</button>
+            <div style="flex:1;text-align:center;font-size:15px;font-weight:600;color:#fff;letter-spacing:3px;">编辑立绘</div>
+            <button id="coverSaveBtn" style="padding:8px 18px;border-radius:16px;background:#c81414;border:none;color:#fff;font-size:13px;cursor:pointer;letter-spacing:1px;">保存</button>
+        </div>
+
+        <div style="flex:1;overflow-y:auto;padding:16px;background:#000;">
+
+            <!-- 前景裁剪区 -->
+            <div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:2px;margin-bottom:6px;">/ FRONT · 左侧前景框</div>
+            <div id="frontPreview" style="position:relative;width:100%;aspect-ratio:3/4;border:1px solid rgba(255,42,42,0.4);overflow:hidden;background:#111;margin-bottom:8px;touch-action:none;cursor:grab;">
+                <!-- 虚化背景 -->
+                <div id="frontBlurBg" style="position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(20px) brightness(0.3);transform:scale(1.15);"></div>
+                <!-- 清晰前景 -->
+                <div id="frontClear" style="position:absolute;inset:0;background-size:cover;background-position:center;"></div>
+                <!-- 边角装饰 -->
+                <div style="position:absolute;top:0;left:0;width:14px;height:14px;border-top:2px solid #ff2a2a;border-left:2px solid #ff2a2a;"></div>
+                <div style="position:absolute;bottom:0;right:0;width:14px;height:14px;border-bottom:2px solid #ff2a2a;border-right:2px solid #ff2a2a;"></div>
+                <!-- 中心十字线 -->
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:20px;height:1px;background:rgba(255,42,42,0.6);pointer-events:none;"></div>
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:1px;height:20px;background:rgba(255,42,42,0.6);pointer-events:none;"></div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:6px;">
+                <span style="font-size:11px;color:#888;width:44px;">左右</span>
+                <input type="range" id="frontXSlider" min="0" max="100" value="${cropping.frontX}" style="flex:1;accent-color:#ff2a2a;">
+                <span id="frontXVal" style="font-size:11px;color:#888;width:36px;text-align:right;">${cropping.frontX}%</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;">
+                <span style="font-size:11px;color:#888;width:44px;">上下</span>
+                <input type="range" id="frontYSlider" min="0" max="100" value="${cropping.frontY}" style="flex:1;accent-color:#ff2a2a;">
+                <span id="frontYVal" style="font-size:11px;color:#888;width:36px;text-align:right;">${cropping.frontY}%</span>
+            </div>
+
+            <!-- 特写裁剪区 -->
+            <div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:2px;margin-bottom:6px;">/ CLOSE-UP · 特写框</div>
+            <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:8px;">
+                <div id="closePreview" style="position:relative;width:140px;height:80px;border:1px solid rgba(255,42,42,0.4);overflow:hidden;background:#111;flex-shrink:0;touch-action:none;cursor:grab;">
+                    <div id="closeClear" style="position:absolute;inset:0;background-size:cover;background-position:center;filter:grayscale(0.7) contrast(1.3);"></div>
+                    <div style="position:absolute;top:0;left:0;width:10px;height:10px;border-top:2px solid #ff2a2a;border-left:2px solid #ff2a2a;"></div>
+                    <div style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-bottom:2px solid #ff2a2a;border-right:2px solid #ff2a2a;"></div>
+                </div>
+                <div style="flex:1;font-size:11px;color:#666;line-height:1.6;">
+                    <div style="color:#ff2a2a;margin-bottom:4px;">拖动左侧框调整特写位置</div>
+                    <div>小图会显示在信息卡里</div>
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:6px;">
+                <span style="font-size:11px;color:#888;width:44px;">左右</span>
+                <input type="range" id="closeXSlider" min="0" max="100" value="${cropping.closeX}" style="flex:1;accent-color:#ff2a2a;">
+                <span id="closeXVal" style="font-size:11px;color:#888;width:36px;text-align:right;">${cropping.closeX}%</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:6px;">
+                <span style="font-size:11px;color:#888;width:44px;">上下</span>
+                <input type="range" id="closeYSlider" min="0" max="100" value="${cropping.closeY}" style="flex:1;accent-color:#ff2a2a;">
+                <span id="closeYVal" style="font-size:11px;color:#888;width:36px;text-align:right;">${cropping.closeY}%</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;">
+                <span style="font-size:11px;color:#888;width:44px;">缩放</span>
+<input type="range" id="closeScaleSlider" min="100" max="800" value="${cropping.closeScale}" style="flex:1;accent-color:#ff2a2a;">
+                <span id="closeScaleVal" style="font-size:11px;color:#888;width:36px;text-align:right;">${cropping.closeScale}%</span>
+            </div>
+
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    // ===== 引用元素 =====
+    var frontPreview = overlay.querySelector('#frontPreview');
+    var frontBlurBg = overlay.querySelector('#frontBlurBg');
+    var frontClear = overlay.querySelector('#frontClear');
+    var closePreview = overlay.querySelector('#closePreview');
+    var closeClear = overlay.querySelector('#closeClear');
+
+    var frontXSlider = overlay.querySelector('#frontXSlider');
+    var frontYSlider = overlay.querySelector('#frontYSlider');
+    var closeXSlider = overlay.querySelector('#closeXSlider');
+    var closeYSlider = overlay.querySelector('#closeYSlider');
+    var closeScaleSlider = overlay.querySelector('#closeScaleSlider');
+
+    // ===== 更新预览 =====
+    function updatePreviews() {
+        var bg = 'url("' + compressed + '")';
+        // 背景（虚化）
+        frontBlurBg.style.backgroundImage = bg;
+        // 前景（清晰，按 frontX/frontY 定位）
+        frontClear.style.backgroundImage = bg;
+        frontClear.style.backgroundPosition = cropping.frontX + '% ' + cropping.frontY + '%';
+
+        // 特写
+        closeClear.style.backgroundImage = bg;
+        closeClear.style.backgroundPosition = cropping.closeX + '% ' + cropping.closeY + '%';
+        closeClear.style.backgroundSize = cropping.closeScale + '% auto';
+
+        // 数值显示
+        overlay.querySelector('#frontXVal').textContent = cropping.frontX + '%';
+        overlay.querySelector('#frontYVal').textContent = cropping.frontY + '%';
+        overlay.querySelector('#closeXVal').textContent = cropping.closeX + '%';
+        overlay.querySelector('#closeYVal').textContent = cropping.closeY + '%';
+        overlay.querySelector('#closeScaleVal').textContent = cropping.closeScale + '%';
+    }
+
+    updatePreviews();
+
+    // ===== 滑条事件 =====
+    frontXSlider.oninput = function() { cropping.frontX = parseInt(this.value); updatePreviews(); };
+    frontYSlider.oninput = function() { cropping.frontY = parseInt(this.value); updatePreviews(); };
+    closeXSlider.oninput = function() { cropping.closeX = parseInt(this.value); updatePreviews(); };
+    closeYSlider.oninput = function() { cropping.closeY = parseInt(this.value); updatePreviews(); };
+    closeScaleSlider.oninput = function() { cropping.closeScale = parseInt(this.value); updatePreviews(); };
+
+    // ===== 拖动逻辑 =====
+    function bindDrag(el, type) {
+        var dragging = false;
+        var startX = 0, startY = 0;
+        var startValX = 0, startValY = 0;
+
+        function onDown(e) {
+            dragging = true;
+            var t = e.touches ? e.touches[0] : e;
+            startX = t.clientX;
+            startY = t.clientY;
+            startValX = (type === 'front') ? cropping.frontX : cropping.closeX;
+            startValY = (type === 'front') ? cropping.frontY : cropping.closeY;
+            el.style.cursor = 'grabbing';
+            if (e.preventDefault) e.preventDefault();
+        }
+        function onMove(e) {
+            if (!dragging) return;
+            var t = e.touches ? e.touches[0] : e;
+            var rect = el.getBoundingClientRect();
+            var dx = ((t.clientX - startX) / rect.width) * 100;
+            var dy = ((t.clientY - startY) / rect.height) * 100;
+
+            var nx = Math.max(0, Math.min(100, startValX - dx));
+            var ny = Math.max(0, Math.min(100, startValY - dy));
+
+            if (type === 'front') {
+                cropping.frontX = nx;
+                cropping.frontY = ny;
+                frontXSlider.value = nx;
+                frontYSlider.value = ny;
+            } else {
+                cropping.closeX = nx;
+                cropping.closeY = ny;
+                closeXSlider.value = nx;
+                closeYSlider.value = ny;
+            }
+            updatePreviews();
+        }
+        function onUp() {
+            dragging = false;
+            el.style.cursor = 'grab';
+        }
+
+        el.addEventListener('mousedown', onDown);
+        el.addEventListener('mousemove', onMove);
+        el.addEventListener('mouseup', onUp);
+        el.addEventListener('mouseleave', onUp);
+        el.addEventListener('touchstart', onDown, { passive: false });
+        el.addEventListener('touchmove', onMove, { passive: false });
+        el.addEventListener('touchend', onUp);
+    }
+
+    bindDrag(frontPreview, 'front');
+    bindDrag(closePreview, 'close');
+
+    // ===== 按钮 =====
+    overlay.querySelector('#coverCancelBtn').onclick = function() {
+        overlay.remove();
+    };
+
+    overlay.querySelector('#coverSaveBtn').onclick = async function() {
+        try {
+            var meta2 = await getStoryMeta();
+            meta2.coverImage = compressed;
+            meta2.cropping = cropping;
+            await saveStoryMeta(meta2);
+            overlay.remove();
+            if (typeof showToast === 'function') showToast('✅ 立绘已保存');
+            await renderStoryHome();
+        } catch(e) {
+            console.warn(e);
+            if (typeof showToast === 'function') showToast('❌ 保存失败');
+        }
+    };
+}
+
+function storyEditMeta() {
+    // 关闭菜单（如果在菜单里点）
+    document.querySelectorAll('div[style*="position: fixed"][style*="z-index: 9999"]').forEach(function(el) {
+        el.remove();
+    });
+    openEditMeta();
+}
+
+// 打开某个目录 → 剧情列表
+async function storyOpenCategory(catId, catName) {
+    closeStoryDrawer();
+    showPage('storyListPage');
+    await renderStoryList(catId, catName);
+}
+
+// ============ 倾心之约 · 编辑首页 ============
+
+function storyOpenEdit() {
+    closeStoryDrawer();
+    // 弹出一个面板，让用户选进入哪一块
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+    var panel = document.createElement('div');
+    panel.style.cssText = 'background:#0f0f0f;border-top:1px solid rgba(255,42,42,0.35);border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom, 0px));width:100%;max-width:480px;';
+    panel.onclick = function(e) { e.stopPropagation(); };
+
+    panel.innerHTML =
+        '<div style="width:36px;height:4px;background:rgba(255,42,42,0.3);border-radius:2px;margin:0 auto 14px;"></div>' +
+        '<div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;text-align:center;margin-bottom:16px;">/ EDIT</div>' +
+
+        '<div onclick="overlay_remove_and(function(){openEditCategoryManager()})" style="padding:16px;font-size:14px;color:#fff;cursor:pointer;border-radius:10px;background:rgba(255,42,42,0.08);border:1px solid rgba(255,42,42,0.3);margin-bottom:8px;">📁 目录管理</div>' +
+        '<div onclick="overlay_remove_and(function(){openEditStoryPicker()})" style="padding:16px;font-size:14px;color:#fff;cursor:pointer;border-radius:10px;background:rgba(255,42,42,0.08);border:1px solid rgba(255,42,42,0.3);margin-bottom:8px;">📖 剧情管理</div>' +
+        '<div onclick="overlay_remove_and(function(){openEditMeta()})" style="padding:16px;font-size:14px;color:#fff;cursor:pointer;border-radius:10px;background:rgba(255,42,42,0.08);border:1px solid rgba(255,42,42,0.3);margin-bottom:8px;">👤 信息卡编辑</div>' +
+        '<div onclick="overlay_remove_and(function(){openCoverEditorTrigger()})" style="padding:16px;font-size:14px;color:#fff;cursor:pointer;border-radius:10px;background:rgba(255,42,42,0.08);border:1px solid rgba(255,42,42,0.3);margin-bottom:8px;">🖼️ 更换立绘</div>' +
+        '<div onclick="overlay_remove_and(function(){exportStoryCollection()})" style="padding:16px;font-size:14px;color:#fff;cursor:pointer;border-radius:10px;background:rgba(255,42,42,0.08);border:1px solid rgba(255,42,42,0.3);margin-bottom:8px;">📤 导出全部</div>' +
+        '<div onclick="overlay_remove_and(function(){importStoryCollection()})" style="padding:16px;font-size:14px;color:#fff;cursor:pointer;border-radius:10px;background:rgba(255,42,42,0.08);border:1px solid rgba(255,42,42,0.3);margin-bottom:8px;">📥 导入</div>' +
+        '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:#888;font-size:13px;cursor:pointer;margin-top:6px;letter-spacing:1px;">取消</button>';
+
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+}
+
+// 辅助：先关掉当前 overlay，再执行 fn
+function overlay_remove_and(fn) {
+    // 关闭所有弹窗
+    document.querySelectorAll('div[style*="position: fixed"][style*="z-index: 99999"]').forEach(function(el) {
+        el.remove();
+    });
+    if (typeof fn === 'function') fn();
+}
+
+// ============ 倾心之约 · 通用弹窗 ============
+
+// 自定义输入弹窗（替代 prompt）
+function storyPrompt(title, defaultValue, placeholder, onConfirm) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:#0f0f0f;border:1px solid rgba(255,42,42,0.4);border-radius:14px;padding:22px;width:100%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.6);';
+
+    dialog.innerHTML =
+        '<div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;text-align:center;margin-bottom:14px;">/ ' + title + '</div>' +
+        '<input id="storyPromptInput" type="text" value="' + (defaultValue || '').replace(/"/g, '&quot;') + '" placeholder="' + (placeholder || '') + '" ' +
+            'style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,42,42,0.4);background:#080808;color:#fff;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;margin-bottom:16px;">' +
+        '<div style="display:flex;gap:10px;">' +
+            '<button id="storyPromptCancel" style="flex:1;padding:11px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:#888;font-size:14px;cursor:pointer;letter-spacing:1px;">取消</button>' +
+            '<button id="storyPromptOk" style="flex:1;padding:11px;border-radius:10px;border:none;background:#c81414;color:#fff;font-size:14px;cursor:pointer;letter-spacing:1px;">确定</button>' +
+        '</div>';
+
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    var input = dialog.querySelector('#storyPromptInput');
+    setTimeout(function() { input.focus(); input.select(); }, 50);
+
+    dialog.querySelector('#storyPromptCancel').onclick = function() { overlay.remove(); };
+    dialog.querySelector('#storyPromptOk').onclick = function() {
+        var v = input.value.trim();
+        overlay.remove();
+        if (onConfirm) onConfirm(v);
+    };
+    input.onkeydown = function(e) {
+        if (e.key === 'Enter') dialog.querySelector('#storyPromptOk').click();
+    };
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+}
+
+// 自定义确认弹窗（替代 confirm）
+function storyConfirm(message, onConfirm) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:#0f0f0f;border:1px solid rgba(255,42,42,0.4);border-radius:14px;padding:24px;width:100%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.6);';
+
+    dialog.innerHTML =
+        '<div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;text-align:center;margin-bottom:14px;">/ CONFIRM</div>' +
+        '<div style="font-size:14px;color:#e5e5e5;line-height:1.7;text-align:center;margin-bottom:22px;white-space:pre-wrap;word-break:break-word;">' + message + '</div>' +
+        '<div style="display:flex;gap:10px;">' +
+            '<button id="storyConfirmCancel" style="flex:1;padding:11px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:#888;font-size:14px;cursor:pointer;letter-spacing:1px;">取消</button>' +
+            '<button id="storyConfirmOk" style="flex:1;padding:11px;border-radius:10px;border:none;background:#c81414;color:#fff;font-size:14px;cursor:pointer;letter-spacing:1px;">确定</button>' +
+        '</div>';
+
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    dialog.querySelector('#storyConfirmCancel').onclick = function() { overlay.remove(); };
+    dialog.querySelector('#storyConfirmOk').onclick = function() {
+        overlay.remove();
+        if (onConfirm) onConfirm();
+    };
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+}
+
+// ============ 目录管理 ============
+
+async function openEditCategoryManager() {
+    var cats = await getStoryCategories();
+
+    var overlay = document.createElement('div');
+    overlay.id = 'editCatOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:#0a0a0a;z-index:99999;display:flex;flex-direction:column;';
+
+    function render() {
+        var listHtml = '';
+        cats.forEach(function(cat) {
+            var isDefault = cat.isDefault;
+            listHtml +=
+                '<div style="display:flex;align-items:center;padding:14px 16px;background:#0d0d0d;border:1px solid rgba(255,42,42,0.2);border-left:3px solid ' + (isDefault ? '#ff2a2a' : '#555') + ';margin-bottom:8px;">' +
+                    '<div style="flex:1;font-size:14px;color:#fff;letter-spacing:1px;">' + cat.name + '</div>' +
+                    (isDefault
+                        ? '<span style="font-size:10px;color:#666;font-family:monospace;margin-right:8px;">默认</span>'
+                        : '<span onclick="deleteStoryCategory(\'' + cat.id + '\',this)" style="font-size:13px;color:#ff2a2a;cursor:pointer;padding:4px 8px;margin-right:4px;">🗑</span>') +
+                    '<span onclick="renameStoryCategory(\'' + cat.id + '\',\'' + cat.name.replace(/'/g, "\\'") + '\',this)" style="font-size:13px;color:#ff2a2a;cursor:pointer;padding:4px 8px;">✎</span>' +
+                '</div>';
+        });
+
+        overlay.innerHTML = `
+            <div style="display:flex;align-items:center;padding:14px 16px;background:#0a0a0a;border-bottom:1px solid rgba(255,42,42,0.3);">
+                <button onclick="this.closest('div[style*=fixed]').remove()" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,42,42,0.4);color:#fff;font-size:16px;cursor:pointer;">←</button>
+                <div style="flex:1;text-align:center;font-size:15px;color:#fff;letter-spacing:3px;font-weight:600;">目录管理</div>
+                <div style="width:36px;"></div>
+            </div>
+            <div style="flex:1;overflow-y:auto;padding:20px 16px;max-width:480px;width:100%;margin:0 auto;">
+                <div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;margin-bottom:14px;">/ CATEGORIES</div>
+                <div id="catListBox">${listHtml}</div>
+                <button onclick="createStoryCategory()" style="width:100%;margin-top:14px;padding:14px;border-radius:10px;border:1px dashed rgba(255,42,42,0.5);background:rgba(255,42,42,0.05);color:#ff2a2a;font-size:14px;cursor:pointer;letter-spacing:2px;">＋ 新建目录</button>
+                <div style="font-size:11px;color:#555;text-align:center;margin-top:16px;line-height:1.7;">默认目录不能删除，只能改名</div>
+            </div>
+        `;
+    }
+
+    render();
+    document.body.appendChild(overlay);
+}
+
+// 改名
+async function renameStoryCategory(id, oldName, el) {
+    storyPrompt('修改目录名称', oldName, '新名称', async function(newName) {
+        if (!newName) return;
+
+        var cats = await dbGetAll('story_categories');
+        var target = cats.find(function(c) { return c.id === id; });
+        if (!target) return;
+        target.name = newName;
+        await dbPut('story_categories', target);
+        if (typeof showToast === 'function') showToast('✅ 已修改');
+
+        // 刷新目录面板
+        await openEditCategoryManager();
+        document.querySelectorAll('div[id="editCatOverlay"]').forEach(function(o, i) {
+            if (i > 0) o.remove();
+        });
+    });
+}
+
+// 新建
+async function createStoryCategory() {
+    storyPrompt('新目录名称', '', '输入目录名', async function(name) {
+        if (!name) return;
+
+        var cats = await getStoryCategories();
+        if (cats.some(function(c) { return c.name === name; })) {
+            if (typeof showToast === 'function') showToast('⚠️ 已存在同名目录');
+            return;
+        }
+
+        var maxOrder = 0;
+        cats.forEach(function(c) { if (c.order > maxOrder) maxOrder = c.order; });
+
+        await dbPut('story_categories', {
+            id: 'cat_' + Date.now(),
+            name: name,
+            order: maxOrder + 1,
+            isDefault: false
+        });
+        if (typeof showToast === 'function') showToast('✅ 已创建');
+
+        await openEditCategoryManager();
+        document.querySelectorAll('div[id="editCatOverlay"]').forEach(function(o, i) {
+            if (i > 0) o.remove();
+        });
+    });
+}
+
+// 删除
+async function deleteStoryCategory(id, el) {
+    var cats = await dbGetAll('story_categories');
+    var target = cats.find(function(c) { return c.id === id; });
+    if (!target) return;
+    if (target.isDefault) {
+        if (typeof showToast === 'function') showToast('⚠️ 默认目录不能删除');
+        return;
+    }
+
+    var stories = await getStoriesByCategory(id);
+    var msg = stories.length > 0
+        ? '「' + target.name + '」下有 ' + stories.length + ' 篇剧情\n删除目录会同时删除所有剧情\n确定吗？'
+        : '确定删除「' + target.name + '」吗？';
+
+    storyConfirm(msg, async function() {
+        for (var i = 0; i < stories.length; i++) {
+            await dbDelete('stories', toIdbKey(stories[i].id));
+        }
+        await dbDelete('story_categories', id);
+        if (typeof showToast === 'function') showToast('🗑 已删除');
+
+        await openEditCategoryManager();
+        document.querySelectorAll('div[id="editCatOverlay"]').forEach(function(o, i) {
+            if (i > 0) o.remove();
+        });
+    });
+}
+
+
+// ============ 剧情管理 ============
+
+async function openEditStoryPicker() {
+    var cats = await getStoryCategories();
+
+    var overlay = document.createElement('div');
+    overlay.id = 'editStoryPickerOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:#0a0a0a;z-index:99999;display:flex;flex-direction:column;';
+
+    var listHtml = '';
+    for (var i = 0; i < cats.length; i++) {
+        var stories = await getStoriesByCategory(cats[i].id);
+        listHtml +=
+            '<div onclick="openEditStoryList(\'' + cats[i].id + '\',\'' + cats[i].name.replace(/'/g, "\\'") + '\')" style="display:flex;align-items:center;padding:16px;background:#0d0d0d;border:1px solid rgba(255,42,42,0.2);border-left:3px solid #ff2a2a;margin-bottom:8px;cursor:pointer;">' +
+                '<div style="flex:1;font-size:14px;color:#fff;letter-spacing:1px;">' + cats[i].name + '</div>' +
+                '<div style="font-size:11px;color:#666;font-family:monospace;margin-right:8px;">' + stories.length + ' 篇</div>' +
+                '<div style="font-size:14px;color:#ff2a2a;">▸</div>' +
+            '</div>';
+    }
+
+    overlay.innerHTML = `
+        <div style="display:flex;align-items:center;padding:14px 16px;background:#0a0a0a;border-bottom:1px solid rgba(255,42,42,0.3);">
+            <button onclick="this.closest('div[style*=fixed]').remove()" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,42,42,0.4);color:#fff;font-size:16px;cursor:pointer;">←</button>
+            <div style="flex:1;text-align:center;font-size:15px;color:#fff;letter-spacing:3px;font-weight:600;">选择目录</div>
+            <div style="width:36px;"></div>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:20px 16px;max-width:480px;width:100%;margin:0 auto;">
+            <div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;margin-bottom:14px;">/ PICK CATEGORY</div>
+            ${listHtml}
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+}
+
+// 某目录下的剧情列表（可编辑）
+async function openEditStoryList(catId, catName) {
+    var overlay = document.createElement('div');
+    overlay.id = 'editStoryListOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:#0a0a0a;z-index:99999;display:flex;flex-direction:column;';
+
+    var stories = await getStoriesByCategory(catId);
+
+    var listHtml = '';
+    if (stories.length === 0) {
+        listHtml = '<div style="text-align:center;padding:60px 20px;color:#555;">还没有剧情</div>';
+    } else {
+        stories.forEach(function(s) {
+            listHtml +=
+                '<div style="display:flex;align-items:center;padding:14px 16px;background:#0d0d0d;border:1px solid rgba(255,42,42,0.2);border-left:3px solid ' + (s.pinned ? '#ff2a2a' : '#333') + ';margin-bottom:8px;">' +
+                    '<div style="flex:1;min-width:0;">' +
+                        '<div style="font-size:13px;color:#fff;margin-bottom:4px;word-break:break-word;">' + (s.pinned ? '📌 ' : '') + (s.title || '无标题') + '</div>' +
+                        '<div style="font-size:10px;color:#666;font-family:monospace;">' + (s.wordCount || 0) + ' 字</div>' +
+                    '</div>' +
+                    '<span onclick="toggleStoryPin(\'' + s.id + '\',this)" style="font-size:13px;cursor:pointer;padding:4px 8px;color:#ff2a2a;">📌</span>' +
+                    '<span onclick="openStoryEditor(\'' + s.id + '\',\'' + catId + '\')" style="font-size:13px;cursor:pointer;padding:4px 8px;color:#ff2a2a;">✎</span>' +
+                    '<span onclick="deleteStoryItem(\'' + s.id + '\',\'' + catId + '\',\'' + catName.replace(/'/g, "\\'") + '\',this)" style="font-size:13px;cursor:pointer;padding:4px 8px;color:#ff2a2a;">🗑</span>' +
+                '</div>';
+        });
+    }
+
+    overlay.innerHTML = `
+        <div style="display:flex;align-items:center;padding:14px 16px;background:#0a0a0a;border-bottom:1px solid rgba(255,42,42,0.3);">
+            <button onclick="openEditStoryPickerCloseAndBack()" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,42,42,0.4);color:#fff;font-size:16px;cursor:pointer;">←</button>
+            <div style="flex:1;text-align:center;font-size:15px;color:#fff;letter-spacing:3px;font-weight:600;">${catName}</div>
+            <div style="width:36px;"></div>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:20px 16px;max-width:480px;width:100%;margin:0 auto;">
+            <div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;margin-bottom:14px;">/ STORIES</div>
+            ${listHtml}
+            <button onclick="openStoryEditor(null,'${catId}')" style="width:100%;margin-top:14px;padding:14px;border-radius:10px;border:1px dashed rgba(255,42,42,0.5);background:rgba(255,42,42,0.05);color:#ff2a2a;font-size:14px;cursor:pointer;letter-spacing:2px;">＋ 新建剧情</button>
+        </div>
+    `;
+
+    // 关掉旧的
+    document.querySelectorAll('div[id="editStoryListOverlay"]').forEach(function(o, i) {
+        if (i > 0) o.remove();
+    });
+    document.body.appendChild(overlay);
+}
+
+// 返回上一层（关掉当前，重开 picker）
+function openEditStoryPickerCloseAndBack() {
+    document.querySelectorAll('div[id="editStoryListOverlay"]').forEach(function(o) { o.remove(); });
+    document.querySelectorAll('div[id="editStoryPickerOverlay"]').forEach(function(o) { o.remove(); });
+    openEditStoryPicker();
+}
+
+// 置顶切换
+async function toggleStoryPin(id, el) {
+    var s = await getStoryById(id);
+    if (!s) return;
+    s.pinned = !s.pinned;
+    s.updatedAt = Date.now();
+    await dbPut('stories', s);
+    if (typeof showToast === 'function') showToast(s.pinned ? '📌 已置顶' : '已取消置顶');
+    // 刷新当前列表
+    var parent = el.closest('div[style*=fixed]');
+    if (parent) {
+        var catName = parent.querySelector('div[style*="font-weight:600"]').textContent;
+        var catId = s.categoryId;
+        parent.remove();
+        await openEditStoryList(catId, catName);
+    }
+}
+
+// 删除剧情
+async function deleteStoryItem(id, catId, catName, el) {
+    storyConfirm('确定删除这篇剧情吗？', async function() {
+        await dbDelete('stories', toIdbKey(id));
+        if (typeof showToast === 'function') showToast('🗑 已删除');
+
+        var parent = el.closest('div[style*=fixed]');
+        if (parent) parent.remove();
+        await openEditStoryList(catId, catName);
+    });
+}
+
+// ============ 剧情编辑器 ============
+
+async function openStoryEditor(storyId, catId) {
+    var story = null;
+    if (storyId) {
+        story = await getStoryById(storyId);
+    }
+    var isNew = !story;
+
+    var overlay = document.createElement('div');
+    overlay.id = 'storyEditorOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:#0a0a0a;z-index:99999;display:flex;flex-direction:column;';
+
+    var initTitle = story ? (story.title || '') : '';
+    var initContent = story ? (story.content || '') : '';
+    var initPinned = story ? !!story.pinned : false;
+
+    overlay.innerHTML = `
+        <div style="display:flex;align-items:center;padding:14px 16px;background:#0a0a0a;border-bottom:1px solid rgba(255,42,42,0.3);">
+            <button id="editorCancelBtn" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,42,42,0.4);color:#fff;font-size:16px;cursor:pointer;">←</button>
+            <div style="flex:1;text-align:center;font-size:15px;color:#fff;letter-spacing:3px;font-weight:600;">${isNew ? '新建剧情' : '编辑剧情'}</div>
+            <button id="editorSaveBtn" style="padding:8px 18px;border-radius:16px;background:#c81414;border:none;color:#fff;font-size:13px;cursor:pointer;letter-spacing:1px;">保存</button>
+        </div>
+
+        <div style="flex:1;overflow-y:auto;padding:20px 16px 100px;max-width:480px;width:100%;margin:0 auto;">
+            <div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;margin-bottom:8px;">/ TITLE</div>
+            <input id="editorTitleInput" type="text" placeholder="标题..." value="${initTitle.replace(/"/g, '&quot;')}"
+                style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,42,42,0.3);background:#0d0d0d;color:#fff;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:16px;font-family:inherit;">
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;">/ CONTENT</span>
+                <span id="editorWordCount" style="font-size:11px;color:#666;font-family:monospace;">0 字</span>
+            </div>
+            <textarea id="editorContentInput" placeholder="开始写..."
+                style="width:100%;min-height:340px;padding:14px;border-radius:10px;border:1px solid rgba(255,42,42,0.3);background:#0d0d0d;color:#e5e5e5;font-size:14px;line-height:1.8;outline:none;box-sizing:border-box;resize:vertical;font-family:inherit;">${initContent.replace(/</g, '&lt;')}</textarea>
+
+            <div style="margin-top:14px;display:flex;align-items:center;gap:10px;">
+                <div id="editorPinToggle" class="toggle-pin ${initPinned ? 'on' : ''}" style="width:44px;height:24px;border-radius:12px;background:${initPinned ? '#ff2a2a' : '#333'};position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+                    <div style="position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;"></div>
+                </div>
+                <span style="font-size:13px;color:#ccc;">置顶这篇剧情</span>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    var titleInput = overlay.querySelector('#editorTitleInput');
+    var contentInput = overlay.querySelector('#editorContentInput');
+    var wordCountEl = overlay.querySelector('#editorWordCount');
+    var pinToggle = overlay.querySelector('#editorPinToggle');
+    var pinned = initPinned;
+
+    // ===== 保存逻辑（放在这里，被下面的按钮调用） =====
+    async function doSaveStory(title, content, wordCount) {
+        var now = Date.now();
+
+        if (isNew) {
+            await dbPut('stories', {
+                id: 'story_' + now + '_' + Math.random().toString(36).slice(2, 6),
+                categoryId: catId,
+                title: title || '无标题',
+                content: content,
+                wordCount: wordCount,
+                pinned: pinned,
+                createdAt: now,
+                updatedAt: now
+            });
+        } else {
+            story.title = title || '无标题';
+            story.content = content;
+            story.wordCount = wordCount;
+            story.pinned = pinned;
+            story.updatedAt = now;
+            await dbPut('stories', story);
+        }
+
+        if (typeof showToast === 'function') showToast('✅ 已保存');
+        overlay.remove();
+
+        document.querySelectorAll('div[id="editStoryListOverlay"]').forEach(function(o) { o.remove(); });
+        var cats = await getStoryCategories();
+        var cat = cats.find(function(c) { return c.id === catId; });
+        if (cat) {
+            await openEditStoryList(catId, cat.name);
+        }
+    }
+
+    // 字数实时统计
+    function updateWordCount() {
+        var n = countStoryWords(contentInput.value);
+        wordCountEl.textContent = n + ' 字';
+        if (n > 10000) {
+            wordCountEl.style.color = '#ff2a2a';
+        } else {
+            wordCountEl.style.color = '#666';
+        }
+    }
+    contentInput.addEventListener('input', updateWordCount);
+    updateWordCount();
+
+    // 置顶开关
+    pinToggle.onclick = function() {
+        pinned = !pinned;
+        pinToggle.style.background = pinned ? '#ff2a2a' : '#333';
+        pinToggle.querySelector('div').style.left = pinned ? '22px' : '2px';
+    };
+
+    // 取消
+    overlay.querySelector('#editorCancelBtn').onclick = function() {
+        if (titleInput.value.trim() || contentInput.value.trim()) {
+            storyConfirm('放弃编辑？未保存的内容会丢失。', function() {
+                overlay.remove();
+            });
+        } else {
+            overlay.remove();
+        }
+    };
+
+    // 保存
+    overlay.querySelector('#editorSaveBtn').onclick = async function() {
+        var title = titleInput.value.trim();
+        var content = contentInput.value;
+        var wordCount = countStoryWords(content);
+
+        if (!title && !content.trim()) {
+            if (typeof showToast === 'function') showToast('⚠️ 至少填标题或内容');
+            return;
+        }
+
+        if (wordCount > 10000) {
+            storyConfirm('正文超过 1 万字（' + wordCount + ' 字）\n可能影响性能，确定保存吗？', async function() {
+                await doSaveStory(title, content, wordCount);
+            });
+            return;
+        }
+
+        await doSaveStory(title, content, wordCount);
+    };
+}
+
+
+
+
+// ============ 信息卡编辑 ============
+
+async function openEditMeta() {
+    var meta = await getStoryMeta();
+
+    var overlay = document.createElement('div');
+    overlay.id = 'editMetaOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:#0a0a0a;z-index:99999;display:flex;flex-direction:column;';
+
+    // 字段编辑区
+    function buildFieldsHtml() {
+        return (meta.fields || []).map(function(f, i) {
+            return '<div style="margin-bottom:14px;">' +
+                '<div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;margin-bottom:6px;">/ ' + f.key.toUpperCase() + '</div>' +
+                '<div style="font-size:11px;color:#666;margin-bottom:6px;">字段名：' + f.key + '</div>' +
+                (f.key === '经历'
+                    ? '<textarea data-field-idx="' + i + '" placeholder="' + f.key + '..." style="width:100%;min-height:120px;padding:12px;border-radius:10px;border:1px solid rgba(255,42,42,0.3);background:#0d0d0d;color:#fff;font-size:14px;outline:none;box-sizing:border-box;resize:vertical;font-family:inherit;">' + (f.value || '').replace(/</g, '&lt;') + '</textarea>'
+                    : '<input type="text" data-field-idx="' + i + '" value="' + (f.value || '').replace(/"/g, '&quot;') + '" placeholder="' + f.key + '..." style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,42,42,0.3);background:#0d0d0d;color:#fff;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;">') +
+            '</div>';
+        }).join('');
+    }
+
+    function buildExtraFieldsHtml() {
+        return '<div style="margin-bottom:14px;">' +
+            '<div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;margin-bottom:6px;">/ 引语</div>' +
+            '<input id="metaQuoteInput" type="text" value="' + (meta.quote || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,42,42,0.3);background:#0d0d0d;color:#fff;font-size:14px;outline:none;box-sizing:border-box;">' +
+            '</div>' +
+            '<div style="margin-bottom:14px;">' +
+            '<div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;margin-bottom:6px;">/ 英文装饰句</div>' +
+            '<input id="metaQuoteEnInput" type="text" value="' + (meta.quoteEn || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,42,42,0.3);background:#0d0d0d;color:#fff;font-size:14px;outline:none;box-sizing:border-box;">' +
+            '</div>' +
+            '<div style="margin-bottom:14px;">' +
+            '<div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;margin-bottom:6px;">/ 底部左文</div>' +
+            '<input id="metaDecorLeftInput" type="text" value="' + (meta.decorLeft || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,42,42,0.3);background:#0d0d0d;color:#fff;font-size:14px;outline:none;box-sizing:border-box;">' +
+            '</div>' +
+            '<div style="margin-bottom:14px;">' +
+            '<div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;margin-bottom:6px;">/ 底部右文上</div>' +
+            '<input id="metaDecorRightInput" type="text" value="' + (meta.decorRight || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,42,42,0.3);background:#0d0d0d;color:#fff;font-size:14px;outline:none;box-sizing:border-box;">' +
+            '</div>' +
+            '<div style="margin-bottom:14px;">' +
+            '<div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;margin-bottom:6px;">/ 底部右文下</div>' +
+            '<input id="metaDecorBottomInput" type="text" value="' + (meta.decorBottom || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,42,42,0.3);background:#0d0d0d;color:#fff;font-size:14px;outline:none;box-sizing:border-box;">' +
+            '</div>';
+    }
+
+    overlay.innerHTML = `
+        <div style="display:flex;align-items:center;padding:14px 16px;background:#0a0a0a;border-bottom:1px solid rgba(255,42,42,0.3);">
+            <button id="metaCancelBtn" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,42,42,0.4);color:#fff;font-size:16px;cursor:pointer;">←</button>
+            <div style="flex:1;text-align:center;font-size:15px;color:#fff;letter-spacing:3px;font-weight:600;">信息卡编辑</div>
+            <button id="metaSaveBtn" style="padding:8px 18px;border-radius:16px;background:#c81414;border:none;color:#fff;font-size:13px;cursor:pointer;letter-spacing:1px;">保存</button>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:20px 16px 100px;max-width:480px;width:100%;margin:0 auto;">
+            <div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;margin-bottom:14px;">/ BASIC FIELDS</div>
+            ${buildFieldsHtml()}
+            <div style="margin:24px 0;border-top:1px dashed rgba(255,42,42,0.3);"></div>
+            <div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;margin-bottom:14px;">/ DECORATION</div>
+            ${buildExtraFieldsHtml()}
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+
+
+    overlay.querySelector('#metaCancelBtn').onclick = function() { overlay.remove(); };
+
+    overlay.querySelector('#metaSaveBtn').onclick = async function() {
+        // 收集字段
+        var inputs = overlay.querySelectorAll('[data-field-idx]');
+        inputs.forEach(function(inp) {
+            var idx = parseInt(inp.dataset.fieldIdx);
+            if (meta.fields[idx]) {
+                meta.fields[idx].value = inp.value;
+            }
+        });
+
+        // 装饰
+        meta.quote = overlay.querySelector('#metaQuoteInput').value;
+        meta.quoteEn = overlay.querySelector('#metaQuoteEnInput').value;
+        meta.decorLeft = overlay.querySelector('#metaDecorLeftInput').value;
+        meta.decorRight = overlay.querySelector('#metaDecorRightInput').value;
+        meta.decorBottom = overlay.querySelector('#metaDecorBottomInput').value;
+
+        await saveStoryMeta(meta);
+        if (typeof showToast === 'function') showToast('✅ 已保存');
+        overlay.remove();
+        // 刷新主界面
+        if (document.getElementById('storyHomeInner')) {
+            await renderStoryHome();
+        }
+    };
+}
+
+// ============ 倾心之约 · 导入导出 ============
+
+// 导出全部
+async function exportStoryCollection() {
+    try {
+        var meta = await getStoryMeta();
+        var cats = await getStoryCategories();
+        var stories = await dbGetAll('stories');
+
+        if (!stories || stories.length === 0) {
+            // 允许导出空（保留信息卡和目录）
+            if (!confirm('当前没有剧情，仍要导出吗？')) return;
+        }
+
+        var data = {
+            type: 'story_collection',
+            version: '1.0',
+            exportTime: new Date().toISOString(),
+            meta: meta,
+            categories: cats,
+            stories: Array.isArray(stories) ? stories : []
+        };
+
+        var json = JSON.stringify(data, null, 2);
+        var sizeKB = (new Blob([json]).size / 1024).toFixed(1);
+
+        var filename = '倾心之约_' + new Date().toLocaleDateString().replace(/\//g, '-') + '.json';
+
+        if (typeof downloadBlob === 'function') {
+            await downloadBlob(json, filename);
+            if (typeof showToast === 'function') showToast('✅ 已导出（' + sizeKB + ' KB，' + stories.length + ' 篇）');
+        }
+    } catch(e) {
+        console.warn(e);
+        if (typeof showToast === 'function') showToast('❌ 导出失败');
+    }
+}
+
+// 导出单篇（剧情分享/备份）
+async function exportSingleStory(storyId) {
+    var story = await getStoryById(storyId);
+    if (!story) {
+        if (typeof showToast === 'function') showToast('⚠️ 剧情不存在');
+        return;
+    }
+    var text = '# ' + (story.title || '无标题') + '\n\n' + (story.content || '') + '\n\n— 共 ' + (story.wordCount || 0) + ' 字 —';
+    var filename = (story.title || '未命名').replace(/[/\\?%*:|"<>]/g, '_') + '.txt';
+    if (typeof downloadBlob === 'function') {
+        await downloadBlob(text, filename);
+        if (typeof showToast === 'function') showToast('✅ 已导出');
+    }
+}
+
+// 打开导入菜单
+function importStoryCollection() {
+    var overlay = document.createElement('div');
+    overlay.id = 'storyImportMenuOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+    var panel = document.createElement('div');
+    panel.style.cssText = 'background:#0f0f0f;border-top:1px solid rgba(255,42,42,0.35);border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom, 0px));width:100%;max-width:480px;';
+    panel.onclick = function(e) { e.stopPropagation(); };
+
+    panel.innerHTML =
+        '<div style="width:36px;height:4px;background:rgba(255,42,42,0.3);border-radius:2px;margin:0 auto 14px;"></div>' +
+        '<div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;text-align:center;margin-bottom:16px;">/ IMPORT</div>' +
+
+        '<div onclick="document.getElementById(\'storyImportFile\').click();this.closest(\'div[style*=fixed]\').remove();" ' +
+            'style="padding:16px;font-size:14px;color:#fff;cursor:pointer;border-radius:10px;background:rgba(255,42,42,0.08);border:1px solid rgba(255,42,42,0.3);margin-bottom:8px;letter-spacing:1px;">📁 从文件导入（.json）</div>' +
+
+        '<button onclick="this.closest(\'div[style*=fixed]\').remove()" ' +
+            'style="width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:#888;font-size:13px;cursor:pointer;margin-top:6px;letter-spacing:1px;">取消</button>';
+
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+}
+
+// 处理文件导入
+async function handleStoryImport(event) {
+    var f = event.target.files[0];
+    event.target.value = '';
+    if (!f) return;
+
+    var text = await f.text();
+    var data;
+    try {
+        data = JSON.parse(text);
+    } catch(e) {
+        if (typeof showToast === 'function') showToast('❌ 文件不是有效的 JSON');
+        return;
+    }
+
+    if (data.type !== 'story_collection' || !data.stories) {
+        if (typeof showToast === 'function') showToast('❌ 文件格式不对');
+        return;
+    }
+
+    // 弹选择：合并 / 覆盖
+    showImportModeDialog(data);
+}
+
+// 导入模式选择
+function showImportModeDialog(data) {
+    var storyCount = (data.stories || []).length;
+    var catCount = (data.categories || []).length;
+    var hasMeta = !!data.meta;
+
+    // 存到全局，供后面调用
+    window._pendingStoryImport = data;
+
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:#0f0f0f;border:1px solid rgba(255,42,42,0.4);border-radius:14px;padding:22px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.6);';
+
+    dialog.innerHTML =
+        '<div style="font-size:11px;color:#ff2a2a;font-family:monospace;letter-spacing:3px;text-align:center;margin-bottom:14px;">/ IMPORT OPTIONS</div>' +
+        '<div style="font-size:13px;color:#ccc;line-height:1.7;margin-bottom:18px;padding:12px;background:#080808;border-radius:10px;">' +
+            '文件里包含：<br>' +
+            '· ' + catCount + ' 个目录<br>' +
+            '· ' + storyCount + ' 篇剧情<br>' +
+            (hasMeta ? '· 1 份信息卡<br>' : '') +
+        '</div>' +
+
+        '<div style="font-size:12px;color:#888;margin-bottom:8px;">导入方式</div>' +
+        '<div data-mode="merge" class="story-import-mode-btn" ' +
+            'style="padding:14px;border-radius:10px;background:rgba(255,42,42,0.08);border:1px solid rgba(255,42,42,0.3);margin-bottom:8px;cursor:pointer;">' +
+            '<div style="font-size:14px;color:#fff;font-weight:500;margin-bottom:4px;">✓ 合并</div>' +
+            '<div style="font-size:11px;color:#888;line-height:1.5;">保留现有数据，跳过重复的剧情，新增的追加进去</div>' +
+        '</div>' +
+        '<div data-mode="overwrite" class="story-import-mode-btn" ' +
+            'style="padding:14px;border-radius:10px;background:rgba(255,42,42,0.08);border:1px solid rgba(255,42,42,0.3);margin-bottom:8px;cursor:pointer;">' +
+            '<div style="font-size:14px;color:#ff2a2a;font-weight:500;margin-bottom:4px;">⚠ 覆盖</div>' +
+            '<div style="font-size:11px;color:#888;line-height:1.5;">清空现有全部数据，用文件里的内容替换</div>' +
+        '</div>' +
+        '<button class="story-import-cancel" ' +
+            'style="width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:#888;font-size:13px;cursor:pointer;margin-top:6px;">取消</button>';
+
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    // 绑定事件
+    dialog.querySelectorAll('.story-import-mode-btn').forEach(function(btn) {
+        btn.onclick = function() {
+            var mode = btn.dataset.mode;
+            overlay.remove();
+            doStoryImportWithMode(mode);
+        };
+    });
+
+    dialog.querySelector('.story-import-cancel').onclick = function() {
+        overlay.remove();
+    };
+
+    overlay.onclick = function(e) {
+        if (e.target === overlay) overlay.remove();
+    };
+}
+
+// 执行导入（mode: 'merge' | 'overwrite'）
+async function doStoryImportWithMode(mode) {
+    var data = window._pendingStoryImport;
+    if (!data) {
+        if (typeof showToast === 'function') showToast('❌ 导入数据丢失');
+        return;
+    }
+
+    if (mode === 'overwrite') {
+        storyConfirm(
+            '确定覆盖？\n当前所有剧情、目录、信息卡都会被清空\n替换为文件里的内容',
+            async function() {
+                await runStoryImport(data, 'overwrite');
+                window._pendingStoryImport = null;
+            }
+        );
+    } else {
+        await runStoryImport(data, 'merge');
+        window._pendingStoryImport = null;
+    }
+}
+
+// 真正执行导入
+async function runStoryImport(data, mode) {
+    try {
+        if (mode === 'overwrite') {
+            // 清空
+            await idbClear('stories');
+            await idbClear('story_categories');
+            // 信息卡
+            if (data.meta) {
+                await kvSet('story_meta', 'story_meta', data.meta);
+            }
+            // 写入目录
+            for (var i = 0; i < (data.categories || []).length; i++) {
+                await dbPut('story_categories', data.categories[i]);
+            }
+            // 写入剧情
+            for (var j = 0; j < (data.stories || []).length; j++) {
+                await dbPut('stories', data.stories[j]);
+            }
+        } else {
+            // 合并模式
+            var existingCats = await getStoryCategories();
+            var existingCatIds = new Set(existingCats.map(function(c) { return c.id; }));
+            var existingNames = new Set(existingCats.map(function(c) { return c.name; }));
+            var existingStories = await dbGetAll('stories');
+            var existingStoryIds = new Set(existingStories.map(function(s) { return String(s.id); }));
+            var existingStoryTitles = new Set(
+                existingStories.map(function(s) { return (s.categoryId || '') + '::' + (s.title || ''); })
+            );
+
+            // 合并目录
+            for (var k = 0; k < (data.categories || []).length; k++) {
+                var cat = data.categories[k];
+                if (existingCatIds.has(cat.id)) continue;
+                if (existingNames.has(cat.name)) continue;
+                await dbPut('story_categories', cat);
+                existingCatIds.add(cat.id);
+                existingNames.add(cat.name);
+            }
+
+            // 合并剧情：按 id 和 "目录+标题" 双重去重
+            for (var m = 0; m < (data.stories || []).length; m++) {
+                var story = data.stories[m];
+                if (existingStoryIds.has(String(story.id))) continue;
+                var key = (story.categoryId || '') + '::' + (story.title || '');
+                if (existingStoryTitles.has(key)) continue;
+                await dbPut('stories', story);
+                existingStoryIds.add(String(story.id));
+                existingStoryTitles.add(key);
+            }
+
+            // 信息卡不覆盖（合并模式下，保留本地的）
+        }
+
+        if (typeof showToast === 'function') {
+            showToast('✅ 导入完成，刷新中...');
+        }
+
+        // 刷新
+        setTimeout(function() {
+            location.reload();
+        }, 800);
+
+    } catch(e) {
+        console.warn(e);
+        if (typeof showToast === 'function') showToast('❌ 导入失败：' + e.message);
+    }
+}
+
+console.log('✅ 倾心之约主界面已加载');
+
+
+
 // ===== 统一读写 collectedMessages =====
 async function getCollected() {
     try {
@@ -6749,7 +9369,7 @@ const TAROT_ALLOW_DENY = {
 
 // ============ IndexedDB 存储层 ============
 const DB_NAME = 'TimeTreeDB';
-const DB_VERSION = 22;
+const DB_VERSION = 23;
 
 function openDB() {
     return new Promise(function(resolve, reject) {
@@ -6777,10 +9397,11 @@ function openDB() {
                 'musicLibrary', 'musicFavs', 'musicFiles',
                 'pendingReplies', 'echoMessages', 'collectedMessages',
                 'mailState', 'tideDays', 'cardOverridesCache',
-                'extraMoodCards', 'extraEmotionCards', 'dailyCounts'
+                'extraMoodCards', 'extraEmotionCards', 'dailyCounts',
+                'story_meta', 'story_categories', 'stories', 'story_settings'
             ];
-            var KEY_STORES = ['settings', 'bgSettings', 'tarotSettings', 'mailState', 'tideDays', 'cardOverridesCache', 'extraMoodCards', 'extraEmotionCards', 'dailyCounts'];
-            var MANUAL_ID_STORES = ['mailLetters', 'pendingReplies', 'echoMessages', 'collectedMessages'];
+            var KEY_STORES = ['settings', 'bgSettings', 'tarotSettings', 'mailState', 'tideDays', 'cardOverridesCache', 'extraMoodCards', 'extraEmotionCards', 'dailyCounts', 'story_meta', 'story_settings'];
+            var MANUAL_ID_STORES = ['mailLetters', 'pendingReplies', 'echoMessages', 'collectedMessages', 'story_categories', 'stories'];
             stores.forEach(function(s) {
                 if (!d.objectStoreNames.contains(s)) {
                     if (KEY_STORES.indexOf(s) !== -1) {
@@ -8241,6 +10862,8 @@ async function downloadBlob(content, filename) {
     document.body.removeChild(a);
     setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
 }
+
+
 
 // ============ 存储注册表 ============
 var STORAGE_REGISTRY = [
@@ -15399,6 +18022,7 @@ closeAllBottomPanels();
 
 function renderHeartStation(){
     var items = [
+        { name: '倾心之约', icon: '📖', desc: '与他的故事，都在这里', fn: 'openStoryHome()' },
         { name: '观牌叙言', icon: '🔮', desc: '翻一张牌，听他说', fn: 'openTarotPage()' },
         { name: '话题扭蛋', icon: '🎱', desc: '不知道聊什么的时候', fn: 'openTopicGacha()' },
         { name: '许愿珍藏', icon: '✨', desc: '把愿望放进去', fn: 'openWishPage()' },
@@ -15859,8 +18483,8 @@ h += '</div></div>';
     h += '<div style="display:flex;flex-direction:column;gap:8px;">';
     h += '<button onclick="exportAll()" style="padding:10px 14px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:13px;cursor:pointer;">💾 全量备份</button>';
     h += '<button onclick="document.getElementById(\'importFileInput\').click()" style="padding:10px 14px;border-radius:12px;background:var(--theme-card);border:1px solid var(--theme-primary);color:var(--theme-primary);font-size:13px;cursor:pointer;">📥 导入数据</button>';
-      
-h += '</div>';
+    h += '<button onclick="openClearDataPanel()" style="padding:10px 14px;border-radius:12px;background:transparent;border:1.5px solid #e05252;color:#e05252;font-size:13px;cursor:pointer;">🗑 清除数据</button>';
+    h += '</div>';
 
 h += '</div></div>';
 
@@ -16307,6 +18931,187 @@ async function loadStorageUsage() {
         box.innerHTML = '<div style="font-size:13px;color:var(--theme-muted);text-align:center;">暂无法统计</div>';
     }
 }
+
+// ============ 清除数据面板 ============
+async function openClearDataPanel() {
+    // 先统计每个表的数量
+    var counts = {};
+    var tables = [
+        { id: 'messages',           label: '聊天记录',   unit: '条' },
+        { id: 'collectedMessages',  label: '收藏',       unit: '条' },
+        { id: 'mailLetters',        label: '树心邮筒信件', unit: '封' },
+        { id: 'echoMessages',       label: '树洞回音留言', unit: '条' },
+        { id: 'callLogs',           label: '通话记录',   unit: '条' },
+        { id: 'tarotHistory',       label: '塔罗语录',   unit: '条' },
+        { id: 'wishes',             label: '许愿',       unit: '条' },
+        { id: 'anniversaries',      label: '纪念日',     unit: '条' },
+        { id: 'emojis',             label: '表情包',     unit: '个' },
+        { id: 'musicLibrary',       label: '音乐库',     unit: '首' },
+        { id: 'wordcards',          label: '字卡库',     unit: '条' }
+    ];
+
+    for (var i = 0; i < tables.length; i++) {
+        try {
+            var items = await dbGetAll(tables[i].id);
+            if (tables[i].id === 'wordcards') {
+                items = items.filter(function(c) {
+                    return c.content && c.content !== '__GROUP_PLACEHOLDER__';
+                });
+            }
+            counts[tables[i].id] = items.length;
+        } catch(e) {
+            counts[tables[i].id] = 0;
+        }
+    }
+
+    // 弹面板
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:var(--theme-card);border-radius:16px;padding:20px;width:100%;max-width:400px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.3);';
+
+    var listHtml = '';
+    tables.forEach(function(t) {
+        var cnt = counts[t.id] || 0;
+        var disabled = cnt === 0 ? 'opacity:0.4;pointer-events:none;' : '';
+        listHtml +=
+            '<label style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--theme-border);cursor:pointer;' + disabled + '">' +
+                '<input type="checkbox" class="clear-data-cb" value="' + t.id + '" style="width:16px;height:16px;accent-color:var(--theme-primary);flex-shrink:0;">' +
+                '<span style="flex:1;font-size:13px;color:var(--theme-text);">' + t.label + '</span>' +
+                '<span style="font-size:11px;color:var(--theme-muted);flex-shrink:0;">' + cnt + ' ' + t.unit + '</span>' +
+            '</label>';
+    });
+
+    dialog.innerHTML =
+        '<div style="font-size:16px;font-weight:600;color:var(--theme-text);margin-bottom:4px;text-align:center;">🗑 清除数据</div>' +
+        '<div style="font-size:11px;color:var(--theme-muted);text-align:center;margin-bottom:12px;">勾选要清除的内容，此操作不可恢复</div>' +
+        '<div style="flex:1;overflow-y:auto;border:1px solid var(--theme-border);border-radius:10px;padding:4px 10px;">' + listHtml + '</div>' +
+        '<div style="display:flex;gap:10px;margin-top:14px;">' +
+            '<button id="clearDataCancel" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--theme-border);background:var(--theme-card);color:var(--theme-muted);font-size:14px;cursor:pointer;">取消</button>' +
+            '<button id="clearDataConfirm" style="flex:1;padding:10px;border-radius:12px;border:none;background:var(--theme-primary);color:#fff;font-size:14px;cursor:pointer;">清除选中</button>' +
+        '</div>';
+
+    overlay.appendChild(dialog);
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+    document.body.appendChild(overlay);
+
+    dialog.querySelector('#clearDataCancel').onclick = function() { overlay.remove(); };
+
+    dialog.querySelector('#clearDataConfirm').onclick = function() {
+        var selected = [];
+        dialog.querySelectorAll('.clear-data-cb:checked').forEach(function(cb) {
+            selected.push(cb.value);
+        });
+        if (selected.length === 0) {
+            if (typeof showToast === 'function') showToast('⚠️ 请至少勾一项');
+            return;
+        }
+
+        // 二次强确认
+        var labels = [];
+        selected.forEach(function(id) {
+            var t = tables.find(function(x) { return x.id === id; });
+            if (t) labels.push(t.label + ' ' + (counts[t.id] || 0) + ' ' + t.unit);
+        });
+
+        overlay.remove();
+        showClearDataFinalConfirm(selected, labels);
+    };
+}
+
+// 二次强确认
+function showClearDataFinalConfirm(selectedIds, labels) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:var(--theme-card);border-radius:16px;padding:22px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.3);';
+
+    var listHtml = labels.map(function(l) {
+        return '<div style="font-size:13px;color:var(--theme-text);padding:3px 0;">• ' + l + '</div>';
+    }).join('');
+
+    dialog.innerHTML =
+        '<div style="font-size:17px;font-weight:600;color:var(--theme-primary);margin-bottom:12px;text-align:center;">⚠️ 确认清除？</div>' +
+        '<div style="font-size:13px;color:var(--theme-muted);margin-bottom:8px;text-align:center;">将永久删除以下数据：</div>' +
+        '<div style="background:var(--theme-bg);border-radius:10px;padding:12px 16px;margin-bottom:14px;max-height:40vh;overflow-y:auto;">' + listHtml + '</div>' +
+        '<div style="font-size:12px;color:#e05252;text-align:center;margin-bottom:16px;font-weight:500;">此操作不可撤销！</div>' +
+        '<div style="display:flex;gap:10px;">' +
+            '<button id="clearFinalCancel" style="flex:1;padding:11px;border-radius:12px;border:1px solid var(--theme-border);background:var(--theme-card);color:var(--theme-muted);font-size:14px;cursor:pointer;">取消</button>' +
+            '<button id="clearFinalConfirm" style="flex:1;padding:11px;border-radius:12px;border:none;background:#e05252;color:#fff;font-size:14px;cursor:pointer;">确认删除</button>' +
+        '</div>';
+
+    overlay.appendChild(dialog);
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+    document.body.appendChild(overlay);
+
+    dialog.querySelector('#clearFinalCancel').onclick = function() { overlay.remove(); };
+
+    dialog.querySelector('#clearFinalConfirm').onclick = async function() {
+        overlay.remove();
+        await doClearSelectedData(selectedIds);
+    };
+}
+
+// 执行清除
+async function doClearSelectedData(ids) {
+    var total = 0;
+
+    for (var i = 0; i < ids.length; i++) {
+        var id = ids[i];
+        try {
+            if (id === 'wordcards') {
+                // 字卡库：保留分组占位符，删除所有实际卡
+                var cards = await dbGetAll('wordcards');
+                var keep = cards.filter(function(c) {
+                    return c.content === '__GROUP_PLACEHOLDER__';
+                });
+                await idbClear('wordcards');
+                for (var j = 0; j < keep.length; j++) {
+                    await dbPut('wordcards', keep[j]);
+                }
+                total += (cards.length - keep.length);
+
+                // 同时清理禁用字卡表
+                await idbClear('disabledCards');
+            } else if (id === 'musicLibrary') {
+                // 音乐库：同时删除音频文件 Blob
+                var tracks = await dbGetAll('musicLibrary');
+                for (var k = 0; k < tracks.length; k++) {
+                    if (tracks[k].source === 'upload' && tracks[k].blobId) {
+                        try { await dbDelete('musicFiles', tracks[k].blobId); } catch(e) {}
+                    }
+                }
+                await idbClear('musicLibrary');
+                await idbClear('musicFavs');
+                total += tracks.length;
+            } else if (id === 'mailLetters') {
+                // 邮筒：同时清空待回复队列和状态
+                await idbClear('mailLetters');
+                await idbClear('pendingReplies');
+                await kvSet('mailState', 'mailState', {status:'idle', replyAt:0, accelerated:false, cooldownUntil:0});
+                var letters = await dbGetAll('mailLetters');
+                total += letters.length;
+            } else {
+                var items = await dbGetAll(id);
+                await idbClear(id);
+                total += items.length;
+            }
+        } catch(e) {
+            console.warn('清除 ' + id + ' 失败:', e);
+        }
+    }
+
+    if (typeof showToast === 'function') {
+        showToast('🗑 已清除 ' + total + ' 条数据');
+    }
+
+    // 刷新用量显示
+    if (typeof loadStorageUsage === 'function') {
+        loadStorageUsage();
+    }
+}
 async function refreshMood(){S.contactMood=await getRandomMood2();await setCal('contactMood',S.contactMood);renderOurUniverse();updateHome();showToast('已更换');}
 async function scheduleStatusUpdate() {
     var delay = Math.floor(Math.random() * 7 + 1) * 3600 * 1000; // 1~8 小时
@@ -16365,8 +19170,8 @@ async function loadAvatarHistory(type){const h=await dbGetAll('avatarHistory');c
 async function selectHistoryAvatar(type,hid){const h=await dbGetAll('avatarHistory');const item=h.find(x=>x.id===parseInt(hid));if(!item)return;if(type==='me'){S.myAvatar=item.data;await dbPut('avatars',{key:'myAvatar',data:item.data});}else{S.contactAvatar=item.data;await dbPut('avatars',{key:'contactAvatar',data:item.data});}updateHome();renderOurUniverse();}
 async function deleteHistoryAvatar(hid,type){await dbDelete('avatarHistory',parseInt(hid));loadAvatarHistory(type);}
 async function saveAvatarToHistory(type,data){const h=await dbGetAll('avatarHistory');if(!h.find(x=>x.type===type&&x.data===data))await dbPut('avatarHistory',{type,data,timestamp:Date.now()});}
-async function handleMyAvatarUpload(event){const f=event.target.files[0];if(!f)return;const d=await fileToDataUrl(f);S.myAvatar=d;await dbPut('avatars',{key:'myAvatar',data:d});await saveAvatarToHistory('me',d);renderOurUniverse();updateHome();event.target.value='';}
-async function handleContactAvatarUpload(event){const f=event.target.files[0];if(!f)return;const d=await fileToDataUrl(f);S.contactAvatar=d;await dbPut('avatars',{key:'contactAvatar',data:d});await saveAvatarToHistory('contact',d);renderOurUniverse();updateHome();event.target.value='';}
+async function handleMyAvatarUpload(event){const f=event.target.files[0];if(!f)return;const d=await fileToDataUrl(f);S.myAvatar=d;await dbPut('avatars',{key:'myAvatar',data:d});renderOurUniverse();updateHome();event.target.value='';}
+async function handleContactAvatarUpload(event){const f=event.target.files[0];if(!f)return;const d=await fileToDataUrl(f);S.contactAvatar=d;await dbPut('avatars',{key:'contactAvatar',data:d});renderOurUniverse();updateHome();event.target.value='';}
 
 // ===== 气泡预设库 =====
 var BUBBLE_PRESET_STYLES = {
@@ -17088,7 +19893,7 @@ window.db = null;
 
 window.openDB = function() {
     return new Promise(function(resolve, reject) {
-        var req = indexedDB.open('TimeTreeDB', 22);   // ← 从 20 改成 22
+        var req = indexedDB.open('TimeTreeDB', 23);  
         req.onupgradeneeded = function(e) {
             console.log('🔄 数据库升级触发，从', e.oldVersion, '到', e.newVersion);
             var d = e.target.result;
@@ -17102,7 +19907,8 @@ window.openDB = function() {
                 }
             });
 
-            var stores = ['messages', 'settings', 'wordcards', 'emojis', 'avatars',
+            var stores = [
+                'messages', 'settings', 'wordcards', 'emojis', 'avatars',
                 'callLogs', 'patOptions', 'statusOptions', 'disabledCards',
                 'disabledGroups', 'avatarHistory', 'bgSettings', 'boardMessages',
                 'wishes', 'anniversaries', 'answerBookHistory', 'choiceHistory',
@@ -17111,9 +19917,10 @@ window.openDB = function() {
                 'musicLibrary', 'musicFavs', 'musicFiles',
                 'pendingReplies', 'echoMessages', 'collectedMessages',
                 'mailState', 'tideDays', 'cardOverridesCache',
-                'extraMoodCards', 'extraEmotionCards', 'dailyCounts'];
-            var KEY_STORES = ['settings', 'bgSettings', 'tarotSettings', 'mailState', 'tideDays', 'cardOverridesCache', 'extraMoodCards', 'extraEmotionCards', 'dailyCounts'];
-            var MANUAL_ID_STORES = ['mailLetters', 'pendingReplies', 'echoMessages', 'collectedMessages'];
+                'extraMoodCards', 'extraEmotionCards', 'dailyCounts'
+            ];
+            var KEY_STORES = ['settings', 'bgSettings', 'tarotSettings', 'mailState', 'tideDays', 'cardOverridesCache', 'extraMoodCards', 'extraEmotionCards', 'dailyCounts', 'story_meta', 'story_settings'];
+            var MANUAL_ID_STORES = ['mailLetters', 'pendingReplies', 'echoMessages', 'collectedMessages', 'story_categories', 'stories'];
             stores.forEach(function(s) {
                 if (!d.objectStoreNames.contains(s)) {
                     if (KEY_STORES.indexOf(s) !== -1) {
@@ -17130,7 +19937,7 @@ window.openDB = function() {
 
         req.onsuccess = function(e) { 
             window.db = e.target.result; 
-            console.log('✅ 数据库已打开，版本 22');
+            console.log('✅ 数据库已打开，版本 23');
             resolve(window.db); 
         };
         req.onerror = function(e) { 
@@ -21566,6 +24373,8 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 
+        // 初始化倾心之约数据
+        await initStoryData();
 
 
 updateHome();
@@ -22021,8 +24830,62 @@ window.doTarotSend = doTarotSend;
 window.openPatPicker = openPatPicker;
 window.doPatQin = doPatQin;
 
+window.openClearDataPanel = openClearDataPanel;
+window.showClearDataFinalConfirm = showClearDataFinalConfirm;
+window.doClearSelectedData = doClearSelectedData;
 
-
+window.openStoryHome = openStoryHome;
+window.renderStoryHome = renderStoryHome;
+window.openStoryDrawer = openStoryDrawer;
+window.closeStoryDrawer = closeStoryDrawer;
+window.openStoryHomeMenu = openStoryHomeMenu;
+window.storyUploadCover = storyUploadCover;
+window.storyOpenCategory = storyOpenCategory;
+window.storyOpenEdit = storyOpenEdit;
+window.openCoverEditor = openCoverEditor;
+window.toggleStoryExp = toggleStoryExp;
+window.openStoryCloseup = openStoryCloseup;
+window.openCoverEditorTrigger = openCoverEditorTrigger;
+window.renderStoryList = renderStoryList;
+window.openStoryReader = openStoryReader;
+window.renderStoryReader = renderStoryReader;
+window.backFromReader = backFromReader;
+window.openStoryReaderSettings = openStoryReaderSettings;
+window.applyReaderBg = applyReaderBg;
+window.applyReaderText = applyReaderText;
+window.applyReaderFont = applyReaderFont;
+window.getStoryCategories = getStoryCategories;
+window.getStoriesByCategory = getStoriesByCategory;
+window.getStoryById = getStoryById;
+window.countStoryWords = countStoryWords;
+window.getStoryReaderSettings = getStoryReaderSettings;
+window.saveStoryReaderSettings = saveStoryReaderSettings;
+window.storyOpenEdit = storyOpenEdit;
+window.overlay_remove_and = overlay_remove_and;
+window.openEditCategoryManager = openEditCategoryManager;
+window.renameStoryCategory = renameStoryCategory;
+window.createStoryCategory = createStoryCategory;
+window.deleteStoryCategory = deleteStoryCategory;
+window.openEditStoryPicker = openEditStoryPicker;
+window.openEditStoryList = openEditStoryList;
+window.openEditStoryPickerCloseAndBack = openEditStoryPickerCloseAndBack;
+window.toggleStoryPin = toggleStoryPin;
+window.deleteStoryItem = deleteStoryItem;
+window.openStoryEditor = openStoryEditor;
+window.openEditMeta = openEditMeta;
+window.storyEditMeta = storyEditMeta;
+window.storyPrompt = storyPrompt;
+window.storyConfirm = storyConfirm;
+window.toggleStoryTrait = toggleStoryTrait;
+window.exportStoryCollection = exportStoryCollection;
+window.exportSingleStory = exportSingleStory;
+window.importStoryCollection = importStoryCollection;
+window.handleStoryImport = handleStoryImport;
+window.showImportModeDialog = showImportModeDialog;
+window.doStoryImportWithMode = doStoryImportWithMode;
+window.runStoryImport = runStoryImport;
+window.getSiblingStories = getSiblingStories;
+window.gotoSiblingStory = gotoSiblingStory;
 
 
 init();
