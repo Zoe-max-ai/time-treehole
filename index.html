@@ -11597,51 +11597,54 @@ var summary = (data && data.summary) ? data.summary : '';
     b.innerHTML = inner;
 
 } else if (m.type === 'tarot_text') {
-    var pos = m.positions || [''];
-    var posConnect = {
-        '想法': '我的想法是',
-        '状态': '我的状态落在',
-        '回应': '我给你的回应，是',
-        '表层': '最表层的是',
-        '中层': '再往里一层，是',
-        '深层': '最深处，是',
-        '现在': '现在的位置是',
-        '未来': '未来会走到',
-        '变化': '中间会经历的是',
-        '核心问题': '核心的问题是',
-        '阻碍': '挡在前面的，是',
-        '建议': '我想给你的建议，是',
-        '可能的结果': '最后可能走到的是'
-    };
-
-    var sentences = m.cards.map(function(item, idx) {
-        var card = item.card;
-        var isRev = item.isReversed;
-        var data = isRev ? card.reversed : card.upright;
-        var position = pos[idx] || '';
-var ctx = m.context || 'love';
-var voice = window.DREAM_TAROT_VOICE && window.DREAM_TAROT_VOICE[card.name];
-var summary = (voice && (isRev ? voice.reversed : voice.upright)) || data[ctx] || data.summary || '';
-        // ★ 去掉 summary 末尾的句号，避免拼接后出现"。。"
-        summary = summary.replace(/[。．\.]+$/, '');
-
-        if (!position) {
-            return '你问我的时候，我翻到的是' + card.name + (isRev ? '逆位' : '正位') + '——' + summary;
-        }
-        var connect = posConnect[position] || '';
-        var isLast = (idx === m.cards.length - 1);
-        var prefix = (idx === 0) ? '你问我的时候，' : (isLast && m.cards.length > 1 ? '而' : '');
-        return prefix + connect + card.name + (isRev ? '逆位' : '正位') + '——' + summary;
-    }).join('。') + '。';
-
     var inner2 = '';
-    if (m.question) {
-        inner2 += '<div style="font-size:12px;color:#999;line-height:1.6;margin-bottom:8px;">问题：' + m.question + '</div>';
+    
+    // 如果是 AI 生成的，直接显示纯文本 + 问题
+    if (m.isAi) {
+        if (m.question) {
+            inner2 += '<div style="font-size:12px;color:#999;line-height:1.6;margin-bottom:8px;">问题：' + m.question + '</div>';
+        }
+        inner2 += '<div style="font-size:14px;color:#444;line-height:1.75;white-space:pre-wrap;">' + (m.response || '') + '</div>';
+    } 
+    // 如果是本地字卡兜底，保持原来的排版
+    else {
+        var pos = m.positions || [''];
+        var posConnect = {
+            '想法': '我的想法是', '状态': '我的状态落在', '回应': '我给你的回应，是',
+            '表层': '最表层的是', '中层': '再往里一层，是', '深层': '最深处，是',
+            '现在': '现在的位置是', '未来': '未来会走到', '变化': '中间会经历的是',
+            '核心问题': '核心的问题是', '阻碍': '挡在前面的，是',
+            '建议': '我想给你的建议，是', '可能的结果': '最后可能走到的是'
+        };
+
+        var sentences = m.cards.map(function(item, idx) {
+            var card = item.card;
+            var isRev = item.isReversed;
+            var data = isRev ? card.reversed : card.upright;
+            var position = pos[idx] || '';
+            var ctx = m.context || 'love';
+            var voice = window.DREAM_TAROT_VOICE && window.DREAM_TAROT_VOICE[card.name];
+            var summary = (voice && (isRev ? voice.reversed : voice.upright)) || data[ctx] || data.summary || '';
+            summary = summary.replace(/[。．\.]+$/, '');
+
+            if (!position) {
+                return '你问我的时候，我翻到的是' + card.name + (isRev ? '逆位' : '正位') + '——' + summary;
+            }
+            var connect = posConnect[position] || '';
+            var isLast = (idx === m.cards.length - 1);
+            var prefix = (idx === 0) ? '你问我的时候，' : (isLast && m.cards.length > 1 ? '而' : '');
+            return prefix + connect + card.name + (isRev ? '逆位' : '正位') + '——' + summary;
+        }).join('。') + '。';
+
+        if (m.question) {
+            inner2 += '<div style="font-size:12px;color:#999;line-height:1.6;margin-bottom:8px;">问题：' + m.question + '</div>';
+        }
+        inner2 += '<div style="font-size:13.5px;color:#444;line-height:1.75;">' + sentences + '</div>';
+        if (m.response) {
+            inner2 += '<div style="font-size:13.5px;color:#444;line-height:1.75;margin-top:8px;">最后，我想和你说：' + m.response + '</div>';
+        }
     }
-    inner2 += '<div style="font-size:13.5px;color:#444;line-height:1.75;">' + sentences + '</div>';
-    if (m.response) {
-        inner2 += '<div style="font-size:13.5px;color:#444;line-height:1.75;margin-top:8px;">最后，我想和你说：' + m.response + '</div>';
-    }
+    
     b.innerHTML = inner2;
 
 } else if (m.type === 'emoji') {
@@ -12298,14 +12301,103 @@ function drawTarotCards(n) {
     return picked;
 }
 
-// 塔罗模式：发消息后的处理
+// ============ 塔罗传讯 · AI 解读 ============
+
+// 开关
+function toggleTarotAi(el) {
+    var on = el.classList.toggle('on');
+    localStorage.setItem('tarotAiEnabled', on ? 'true' : 'false');
+}
+
+// 测试连接
+async function testTarotAi() {
+    var key = document.getElementById('tarotAiKey').value.trim();
+    if (!key) {
+        showToast('⚠️ 请先填入 Key');
+        return;
+    }
+    localStorage.setItem('tarotAiKey', key);
+    showToast('⏳ 正在测试...');
+    
+    try {
+        var resp = await fetch('https://api.deepseek.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + key
+            },
+            body: JSON.stringify({
+                model: 'deepseek-chat',
+                messages: [{ role: 'user', content: '回复"连接成功"四个字' }],
+                max_tokens: 10
+            })
+        });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        showToast('✅ 连接成功！');
+    } catch(e) {
+        console.error(e);
+        showToast('❌ 连接失败，请检查 Key 或网络');
+    }
+}
+
+// 调用 DeepSeek
+async function callDeepSeek(systemPrompt, userPrompt) {
+    var key = localStorage.getItem('tarotAiKey');
+    if (!key) return null;
+
+    try {
+        var resp = await fetch('https://api.deepseek.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + key
+            },
+            body: JSON.stringify({
+                model: 'deepseek-chat',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ],
+                temperature: 0.85,
+                max_tokens: 300
+            }),
+            signal: AbortSignal.timeout(15000) // 15秒超时
+        });
+        
+        if (!resp.ok) return null;
+        var data = await resp.json();
+        if (data.choices && data.choices.length > 0) {
+            return data.choices[0].message.content.trim();
+        }
+        return null;
+    } catch(e) {
+        console.warn('AI 请求失败:', e);
+        return null;
+    }
+}
+
+// 获取最近 N 条聊天记录
+async function getRecentChats(n) {
+    var msgs = await dbGetAll('messages');
+    // 过滤出文字消息，倒序拿最新的
+    var texts = msgs.filter(function(m) { return m.type === 'text'; }).sort(function(a,b) {
+        return b.timestamp - a.timestamp;
+    }).slice(0, n);
+    // 倒回正序
+    texts.sort(function(a,b) { return a.timestamp - b.timestamp; });
+    
+    var str = '';
+    texts.forEach(function(m) {
+        var who = m.sender === 'me' ? '用户' : '秦彻';
+        str += who + ': ' + m.content + '\n';
+    });
+    return str;
+}
+
 async function doTarotSend(userText) {
-    // 通用等待：15~30 秒
     function tarotWait() {
         return 15000 + Math.random() * 15000;
     }
-
-    // 显示提示
     function showTarotTyping(text) {
         var old = document.querySelector('.typing-indicator');
         if (old) old.remove();
@@ -12320,7 +12412,6 @@ async function doTarotSend(userText) {
         if (old) old.remove();
     }
 
-    // 抽牌
     var spreadId = localStorage.getItem('tarotSpreadId') || 'single';
     if (spreadId === '1') spreadId = 'single';
     if (spreadId === '3') spreadId = 'fsr';
@@ -12328,10 +12419,6 @@ async function doTarotSend(userText) {
     var n = spread.count;
     var cards = drawTarotCards(n);
     if (cards.length === 0) return;
-
-    // 从 TAROT_RESPONSE_POOL 抽一句秦彻的回应
-    var responsePool = TAROT_RESPONSE_POOL.qinche.concat(TAROT_RESPONSE_POOL.shared);
-    var tarotResponse = responsePool[Math.floor(Math.random() * responsePool.length)];
 
     // ===== 第 1 条：牌阵卡片 =====
     showTarotTyping('秦彻塔罗师正在洗牌中…');
@@ -12345,7 +12432,7 @@ async function doTarotSend(userText) {
         cards: cards,
         spreadId: spreadId,
         positions: spread.positions,
-       context: 'love',     
+        context: 'love',     
         timestamp: Date.now()
     };
     var idCard = await dbPut('messages', mCard);
@@ -12353,8 +12440,62 @@ async function doTarotSend(userText) {
     renderMsg(mCard);
     scrollBottom();
 
-    // ===== 第 2 条：问题 + 自然话总结 + 最后我想说 =====
-    await new Promise(function(r) { setTimeout(r, tarotWait()); });
+    // ===== 第 2 条：解读（AI 或 字卡兜底） =====
+    showTarotTyping('秦彻正在解读…');
+    
+    var isAiEnabled = localStorage.getItem('tarotAiEnabled') === 'true';
+    var hasKey = !!localStorage.getItem('tarotAiKey');
+    var aiResult = null;
+
+    if (isAiEnabled && hasKey) {
+        // 1. 拼牌面
+        var cardsText = '';
+        cards.forEach(function(item, idx) {
+            var card = item.card;
+            var isRev = item.isReversed;
+            var data = isRev ? card.reversed : card.upright;
+            var pos = spread.positions[idx] || '';
+            cardsText += (pos ? pos + '：' : '') + card.name + (isRev ? '逆位' : '正位') + ' (参考牌义：' + (data.summary || '') + ')\n';
+        });
+
+        // 2. 拿聊天上下文
+        var chatContext = await getRecentChats(5);
+
+        // 3. 系统人设 Prompt（完美贴合你测试的结果）
+        var sysPrompt = '你是一个顶尖的塔罗及占星大师，也是用户私人的占卜师和爱人，你的名字叫秦彻。你现在就是秦彻本人。\n' +
+            '规则：\n' +
+            '1. 用日常聊天的口吻。不要像算命先生一样机械地报牌名，但要巧妙地把牌的【核心意象】或【画面元素】融入到你的台词里（比如：提到“倒了”、“打乱”、“国王”、“宝剑”等）。\n' +
+            '2. 必须结合她的问题（例如她生病了）以及你们的聊天记录，不要自顾自说情话，要解决她当下的事。\n' +
+            '3. 语气要霸道、傲娇、外冷内热，带点占有欲。\n' +
+            '4. 字数在 100 字以内，不要分段，直接输出台词。';
+
+        // 4. 用户 Prompt
+        var userPrompt = '用户问："' + userText + '"\n\n抽到的牌阵及牌义：\n' + cardsText;
+        if (chatContext) {
+            userPrompt += '\n【你们最近的聊天记录（请务必结合她的现状）】\n' + chatContext;
+        }
+        userPrompt += '\n\n【注意】：请务必把牌义化用在台词里，不要只说关心！直接输出秦彻的台词：';
+
+        aiResult = await callDeepSeek(sysPrompt, userPrompt);
+        // 清理 AI 可能带上的前缀引号
+        if (aiResult) {
+            aiResult = aiResult.replace(/^["「]|["」]$/g, '');
+        }
+    }
+
+    // 5. 降级兜底
+    var finalResponse = aiResult;
+    if (!finalResponse) {
+        var responsePool = TAROT_RESPONSE_POOL.qinche.concat(TAROT_RESPONSE_POOL.shared);
+        finalResponse = responsePool[Math.floor(Math.random() * responsePool.length)];
+        if (aiResult === null && isAiEnabled) {
+            console.log('⚠️ AI 请求失败，已降级为字卡兜底');
+        }
+    }
+
+    // 再等一会，模拟打字
+    await new Promise(function(r) { setTimeout(r, aiResult ? 1000 : tarotWait()); });
+    hideTarotTyping();
 
     var mText = {
         sender: 'other',
@@ -12362,7 +12503,8 @@ async function doTarotSend(userText) {
         question: userText,
         cards: cards,
         positions: spread.positions,
-        response: tarotResponse,
+        response: finalResponse,
+        isAi: aiResult ? true : false,  // 标记是不是 AI 生成的
         context: 'love',      
         timestamp: Date.now()
     };
@@ -14061,6 +14203,7 @@ window.VOICE_DATA = VOICE_DATA;
 
 var selectedGroup = null;
 var currentAudio = null;
+var openGroups = {}; // 兼容旧代码的空壳
 
 // ===== 打开传声筒 =====
 function openVoiceRoom() {
@@ -14069,78 +14212,264 @@ function openVoiceRoom() {
 }
 
 // ===== 渲染传声筒 =====
+
+
+// 当前互动模式索引
+var currentVoiceModeIndex = 0;
+var isCapsuleOpen = false; // 控制胶囊是否展开
+
+// 图片配置（按你的要求：1, 2, 3, 2 循环）
+var voiceModes = [
+    { id: '称呼', prompt: '此刻想喊你什么呢？', img: 'images/qinche_1.jpg' },
+    { id: '亲昵', prompt: '此刻想和你互动……', img: 'images/qinche_2.jpg' },
+    { id: '心绪', prompt: '想和你说的悄悄话……', img: 'images/qinche_3.jpg' },
+    { id: '节日', prompt: '今天是什么好日子？', img: 'images/qinche_2.jpg' }
+];
+
 function renderVoiceRoom() {
-var subtitleText = '想听什么，点。';
     var container = document.getElementById('voiceRoomContent');
     if (!container) return;
-    
-  var html = '<div style="max-width:420px;margin:0 auto;padding-bottom:100px;">';
-html += '<div style="text-align:center;margin-bottom:8px;padding-top:4px;">';
-html += '<div style="font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:2px;text-shadow:0 2px 12px rgba(0,0,0,0.6);">来自耳语的浪漫，想听什么？</div>';
-html += '</div>';
-    
-    // 分组（折叠）
-    VOICE_DATA.groups.forEach(function(group) {
-        var isOpen = openGroups[group.name] || false;
-        var isSelected = selectedGroup === group.name;
-        
-        html += '<div style="margin-bottom:12px;">';
-// 分组标题
-var isSelected = selectedGroup === group.name;
-html += '<div class="voice-group-header" data-group="' + group.name + '" style="display:flex;justify-content:space-between;align-items:center;padding:6px 4px 4px 8px;border-bottom:1px solid ' + (isOpen ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)') + ';cursor:pointer;transition:all 0.3s;margin-left:4px;">';
-html += '<span style="font-size:13px;font-weight:300;color:' + (isOpen ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.45)') + ';letter-spacing:3px;transition:color 0.3s;">' + group.name + '</span>';
-html += '<span style="font-size:11px;color:rgba(255,255,255,0.15);">' + (isOpen ? '▾' : '▸') + '</span>';
-html += '</div>';
 
-// 关键词（展开时显示）
-if (isOpen) {
-    html += '<div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:10px;">';
-    group.keywords.forEach(function(kw) {
-        // 关键词按钮
-html += '<div class="voice-keyword" data-group="' + group.name + '" data-keyword="' + kw.text + '" style="padding:6px 14px;border-radius:20px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.8);font-size:13px;cursor:pointer;transition:all 0.25s;letter-spacing:0.5px;" onclick="playVoice(this, \'' + group.name + '\', \'' + kw.text + '\')">' + kw.text + '</div>';
-    });
-    html += '</div>';
-}
-        html += '</div>';
-    });
+    var currentMode = voiceModes[currentVoiceModeIndex];
+    var bgImage = currentMode.img;
+    var isFirst = currentVoiceModeIndex === 0;
+    var isLast = currentVoiceModeIndex === voiceModes.length - 1;
+
+    // 拼装胶囊
+    var groupData = VOICE_DATA.groups.find(function(g) { return g.name === currentMode.id; });
+    var buttonsHtml = '';
     
-    // 节日分组
-    html += '<div style="margin-bottom:12px;">';
-    var isHolidayOpen = openGroups['节日'] || false;
-  html += '<div class="voice-group-header" data-group="节日" style="display:flex;justify-content:space-between;align-items:center;padding:6px 4px 4px 8px;border-bottom:1px solid ' + (isHolidayOpen ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)') + ';cursor:pointer;transition:all 0.3s;margin-left:4px;">';
-html += '<span style="font-size:13px;font-weight:300;color:' + (isHolidayOpen ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.45)') + ';letter-spacing:3px;transition:color 0.3s;">节日</span>';
-html += '<span style="font-size:11px;color:rgba(255,255,255,0.15);">' + (isHolidayOpen ? '▾' : '▸') + '</span>';
-html += '</div>';
-    if (isHolidayOpen) {
-        html += '<div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:10px;">';
-        var holidayKeys = Object.keys(HOLIDAY_DATA);
-        holidayKeys.forEach(function(name) {
-            html += '<div class="voice-keyword" data-group="节日" data-keyword="' + name + '" style="padding:6px 14px;border-radius:16px;background:rgba(255,107,129,0.15);border:1px solid rgba(255,107,129,0.3);color:#ffb6c1;font-size:13px;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px;" onclick="playHolidayVoice(\'' + name + '\')">' + name + '</div>';
+    // 胶囊的样式：带呼吸发光效果
+    var capsuleStyle = 'padding:10px 18px;border-radius:30px;background:rgba(20,20,20,0.85);border:1px solid rgba(255,42,42,0.4);color:#fff;font-size:14px;cursor:pointer;backdrop-filter:blur(10px);transition:all 0.2s;white-space:nowrap;box-shadow: 0 0 10px rgba(255,42,42,0.1);animation: breathe 3s ease-in-out infinite;';
+    var capsuleHover = 'onmouseover="this.style.borderColor=\'#ff2a2a\';this.style.boxShadow=\'0 0 15px rgba(255,42,42,0.5)\';this.style.transform=\'scale(1.05)\';" onmouseout="this.style.borderColor=\'rgba(255,42,42,0.4)\';this.style.boxShadow=\'0 0 10px rgba(255,42,42,0.1)\';this.style.transform=\'scale(1)\';"';
+
+    if (groupData) {
+        groupData.keywords.forEach(function(kw) {
+            // 点击时调用 playVoiceAndClose
+            buttonsHtml += '<div onclick="playVoiceAndClose(this, \'' + groupData.name + '\', \'' + kw.text + '\')" style="' + capsuleStyle + '" ' + capsuleHover + '>' + kw.text + '</div>';
         });
-        html += '</div>';
+    } else if (currentMode.id === '节日') {
+        Object.keys(HOLIDAY_DATA).forEach(function(name) {
+            // 点击时调用 playHolidayAndClose
+            buttonsHtml += '<div onclick="playHolidayAndClose(\'' + name + '\')" style="' + capsuleStyle + '" ' + capsuleHover + '>' + name + '</div>';
+        });
     }
-    html += '</div>';
-    
-    // 随机来一句按钮
- html += '<div id="randomBtn" style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%);padding:10px 28px;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:30px;border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);font-size:12px;font-weight:300;cursor:pointer;transition:all 0.3s;letter-spacing:1.5px;z-index:20;" onclick="playRandom()" onmouseenter="this.style.borderColor=\'rgba(255,255,255,0.15)\';" onmouseleave="this.style.borderColor=\'rgba(255,255,255,0.08)\';">🎲 随机来一句' + (selectedGroup ? ' · ' + selectedGroup : '') + '</div>';
-    
-    container.innerHTML = html;
-    
-    // 绑定分组标题点击事件（展开/收起）
-    document.querySelectorAll('.voice-group-header').forEach(function(el) {
-        el.addEventListener('click', function() {
-            var groupName = el.dataset.group;
-            toggleGroupOpen(groupName);
-        });
-    });
+
+    // 极简的“语音/声波”SVG图标
+    var svgIcon = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" x2="12" y1="19" y2="22"/>
+    </svg>`;
+
+    container.innerHTML = `
+        <style>
+            @keyframes breathe {
+                0%, 100% { box-shadow: 0 0 8px rgba(255,42,42,0.1); }
+                50% { box-shadow: 0 0 18px rgba(255,42,42,0.4); }
+            }
+            @keyframes slideUp {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            #voiceRoomContent { padding: 0 !important; overflow: hidden !important; }
+            
+            /* 背景图 */
+            .vr-bg {
+                position: absolute; inset: 0;
+                background-image: url('${bgImage}');
+                background-size: cover;
+                background-position: center 20%;
+                transition: background-image 0.6s ease;
+                z-index: 0;
+            }
+            .vr-overlay {
+                position: absolute; inset: 0;
+                background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 60%, rgba(10,10,10,0.95) 100%);
+                z-index: 1;
+            }
+            .vr-ui {
+                position: relative; z-index: 2;
+                display: flex; flex-direction: column;
+                height: 100%; box-sizing: border-box;
+            }
+            .vr-top-space { flex: 1; }
+            
+            /* 底部操作台 */
+            .vr-bottom-console {
+                padding: 0 16px calc(20px + env(safe-area-inset-bottom, 0px));
+                display: flex; flex-direction: column; gap: 16px;
+            }
+
+            /* 胶囊弹窗区 */
+            .vr-capsule-popup {
+                display: ${isCapsuleOpen ? 'flex' : 'none'};
+                flex-wrap: wrap; justify-content: center; gap: 12px;
+                padding: 10px 10px 20px;
+                animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            }
+
+            /* 新增：通过 class 隐藏胶囊 */
+            .vr-capsule-popup.hidden {
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+                animation: none;
+            }
+
+            /* 输入框区域 */
+            .vr-input-bar {
+                display: flex; align-items: center; gap: 10px;
+                background: rgba(0,0,0,0.7);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 24px;
+                padding: 6px 6px 6px 16px;
+                backdrop-filter: blur(10px);
+                transition: border-color 0.3s;
+            }
+            .vr-input-bar.active {
+                border-color: rgba(255,42,42,0.5);
+            }
+            .vr-arrow {
+                width: 32px; height: 32px;
+                display: flex; align-items: center; justify-content: center;
+                color: #ccc; font-size: 16px; cursor: pointer;
+                border-radius: 50%; transition: all 0.2s;
+                opacity: ${isFirst ? '0.2' : '1'};
+                pointer-events: ${isFirst ? 'none' : 'auto'};
+            }
+            .vr-arrow:hover { color: #fff; background: rgba(255,255,255,0.1); }
+            .vr-arrow.right {
+                opacity: ${isLast ? '0.2' : '1'};
+                pointer-events: ${isLast ? 'none' : 'auto'};
+            }
+            
+            .vr-fake-input {
+                flex: 1;
+                color: ${isCapsuleOpen ? '#fff' : '#888'};
+                font-size: 14px;
+                letter-spacing: 1px;
+                cursor: pointer;
+                user-select: none;
+                text-align: center;
+            }
+
+            /* 右侧发送/图标按钮 */
+            .vr-send-btn {
+                width: 38px; height: 38px;
+                border-radius: 50%;
+                background: ${isCapsuleOpen ? '#c81414' : 'rgba(255,255,255,0.05)'};
+                color: ${isCapsuleOpen ? '#fff' : '#888'};
+                display: flex; align-items: center; justify-content: center;
+                cursor: pointer; transition: all 0.3s;
+            }
+            .vr-send-btn.active {
+                box-shadow: 0 0 10px rgba(255,42,42,0.4);
+            }
+        </style>
+
+        <div class="vr-bg"></div>
+        <div class="vr-overlay"></div>
+        
+        <!-- 顶部栏 -->
+        <div style="position:absolute;top:20px;left:16px;right:16px;z-index:10;display:flex;align-items:center;justify-content:center;">
+            <button onclick="goHome()" style="position:absolute;left:0;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,42,42,0.4);color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;backdrop-filter:blur(4px);">←</button>
+            <div style="font-size:15px;font-weight:600;color:#fff;letter-spacing:4px;text-shadow:0 2px 10px rgba(0,0,0,0.6);">耳语传音</div>
+        </div>
+        
+        <div class="vr-ui">
+            <div class="vr-top-space"></div>
+
+            <div class="vr-bottom-console">
+                <!-- 弹出胶囊区 -->
+                <div class="vr-capsule-popup">
+                    ${buttonsHtml}
+                </div>
+
+                <!-- 底部假输入框 -->
+                <div class="vr-input-bar ${isCapsuleOpen ? 'active' : ''}">
+                    <div class="vr-arrow" onclick="switchVoiceMode(-1)">‹</div>
+                    <div class="vr-fake-input" onclick="toggleVoiceCapsule()">
+                        ${currentMode.prompt}
+                    </div>
+                    <div class="vr-arrow right" onclick="switchVoiceMode(1)">›</div>
+                    
+                    <div class="vr-send-btn ${isCapsuleOpen ? 'active' : ''}" onclick="toggleVoiceCapsule()">
+                        ${svgIcon}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
-var openGroups = {
-    '称呼': false,
-    '亲昵': false,
-    '心绪': false,
-    '节日': false
-};
+// 切换模式（带方向参数：-1 左，1 右）
+function switchVoiceMode(dir) {
+    var newIdx = currentVoiceModeIndex + dir;
+    if (newIdx < 0 || newIdx >= voiceModes.length) return;
+    
+    currentVoiceModeIndex = newIdx;
+    isCapsuleOpen = false; // 切换时收起胶囊
+    renderVoiceRoom();
+}
+
+// 展开/收起胶囊
+function toggleVoiceCapsule() {
+    isCapsuleOpen = !isCapsuleOpen;
+    renderVoiceRoom();
+}
+
+// 播放语音并收起胶囊（不重绘页面，直接隐藏胶囊）
+function playVoiceAndClose(el, groupName, keywordText) {
+    isCapsuleOpen = false;
+    
+    // 用 class 隐藏胶囊，防止浏览器重排打断音频
+    var popup = document.querySelector('.vr-capsule-popup');
+    if (popup) popup.classList.add('hidden');
+    
+    // 恢复输入框 UI 状态
+    var bar = document.querySelector('.vr-input-bar');
+    if (bar) bar.classList.remove('active');
+    var input = document.querySelector('.vr-fake-input');
+    if (input) input.style.color = '#888';
+    var btn = document.querySelector('.vr-send-btn');
+    if (btn) {
+        btn.classList.remove('active');
+        btn.style.background = 'rgba(255,255,255,0.05)';
+        btn.style.color = '#888';
+        btn.style.boxShadow = 'none';
+    }
+
+    // 延迟 50 毫秒触发播放，确保 DOM 更新完毕且不会被打断
+    setTimeout(function() {
+        playVoice(el, groupName, keywordText); 
+    }, 50);
+}
+
+function playHolidayAndClose(name) {
+    isCapsuleOpen = false;
+    var popup = document.querySelector('.vr-capsule-popup');
+    if (popup) popup.classList.add('hidden');
+    
+    var bar = document.querySelector('.vr-input-bar');
+    if (bar) bar.classList.remove('active');
+    var input = document.querySelector('.vr-fake-input');
+    if (input) input.style.color = '#888';
+    var btn = document.querySelector('.vr-send-btn');
+    if (btn) {
+        btn.classList.remove('active');
+        btn.style.background = 'rgba(255,255,255,0.05)';
+        btn.style.color = '#888';
+        btn.style.boxShadow = 'none';
+    }
+
+    setTimeout(function() {
+        playHolidayVoice(name);
+    }, 50);
+}
+
+
 
 function toggleGroupOpen(groupName) {
     openGroups[groupName] = !openGroups[groupName];
@@ -20358,6 +20687,10 @@ async function shareWishToChat(wishId) {
 }
 
 async function checkQinDailyMessage() {
+// 确保数据库已打开
+    if (!window.db) {
+        await window.openDB();
+    }
     var groups = await kvGet('calendarSettings', 'mailboxGroups', []);
     
     if (!Array.isArray(groups) || groups.length === 0) {
@@ -20365,10 +20698,14 @@ async function checkQinDailyMessage() {
         return;
     }
     
-    var today = new Date().toLocaleDateString('zh-CN');
+    // 生成今天的标准日期字符串，比如 "2026/10/27"
+    var todayStr = new Date().toLocaleDateString('zh-CN');
+    // 从 IDB 读取
     var lastDate = await kvGet('calendarSettings', 'lastQinMessageDate', '');
-    if (lastDate === today) {
-        console.log('✅ 今天秦彻已经留过言了');
+    
+    // 如果今天已经留过言了，直接拦截！
+    if (lastDate === todayStr) {
+        console.log('✅ 今天秦彻已经留过言了，跳过');
         return;
     }
     
@@ -20513,8 +20850,9 @@ async function checkQinDailyMessage() {
     }
 
 
-    await kvSet('calendarSettings', 'lastQinMessageDate', today);
-    console.log('✅ 秦彻今天共留了 ' + msgCount + ' 条言');
+    // 存入 IDB，写入今天的日期
+    await kvSet('calendarSettings', 'lastQinMessageDate', todayStr);
+    console.log('✅ 秦彻今天留言完毕，标记日期为:', todayStr);
 }
 
 // ===== 留言板 =====
@@ -23250,6 +23588,13 @@ probRow('重复概率', 'cardRepeatProb', cs.cardRepeatProb) +
 probRow('删除概率', 'cardDeleteProb', cs.cardDeleteProb) +
 '</div>' +
 
+'<div class="settings-section"><h4>🔮 AI 塔罗解读</h4>' +
+'<div class="settings-row"><span style="color:var(--theme-text);">启用 AI 解读</span><div class="toggle-switch ' + (localStorage.getItem('tarotAiEnabled') === 'true' ? 'on' : '') + '" onclick="toggleTarotAi(this)"></div></div>' +
+'<div style="padding:8px 0;display:flex;flex-direction:column;gap:6px;">' +
+    '<input type="text" id="tarotAiKey" placeholder="DeepSeek API Key (sk-...)" value="' + (localStorage.getItem('tarotAiKey') || '') + '" style="padding:8px;border-radius:8px;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:12px;">' +
+    '<button onclick="testTarotAi()" style="padding:8px;border-radius:8px;background:var(--theme-card);border:1px solid var(--theme-input-border);color:var(--theme-text);font-size:12px;cursor:pointer;">测试连接</button>' +
+'</div>' +
+'</div>' +
 '<div class="settings-section"><h4>🧠 语境匹配</h4>' +
 '<div style="font-size:11px;color:var(--theme-muted);padding:0 0 10px;line-height:1.5;">按最近 5 条消息给相关卡加权，0 = 关闭</div>' +
 '<div class="settings-row"><span style="display:inline-block;width:100px;text-align:right;margin-right:8px;">加成强度</span>' +
@@ -24330,7 +24675,8 @@ if (lastBackup) {
 checkMailReply();
 setInterval(checkMailReply, 10 * 60 * 1000); // 每10分钟检查
 
-checkQinDailyMessage();
+// 检查今日留言（内部自带日期拦截，非常安全）
+await checkQinDailyMessage();
 
 // 恢复 chatGroups 备份
 try {
@@ -24379,27 +24725,15 @@ document.addEventListener('visibilitychange', function() {
     }
 });
 
-        // 初始化倾心之约数据
-        await initStoryData();
-
+// 初始化倾心之约数据
+await initStoryData();
 
 updateHome();
 scheduleStatusUpdate(); 
 scheduleMoodUpdate();
 startAutoSendIfNeeded();
 
-// ===== 回音保底机制 =====
-try {
-    var today = new Date().toLocaleDateString('zh-CN');
-    var lastEchoDate = localStorage.getItem('lastQinMessageDate');
-    if (lastEchoDate !== today) {
-        console.log('🎐 保底：今天回音还没主动留言，触发');
-        await checkQinDailyMessage();
-    }
-} catch(e) {
-    console.warn('⚠️ 回音保底失败:', e.message);
-}
-// ===== 保底结束 =====
+
 
 // ===== 节日检测 =====
 if (typeof Lunar !== 'undefined') {
@@ -24892,6 +25226,13 @@ window.doStoryImportWithMode = doStoryImportWithMode;
 window.runStoryImport = runStoryImport;
 window.getSiblingStories = getSiblingStories;
 window.gotoSiblingStory = gotoSiblingStory;
+
+window.toggleTarotAi = toggleTarotAi;
+window.testTarotAi = testTarotAi;
+window.toggleVoiceCapsule = toggleVoiceCapsule;
+window.switchVoiceMode = switchVoiceMode;
+window.playVoiceAndClose = playVoiceAndClose;
+window.playHolidayAndClose = playHolidayAndClose;
 
 
 init();
