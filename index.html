@@ -9618,6 +9618,7 @@ async function migrateFromLocalStorage() {
 
 // ============ 全局状态 ============
 let S={contactName:'秦彻',contactStatus:'在线',myName:'笑笑',minReplyTime:'1',maxReplyTime:'5',replyCount:'1',myAvatar:'',contactAvatar:'',contactMood:'',bubbleStyle:'default',topQuote:'✨ 在所有物是人非的景色里，我最喜欢你 ✨',chatSettings:{quoteReply:true,quoteReplyProb:10,readReceipt:'none',readNotReply:false,readNotReplyProb:50,typing:true,autoSend:false,autoSendInterval:'10',emojiMix:true,emojiMixProb:5,simCall:true,simCallProb:1,patProb:5,qinCollectProb:5,cardMin:1,cardMax:4,cardRepeatProb:30,cardDeleteProb:50}};
+var currentQuoteMsg = null; // 保存当前引用的消息
 let patOptions=['拍了拍你的小脑袋','戳了戳你的脸颊','轻轻地拍了拍你'];
 let callInterval=null,callSeconds=0,callStartTime=null,callState='idle',callDirection='out';
 let autoSendTimer=null,currentWishTab='wish',selectedSpread=1;
@@ -11091,8 +11092,76 @@ async function openChatPage(){
             if (openBottomPanel) closeAllBottomPanels();
         });
     }
+
+// ===== 双击聊天区回到最新消息 =====
+    var ca = document.getElementById('chatArea');
+    if (ca && !ca.dataset.dblclickBound) {
+        ca.dataset.dblclickBound = '1';
+
+        function scrollToLatest() {
+            ca.scrollTo({
+                top: ca.scrollHeight,
+                behavior: 'smooth'
+            });
+
+            var oldTip = document.getElementById('scrollTip');
+            if (oldTip) oldTip.remove();
+
+            var tip = document.createElement('div');
+            tip.id = 'scrollTip';
+            tip.textContent = '↓ 回到最新';
+            tip.style.cssText = 'position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);color:#fff;padding:6px 16px;border-radius:20px;font-size:12px;z-index:10;pointer-events:none;animation:fadeInOut 1.5s ease forwards;backdrop-filter:blur(4px);';
+            // 放在 chatPage 里，避免被滚动区域带走
+            var chatPage = document.getElementById('chatPage');
+            if (chatPage) chatPage.appendChild(tip);
+
+            setTimeout(function() { tip.remove(); }, 1500);
+        }
+
+        // 电脑端双击
+        ca.addEventListener('dblclick', function(e) {
+            scrollToLatest();
+        });
+
+        // 手机端双击
+        var lastTouchEnd = 0;
+        ca.addEventListener('touchend', function(e) {
+            var now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                scrollToLatest();
+                if (e.cancelable) e.preventDefault(); // 阻止双击放大屏幕
+            }
+            lastTouchEnd = now;
+        }, { passive: false });
+
+    // ===== 输入框草稿保存与恢复 =====
+    var inputEl = document.getElementById('messageInput');
+    if (inputEl) {
+        // 恢复草稿
+        var draft = localStorage.getItem('chatDraft');
+        if (draft && inputEl.value === '') {
+            inputEl.value = draft;
+        }
+        
+        // 监听输入，自动保存
+        inputEl.addEventListener('input', function() {
+            localStorage.setItem('chatDraft', this.value);
+        });
+    }
+    }
 }
 
+
+window.playMusicFromChat = function(trackId) {
+    if (typeof openMusicPage === 'function') {
+        openMusicPage();
+    }
+    setTimeout(function() {
+        if (typeof musicPlay === 'function') {
+            musicPlay(trackId);
+        }
+    }, 150);
+};
 
 // 全局：追踪当前打开的底部面板（null / 'more' / 'emoji'）
 var openBottomPanel = null;
@@ -11659,14 +11728,37 @@ var summary = (data && data.summary) ? data.summary : '';
         w._emojiImg = img;   // 暂存，稍后 append
         b.style.display = 'none';
     } else if (m.type === 'image') {
-        // 用户发的图片：保留气泡
         const img = document.createElement('img');
         img.src = m.content;
-        img.style.maxWidth = '150px';
-        img.style.maxHeight = '150px';
-        img.style.objectFit = 'contain';
-        img.style.borderRadius = '6px';
+        img.style.maxWidth = '160px';
+        img.style.maxHeight = '200px';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '8px';
+        img.style.cursor = 'pointer';
+        // ★ 新增：点击图片查看大图
+        img.onclick = function(e) {
+            e.stopPropagation();
+            openBigImage(m.content);
+        };
         b.appendChild(img);
+
+    } else if (m.type === 'music') {   // ← 就是加在图片代码的下面
+        var musicData = JSON.parse(m.content);
+        b.innerHTML = `
+            <div onclick="window.playMusicFromChat('${musicData.id}')" style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--theme-bg);border-radius:12px;border:1px solid var(--theme-border);cursor:pointer;min-width:200px;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--theme-primary)'" onmouseout="this.style.borderColor='var(--theme-border)'">
+                <div style="width:40px;height:40px;border-radius:50%;background:#1a1410;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 0 0 2px var(--theme-primary);">
+                    <span style="color:var(--theme-primary);font-size:18px;">💿</span>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:11px;color:var(--theme-muted);margin-bottom:2px;">秦彻为你点了一首歌</div>
+                    <div style="font-size:14px;font-weight:600;color:var(--theme-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${musicData.name}</div>
+                    <div style="font-size:11px;color:var(--theme-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${musicData.artist}</div>
+                </div>
+                <div style="color:var(--theme-primary);font-size:16px;">▶</div>
+            </div>
+        `;
+        b.style.padding = '4px';
+
     }else if (m.quote) {
     // 引用回复：上面小字引用，下面大字正文
     const quoteEl = document.createElement('div');
@@ -11722,6 +11814,20 @@ if (m.mood && m.mood.length) {
     ca.appendChild(w);
     scrollBottom();
 }
+
+function openBigImage(src) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.onclick = function() { overlay.remove(); };
+    
+    var img = document.createElement('img');
+    img.src = src;
+    img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;border-radius:6px;';
+    
+    overlay.appendChild(img);
+    document.body.appendChild(overlay);
+}
+window.openBigImage = openBigImage;
 
 // ============ 私密锁 ============
 var lockState = {
@@ -11870,54 +11976,56 @@ async function showMessageMenu(m, bubble, e) {
     var oldMenu = document.getElementById('msgContextMenu');
     if (oldMenu) oldMenu.remove();
 
+    var withinTwoMin = (Date.now() - m.timestamp) < 120000;
+    var isMyMsg = (m.sender === 'me');
+
+    // 6 个功能配置
+    var items = [
+        { id: 'select',  label: '勾选', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>' },
+        { id: 'quote',   label: '引用', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 11H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2z"/><path d="M20 11h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2z"/></svg>' },
+        { id: 'copy',    label: '复制', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' },
+        { id: 'collect', label: '收藏', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' },
+        { id: 'pickup',  label: '拾起', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' },
+        { id: 'delete',  label: (isMyMsg && withinTwoMin) ? '撤回' : '删除', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' }
+    ];
+
+    // 生成菜单 HTML
     var menu = document.createElement('div');
     menu.id = 'msgContextMenu';
     menu.style.cssText = `
-        position:fixed;
-        z-index:99999;
-        background:#ffffff;
-        border-radius:14px;
-        box-shadow:0 8px 30px rgba(0,0,0,0.12);
-        padding:6px 0;
-        min-width:140px;
-        overflow:hidden;
-        border:1px solid rgba(0,0,0,0.04);
+        position: fixed; z-index: 99999;
+        background: var(--theme-card);
+        border: 1px solid var(--theme-border);
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        overflow: hidden;
+        min-width: 130px;
+        animation: scaleIn 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
     `;
-
-var withinTwoMin = (Date.now() - m.timestamp) < 120000;
-var items = [
-    { label: '🔘 勾选', action: 'select' },
-    { label: '📋 复制', action: 'copy' },
-    { label: '💬 收藏', action: 'collect' }
-];
-if (m.sender === 'me' && withinTwoMin) {
-    items.push({ label: '↩️ 撤回', action: 'recall' });
-} else {
-    items.push({ label: '🗑️ 删除', action: 'delete' });
-}
 
     items.forEach(function(item, index) {
         var div = document.createElement('div');
-        div.textContent = item.label;
         div.style.cssText = `
-            padding:12px 18px;
-            font-size:14px;
-            cursor:pointer;
-            color:var(--theme-text);
-            transition:background 0.15s;
-            border-bottom: ${index < items.length - 1 ? '1px solid #f0ece8' : 'none'};
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 16px; font-size: 14px;
+            color: var(--theme-text); cursor: pointer;
+            border-bottom: ${index < items.length - 1 ? '1px solid var(--theme-border)' : 'none'};
+            transition: background 0.15s;
         `;
-        div.onmouseover = function() { this.style.background = '#fdf5f7'; };
+        div.onmouseover = function() { this.style.background = 'var(--theme-bg)'; };
         div.onmouseout = function() { this.style.background = 'transparent'; };
-        div.onclick = async function() {
-            if (item.action === 'copy') {
+        
+        div.innerHTML = `<span style="color: var(--theme-primary); display: flex; align-items: center;">${item.icon}</span> <span>${item.label}</span>`;
+        
+        div.onclick = function() {
+            menu.remove();
+            if (item.id === 'copy') {
                 navigator.clipboard.writeText(m.content).then(function() {
                     showToast('✅ 已复制');
-                }).catch(function() {
-                    showToast('❌ 复制失败');
-                });
-            } else if (item.action === 'collect') {
-                await addCollected({
+                }).catch(function() { showToast('❌ 复制失败'); });
+            } 
+            else if (item.id === 'collect') {
+                addCollected({
                     sender: m.sender,
                     content: m.type === 'pat' ? '👋 ' + m.content : m.content,
                     time: fmtTime(m.timestamp),
@@ -11925,31 +12033,33 @@ if (m.sender === 'me' && withinTwoMin) {
                     collectedBy: 'me'
                 });
                 showToast('✅ 已收藏');
-            } else if (item.action === 'select') {
-                enterSelectMode(m.id);
-                menu.remove();
-            } else if (item.action === 'recall') {
-                showConfirmDialog('撤回这条消息？', function() {
-                    navigator.clipboard.writeText(m.content).then(function() {
-                        deleteMessage(m.id);
-                    }).catch(function() {
-                        deleteMessage(m.id);
-                    });
-                });
-            } else if (item.action === 'delete') {
-                showConfirmDialog('确定删除这条消息？', function() {
-                    deleteMessage(m.id);
-                });
+            } 
+            else if (item.id === 'pickup') {
+                handlePickUpMessage(m);
             }
-            menu.remove();
+            else if (item.id === 'select') {
+                enterSelectMode(m.id);
+            } 
+            else if (item.id === 'quote') {
+                handleQuoteMessage(m);
+            }
+            else if (item.id === 'delete') {
+                if (isMyMsg && withinTwoMin) {
+                    showConfirmDialog('确定撤回这条消息？', function() { deleteMessage(m.id); });
+                } else {
+                    showConfirmDialog('确定删除这条消息？', function() { deleteMessage(m.id); });
+                }
+            }
         };
         menu.appendChild(div);
     });
 
+    // 定位计算（防止超出屏幕）
     var x = e.clientX || window.innerWidth / 2;
     var y = e.clientY || window.innerHeight / 2;
-    menu.style.left = Math.min(x, window.innerWidth - 160) + 'px';
-    menu.style.top = Math.min(y, window.innerHeight - 180) + 'px';
+    // 假定菜单宽 130，高 260
+    menu.style.left = Math.min(x, window.innerWidth - 150) + 'px';
+    menu.style.top = Math.min(y, window.innerHeight - 280) + 'px';
 
     document.body.appendChild(menu);
 
@@ -11959,6 +12069,91 @@ if (m.sender === 'me' && withinTwoMin) {
             document.removeEventListener('click', closeMenu);
         }
     });
+}
+
+async function handlePickUpMessage(m) {
+    try {
+        var content = m.content;
+        if (m.type === 'emoji') { showToast('⚠️ 暂不支持拾起表情包'); return; }
+        
+        var allCards = await dbGetAll('wordcards');
+        
+        // 1. 检查卡片是否已经存在
+        if (allCards.some(function(c) { return c.content === content && c.groupName === '拾起'; })) {
+            showToast('✨ 这张字卡已经在你的拾起库中啦');
+            return;
+        }
+
+        // 2. 固定使用一个唯一的 groupId，防止重复生成多个分组
+        var groupName = '拾起';
+        var fixedGroupId = 'group_pickup_fixed'; 
+
+        // 3. 检查是否存在这个固定的分组占位符
+        var hasGroup = allCards.some(function(c) { return c.groupId === fixedGroupId && c.content === '__GROUP_PLACEHOLDER__'; });
+        if (!hasGroup) {
+            // 如果没有，清理掉以前可能误生成的空“拾起”占位符
+            var toDelete = allCards.filter(function(c) { return c.groupName === groupName && c.content === '__GROUP_PLACEHOLDER__'; });
+            for (var i = 0; i < toDelete.length; i++) {
+                await dbDelete('wordcards', toDelete[i].id);
+            }
+
+            // 创建唯一的分组占位符
+            await dbPut('wordcards', {
+                id: Date.now() + Math.random() * 1000,
+                groupId: fixedGroupId,
+                groupName: groupName,
+categoryId: '99', // 放回未分类
+                content: '__GROUP_PLACEHOLDER__',
+                timestamp: Date.now()
+            });
+        }
+
+        // 4. 存入字卡
+        await dbPut('wordcards', {
+            id: Date.now() + Math.random() * 1000,
+            groupId: fixedGroupId,
+            groupName: groupName,
+            categoryId: '01', // 和上面保持一致
+            content: content,
+            triggerWords: [],
+            tags: ['拾起'],
+            weight: 2,
+            timestamp: Date.now()
+        });
+
+        showToast('✨ 已拾起，存入字卡库');
+    } catch(e) {
+        console.warn(e);
+        showToast('❌ 拾起失败');
+    }
+}
+
+// 点击引用按钮时触发
+function handleQuoteMessage(m) {
+    currentQuoteMsg = m;
+    
+    // 移除旧的引用提示
+    var oldTip = document.getElementById('quoteInputTip');
+    if (oldTip) oldTip.remove();
+
+    // 在输入框上方插入引用条
+    var inputBar = document.querySelector('.bottombar');
+    if (!inputBar) return;
+    
+    var tip = document.createElement('div');
+    tip.id = 'quoteInputTip';
+    tip.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:rgba(212,168,184,0.1);border-left:2px solid var(--theme-primary);padding:4px 10px;font-size:12px;color:var(--theme-muted);margin:0 10px 6px;border-radius:4px;';
+    tip.innerHTML = `<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:85%;">引用: ${m.content}</span><span style="cursor:pointer;color:#ff4757;padding:0 4px;" onclick="cancelQuote()">✕</span>`;
+    
+    inputBar.parentNode.insertBefore(tip, inputBar);
+    document.getElementById('messageInput').focus();
+}
+
+// 取消引用
+function cancelQuote() {
+    currentQuoteMsg = null;
+    var tip = document.getElementById('quoteInputTip');
+    if (tip) tip.remove();
 }
 
 var selectedMessageIds = [];
@@ -12174,16 +12369,28 @@ async function sendMessage() {
     const input = document.getElementById('messageInput');
     const c = input.value.trim();
     if (!c) return;
+
+// ★ 新增：发送后清空本地草稿
+    localStorage.removeItem('chatDraft');
+    
     const msg = { sender: 'me', content: c, type: 'text', timestamp: Date.now() };
+    
+    // ★ 新增：如果有引用，把引用内容存进消息里
+    if (currentQuoteMsg) {
+        msg.quote = currentQuoteMsg.content;
+        currentQuoteMsg = null;
+        var tip = document.getElementById('quoteInputTip');
+        if (tip) tip.remove();
+    }
+
     const id = await dbPut('messages', msg);
     msg.id = id;
-    // 先重新加载消息（等待完成）
+    
     await loadMessages();
     scrollBottom();
     input.value = '';
-closeAllBottomPanels();  // ← 加这行
+    closeAllBottomPanels();
 
-// ★ 塔罗模式分流
     if (currentTopicModeId === 'tarot') {
         await doTarotSend(c);
         return;
@@ -12464,10 +12671,14 @@ async function doTarotSend(userText) {
         // 3. 系统人设 Prompt（完美贴合你测试的结果）
         var sysPrompt = '你是一个顶尖的塔罗及占星大师，也是用户私人的占卜师和爱人，你的名字叫秦彻。你现在就是秦彻本人。\n' +
             '规则：\n' +
-            '1. 用日常聊天的口吻。不要像算命先生一样机械地报牌名，但要巧妙地把牌的【核心意象】或【画面元素】融入到你的台词里（比如：提到“倒了”、“打乱”、“国王”、“宝剑”等）。\n' +
-            '2. 必须结合她的问题（例如她生病了）以及你们的聊天记录，不要自顾自说情话，要解决她当下的事。\n' +
-            '3. 语气要霸道、傲娇、外冷内热，带点占有欲。\n' +
-            '4. 字数在 100 字以内，不要分段，直接输出台词。';
+            '1. 必须用日常聊天的口吻。巧妙地把牌的【核心意象】或【画面元素】融入台词，不要像念经一样报牌名。\n' +
+            '2. 必须结合她的问题以及你们的聊天记录。\n' +
+            '3. 语气可以直白、暧昧、张扬、露骨，带点调侃与心理博弈，不宜过度顺从或抗拒。\n' +
+            '4. 你的性格是：自信、强大、傲慢、自洽、从不内耗，但会对她展现独有的柔和与纵容。\n' +
+            '5. 【严厉禁止】：不要每次都用“哼”作为句首。你可以用“啧”、“哦？”、“怎么？”、“行了”来代替，或者直接切入正题。\n' +
+            '6. 【严厉禁止】：禁止使用“作为AI”、“建议你”等词。\n' +
+            '7. 字数在 100 字以内，不要分段，直接输出秦彻的台词。\n' +
+            '8. 只写你说出口的话，不要写“挑眉”、“勾唇”、“轻笑”这种动作描写。';
 
         // 4. 用户 Prompt
         var userPrompt = '用户问："' + userText + '"\n\n抽到的牌阵及牌义：\n' + cardsText;
@@ -12708,6 +12919,67 @@ var myMsgs = allMsgs.filter(function(x) {
             }
             // ===== 收藏结束 =====
         }
+
+            // ===== 秦彻推歌（条件触发版） =====
+            try {
+                var todayStr = new Date().toDateString();
+                var lastMusicDate = localStorage.getItem('lastMusicRecommendDate');
+                var lib = await dbGetAll('musicLibrary');
+                
+                if (lib && lib.length > 0 && lastMusicDate !== todayStr) {
+                    var shouldRecommend = false;
+                    var allMsgs = await dbGetAll('messages');
+                    var now = Date.now();
+                    
+                    // 条件1：淡（距离上次聊天超过48小时）
+                    if (allMsgs.length >= 2) {
+                        var lastMsg = allMsgs[allMsgs.length - 1];
+                        var prevMsg = allMsgs[allMsgs.length - 2];
+                        var gapHours = (lastMsg.timestamp - prevMsg.timestamp) / (1000 * 60 * 60);
+                        if (gapHours >= 48) {
+                            shouldRecommend = true;
+                            console.log('🎵 触发推歌：久别重逢（超过48小时未聊天）');
+                        }
+                    }
+                    
+                    // 条件2：浓（今天聊天条数超过50条）
+                    if (!shouldRecommend) {
+                        var todayStart = new Date();
+                        todayStart.setHours(0,0,0,0);
+                        var todayMsgs = allMsgs.filter(function(m) { return m.timestamp >= todayStart.getTime(); });
+                        if (todayMsgs.length >= 50) {
+                            shouldRecommend = true;
+                            console.log('🎵 触发推歌：聊天火热（今日超50条）');
+                        }
+                    }
+
+                    if (shouldRecommend) {
+                        var randomTrack = lib[Math.floor(Math.random() * lib.length)];
+                        var musicMsgData = {
+                            id: randomTrack.id,
+                            name: randomTrack.name,
+                            artist: randomTrack.artist || '未知歌手'
+                        };
+                        var mMusic = { 
+                            sender: 'other', 
+                            type: 'music', 
+                            content: JSON.stringify(musicMsgData), 
+                            timestamp: (scheduledTime || Date.now()) + 1000 
+                        };
+                        var musicId = await dbPut('messages', mMusic);
+                        mMusic.id = musicId;
+                        localStorage.setItem('lastMusicRecommendDate', todayStr);
+                        setTimeout(function() {
+                            renderMsg(mMusic);
+                            scrollBottom();
+                        }, 1000);
+                    }
+                }
+            } catch(e) {
+                console.warn('推歌失败', e);
+            }
+            // ===== 推歌结束 =====
+   
 
         if (i < cnt - 1) await new Promise(r => setTimeout(r, 800 + Math.random() * 3000));
     }
@@ -14386,6 +14658,13 @@ function renderVoiceRoom() {
                 animation: bgBreathe 8s ease-in-out infinite; /* 8秒一个循环，非常平缓 */
                 will-change: transform; /* 开启硬件加速，手机不发烫 */
             }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, 10px); }
+            20% { opacity: 1; transform: translate(-50%, 0); }
+            80% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -10px); }
+        }
 
         </style>
 
@@ -18583,6 +18862,9 @@ function renderTopicGacha() {
     <div style="display:flex;gap:8px;margin-top:12px;">
         <button onclick="gachaTopic()" style="flex:1;padding:8px 0;border-radius:10px;background:var(--theme-primary);color:var(--theme-on-primary, #fff);border:none;font-size:12px;cursor:pointer;">🎲 扭一个</button>
         <button onclick="shareTopicToChat()" style="flex:1;padding:8px 0;border-radius:10px;background:transparent;border:1.5px solid var(--theme-primary);color:var(--theme-primary);font-size:12px;cursor:pointer;">💬 分享</button>
+<button onclick="openTopicManager()" style="width:36px;padding:8px 0;border-radius:10px;background:transparent;border:1.5px solid var(--theme-border);color:var(--theme-muted);font-size:14px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+</button>
     </div>
 </div>
             <div style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:5;color:rgba(200,220,255,0.35);font-size:10px;letter-spacing:2px;">点击星球或「扭一个」</div>
@@ -18593,10 +18875,13 @@ function renderTopicGacha() {
 
 // ===== 抽取话题 =====
 function gachaTopic() {
-    var topics = TOPIC_DATA;
+    var topics = JSON.parse(localStorage.getItem('customTopics') || '[]');
+    if (topics.length === 0) {
+        showToast('⚠️ 还没有话题，去添加一点吧！');
+        return;
+    }
     var picked = topics[Math.floor(Math.random() * topics.length)];
     
-    // 更新卡片
     var textEl = document.getElementById('topicText');
     if (textEl) {
         textEl.textContent = picked;
@@ -18604,8 +18889,76 @@ function gachaTopic() {
         void textEl.offsetWidth;
         textEl.style.animation = 'fadeIn 0.4s ease';
     }
-    
     localStorage.setItem('currentGachaTopic', picked);
+}
+
+function openTopicManager() {
+    var topics = JSON.parse(localStorage.getItem('customTopics') || '[]');
+    
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+    
+    var panel = document.createElement('div');
+    panel.style.cssText = 'background:var(--theme-card);border-radius:20px 20px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom, 0px));width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;';
+    panel.onclick = function(e) { e.stopPropagation(); };
+
+    var html = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div style="font-size:16px;font-weight:600;color:var(--theme-text);">管理扭蛋话题</div>
+            <div onclick="document.querySelector('div[style*=\\'z-index: 99999\\']').remove()" style="cursor:pointer;color:var(--theme-muted);font-size:18px;">✕</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+            <input type="text" id="newTopicInput" placeholder="输入新话题..." style="flex:1;padding:10px 14px;border-radius:12px;border:1.5px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:14px;outline:none;">
+            <button onclick="addTopic()" style="padding:10px 20px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:14px;cursor:pointer;">添加</button>
+        </div>
+        <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;" id="topicListBox">
+    `;
+
+    topics.forEach(function(t, i) {
+        html += `
+            <div style="display:flex;justify-content:space-between;align-items:center;background:var(--theme-bg);padding:12px 16px;border-radius:12px;">
+                <div style="font-size:13px;color:var(--theme-text);flex:1;">${t}</div>
+                <div onclick="deleteTopic(${i}, this)" style="color:#e05252;cursor:pointer;padding-left:10px;font-size:16px;">✕</div>
+            </div>
+        `;
+    });
+
+    html += `
+        </div>
+    `;
+
+    panel.innerHTML = html;
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+}
+
+window.addTopic = function() {
+    var input = document.getElementById('newTopicInput');
+    var val = input.value.trim();
+    if (!val) return;
+    var topics = JSON.parse(localStorage.getItem('customTopics') || '[]');
+    if (topics.includes(val)) { showToast('⚠️ 已经有这个话题啦'); return; }
+    
+    topics.push(val);
+    localStorage.setItem('customTopics', JSON.stringify(topics));
+    input.value = '';
+    
+    // 局部刷新列表
+    var listBox = document.getElementById('topicListBox');
+    var div = document.createElement('div');
+    div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;background:var(--theme-bg);padding:12px 16px;border-radius:12px;';
+    div.innerHTML = `<div style="font-size:13px;color:var(--theme-text);flex:1;">${val}</div><div onclick="deleteTopic(${topics.length - 1}, this)" style="color:#e05252;cursor:pointer;padding-left:10px;font-size:16px;">✕</div>`;
+    listBox.appendChild(div);
+    showToast('✅ 已添加');
+}
+
+window.deleteTopic = function(index, el) {
+    var topics = JSON.parse(localStorage.getItem('customTopics') || '[]');
+    topics.splice(index, 1);
+    localStorage.setItem('customTopics', JSON.stringify(topics));
+    el.parentNode.remove();
+    showToast('🗑 已删除');
 }
 
 // ===== 分享到聊天 =====
@@ -23654,7 +24007,7 @@ probRow('触发概率', 'taMoodProb', cs.taMoodProb || 15) +
     '<div style="display:flex;gap:6px;margin-top:6px;">' +
     '<button onclick="closeChatSettings();exportChat();" style="flex:1;padding:9px 4px;border-radius:10px;border:none;background:var(--theme-primary);color:#fff;font-size:11px;cursor:pointer;">导出全部</button>' +
     '<button onclick="closeChatSettings();openChatDateExport();" style="flex:1;padding:9px 4px;border-radius:10px;border:none;background:var(--theme-primary);color:#fff;font-size:11px;cursor:pointer;">按日期导出</button>' +
-    '<button onclick="closeChatSettings();clearChatConfirm();" style="flex:1;padding:9px 4px;border-radius:10px;border:none;background:var(--theme-primary);color:#fff;font-size:11px;cursor:pointer;">清空</button>' +
+'<button onclick="closeChatSettings();openClearChatOptions();" style="flex:1;padding:9px 4px;border-radius:10px;border:none;background:var(--theme-primary);color:#fff;font-size:11px;cursor:pointer;">清理</button>' +
     '</div>' +
     '<div class="settings-row" style="margin-top:8px;"><span style="color:var(--theme-text);">通话记录</span><button onclick="closeChatSettings();openCallLogPage();" style="padding:6px 14px;border-radius:12px;border:none;background:var(--theme-primary);color:#fff;font-size:12px;cursor:pointer;">查看</button></div>' +
     '</div>' +    
@@ -23733,6 +24086,72 @@ function clearChatConfirm(){
     showConfirmDialog('确定清空所有聊天记录吗？', function(){
         clearChat();
     }, '清空聊天记录');
+}
+
+// ============ 聊天记录清理选项 ============
+
+async function openClearChatOptions() {
+    // 统计一下当前有多少图片
+    var msgs = await dbGetAll('messages');
+    var imgCount = msgs.filter(function(m) { return m.type === 'image' && m.content && m.content.length > 100; }).length;
+
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:var(--theme-card);border-radius:16px;padding:22px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.2);';
+    dialog.onclick = function(e) { e.stopPropagation(); };
+
+    dialog.innerHTML = `
+        <div style="font-size:16px;font-weight:600;color:var(--theme-text);margin-bottom:16px;text-align:center;">清理聊天记录</div>
+        
+        <div onclick="doClearImages(this)" style="padding:14px 16px;border-radius:12px;background:var(--theme-bg);border:1px solid var(--theme-border);margin-bottom:10px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--theme-primary)'" onmouseout="this.style.borderColor='var(--theme-border)'">
+            <div style="font-size:14px;color:var(--theme-primary);font-weight:500;margin-bottom:4px;">🖼️ 仅清理聊天图片</div>
+            <div style="font-size:11px;color:var(--theme-muted);line-height:1.5;">保留文字记录，清空图片本体释放空间。<br>当前可清理：<span style="color:var(--theme-text);font-weight:600;">${imgCount} 张</span>图片</div>
+        </div>
+
+        <div onclick="doClearAllText(this)" style="padding:14px 16px;border-radius:12px;background:var(--theme-bg);border:1px solid var(--theme-border);margin-bottom:16px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='#e05252'" onmouseout="this.style.borderColor='var(--theme-border)'">
+            <div style="font-size:14px;color:#e05252;font-weight:500;margin-bottom:4px;">🗑️ 清空所有聊天记录</div>
+            <div style="font-size:11px;color:var(--theme-muted);line-height:1.5;">删除所有文字、图片、语音和塔罗记录。<br>此操作不可恢复！</div>
+        </div>
+
+        <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-card);color:var(--theme-muted);font-size:13px;cursor:pointer;">取消</button>
+    `;
+
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+}
+
+// 执行：仅清理图片
+async function doClearImages(el) {
+    var overlay = el.closest('div[style*=fixed]');
+    if (overlay) overlay.remove();
+    
+    showConfirmDialog('确定清理所有图片吗？文字记录会保留。', async function() {
+        var msgs = await dbGetAll('messages');
+        var count = 0;
+        for (var i = 0; i < msgs.length; i++) {
+            if (msgs[i].type === 'image' && msgs[i].content && msgs[i].content.length > 100) {
+                // 把巨大的 base64 替换成一段占位符
+                msgs[i].content = '[图片已被清理]';
+                await dbPut('messages', msgs[i]);
+                count++;
+            }
+        }
+        showToast('✅ 已清理 ' + count + ' 张图片');
+        loadMessages();
+    }, '清理图片');
+}
+
+// 执行：清空全部（保留原有的逻辑）
+function doClearAllText(el) {
+    var overlay = el.closest('div[style*=fixed]');
+    if (overlay) overlay.remove();
+    
+    showConfirmDialog('确定清空所有聊天记录吗？此操作不可恢复！', function() {
+        clearChat();
+    }, '清空记录');
 }
 
 function openSearchByKeyword() {
@@ -24753,7 +25172,41 @@ scheduleStatusUpdate();
 scheduleMoodUpdate();
 startAutoSendIfNeeded();
 
-
+        // 初始化话题库
+        var savedTopics = localStorage.getItem('customTopics');
+        if (!savedTopics) {
+            var defaultTopics = [
+                '你最喜欢一天里的哪个时间段，为什么？',
+                '如果有一整个空闲的下午，你会选择怎么消磨？',
+                '有没有一道简单的食物，吃到就会觉得安心？',
+                '你偏爱晴天还是雨天，会在那样的天气里做什么？',
+                '逛书店或者小店的时候，你常常会被什么样的小东西吸引？',
+                '你听歌更看重歌词，还是旋律本身带来的感觉？',
+                '有没有一种气味，一闻到就会想起某段温柔的时光？',
+                '闲暇的时候，你更爱出门走走，还是独自待在房间里？',
+                '你有没有一直想学，却迟迟没有动身去学的小事？',
+                '如果可以养一株植物，你会选哪一种？',
+                '你觉得舒服的相处，是可以一直说话，还是安静待在一起也不尴尬？',
+                '你觉得人这一生，最重要的感受是什么？',
+                '你怎么理解自由，它对你来说意味着什么？',
+                '有没有一件事，曾经颠覆过你原本固有的看法？',
+                '你认为遗憾本身，有没有它存在的意义？',
+                '你心里定义的“真诚”是什么样子？',
+                '如果给你一次机会，你想要修改过去的某件事吗？',
+                '你觉得，一个人一定要达成很多目标，才算活得有价值吗？',
+                '如果抛开所有外界的评价，你最想成为什么样的自己？',
+                '你相信人和人之间，存在灵魂层面的同频吗？',
+                '快乐一定要有缘由吗，还是可以凭空而来？',
+                '你怎么看待告别，是不是所有关系都要有始有终？',
+                '什么东西，是你无论如何都不愿意妥协的底线？',
+                '你觉得记忆会塑造我们，还是我们在塑造记忆？',
+                '美好是短暂易碎的，正因为这样才更加珍贵吗？',
+                '你认为幸福，是一种终点，还是持续不断的状态？',
+                '你觉得，爱意一定要用盛大隆重的方式证明吗？',
+                '你觉得共情是一种天赋，还是可以慢慢习得的能力？'
+            ];
+            localStorage.setItem('customTopics', JSON.stringify(defaultTopics));
+        }
 
 // ===== 节日检测 =====
 if (typeof Lunar !== 'undefined') {
@@ -25253,6 +25706,13 @@ window.toggleVoiceCapsule = toggleVoiceCapsule;
 window.switchVoiceMode = switchVoiceMode;
 window.playVoiceAndClose = playVoiceAndClose;
 window.playHolidayAndClose = playHolidayAndClose;
+
+window.openClearChatOptions = openClearChatOptions;
+window.doClearImages = doClearImages;
+window.doClearAllText = doClearAllText;
+window.openTopicManager = openTopicManager;
+window.addTopic = addTopic;
+window.deleteTopic = deleteTopic;
 
 
 init();
