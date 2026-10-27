@@ -14367,6 +14367,26 @@ function renderVoiceRoom() {
             .vr-send-btn.active {
                 box-shadow: 0 0 10px rgba(255,42,42,0.4);
             }
+
+            /* 呼吸缩放动画 */
+            @keyframes bgBreathe {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.03); }
+                100% { transform: scale(1); }
+            }
+
+            /* 背景图 */
+            .vr-bg {
+                position: absolute; inset: 0;
+                background-image: url('${bgImage}');
+                background-size: cover;
+                background-position: center 20%;
+                transition: background-image 0.6s ease;
+                z-index: 0;
+                animation: bgBreathe 8s ease-in-out infinite; /* 8秒一个循环，非常平缓 */
+                will-change: transform; /* 开启硬件加速，手机不发烫 */
+            }
+
         </style>
 
         <div class="vr-bg"></div>
