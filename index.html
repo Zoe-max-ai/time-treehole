@@ -10868,7 +10868,7 @@ async function downloadBlob(content, filename) {
 
 // ============ 存储注册表 ============
 var STORAGE_REGISTRY = [
-    // ===== IndexedDB =====
+    // ===== IndexedDB 核心数据 =====
     { id: 'messages',          label: '💬 聊天记录',     type: 'idb', group: '内容' },
     { id: 'boardMessages',     label: '📌 留言板',       type: 'idb', group: '内容' },
     { id: 'callLogs',          label: '📞 通话记录',     type: 'idb', group: '内容' },
@@ -10878,36 +10878,40 @@ var STORAGE_REGISTRY = [
     { id: 'anniversaries',     label: '🎀 纪念日',       type: 'idb', group: '内容' },
     { id: 'tarotHistory',      label: '🔮 塔罗语录',     type: 'idb', group: '内容' },
     { id: 'avatarHistory',     label: '📷 头像历史',     type: 'idb', group: '内容' },
-    { id: 'stories',           label: '📖 倾心之约·剧情',  type: 'idb', group: '内容' },   // ← 新增
-    { id: 'story_categories',  label: '📂 倾心之约·目录',  type: 'idb', group: '内容' },   // ← 新增
+    { id: 'stories',           label: '📖 倾心之约·剧情',  type: 'idb', group: '内容' },
+    { id: 'story_categories',  label: '📂 倾心之约·目录',  type: 'idb', group: '内容' },
+    
+    // ★ 把这几项从 ls 移过来 ★
+    { id: 'echoMessages',        label: '🌳 树洞回音',   type: 'idb', group: '内容' },
+    { id: 'mailLetters',         label: '✉️ 树心邮筒',   type: 'idb', group: '内容' },
+    { id: 'collectedMessages',   label: '💎 收藏',       type: 'idb', group: '内容' },
+    
+    // ===== IndexedDB 状态数据 =====
     { id: 'disabledCards',     label: '🚫 禁用字卡',     type: 'idb', group: '状态' },
     { id: 'disabledGroups',    label: '🚫 禁用分组',     type: 'idb', group: '状态' },
     { id: 'patOptions',        label: '👋 拍一拍',       type: 'idb', group: '状态' },
     { id: 'statusOptions',     label: '💬 状态选项',     type: 'idb', group: '状态' },
+    { id: 'tideDays',            label: '🌊 潮汐记录',   type: 'idb', group: '状态' },
+    { id: 'cardOverridesCache',  label: '✏️ 卡片编辑',   type: 'idb', group: '状态' },
+    { id: 'extraMoodCards',      label: '➕ 心情卡附加', type: 'idb', group: '状态' },
+    { id: 'extraEmotionCards',   label: '➕ 情绪卡附加', type: 'idb', group: '状态' },
+
+    // ===== IndexedDB 设置与图片 =====
     { id: 'avatars',           label: '📷 头像',         type: 'idb', group: '设置' },
     { id: 'settings',          label: '⚙️ 全局设置',     type: 'idb', group: '设置' },
     { id: 'bgSettings',        label: '🖼️ 背景设置',     type: 'idb', group: '设置' },
     { id: 'tarotSettings',     label: '🔮 塔罗设置',     type: 'idb', group: '设置' },
     { id: 'calendarSettings',  label: '📅 日历设置',     type: 'idb', group: '设置' },
-    { id: 'story_meta',        label: '👤 倾心之约·信息卡', type: 'idb', group: '设置' },   // ← 新增
-    { id: 'story_settings',    label: '📖 倾心之约·阅读设置', type: 'idb', group: '设置' }, // ← 新增
+    { id: 'story_meta',        label: '👤 倾心之约·信息卡', type: 'idb', group: '设置' },
+    { id: 'story_settings',    label: '📖 倾心之约·阅读设置', type: 'idb', group: '设置' },
+    { id: 'musicFiles',        label: '🎵 音乐文件',     type: 'idb', group: '设置' }, // 如果有音乐也要带上
 
-
-
-    // ===== localStorage 固定 key =====
-    { id: 'echoMessages',        label: '🌳 树洞回音',   type: 'ls', key: 'echoMessages',        group: '内容' },
-    { id: 'mailLetters',         label: '✉️ 树心邮筒',   type: 'ls', key: 'mailLetters',         group: '内容' },
-    { id: 'collectedMessages',   label: '💎 收藏',       type: 'ls', key: 'collectedMessages',   group: '内容' },
-    { id: 'tideDays',            label: '🌊 潮汐记录',   type: 'ls', key: 'tideDays',            group: '内容' },
-    { id: 'cardOverridesCache',  label: '✏️ 卡片编辑',   type: 'ls', key: 'cardOverridesCache',  group: '状态' },
-    { id: 'extraMoodCards',      label: '➕ 心情卡附加', type: 'ls', key: 'extraMoodCards',      group: '状态' },
-    { id: 'extraEmotionCards',   label: '➕ 情绪卡附加', type: 'ls', key: 'extraEmotionCards',   group: '状态' },
+    // ===== localStorage 固定 key (纯 UI 状态) =====
     { id: 'customBubble',        label: '🎨 自定义气泡', type: 'ls', key: 'customBubble',        group: '设置' },
     { id: 'currentBubblePreset', label: '🎈 气泡预设',   type: 'ls', key: 'currentBubblePreset', group: '设置' },
     { id: 'customBubbleEnabled', label: '🎈 气泡开关',   type: 'ls', key: 'customBubbleEnabled', group: '设置' },
     { id: 'treehole_theme',      label: '🎨 主题',       type: 'ls', key: 'treehole_theme',      group: '设置' },
     { id: 'homeLightText',       label: '🎨 首页文字色', type: 'ls', key: 'homeLightText',       group: '设置' },
-    { id: 'tideCycle',           label: '🌊 潮汐周期',   type: 'ls', key: 'tideCycle',           group: '设置' },
 
     // ===== localStorage 前缀 =====
     { id: 'tm-off',              label: '💭 心情卡开关', type: 'ls-prefix', prefix: 'tm-off-',           group: '状态' },
@@ -24046,18 +24050,22 @@ async function doExportSelected(selectedIds) {
     for (var i = 0; i < selectedIds.length; i++) {
         var entry = STORAGE_REGISTRY.find(function(e) { return e.id === selectedIds[i]; });
         if (!entry) continue;
+        
         var value = await collectStorageItem(entry);
         if (value === null) continue;
+
+        // ★★★ 把剥离大图的逻辑全部删掉！原样导出！ ★★★
+
         if (entry.type === 'idb') data.idb[entry.id] = value;
         else if (entry.type === 'ls') data.ls[entry.key] = value;
-        else if (entry.type === 'ls-prefix') data.lsPrefix[entry.prefix] = value;
+        else if (entry.type === 'lsPrefix') data.lsPrefix[entry.prefix] = value;
         hasData = true;
     }
 
     if (!hasData) { showToast('⚠️ 没有可导出的数据'); return; }
 
     var json = JSON.stringify(data, null, 2);
-    var filename = '时光树洞_2.0_' + new Date().toLocaleDateString().replace(/\//g, '-') + '.json';
+    var filename = '时光树洞_全量备份_' + new Date().toLocaleDateString().replace(/\//g, '-') + '.json';
     await downloadBlob(json, filename);
     localStorage.setItem('lastBackupTime', Date.now());
     showToast('✅ 备份成功');
@@ -24137,7 +24145,47 @@ async function doImportSelected(d, isNewFormat, ids) {
         console.warn('导入后刷新失败:', e);
     }
 
-    showToast('✅ 导入完成，刷新页面后所有内容生效');
+    // 导入后强制刷新 UI 状态
+    try {
+        // 1. 重新应用气泡
+        var savedPreset = localStorage.getItem('currentBubblePreset') || '粉白淡调';
+        if (typeof applyBubblePreset === 'function') {
+            applyBubblePreset(savedPreset, true); 
+        }
+        
+        // 2. 重新应用全局字体
+        var savedFontCss = localStorage.getItem('globalFontCss');
+        if (savedFontCss) {
+            document.documentElement.style.setProperty('--global-font', savedFontCss);
+        }
+
+        // 3. 重新应用主题
+        var savedTheme = localStorage.getItem('treehole_theme');
+        if (savedTheme !== null && typeof applyTheme === 'function') {
+            applyTheme(parseInt(savedTheme) || 0);
+        }
+        
+        // 4. 重新应用背景
+        if (typeof bgLoadSaved === 'function') {
+            await bgLoadSaved();
+            if (bgHomeConfig) bgApplyVars('home', bgHomeConfig);
+            if (bgChatConfig) bgApplyVars('chat', bgChatConfig);
+        }
+
+        // 5. 重新加载卡片背景
+        if (typeof bgLoadCardBgs === 'function') {
+            await bgLoadCardBgs();
+            applyCardBgs();
+        }
+    } catch(e) {
+        console.warn('导入后刷新 UI 失败:', e);
+    }
+
+    showToast('✅ 导入完成，数据已恢复');
+    // 延时刷新页面，让所有数据加载完毕
+    setTimeout(function() {
+        location.reload();
+    }, 1000);
 }
 
 async function clearChat(){
