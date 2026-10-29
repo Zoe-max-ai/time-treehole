@@ -1890,6 +1890,19 @@ body.theme-shuimo .home-page-inner .status span:last-child {
     <button class="tarot-bar-chip" data-spread="dual" onclick="setTarotSpread('dual')">三牌·对照</button>
 </div>
 
+<!-- 拼卡模式悬浮气囊 -->
+<div id="chatModeBubble" style="display:none; position:absolute; right:16px; bottom:70px; z-index:100;">
+    <div id="modeBubbleTrigger" onclick="toggleModeBubbleMenu()" style="background:var(--theme-card); border:1px solid var(--theme-border); padding:6px 12px; border-radius:20px; font-size:12px; color:var(--theme-text); cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.1); display:flex; align-items:center; gap:6px;">
+        <span id="modeBubbleText">🐦 混合</span>
+    </div>
+    <!-- 展开的菜单 -->
+    <div id="modeBubbleMenu" style="display:none; position:absolute; bottom:36px; right:0; background:var(--theme-card); border:1px solid var(--theme-border); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.15); overflow:hidden; min-width:100px;">
+        <div onclick="setChatBubbleMode('short')" style="padding:10px 16px; font-size:13px; cursor:pointer; color:var(--theme-text); border-bottom:1px solid var(--theme-border);">⚡ 简短</div>
+        <div onclick="setChatBubbleMode('mix')" style="padding:10px 16px; font-size:13px; cursor:pointer; color:var(--theme-text); border-bottom:1px solid var(--theme-border);">🐦 混合</div>
+        <div onclick="setChatBubbleMode('deep')" style="padding:10px 16px; font-size:13px; cursor:pointer; color:var(--theme-text);">💖 走心</div>
+    </div>
+</div>
+
 <div class="bottombar" style="position:relative;">
     <button class="quick-emoji-btn" id="btnQuickEmoji" onclick="toggleQuickEmojiPanel()" aria-label="表情">
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -9369,7 +9382,7 @@ const TAROT_ALLOW_DENY = {
 
 // ============ IndexedDB 存储层 ============
 const DB_NAME = 'TimeTreeDB';
-const DB_VERSION = 23;
+const DB_VERSION = 24;
 
 function openDB() {
     return new Promise(function(resolve, reject) {
@@ -9398,7 +9411,8 @@ function openDB() {
                 'pendingReplies', 'echoMessages', 'collectedMessages',
                 'mailState', 'tideDays', 'cardOverridesCache',
                 'extraMoodCards', 'extraEmotionCards', 'dailyCounts',
-                'story_meta', 'story_categories', 'stories', 'story_settings'
+                'story_meta', 'story_categories', 'stories', 'story_settings', 
+     'voiceCards'
             ];
             var KEY_STORES = ['settings', 'bgSettings', 'tarotSettings', 'mailState', 'tideDays', 'cardOverridesCache', 'extraMoodCards', 'extraEmotionCards', 'dailyCounts', 'story_meta', 'story_settings'];
             var MANUAL_ID_STORES = ['mailLetters', 'pendingReplies', 'echoMessages', 'collectedMessages', 'story_categories', 'stories'];
@@ -10868,7 +10882,7 @@ async function downloadBlob(content, filename) {
 
 // ============ 存储注册表 ============
 var STORAGE_REGISTRY = [
-    // ===== IndexedDB 核心数据 =====
+    // ===== IndexedDB 核心内容数据 =====
     { id: 'messages',          label: '💬 聊天记录',     type: 'idb', group: '内容' },
     { id: 'boardMessages',     label: '📌 留言板',       type: 'idb', group: '内容' },
     { id: 'callLogs',          label: '📞 通话记录',     type: 'idb', group: '内容' },
@@ -10880,21 +10894,21 @@ var STORAGE_REGISTRY = [
     { id: 'avatarHistory',     label: '📷 头像历史',     type: 'idb', group: '内容' },
     { id: 'stories',           label: '📖 倾心之约·剧情',  type: 'idb', group: '内容' },
     { id: 'story_categories',  label: '📂 倾心之约·目录',  type: 'idb', group: '内容' },
-    
-    // ★ 把这几项从 ls 移过来 ★
-    { id: 'echoMessages',        label: '🌳 树洞回音',   type: 'idb', group: '内容' },
-    { id: 'mailLetters',         label: '✉️ 树心邮筒',   type: 'idb', group: '内容' },
-    { id: 'collectedMessages',   label: '💎 收藏',       type: 'idb', group: '内容' },
+    { id: 'echoMessages',      label: '🌳 树洞回音',     type: 'idb', group: '内容' },
+    { id: 'mailLetters',       label: '✉️ 树心邮筒',     type: 'idb', group: '内容' },
+    { id: 'collectedMessages', label: '💎 收藏',         type: 'idb', group: '内容' },
+    { id: 'musicLibrary',      label: '💿 黑胶唱片',     type: 'idb', group: '内容' },
+    { id: 'musicFiles',        label: '🎵 音乐文件(大)', type: 'idb', group: '内容' },
     
     // ===== IndexedDB 状态数据 =====
     { id: 'disabledCards',     label: '🚫 禁用字卡',     type: 'idb', group: '状态' },
     { id: 'disabledGroups',    label: '🚫 禁用分组',     type: 'idb', group: '状态' },
     { id: 'patOptions',        label: '👋 拍一拍',       type: 'idb', group: '状态' },
     { id: 'statusOptions',     label: '💬 状态选项',     type: 'idb', group: '状态' },
-    { id: 'tideDays',            label: '🌊 潮汐记录',   type: 'idb', group: '状态' },
-    { id: 'cardOverridesCache',  label: '✏️ 卡片编辑',   type: 'idb', group: '状态' },
-    { id: 'extraMoodCards',      label: '➕ 心情卡附加', type: 'idb', group: '状态' },
-    { id: 'extraEmotionCards',   label: '➕ 情绪卡附加', type: 'idb', group: '状态' },
+    { id: 'tideDays',          label: '🌊 潮汐记录',     type: 'idb', group: '状态' },
+    { id: 'cardOverridesCache',label: '✏️ 卡片编辑',     type: 'idb', group: '状态' },
+    { id: 'extraMoodCards',    label: '➕ 心情卡附加',   type: 'idb', group: '状态' },
+    { id: 'extraEmotionCards', label: '➕ 情绪卡附加',   type: 'idb', group: '状态' },
 
     // ===== IndexedDB 设置与图片 =====
     { id: 'avatars',           label: '📷 头像',         type: 'idb', group: '设置' },
@@ -10904,16 +10918,46 @@ var STORAGE_REGISTRY = [
     { id: 'calendarSettings',  label: '📅 日历设置',     type: 'idb', group: '设置' },
     { id: 'story_meta',        label: '👤 倾心之约·信息卡', type: 'idb', group: '设置' },
     { id: 'story_settings',    label: '📖 倾心之约·阅读设置', type: 'idb', group: '设置' },
-    { id: 'musicFiles',        label: '🎵 音乐文件',     type: 'idb', group: '设置' }, // 如果有音乐也要带上
 
-    // ===== localStorage 固定 key (纯 UI 状态) =====
-    { id: 'customBubble',        label: '🎨 自定义气泡', type: 'ls', key: 'customBubble',        group: '设置' },
-    { id: 'currentBubblePreset', label: '🎈 气泡预设',   type: 'ls', key: 'currentBubblePreset', group: '设置' },
-    { id: 'customBubbleEnabled', label: '🎈 气泡开关',   type: 'ls', key: 'customBubbleEnabled', group: '设置' },
-    { id: 'treehole_theme',      label: '🎨 主题',       type: 'ls', key: 'treehole_theme',      group: '设置' },
-    { id: 'homeLightText',       label: '🎨 首页文字色', type: 'ls', key: 'homeLightText',       group: '设置' },
+    // ===== localStorage 固定 key (UI状态与核心配置) =====
+    { id: 'treehole_theme',        label: '🎨 主题',         type: 'ls', key: 'treehole_theme',        group: '设置' },
+    { id: 'currentBubblePreset',   label: '🎈 气泡预设',     type: 'ls', key: 'currentBubblePreset',   group: '设置' },
+    { id: 'customBubbleEnabled',   label: '🎈 气泡开关',     type: 'ls', key: 'customBubbleEnabled',   group: '设置' },
+    { id: 'customBubble',          label: '🎨 自定义气泡',   type: 'ls', key: 'customBubble',          group: '设置' },
+    { id: 'homeLightText',         label: '🎨 首页文字色',   type: 'ls', key: 'homeLightText',         group: '设置' },
+    
+    // ★ 核心模版和结构配置 ★
+    { id: 'mailboxStructureConfig', label: '⚙️ 回信结构模版', type: 'ls', key: 'mailboxStructureConfig', group: '设置' },
+    { id: 'chatStructureEnabled',   label: '🧩 智能拼卡开关', type: 'ls', key: 'chatStructureEnabled',   group: '设置' },
+    { id: 'chatTemplatesCustom', label: '🧩 聊天拼卡模版', type: 'ls', key: 'chatTemplatesCustom', group: '设置' },
+    // ★ 拼卡模版与模式气囊配置 ★
+    { id: 'chatTemplatesCustom', label: '🧩 自定义拼卡模板', type: 'ls', key: 'chatTemplatesCustom', group: '设置' },
+    { id: 'chatBubbleMode',      label: '🦜 气囊当前模式',   type: 'ls', key: 'chatBubbleMode',      group: '设置' },
+    
+    // ★ 话题模式配置 ★
+    { id: 'currentTopicModeId',    label: '🎭 当前话题模式', type: 'ls', key: 'currentTopicModeId',    group: '设置' },
+    { id: 'customTopicConfig',     label: '🎯 自定义话题权重', type: 'ls', key: 'customTopicConfig',     group: '设置' },
+    { id: 'customTopics',          label: '💡 扭蛋话题库',   type: 'ls', key: 'customTopics',          group: '设置' },
+    
+    { id: 'minimaxApiKey',          label: '🔑 MiniMax Key',     type: 'ls', key: 'minimaxApiKey',          group: '设置' },
+    { id: 'minimaxGroupId',         label: '🔑 MiniMax GroupID', type: 'ls', key: 'minimaxGroupId',         group: '设置' },
+    { id: 'minimaxVoiceId',         label: '🔑 MiniMax VoiceID', type: 'ls', key: 'minimaxVoiceId',         group: '设置' },
+    // ★ 塔罗 AI 配置 ★
+    { id: 'tarotAiEnabled',        label: '🔮 塔罗 AI 开关', type: 'ls', key: 'tarotAiEnabled',        group: '设置' },
+    { id: 'tarotAiKey',            label: '🔮 塔罗 AI Key',  type: 'ls', key: 'tarotAiKey',            group: '设置' },
+    { id: 'tarotSpreadId',         label: '🔮 塔罗默认牌阵', type: 'ls', key: 'tarotSpreadId',         group: '设置' },
 
-    // ===== localStorage 前缀 =====
+    // ★ 拼字卡滑条参数 ★
+    { id: 'mail_cardMin',          label: '✉️ 邮筒最少卡数', type: 'ls', key: 'mail_cardMin',          group: '设置' },
+    { id: 'mail_cardMax',          label: '✉️ 邮筒最多卡数', type: 'ls', key: 'mail_cardMax',          group: '设置' },
+    { id: 'mail_cardRepeatProb',   label: '✉️ 邮筒重复概率', type: 'ls', key: 'mail_cardRepeatProb',   group: '设置' },
+    { id: 'mail_cardDeleteProb',   label: '✉️ 邮筒删除概率', type: 'ls', key: 'mail_cardDeleteProb',   group: '设置' },
+    { id: 'mailbox_cardMin',       label: '🎐 回音最少卡数', type: 'ls', key: 'mailbox_cardMin',       group: '设置' },
+    { id: 'mailbox_cardMax',       label: '🎐 回音最多卡数', type: 'ls', key: 'mailbox_cardMax',       group: '设置' },
+    { id: 'mailbox_cardRepeatProb',label: '🎐 回音重复概率', type: 'ls', key: 'mailbox_cardRepeatProb',group: '设置' },
+    { id: 'mailbox_cardDeleteProb',label: '🎐 回音删除概率', type: 'ls', key: 'mailbox_cardDeleteProb',group: '设置' },
+
+    // ===== localStorage 前缀 (单卡开关等) =====
     { id: 'tm-off',              label: '💭 心情卡开关', type: 'ls-prefix', prefix: 'tm-off-',           group: '状态' },
     { id: 'em-off',              label: '💗 情绪卡开关', type: 'ls-prefix', prefix: 'em-off-',           group: '状态' },
     { id: 'holiday_triggered',   label: '🎉 节日已触发', type: 'ls-prefix', prefix: 'holiday_triggered_', group: '状态' }
@@ -11007,12 +11051,14 @@ function showStoragePicker(title, desc, entries, confirmText, onConfirm) {
         });
     });
 
+    // 把标题、描述、警告、列表、按钮一次性正确拼接
     dialog.innerHTML =
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
         '<span style="font-size:15px;font-weight:600;color:var(--theme-text);">' + title + '</span>' +
         '<span id="pickerToggleAll" style="font-size:12px;color:var(--theme-primary);cursor:pointer;">全选/取消</span>' +
         '</div>' +
-        '<div style="font-size:11px;color:var(--theme-muted);margin-bottom:8px;">' + desc + '</div>' +
+        '<div style="font-size:11px;color:var(--theme-muted);margin-bottom:4px;">' + desc + '</div>' +
+        '<div style="font-size:11px;color:#e05252;margin-bottom:10px;font-weight:500;">⚠️ 注意：导入会覆盖勾选项目现有的数据</div>' + 
         '<div style="flex:1;overflow-y:auto;border:1px solid var(--theme-border);border-radius:10px;padding:6px 10px;">' + listHtml + '</div>' +
         '<div style="display:flex;gap:10px;margin-top:14px;">' +
         '<button id="pickerCancel" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--theme-border);background:var(--theme-card);color:var(--theme-muted);font-size:14px;cursor:pointer;">取消</button>' +
@@ -11150,6 +11196,9 @@ async function openChatPage(){
         // 监听输入，自动保存
         inputEl.addEventListener('input', function() {
             localStorage.setItem('chatDraft', this.value);
+
+    // 检查气囊显示
+    checkChatModeBubbleVisibility();
         });
     }
     }
@@ -11746,6 +11795,19 @@ var summary = (data && data.summary) ? data.summary : '';
         };
         b.appendChild(img);
 
+ } else if (m.type === 'voice') {  // ← 就是从这里开始加的
+        // 语音消息，微信风格气泡
+        var voiceHtml = '<div style="display:flex;flex-direction:column;gap:4px;">' +
+            '<div style="cursor:pointer;display:flex;align-items:center;gap:8px;" onclick="playChatVoice(\'' + m.id + '\')">' +
+                '<div style="width:20px;height:20px;border-radius:50%;background:var(--theme-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;">🔊</div>' +
+                '<div style="color:var(--theme-primary);font-size:14px;font-weight:500;">语音消息 (' + (m.duration || 3) + '")</div>' +
+            '</div>' +
+            '<div id="voice-text-' + m.id + '" style="display:none;font-size:12px;color:var(--theme-muted);padding:6px;background:var(--theme-bg);border-radius:6px;margin-top:4px;white-space:pre-wrap;">' + (m.content || '') + '</div>' +
+            '<span onclick="var t=document.getElementById(\'voice-text-' + m.id + '\');t.style.display=t.style.display===\'none\'?\'block\':\'none\';" style="font-size:10px;color:var(--theme-muted);cursor:pointer;margin-top:2px;display:inline-block;border-bottom:1px dashed var(--theme-muted);">转文字</span>' +
+        '</div>';
+        b.innerHTML = voiceHtml;
+       
+
     } else if (m.type === 'music') {   // ← 就是加在图片代码的下面
         var musicData = JSON.parse(m.content);
         b.innerHTML = `
@@ -11818,6 +11880,20 @@ if (m.mood && m.mood.length) {
     ca.appendChild(w);
     scrollBottom();
 }
+
+window.playChatVoice = async function(msgId) {
+    var msgs = await dbGetAll('messages');
+    var m = msgs.find(function(x) { return String(x.id) === String(msgId); });
+    if (!m) return;
+    
+    if (m.audioData) {
+        new Audio(m.audioData).play();
+    } else if (m.audioUrl) {
+        new Audio(m.audioUrl).play();
+    } else {
+        showToast('⚠️ 音频不存在');
+    }
+};
 
 function openBigImage(src) {
     var overlay = document.createElement('div');
@@ -11983,88 +12059,91 @@ async function showMessageMenu(m, bubble, e) {
     var withinTwoMin = (Date.now() - m.timestamp) < 120000;
     var isMyMsg = (m.sender === 'me');
 
-    // 6 个功能配置
+    // 按照你的截图，直接放两个按钮
+    // 菜单配置（4+3 网格）
     var items = [
-        { id: 'select',  label: '勾选', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>' },
-        { id: 'quote',   label: '引用', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 11H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2z"/><path d="M20 11h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2z"/></svg>' },
-        { id: 'copy',    label: '复制', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' },
-        { id: 'collect', label: '收藏', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' },
-        { id: 'pickup',  label: '拾起', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' },
-        { id: 'delete',  label: (isMyMsg && withinTwoMin) ? '撤回' : '删除', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' }
+        { id: 'select',  label: '勾选', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>' },
+        { id: 'quote',   label: '引用', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 11H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2z"/><path d="M20 11h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2z"/></svg>' },
+        { id: 'copy',    label: '复制', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' },
+        { id: 'collect', label: '收藏', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' },
+        
+        { id: 'pickup_text',  label: '拾起文字', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' },
+        { id: 'pickup_voice', label: '拾起语音', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>' },
+        { id: 'delete',  label: (isMyMsg && withinTwoMin) ? '撤回' : '删除', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' }
     ];
 
     // 生成菜单 HTML
+    // 1. 遮罩层（点击空白处关闭菜单）
+    var mask = document.createElement('div');
+    mask.id = 'msgMenuMask';
+    mask.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.15); z-index:99998; backdrop-filter:blur(1px); animation: fadeIn 0.15s ease;';
+    mask.onclick = function() { mask.remove(); menu.remove(); };
+    document.body.appendChild(mask);
+
+    // 2. 菜单主容器（居中悬浮）
     var menu = document.createElement('div');
     menu.id = 'msgContextMenu';
+    // ★ 关键：用 position:fixed + inset:0 + margin:auto 实现绝对居中，且不会闪烁
     menu.style.cssText = `
         position: fixed; z-index: 99999;
+        inset: 0; margin: auto;
+        width: 290px;
+        height: fit-content;
         background: var(--theme-card);
         border: 1px solid var(--theme-border);
-        border-radius: 14px;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-        overflow: hidden;
-        min-width: 130px;
+        border-radius: 20px;
+        box-shadow: 0 16px 50px rgba(0,0,0,0.2);
+        padding: 20px 16px;
         animation: scaleIn 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
     `;
 
-    items.forEach(function(item, index) {
+    // 3. 网格布局
+    var grid = document.createElement('div');
+    grid.style.cssText = 'display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px 8px;';
+
+    items.forEach(function(item) {
+        var isDelete = item.id === 'delete';
+        var iconColor = isDelete ? '#e05252' : 'var(--theme-primary)';
+        var textColor = isDelete ? '#e05252' : 'var(--theme-text)';
+
         var div = document.createElement('div');
         div.style.cssText = `
-            display: flex; align-items: center; gap: 10px;
-            padding: 12px 16px; font-size: 14px;
-            color: var(--theme-text); cursor: pointer;
-            border-bottom: ${index < items.length - 1 ? '1px solid var(--theme-border)' : 'none'};
-            transition: background 0.15s;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 6px; padding: 10px 0; border-radius: 12px; cursor: pointer; transition: all 0.15s;
         `;
+        
         div.onmouseover = function() { this.style.background = 'var(--theme-bg)'; };
         div.onmouseout = function() { this.style.background = 'transparent'; };
         
-        div.innerHTML = `<span style="color: var(--theme-primary); display: flex; align-items: center;">${item.icon}</span> <span>${item.label}</span>`;
+        div.innerHTML = `
+            <div style="color: ${iconColor};">${item.icon}</div>
+            <div style="font-size: 12px; color: ${textColor}; white-space: nowrap;">${item.label}</div>
+        `;
         
+        // 点击逻辑（完全保留你原来的）
         div.onclick = function() {
+            mask.remove();
             menu.remove();
             if (item.id === 'copy') {
-                navigator.clipboard.writeText(m.content).then(function() {
-                    showToast('✅ 已复制');
-                }).catch(function() { showToast('❌ 复制失败'); });
+                navigator.clipboard.writeText(m.content).then(function() { showToast('✅ 已复制'); }).catch(function() { showToast('❌ 复制失败'); });
             } 
             else if (item.id === 'collect') {
-                addCollected({
-                    sender: m.sender,
-                    content: m.type === 'pat' ? '👋 ' + m.content : m.content,
-                    time: fmtTime(m.timestamp),
-                    timestamp: m.timestamp,
-                    collectedBy: 'me'
-                });
+                addCollected({ sender: m.sender, content: m.type === 'pat' ? '👋 ' + m.content : m.content, time: fmtTime(m.timestamp), timestamp: m.timestamp, collectedBy: 'me' });
                 showToast('✅ 已收藏');
             } 
-            else if (item.id === 'pickup') {
-                handlePickUpMessage(m);
-            }
-            else if (item.id === 'select') {
-                enterSelectMode(m.id);
-            } 
-            else if (item.id === 'quote') {
-                handleQuoteMessage(m);
-            }
+            else if (item.id === 'pickup_text') { handlePickUpMessage(m); }
+            else if (item.id === 'pickup_voice') { handlePickUpVoiceCard(m); }
+            else if (item.id === 'select') { enterSelectMode(m.id); } 
+            else if (item.id === 'quote') { handleQuoteMessage(m); }
             else if (item.id === 'delete') {
-                if (isMyMsg && withinTwoMin) {
-                    showConfirmDialog('确定撤回这条消息？', function() { deleteMessage(m.id); });
-                } else {
-                    showConfirmDialog('确定删除这条消息？', function() { deleteMessage(m.id); });
-                }
+                if (isMyMsg && withinTwoMin) { showConfirmDialog('确定撤回这条消息？', function() { deleteMessage(m.id); }); } 
+                else { showConfirmDialog('确定删除这条消息？', function() { deleteMessage(m.id); }); }
             }
         };
-        menu.appendChild(div);
+        grid.appendChild(div);
     });
 
-    // 定位计算（防止超出屏幕）
-    var x = e.clientX || window.innerWidth / 2;
-    var y = e.clientY || window.innerHeight / 2;
-    // 假定菜单宽 130，高 260
-    menu.style.left = Math.min(x, window.innerWidth - 150) + 'px';
-    menu.style.top = Math.min(y, window.innerHeight - 280) + 'px';
-
+    menu.appendChild(grid);
     document.body.appendChild(menu);
 
     document.addEventListener('click', function closeMenu(ev) {
@@ -12088,36 +12167,36 @@ async function handlePickUpMessage(m) {
             return;
         }
 
-        // 2. 固定使用一个唯一的 groupId，防止重复生成多个分组
+        // 2. 固定使用唯一的 groupId
         var groupName = '拾起';
         var fixedGroupId = 'group_pickup_fixed'; 
 
-        // 3. 检查是否存在这个固定的分组占位符
+        // 3. 检查是否存在固定的分组占位符
         var hasGroup = allCards.some(function(c) { return c.groupId === fixedGroupId && c.content === '__GROUP_PLACEHOLDER__'; });
         if (!hasGroup) {
-            // 如果没有，清理掉以前可能误生成的空“拾起”占位符
+            // 清理旧垃圾
             var toDelete = allCards.filter(function(c) { return c.groupName === groupName && c.content === '__GROUP_PLACEHOLDER__'; });
             for (var i = 0; i < toDelete.length; i++) {
                 await dbDelete('wordcards', toDelete[i].id);
             }
 
-            // 创建唯一的分组占位符
+            // 创建占位符（放到 99 未分类）
             await dbPut('wordcards', {
                 id: Date.now() + Math.random() * 1000,
                 groupId: fixedGroupId,
                 groupName: groupName,
-categoryId: '99', // 放回未分类
+                categoryId: '99', 
                 content: '__GROUP_PLACEHOLDER__',
                 timestamp: Date.now()
             });
         }
 
-        // 4. 存入字卡
+        // 4. 存入字卡（也必须是 99 未分类）
         await dbPut('wordcards', {
             id: Date.now() + Math.random() * 1000,
             groupId: fixedGroupId,
             groupName: groupName,
-            categoryId: '01', // 和上面保持一致
+            categoryId: '99', // ★ 这里必须是 99！
             content: content,
             triggerWords: [],
             tags: ['拾起'],
@@ -12800,6 +12879,7 @@ async function autoReply(triggerText) {
     }, delay);
 }
 async function executeReply(cnt, scheduledTime, triggerText, pendingId, triggerTime) {
+
     // ===== 加锁：防同一 pendingId 并发执行 =====
     if (pendingId) {
         if (!window._executingReplies) window._executingReplies = new Set();
@@ -12816,6 +12896,41 @@ async function executeReply(cnt, scheduledTime, triggerText, pendingId, triggerT
         if (ti) ti.remove();
     
     const cs = S.chatSettings;
+    // ===== 语音拦截 =====
+    if (cs.voiceProb > 0 && Math.random() * 100 < cs.voiceProb) {
+        var voiceCards = await dbGetAll('voiceCards');
+        var validVoices = voiceCards.filter(function(v) { return v.enabled !== false; });
+        
+        if (validVoices.length > 0) {
+            var pick = validVoices[Math.floor(Math.random() * validVoices.length)];
+            
+            // ★ 读取真实时长（优先读 audioData，没有就读 audioUrl）
+            var audioSrc = pick.audioData || pick.audioUrl;
+            var realDuration = await getAudioDuration(audioSrc);
+            
+            var voiceMsg = {
+                sender: 'other',
+                type: 'voice',
+                content: pick.text,
+                audioData: pick.audioData || null,
+                audioUrl: pick.audioUrl || null,
+                duration: realDuration, // ★ 存入真实时长
+                timestamp: scheduledTime || Date.now()
+            };
+            
+            var vId = await dbPut('messages', voiceMsg);
+
+            voiceMsg.id = vId;
+            renderMsg(voiceMsg);
+            scrollBottom();
+            
+            var pendings = JSON.parse(localStorage.getItem('pendingChatReplies') || '[]');
+            pendings = pendings.filter(function(p) { return p.id !== pendingId; });
+            localStorage.setItem('pendingChatReplies', JSON.stringify(pendings));
+            return; 
+        }
+    }
+    // ===== 语音拦截结束 =====
     
     // ===== 引用回复：整个回复只决定一次 =====
     let quoteText = '';
@@ -13553,6 +13668,8 @@ function refreshTopicModeBadge() {
   el.style.color = (currentTopicModeId === 'auto') ? 'var(--theme-muted)' : 'var(--theme-primary)';
 // ★ 加这一行
     if (typeof refreshTarotBar === 'function') refreshTarotBar();
+    // 检查气囊显示
+    if (typeof checkChatModeBubbleVisibility === 'function') checkChatModeBubbleVisibility();
 }
 
 function openTopicModePicker() {
@@ -13784,8 +13901,119 @@ function scoreCardAgainstContext(card, contextFeatures) {
     return score;
 }
 
+// ============ 聊天拼字卡引擎（模块组装 v19） ============
+async function composeChatMessageByStructure(triggerText) {
+    var isEnabled = localStorage.getItem('chatStructureEnabled') === 'true';
+    if (!isEnabled) return null;
+
+    // ★ 这里暂时从 localStorage 读模式，默认是 'mix'
+    var currentMode = localStorage.getItem('chatBubbleMode') || 'mix';
+    
+    // 1. 随机抽一个当前模式下的“小模板”
+    var activeTpl = getRandomChatTemplate(currentMode);
+    if (!activeTpl) return null;
+
+    var candidates = await getCandidatesByMode(currentTopicModeId);
+    if (candidates.length === 0) return null;
+
+    // 2. 把所有卡片按标签分类（新增表情和心里话）
+    var poolByTag = { 
+        '动作': [], '表情': [], '短句': [], '核心': [], 
+        '独立': [], '结尾': [], '心里话': [], '无标签': [] 
+    };
+    
+    candidates.forEach(function(item) {
+        var c = item.card;
+        var text = c.content.trim();
+        if (!text) return;
+        var tags = c.tags || [];
+        
+        if (tags.includes('动作')) poolByTag['动作'].push(text);
+        else if (tags.includes('表情')) poolByTag['表情'].push(text);
+        else if (tags.includes('心里话')) poolByTag['心里话'].push(text);
+        else if (tags.includes('结尾')) poolByTag['结尾'].push(text);
+        else if (tags.includes('短句')) poolByTag['短句'].push(text);
+        else if (tags.includes('独立')) poolByTag['独立'].push(text);
+        else if (tags.includes('核心')) poolByTag['核心'].push(text);
+        else {
+            // 兜底逻辑
+            if (text.length <= 6) poolByTag['短句'].push(text);
+            else if ((text.endsWith("？") || text.endsWith("！")) && text.length < 10) poolByTag['结尾'].push(text);
+            else poolByTag['核心'].push(text);
+        }
+    });
+
+    // 过滤掉太长的话
+    Object.keys(poolByTag).forEach(function(k) {
+        poolByTag[k] = poolByTag[k].filter(function(t) { return t.length <= 40; });
+    });
+
+    // 3. 按模板结构拼装
+    var finalText = '';
+    activeTpl.structure.forEach(function(block) {
+        if (!block.tags || block.tags.length === 0) return;
+        
+        var count = Math.floor(Math.random() * (block.max - block.min + 1)) + block.min;
+        if (count <= 0) return;
+
+        // 把当前区块需要的标签卡合并到一起
+        var currentPool = [];
+        block.tags.forEach(function(tag) {
+            if (poolByTag[tag]) currentPool = currentPool.concat(poolByTag[tag]);
+        });
+
+        // 去重、打乱、抽取
+        currentPool = Array.from(new Set(currentPool));
+        currentPool.sort(function() { return Math.random() - 0.5; });
+        var picked = currentPool.slice(0, count);
+        
+        // 4. 智能拼接规则（核心）
+        picked.forEach(function(text) {
+            var isActionOrExpression = block.tags.includes('动作') || block.tags.includes('表情');
+            var isInnerThought = block.tags.includes('心里话');
+            var isStandalone = block.tags.includes('独立');
+
+            if (isActionOrExpression) {
+                // 动作和表情：单独一行，放在前面
+                finalText += text + '\n';
+            } else if (isInnerThought) {
+                // 心里话：前后换行，用星号包裹（或者用括号，你可以自己定）
+                if (finalText && !finalText.endsWith('\n')) finalText += '\n';
+                finalText += '*' + text + '*\n'; 
+            } else if (isStandalone) {
+                // 独立句：前后换行，自带句号
+                if (finalText && !finalText.endsWith('\n')) finalText += '\n';
+                finalText += text;
+                if (!text.match(/[。！？…]$/)) finalText += '。';
+                finalText += '\n';
+            } else {
+                // 普通短句/核心：如果前面有字且没换行，加逗号
+                if (finalText && !finalText.endsWith('\n') && !finalText.endsWith('，') && !finalText.endsWith('。')) {
+                    finalText += '，';
+                }
+                finalText += text;
+            }
+        });
+    });
+
+    // 5. 收尾：清理多余换行，确保最后一句有标点
+    if (finalText) {
+        finalText = finalText.trim();
+        if (!finalText.match(/[。！？…*]$/)) {
+            finalText += '。';
+        }
+    }
+    return finalText;
+}
+
 // ============ 拼字卡回复 ============
 async function smartComposeReply(triggerText) {
+// ===== 新逻辑拦截 =====
+    var structuredReply = await composeChatMessageByStructure(triggerText);
+    if (structuredReply) {
+        return structuredReply; // 如果开启了开关，并且拼装成功，直接返回！
+    }
+    // =====================
   // 1. 按当前模式筛候选
   var candidates = await getCandidatesByMode(currentTopicModeId);
   if (candidates.length === 0) return '😅 请先在模块设置里勾选聊天分组～';
@@ -15408,6 +15636,22 @@ function checkHoliday() {
     }
 }
 
+async function getMailboxAllGroupNames() {
+    try {
+        var cards = await dbGetAll('wordcards');
+        var groupSet = new Set();
+        cards.forEach(function(c) {
+            // 获取真实的分组名称
+            if (c.groupName && c.groupName !== '__GROUP_PLACEHOLDER__') {
+                groupSet.add(c.groupName);
+            }
+        });
+        return Array.from(groupSet).sort(); // 去重并排序
+    } catch(e) {
+        return [];
+    }
+}
+
 // ============ 字卡库 ============
 function openWordCardLibrary(){showPage('wordcardLibraryPage');renderWordCardLibrary();}
 async function getAllGroups() {
@@ -15471,6 +15715,7 @@ async function renderWordCardLibrary() {
 '<button id="wcTabNormal" onclick="switchWordcardTab(\'normal\')" style="flex:1;padding:10px 6px;border-radius:12px;border:1.5px solid var(--theme-primary);background:var(--theme-primary);color:#fff;font-size:13px;cursor:pointer;">聊天</button>' +
 '<button id="wcTabEmotion" onclick="switchWordcardTab(\'emotion\')" style="flex:1;padding:10px 6px;border-radius:12px;border:1.5px solid var(--theme-primary);background:var(--theme-card);color:var(--theme-muted);font-size:13px;cursor:pointer;">情绪</button>' +
 '<button id="wcTabMood" onclick="switchWordcardTab(\'mood\')" style="flex:1;padding:10px 6px;border-radius:12px;border:1.5px solid var(--theme-primary);background:var(--theme-card);color:var(--theme-muted);font-size:13px;cursor:pointer;">心情</button>' +
+'<button id="wcTabVoice" onclick="switchWordcardTab(\'voice\')" style="flex:1;padding:10px 6px;border-radius:12px;border:1.5px solid var(--theme-primary);background:var(--theme-card);color:var(--theme-muted);font-size:13px;cursor:pointer;">语音</button>' +
 '</div>' +
 
 '<div id="wcPanelNormal">' +
@@ -15483,6 +15728,7 @@ async function renderWordCardLibrary() {
 '<button onclick="exportCardsJSON()" style="padding:8px 2px;border-radius:10px;background:var(--theme-primary);border:none;color:#fff;font-size:10px;cursor:pointer;white-space:nowrap;">导出</button>' +
 '<button onclick="openModuleSettings()" style="padding:8px 2px;border-radius:10px;background:var(--theme-primary);border:none;color:#fff;font-size:10px;cursor:pointer;white-space:nowrap;">管理</button>' +
 '<button onclick="openClearMenu()" style="padding:8px 2px;border-radius:10px;background:var(--theme-primary);border:none;color:#fff;font-size:10px;cursor:pointer;white-space:nowrap;">清空</button>' +
+
 '</div>' +
     // ===== 搜索框 =====
     '<input type="text" class="wordcard-global-search" id="wordcardGlobalSearch" placeholder="🔍 搜索全部字卡..." oninput="searchAllCardsAndDisplay()" style="width:100%;max-width:100%;box-sizing:border-box;padding:8px 12px;border-radius:14px;border:1.5px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:12px;outline:none;margin-bottom:8px;">' +
@@ -15504,6 +15750,9 @@ async function renderWordCardLibrary() {
 '<div id="wcPanelMood" style="display:none;">' +
 '<div id="moodTabContent"></div>' +
 '</div>' +
+'<div id="wcPanelVoice" style="display:none;">' +
+'<div id="voiceTabContent"></div>' +
+'</div>' +
 
     '</div></div>';
     
@@ -15512,6 +15761,128 @@ async function renderWordCardLibrary() {
 setTimeout(function() {
     viewAllCards(1);
 }, 100);
+}
+
+// ===== 批量打标签弹窗 =====
+function openBatchTagMenu() {
+    var selectedIds = getSelectedCardIds();
+    if (selectedIds.length === 0) {
+        showToast('⚠️ 请先在列表中勾选要打标的字卡');
+        return;
+    }
+
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:var(--theme-card);border-radius:16px;padding:20px;width:100%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.15);';
+    
+    // 生成标签按钮
+    var tagsHtml = ['动作', '短句', '核心', '结尾', '独立', '表情', '心里话'].map(function(tag) {
+        return '<div class="batch-tag-btn" data-tag="' + tag + '" onclick="toggleBatchTag(this)" style="padding:8px 12px;border-radius:12px;font-size:13px;cursor:pointer;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);text-align:center;transition:all 0.2s;">' + tag + '</div>';
+    }).join('');
+
+    dialog.innerHTML = `
+        <div style="font-size:16px;font-weight:600;color:var(--theme-text);margin-bottom:8px;text-align:center;">批量添加标签</div>
+        <div style="font-size:12px;color:var(--theme-muted);text-align:center;margin-bottom:16px;">已选中 ${selectedIds.length} 张字卡</div>
+        
+        <div style="font-size:12px;color:var(--theme-text);margin-bottom:8px;">点击选择要添加的标签（可多选）：</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">
+            ${tagsHtml}
+        </div>
+        
+        <div style="display:flex;gap:10px;margin-top:16px;">
+            <button id="batchTagCancel" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--theme-border);background:var(--theme-card);color:var(--theme-muted);font-size:14px;cursor:pointer;">取消</button>
+            <button id="batchTagConfirm" style="flex:1;padding:10px;border-radius:12px;border:none;background:var(--theme-primary);color:#fff;font-size:14px;cursor:pointer;">确认添加</button>
+        </div>
+    `;
+
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    dialog.querySelector('#batchTagCancel').onclick = function() { overlay.remove(); };
+    
+    dialog.querySelector('#batchTagConfirm').onclick = async function() {
+        var selectedTags = [];
+        dialog.querySelectorAll('.batch-tag-btn.active').forEach(function(el) {
+            selectedTags.push(el.dataset.tag);
+        });
+        
+        if (selectedTags.length === 0) {
+            showToast('⚠️ 请至少选择一个标签');
+            return;
+        }
+
+        overlay.remove();
+        await doBatchAddTags(selectedIds, selectedTags);
+    };
+}
+
+// 切换批量标签按钮状态
+function toggleBatchTag(el) {
+    var isActive = el.classList.toggle('active');
+    if (isActive) {
+        el.style.background = 'var(--theme-primary)';
+        el.style.color = '#fff';
+        el.style.borderColor = 'var(--theme-primary)';
+    } else {
+        el.style.background = 'var(--theme-input-bg)';
+        el.style.color = 'var(--theme-text)';
+        el.style.borderColor = 'var(--theme-input-border)';
+    }
+}
+
+// 执行批量打标
+async function doBatchAddTags(ids, newTags) {
+    var allCards = await dbGetAll('wordcards');
+    var count = 0;
+
+    allCards.forEach(function(c) {
+        if (!ids.includes(String(c.id))) return;
+
+        // 获取原有标签
+        var currentTags = Array.isArray(c.tags) ? c.tags : [];
+        
+        // 功能标签互斥逻辑：如果是动作，就删掉核心等（可选，你可以去掉这个互斥）
+        var exclusiveMap = {
+            '动作': ['短句', '核心', '结尾', '独立'],
+            '核心': ['动作'],
+            '短句': ['动作'],
+            '结尾': ['动作'],
+            '独立': ['动作']
+        };
+
+        // 先把新标签加进去
+        newTags.forEach(function(t) {
+            if (!currentTags.includes(t)) currentTags.push(t);
+        });
+
+        // 再做互斥清理（比如加了独立，就把动作、核心删了）
+        newTags.forEach(function(t) {
+            if (exclusiveMap[t]) {
+                currentTags = currentTags.filter(function(existingTag) {
+                    return !exclusiveMap[t].includes(existingTag);
+                });
+            }
+        });
+
+        c.tags = currentTags;
+        count++;
+    });
+
+    // 保存回数据库
+    await idbClear('wordcards');
+    for (var i = 0; i < allCards.length; i++) {
+        await dbPut('wordcards', allCards[i]);
+    }
+
+    showToast('✅ 已为 ' + count + ' 张卡添加标签');
+    
+    // 刷新页面列表
+    if (typeof viewAllCards === 'function') {
+        viewAllCards(1);
+    }
 }
 
 // ============ 笺语成册 · Tab 切换 ============
@@ -15534,7 +15905,10 @@ function switchWordcardTab(tab) {
     document.getElementById('wcPanelNormal').style.display = (tab === 'normal') ? 'block' : 'none';
     document.getElementById('wcPanelEmotion').style.display = (tab === 'emotion') ? 'block' : 'none';
     document.getElementById('wcPanelMood').style.display = (tab === 'mood') ? 'block' : 'none';
-    if (tab === 'mood') renderMoodTab();
+document.getElementById('wcPanelVoice').style.display = (tab === 'voice') ? 'block' : 'none';
+
+if (tab === 'mood') renderMoodTab();
+if (tab === 'voice') renderVoiceTab(); 
     if (tab === 'emotion') renderEmotionTab();
 }
 
@@ -15601,6 +15975,368 @@ function selectMoodGroup(g) {
     currentMoodGroup = g;
     renderMoodTab();
 }
+
+
+
+
+var currentVoiceCat = '全部';
+
+// 渲染语音 Tab 列表
+async function renderVoiceTab() {
+    var container = document.getElementById('voiceTabContent');
+    if (!container) return;
+
+    var cards = await dbGetAll('voiceCards');
+    
+    // 获取所有分类
+    var cats = ['全部'];
+    cards.forEach(function(c) {
+        if (c.category && cats.indexOf(c.category) === -1) cats.push(c.category);
+    });
+
+    // 过滤
+    var filtered = cards.filter(function(c) {
+        if (currentVoiceCat !== '全部' && c.category !== currentVoiceCat) return false;
+        return true;
+    });
+
+    var h = '';
+    
+    // 搜索 & 添加
+    h += '<div style="display:flex;gap:8px;margin-bottom:12px;">';
+    h += '<input type="text" id="voiceSearchInput" placeholder="🔍 搜索语音文字..." oninput="filterVoiceCards()" style="flex:1;padding:8px 12px;border-radius:14px;border:1.5px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:12px;outline:none;">';
+    h += '<button onclick="openAddVoiceCardDialog()" style="padding:8px 16px;border-radius:14px;background:var(--theme-primary);color:#fff;border:none;font-size:12px;cursor:pointer;white-space:nowrap;">+ 添加</button>';
+    h += '</div>';
+    
+    // 分类 Chip
+    h += '<div style="display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px 0;-webkit-overflow-scrolling:touch;">';
+    cats.forEach(function(cat) {
+        var isActive = cat === currentVoiceCat;
+        h += '<div onclick="switchVoiceCat(\'' + cat + '\')" style="flex:0 0 auto;padding:8px 14px;border-radius:16px;border:1.5px solid ' + (isActive ? 'var(--theme-primary)' : 'var(--theme-border)') + ';background:' + (isActive ? 'var(--theme-primary)' : 'var(--theme-card)') + ';color:' + (isActive ? '#fff' : 'var(--theme-text)') + ';font-size:12px;cursor:pointer;white-space:nowrap;">' + cat + '</div>';
+    });
+    h += '</div>';
+
+    // 列表
+    h += '<div id="voiceListContainer" style="display:flex;flex-direction:column;gap:10px;">';
+    if (filtered.length === 0) {
+        h += '<div style="text-align:center;color:var(--theme-muted);padding:40px;font-size:13px;">没有找到语音卡</div>';
+    } else {
+        filtered.forEach(function(c) {
+            h += buildVoiceCardHTML(c);
+        });
+    }
+    h += '</div>';
+
+    container.innerHTML = h;
+}
+
+// 构建单个卡片 HTML（加入防报错处理）
+function buildVoiceCardHTML(c) {
+    var isOn = c.enabled !== false;
+    var sourceName = c.source === 'builtin' ? '内置' : (c.source === 'upload' ? '本地' : 'AI');
+    var safeText = encodeURIComponent(c.text || ''); 
+    var safeId = encodeURIComponent(String(c.id));
+
+    return '<div class="voice-card-item" data-text="' + (c.text || '').replace(/"/g, '&quot;').toLowerCase() + '" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;' + (isOn ? '' : 'opacity:0.5;') + '">' +
+        '<div onclick="playRealVoiceCard(\'' + safeId + '\')" style="width:32px;height:32px;border-radius:50%;background:var(--theme-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;cursor:pointer;">▶</div>' +
+        '<div style="flex:1;min-width:0;">' +
+            '<div style="font-size:14px;color:var(--theme-text);line-height:1.4;cursor:pointer;" onclick="openVoiceCardDetail(\'' + safeId + '\')">' + (c.text || '无文字') + '</div>' +
+            '<div style="font-size:11px;color:var(--theme-muted);margin-top:4px;display:flex;gap:6px;">' +
+                '<span>#' + (c.category || '未分类') + '</span>' +
+                '<span>#' + sourceName + '</span>' +
+            '</div>' +
+        '</div>' +
+        '<div class="toggle-switch ' + (isOn ? 'on' : '') + '" onclick="toggleVoiceCard(\'' + safeId + '\')" style="flex-shrink:0;"></div>' +
+    '</div>';
+}
+
+// 切换分类
+window.switchVoiceCat = function(cat) {
+    currentVoiceCat = cat;
+    renderVoiceTab();
+};
+
+// 搜索过滤
+window.filterVoiceCards = function() {
+    var kw = (document.getElementById('voiceSearchInput').value || '').toLowerCase();
+    document.querySelectorAll('.voice-card-item').forEach(function(el) {
+        var text = el.getAttribute('data-text') || '';
+        el.style.display = text.indexOf(kw) > -1 ? 'flex' : 'none';
+    });
+};
+
+// 开关单条语音
+window.toggleVoiceCard = async function(safeId) {
+    var id = decodeURIComponent(safeId);
+    var cards = await dbGetAll('voiceCards');
+    var c = cards.find(function(x) { return String(x.id) === String(id); });
+    if (!c) return;
+    c.enabled = (c.enabled === false) ? true : false;
+    await dbPut('voiceCards', c);
+    renderVoiceTab();
+};
+
+// 真实播放逻辑（先用浏览器自带的 Audio 测试）
+window.playRealVoiceCard = async function(safeId) {
+    var id = decodeURIComponent(safeId);
+    var cards = await dbGetAll('voiceCards');
+    var c = cards.find(function(x) { return String(x.id) === String(id); });
+    if (!c) return;
+    
+    if (c.audioData) {
+        var audio = new Audio(c.audioData);
+        audio.play();
+    } else if (c.audioUrl) {
+        var audio2 = new Audio(c.audioUrl);
+        audio2.play();
+    } else {
+        showToast('⚠️ 暂无音频数据');
+    }
+};
+
+// 打开添加语音卡弹窗
+window.openAddVoiceCardDialog = function() {
+    var dialogRef = null;
+    createDialog({
+        title: '➕ 添加语音卡',
+        content: '<div style="text-align:left;">' +
+                '<div style="font-size:12px;color:var(--theme-muted);margin-bottom:4px;">配套文字</div>' +
+                '<input type="text" id="newVoiceText" placeholder="这句话的内容..." style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:14px;outline:none;box-sizing:border-box;margin-bottom:12px;">' +
+                
+                '<div style="font-size:12px;color:var(--theme-muted);margin-bottom:4px;">分类</div>' +
+                '<input type="text" id="newVoiceCat" placeholder="如：日常、吃醋、亲昵" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:14px;outline:none;box-sizing:border-box;margin-bottom:12px;">' +
+                
+                '<div style="font-size:12px;color:var(--theme-muted);margin-bottom:4px;">音频来源</div>' +
+                '<div style="display:flex;gap:10px;margin-bottom:12px;">' +
+                    '<button id="vcBtnLocal" onclick="switchVoiceSource(\'local\')" style="flex:1;padding:8px;border-radius:10px;border:1.5px solid var(--theme-primary);background:var(--theme-primary);color:#fff;font-size:12px;cursor:pointer;">本地上传</button>' +
+                    '<button id="vcBtnAi" onclick="switchVoiceSource(\'ai\')" style="flex:1;padding:8px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-card);color:var(--theme-text);font-size:12px;cursor:pointer;">✨ AI生成</button>' +
+                '</div>' +
+                
+                '<div id="vcSourceLocal">' +
+                    '<input type="file" id="newVoiceFile" accept="audio/*" style="width:100%;font-size:12px;color:var(--theme-text);">' +
+                '</div>' +
+                '<div id="vcSourceAi" style="display:none;color:var(--theme-muted);font-size:12px;text-align:center;padding:10px;border:1px dashed var(--theme-border);border-radius:10px;">点击保存后，将自动调用 MiniMax 生成语音</div>' +
+                '</div>',
+        buttons: [
+            { text: '取消' },
+            { text: '保存', primary: true, onClick: async function() {
+                var text = dialogRef.querySelector('#newVoiceText').value.trim();
+                var cat = dialogRef.querySelector('#newVoiceCat').value.trim() || '未分类';
+                var isAi = dialogRef.querySelector('#vcBtnAi').style.background === 'var(--theme-primary)';
+                
+                if (!text) { showToast('⚠️ 请填写文字'); return; }
+                
+                if (isAi) {
+                    // 调用 AI 生成
+                    showToast('⏳ 正在生成语音，请稍候...');
+                    var audioData = await generateMinimaxAudio(text);
+                    if (!audioData) {
+                        showToast('❌ 生成失败，请检查配置'); return;
+                    }
+                    await dbPut('voiceCards', {
+                        id: 'vc_' + Date.now(),
+                        text: text, category: cat,
+                        audioData: audioData, // 存入 Base64
+                        source: 'ai', tags: ['独立'], enabled: true, timestamp: Date.now()
+                    });
+                } else {
+                    // 本地文件
+                    var file = dialogRef.querySelector('#newVoiceFile').files[0];
+                    if (!file) { showToast('⚠️ 请选择音频文件'); return; }
+                    showToast('⏳ 处理中...');
+                    var base64Audio = await fileToDataUrl(file);
+                    await dbPut('voiceCards', {
+                        id: 'vc_' + Date.now(),
+                        text: text, category: cat,
+                        audioData: base64Audio,
+                        source: 'upload', tags: ['独立'], enabled: true, timestamp: Date.now()
+                    });
+                }
+                
+                showToast('✅ 语音卡已添加');
+                dialogRef.closest('div[style*=fixed]').remove();
+                renderVoiceTab();
+            }}
+        ],
+        onOpen: function(d) { dialogRef = d; }
+    });
+};
+
+// 切换来源的 UI 辅助函数
+window.switchVoiceSource = function(type) {
+    var btnL = document.getElementById('vcBtnLocal');
+    var btnA = document.getElementById('vcBtnAi');
+    var boxL = document.getElementById('vcSourceLocal');
+    var boxA = document.getElementById('vcSourceAi');
+    if (type === 'local') {
+        btnL.style.background = 'var(--theme-primary)'; btnL.style.color = '#fff'; btnL.style.border = '1.5px solid var(--theme-primary)';
+        btnA.style.background = 'var(--theme-card)'; btnA.style.color = 'var(--theme-text)'; btnA.style.border = '1px solid var(--theme-border)';
+        boxL.style.display = 'block'; boxA.style.display = 'none';
+    } else {
+        btnA.style.background = 'var(--theme-primary)'; btnA.style.color = '#fff'; btnA.style.border = '1.5px solid var(--theme-primary)';
+        btnL.style.background = 'var(--theme-card)'; btnL.style.color = 'var(--theme-text)'; btnL.style.border = '1px solid var(--theme-border)';
+        boxA.style.display = 'block'; boxL.style.display = 'none';
+    }
+};
+
+window.handlePickUpMessage = async function(m) {
+    try {
+        var content = m.content;
+        if (m.type === 'emoji' || m.type === 'image') { 
+            showToast('⚠️ 暂不支持拾起表情/图片'); 
+            return; 
+        }
+        if (!content) { showToast('⚠️ 消息为空'); return; }
+        
+        var allCards = await dbGetAll('wordcards');
+        
+        // 查重
+        if (allCards.some(function(c) { return c.content === content && c.groupName === '拾起'; })) {
+            showToast('✨ 这张字卡已经在你的拾起库中啦'); 
+            return;
+        }
+
+        var groupName = '拾起';
+        var fixedGroupId = 'group_pickup_fixed'; 
+
+        // 确保占位符存在
+        var hasGroup = allCards.some(function(c) { return c.groupId === fixedGroupId && c.content === '__GROUP_PLACEHOLDER__'; });
+        if (!hasGroup) {
+            var toDelete = allCards.filter(function(c) { return c.groupName === groupName && c.content === '__GROUP_PLACEHOLDER__'; });
+            for (var i = 0; i < toDelete.length; i++) { await dbDelete('wordcards', toDelete[i].id); }
+            await dbPut('wordcards', {
+                id: Date.now() + Math.random() * 1000, 
+                groupId: fixedGroupId, 
+                groupName: groupName,
+                categoryId: '99', 
+                content: '__GROUP_PLACEHOLDER__', 
+                timestamp: Date.now()
+            });
+        }
+
+        // 存入字卡
+        await dbPut('wordcards', {
+            id: Date.now() + Math.random() * 1000, 
+            groupId: fixedGroupId, 
+            groupName: groupName,
+            categoryId: '99', 
+            content: content, 
+            triggerWords: [], 
+            tags: ['拾起'], 
+            weight: 2, 
+            timestamp: Date.now()
+        });
+        
+        showToast('✨ 已拾起，存入字卡库');
+    } catch(e) { 
+        console.error(e);
+        showToast('❌ 拾起失败'); 
+    }
+};
+
+// 点击卡片文字，展开/收起操作区
+window.openVoiceCardDetail = function(safeId) {
+    var id = decodeURIComponent(safeId);
+    // 找到这个卡片所在的 DOM
+    var cards = document.querySelectorAll('.voice-card-item');
+    var targetCard = null;
+    cards.forEach(function(el) {
+        // 通过播放按钮的 onclick 属性来匹配
+        var btn = el.querySelector('div[onclick*="playRealVoiceCard"]');
+        if (btn && btn.getAttribute('onclick').indexOf(safeId) > -1) {
+            targetCard = el;
+        }
+    });
+    if (!targetCard) return;
+
+    // 查找是不是已经有展开的详情区了
+    var detail = targetCard.querySelector('.voice-card-detail');
+    if (detail) {
+        // 如果有，就收起并移除
+        detail.remove();
+        return;
+    }
+
+    // 如果没有，就去数据库拿完整数据并渲染展开区
+    dbGetAll('voiceCards').then(function(list) {
+        var c = list.find(function(x) { return String(x.id) === String(id); });
+        if (!c) return;
+
+        var tagsHtml = (c.tags || []).map(function(t) {
+            return '<span style="font-size:10px;padding:2px 6px;background:var(--theme-bg);border-radius:4px;color:var(--theme-muted);margin-right:4px;">' + t + '</span>';
+        }).join('');
+
+        var detailHtml = '<div class="voice-card-detail" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--theme-border);width:100%;">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+                '<div style="display:flex;flex-wrap:wrap;">' + (tagsHtml || '<span style="font-size:11px;color:var(--theme-muted);">暂无标签</span>') + '</div>' +
+                '<div style="display:flex;gap:12px;color:var(--theme-primary);font-size:12px;cursor:pointer;">' +
+                    '<span onclick="editVoiceCard(\'' + safeId + '\')">✏️ 编辑</span>' +
+                    '<span onclick="deleteVoiceCard(\'' + safeId + '\')">🗑️ 删除</span>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+
+        // 把卡片改成竖排，方便把详情塞在下面
+        targetCard.style.flexDirection = 'column';
+        targetCard.style.alignItems = 'stretch';
+        // 但要把上方的横向内容包起来，不然会乱
+        var topWrap = document.createElement('div');
+        topWrap.style.cssText = 'display:flex;align-items:center;gap:12px;width:100%;';
+        
+        // 把除了详情之外的子元素移进 topWrap
+        while (targetCard.firstChild) {
+            topWrap.appendChild(targetCard.firstChild);
+        }
+        targetCard.appendChild(topWrap);
+        targetCard.insertAdjacentHTML('beforeend', detailHtml);
+    });
+};
+
+// 删除语音卡
+window.deleteVoiceCard = function(safeId) {
+    var id = decodeURIComponent(safeId);
+    storyConfirm('确定删除这张语音卡吗？', async function() {
+        await dbDelete('voiceCards', toIdbKey(id));
+        showToast('🗑 已删除');
+        renderVoiceTab();
+    }, '删除语音卡');
+};
+
+// 编辑语音卡（修改文字、分类和标签）
+window.editVoiceCard = function(safeId) {
+    var id = decodeURIComponent(safeId);
+    dbGetAll('voiceCards').then(function(list) {
+        var c = list.find(function(x) { return String(x.id) === String(id); });
+        if (!c) return;
+
+        var dialogRef = null;
+        createDialog({
+            title: '✏️ 编辑语音卡',
+            content: '<div style="text-align:left;">' +
+                    '<div style="font-size:12px;color:var(--theme-muted);margin-bottom:4px;">配套文字</div>' +
+                    '<input type="text" id="editVoiceText" value="' + (c.text || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:14px;outline:none;box-sizing:border-box;margin-bottom:12px;">' +
+                    '<div style="font-size:12px;color:var(--theme-muted);margin-bottom:4px;">分类</div>' +
+                    '<input type="text" id="editVoiceCat" value="' + (c.category || '') + '" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:14px;outline:none;box-sizing:border-box;margin-bottom:12px;">' +
+                    '<div style="font-size:12px;color:var(--theme-muted);margin-bottom:4px;">标签（逗号分隔）</div>' +
+                    '<input type="text" id="editVoiceTags" value="' + (c.tags || []).join('，') + '" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:14px;outline:none;box-sizing:border-box;">' +
+                    '</div>',
+            buttons: [
+                { text: '取消' },
+                { text: '保存', primary: true, onClick: async function() {
+                    c.text = dialogRef.querySelector('#editVoiceText').value.trim();
+                    c.category = dialogRef.querySelector('#editVoiceCat').value.trim() || '未分类';
+                    c.tags = dialogRef.querySelector('#editVoiceTags').value.split(/[，,]/).map(function(t){return t.trim()}).filter(Boolean);
+                    
+                    await dbPut('voiceCards', c);
+                    showToast('✅ 已保存');
+                    dialogRef.closest('div[style*=fixed]').remove();
+                    renderVoiceTab();
+                }}
+            ],
+            onOpen: function(d) { dialogRef = d; }
+        });
+    });
+};
 
 // ============ 情绪字卡 Tab ============
 var currentEmotionType = 'mood';
@@ -16801,8 +17537,10 @@ showResults.forEach(function(c) {
         }
         
         h += '<div style="display:flex;gap:8px;margin-top:12px;">';
-        h += '<button onclick="batchDeleteSearchResults()" style="flex:1;padding:10px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:14px;cursor:pointer;">批量删除</button>';
-        h += '<button onclick="batchMoveSearchResults()" style="flex:1;padding:10px;border-radius:12px;background:var(--theme-primary);border:none;color:#fff;font-size:14px;cursor:pointer;">批量移动</button>';
+        // 注意这里是针对搜索结果的函数
+        h += '<button onclick="batchDeleteSearchResults()" style="flex:1;padding:10px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:13px;cursor:pointer;">批量删除</button>';
+        h += '<button onclick="batchMoveSearchResults()" style="flex:1;padding:10px;border-radius:12px;background:var(--theme-primary);border:none;color:#fff;font-size:13px;cursor:pointer;">批量移动</button>';
+        h += '<button onclick="openBatchTagMenu()" style="flex:1;padding:10px;border-radius:12px;background:var(--theme-card);border:1.5px solid var(--theme-primary);color:var(--theme-primary);font-size:13px;cursor:pointer;">批量打标</button>';
         h += '</div></div>';
         
         co.innerHTML = h;
@@ -17278,10 +18016,11 @@ async function viewCategoryCards(categoryId) {
   });
 
   // 底部批量操作
-  h += '<div style="display:flex;gap:8px;margin-top:12px;">';
-  h += '  <button onclick="batchDeleteCards(\'all\')" style="flex:1;padding:10px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:14px;cursor:pointer;">批量删除</button>';
-  h += '  <button onclick="batchMoveCards(\'all\')" style="flex:1;padding:10px;border-radius:12px;background:var(--theme-primary);border:none;color:#fff;font-size:14px;cursor:pointer;">批量移动</button>';
-  h += '</div>';
+    h += '<div style="display:flex;gap:8px;margin-top:12px;">';
+    h += '<button onclick="batchDeleteCards(\'all\')" style="flex:1;padding:10px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:13px;cursor:pointer;">批量删除</button>';
+    h += '<button onclick="batchMoveCards(\'all\')" style="flex:1;padding:10px;border-radius:12px;background:var(--theme-primary);border:none;color:#fff;font-size:13px;cursor:pointer;">批量移动</button>';
+    h += '<button onclick="openBatchTagMenu()" style="flex:1;padding:10px;border-radius:12px;background:var(--theme-card);border:1.5px solid var(--theme-primary);color:var(--theme-primary);font-size:13px;cursor:pointer;">批量打标</button>';
+    h += '</div>';
 
   h += '</div>';
 
@@ -17350,8 +18089,9 @@ async function viewGroupCards(gid, gname) {
     });
 
     h += '<div style="display:flex;gap:8px;margin-top:12px;">';
-    h += '<button onclick="batchDeleteCards(\'all\')" style="flex:1;padding:10px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:14px;cursor:pointer;">批量删除</button>';
-    h += '<button onclick="batchMoveCards(\'all\')" style="flex:1;padding:10px;border-radius:12px;background:var(--theme-primary);border:none;color:#fff;font-size:14px;cursor:pointer;">批量移动</button>';
+    h += '<button onclick="batchDeleteCards(\'all\')" style="flex:1;padding:10px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:13px;cursor:pointer;">批量删除</button>';
+    h += '<button onclick="batchMoveCards(\'all\')" style="flex:1;padding:10px;border-radius:12px;background:var(--theme-primary);border:none;color:#fff;font-size:13px;cursor:pointer;">批量移动</button>';
+    h += '<button onclick="openBatchTagMenu()" style="flex:1;padding:10px;border-radius:12px;background:var(--theme-card);border:1.5px solid var(--theme-primary);color:var(--theme-primary);font-size:13px;cursor:pointer;">批量打标</button>';
     h += '</div></div>';
   }
 
@@ -17660,13 +18400,24 @@ async function editCardContent(cardId, groupId) {
             '<div style="text-align:left;">' +
             '<div style="font-size:12px;color:var(--dialog-muted);margin-bottom:4px;">内容</div>' +
             '<textarea id="editCardContentInput" style="width:100%;min-height:70px;padding:10px 12px;border-radius:var(--input-radius);border:1.5px solid var(--input-border);font-size:14px;outline:none;box-sizing:border-box;resize:vertical;font-family:inherit;margin-bottom:12px;background:var(--input-bg);color:var(--dialog-text);">' + card.content + '</textarea>' +
+            
             '<div style="font-size:12px;color:var(--dialog-muted);margin-bottom:4px;">触发词（逗号分隔）</div>' +
             '<input type="text" id="editCardTriggerInput" value="' + tw + '" placeholder="如：想你，想见你" style="width:100%;padding:8px 12px;border-radius:var(--input-radius);border:1.5px solid var(--input-border);font-size:13px;outline:none;box-sizing:border-box;margin-bottom:12px;background:var(--input-bg);color:var(--dialog-text);">' +
+            
+            // 👇 修改了这里的 placeholder
             '<div style="font-size:12px;color:var(--dialog-muted);margin-bottom:4px;">标签（逗号分隔）</div>' +
-            '<input type="text" id="editCardTagsInput" value="' + tg + '" placeholder="如：温柔，占有" style="width:100%;padding:8px 12px;border-radius:var(--input-radius);border:1.5px solid var(--input-border);font-size:13px;outline:none;box-sizing:border-box;margin-bottom:12px;background:var(--input-bg);color:var(--dialog-text);">' +
+            '<input type="text" id="editCardTagsInput" value="' + tg + '" placeholder="点击下方快捷键添加，或手动输入" style="width:100%;padding:8px 12px;border-radius:var(--input-radius);border:1.5px solid var(--input-border);font-size:13px;outline:none;box-sizing:border-box;background:var(--input-bg);color:var(--dialog-text);">' +
+            
+            '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;margin-bottom:12px;">' +
+                ['动作', '短句', '核心', '结尾', '独立', '表情', '心里话'].map(function(tagName) {
+                    return '<div onclick="quickInsertTag(this, \'' + tagName + '\')" style="padding:4px 10px;border-radius:12px;font-size:11px;cursor:pointer;border:1px dashed var(--input-border);color:var(--dialog-muted);background:transparent;transition:all 0.2s;" onmouseover="this.style.borderColor=\'var(--theme-primary)\';this.style.color=\'var(--theme-primary)\';" onmouseout="this.style.borderColor=\'var(--input-border)\';this.style.color=\'var(--dialog-muted)\';">+ ' + tagName + '</div>';
+                }).join('') +
+            '</div>' +
+            
             '<div style="font-size:12px;color:var(--dialog-muted);margin-bottom:4px;">权重（1-5）</div>' +
-            '<input type="number" id="editCardWeightInput" value="' + wt + '" min="1" max="5" style="width:100%;padding:8px 12px;border-radius:var(--input-radius);border:1.5px solid var(--input-border);font-size:13px;outline:none;box-sizing:border-box;background:var(--input-bg);color:var(--dialog-text);">' +
+            '<input type="number" id="editCardWeightInput" value="' + wt + '" min="1" max="5" style="width:100%;padding:8px 12px;border-radius:var(--input-radius);border:1.5px solid var(--input-border);font-size:13px;outline:none;box-sizing:border-box;background:var(--input-bg);color:var(--dialog-text);margin-bottom:12px;">' +
             '</div>',
+
         width: '340px',
         buttons: [
             { text: '取消' },
@@ -17683,11 +18434,15 @@ async function editCardContent(cardId, groupId) {
                 }
 
                 var newTrigger = triggerInput.value.split(/[，,、\s]+/).map(function(x) { return x.trim(); }).filter(Boolean);
+                
+                // 关键：把标签彻底洗净，转成数组，再存进去！
                 var newTags = tagsInput.value.split(/[，,、\s]+/).map(function(x) { return x.trim(); }).filter(Boolean);
+                
                 var newWeight = parseInt(weightInput.value) || 1;
                 if (newWeight < 1) newWeight = 1;
                 if (newWeight > 5) newWeight = 5;
 
+                // 调用底层的保存逻辑
                 await doEditCardContent(cardId, newContent, newTrigger, newTags, newWeight);
             }}
         ],
@@ -17697,6 +18452,29 @@ async function editCardContent(cardId, groupId) {
             input.select();
         }
     });
+}
+
+function quickInsertTag(el, tagName) {
+    var input = document.getElementById('editCardTagsInput');
+    if (!input) return;
+    
+    // 获取当前输入框的值，并切成数组
+    var currentVal = input.value.trim();
+    var tags = currentVal ? currentVal.split(/[，,、\s]+/).filter(Boolean) : [];
+    
+    // 如果已经包含了这个标签，就提示并忽略
+    if (tags.includes(tagName)) {
+        showToast('⚠️ 已经有这个标签了');
+        return;
+    }
+    
+    // 加进去，并用中文逗号重新拼接
+    tags.push(tagName);
+    input.value = tags.join('，');
+    
+    // 按钮动画反馈
+    el.style.transform = 'scale(0.9)';
+    setTimeout(function() { el.style.transform = 'scale(1)'; }, 150);
 }
 
 // ===== 实际执行编辑字卡 =====
@@ -20886,7 +21664,7 @@ window.db = null;
 
 window.openDB = function() {
     return new Promise(function(resolve, reject) {
-        var req = indexedDB.open('TimeTreeDB', 23);  
+        var req = indexedDB.open('TimeTreeDB', 24);  
         req.onupgradeneeded = function(e) {
             console.log('🔄 数据库升级触发，从', e.oldVersion, '到', e.newVersion);
             var d = e.target.result;
@@ -20910,7 +21688,8 @@ window.openDB = function() {
                 'musicLibrary', 'musicFavs', 'musicFiles',
                 'pendingReplies', 'echoMessages', 'collectedMessages',
                 'mailState', 'tideDays', 'cardOverridesCache',
-                'extraMoodCards', 'extraEmotionCards', 'dailyCounts'
+                'extraMoodCards', 'extraEmotionCards', 'dailyCounts',
+    'voiceCards' 
             ];
             var KEY_STORES = ['settings', 'bgSettings', 'tarotSettings', 'mailState', 'tideDays', 'cardOverridesCache', 'extraMoodCards', 'extraEmotionCards', 'dailyCounts', 'story_meta', 'story_settings'];
             var MANUAL_ID_STORES = ['mailLetters', 'pendingReplies', 'echoMessages', 'collectedMessages', 'story_categories', 'stories'];
@@ -20930,7 +21709,7 @@ window.openDB = function() {
 
         req.onsuccess = function(e) { 
             window.db = e.target.result; 
-            console.log('✅ 数据库已打开，版本 23');
+            console.log('✅ 数据库已打开，版本 24');
             resolve(window.db); 
         };
         req.onerror = function(e) { 
@@ -22050,6 +22829,56 @@ var mailState = {
     cooldownUntil: 0
 };
 
+// 默认的分区结构配置（完全基于你的真实中文分组）
+var defaultMailboxStructure = [
+    // 1. 开头感受（回信与主动来信合并）
+    { id: 'feel', name: '开头感受', groups: ['读信感受', '信任你', '依赖你', '默契'], min: 1, max: 2 },
+    // 2. 想说的一句话
+    { id: 'oneLine', name: '想说的一句话', groups: ['悄悄话', '确认关系', '永远的话题'], min: 1, max: 1 },
+    // 3. 分享一件事
+    { id: 'story', name: '分享一件事', groups: ['分享', '日常报备', '平淡日常', '碎碎念'], min: 2, max: 4 },
+    // 4. 一句心里话
+    { id: 'heart', name: '一句心里话', groups: ['想你', '记得', '依赖', '有些话只能在这里说'], min: 1, max: 2 },
+    // 5. 回应约定
+    { id: 'promise', name: '回应约定', groups: ['约定', '永远的话题', '答应'], min: 1, max: 2 },
+    // 6. 表达心情
+    { id: 'mood', name: '表达心情', groups: ['关心', '小小关心', '晚安', '安抚'], min: 1, max: 2 }
+];
+
+// 获取当前设置
+function getMailboxStructureConfig() {
+    var raw = localStorage.getItem('mailboxStructureConfig');
+    if (raw) {
+        try {
+            var parsed = JSON.parse(raw);
+            // 兼容老数据结构
+            if (parsed.structure && !parsed.templates) {
+                return {
+                    enabled: parsed.enabled || false,
+                    activeTemplateId: 'default_tpl',
+                    templates: {
+                        'default_tpl': { name: '默认模板', structure: parsed.structure }
+                    }
+                };
+            }
+            return parsed;
+        } catch(e) {}
+    }
+    // 首次默认
+    return {
+        enabled: false,
+        activeTemplateId: 'default_tpl',
+        templates: {
+            'default_tpl': { name: '默认模板', structure: defaultMailboxStructure }
+        }
+    };
+}
+
+// 保存设置
+function saveMailboxStructureConfig(cfg) {
+    localStorage.setItem('mailboxStructureConfig', JSON.stringify(cfg));
+}
+
 function openMailboxPage() {
     showPage('choicePage');
     renderMailboxPage();
@@ -22251,44 +23080,39 @@ document.getElementById('clearMailConfirm').onclick = async function() {
 // ===== 写信 =====
 function openWriteLetter() {
     var overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
-    overlay.innerHTML = '<div style="background:var(--theme-card);border-radius:16px;padding:20px;width:90%;max-width:380px;max-height:80vh;display:flex;flex-direction:column;">' +
-    '<div style="font-size:16px;font-weight:600;color:var(--theme-text);margin-bottom:4px;">写一封</div>' +
-    '<div style="font-size:11px;color:var(--theme-muted);margin-bottom:12px;">见字如晤，开头已替你写好</div>' +
-    '<textarea id="letterTextarea" placeholder="写点什么…（300字以内）" maxlength="300" style="flex:1;border:1px solid var(--theme-border);border-radius:12px;padding:12px;font-size:14px;line-height:1.8;resize:none;outline:none;box-sizing:border-box;min-height:150px;color:var(--theme-text);"></textarea>' +
-    '<div style="display:flex;gap:10px;margin-top:16px;">' +
-    '<button id="letterCancel" style="flex:1;padding:10px;border-radius:10px;border:1px solid #ddd;background:#f5f5f5;color:#666;font-size:14px;cursor:pointer;">取消</button>' +
-    '<button id="letterSend" style="flex:1;padding:10px;border-radius:10px;border:none;background:var(--theme-primary);color:#fff;font-size:14px;cursor:pointer;">寄出</button>' +
-    '</div></div>';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    
+    // 注意这里全部换成了 var(--theme-xxx)
+    overlay.innerHTML = `
+    <div style="background:var(--theme-card);border-radius:16px;padding:20px;width:100%;max-width:380px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+        <div style="font-size:16px;font-weight:600;color:var(--theme-text);margin-bottom:4px;">写一封</div>
+        <div style="font-size:11px;color:var(--theme-muted);margin-bottom:12px;">信纸铺好了，写点什么给他吧。</div>
+        
+        <!-- 结构提示区 -->
+        <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+            <div style="font-size:11px;color:var(--theme-muted);width:100%;margin-bottom:2px;">可以点击下方标签，给秦彻一点小提示：</div>
+            <button onclick="insertLetterTag('【一件事】')" style="padding:4px 10px;border-radius:12px;background:var(--theme-bg);border:1px solid var(--theme-border);color:var(--theme-text);font-size:11px;cursor:pointer;">一件事</button>
+            <button onclick="insertLetterTag('【心里话】')" style="padding:4px 10px;border-radius:12px;background:var(--theme-bg);border:1px solid var(--theme-border);color:var(--theme-text);font-size:11px;cursor:pointer;">心里话</button>
+            <button onclick="insertLetterTag('【小约定】')" style="padding:4px 10px;border-radius:12px;background:var(--theme-bg);border:1px solid var(--theme-border);color:var(--theme-text);font-size:11px;cursor:pointer;">小约定</button>
+        </div>
+
+        <textarea id="letterTextarea" placeholder="写点什么…（300字以内）" maxlength="300" style="flex:1;border:1px solid var(--theme-border);border-radius:12px;padding:12px;font-size:14px;line-height:1.8;resize:none;outline:none;box-sizing:border-box;min-height:150px;color:var(--theme-text);background:var(--theme-input-bg);"></textarea>
+        
+        <div style="display:flex;gap:10px;margin-top:16px;">
+            <button id="letterCancel" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-card);color:var(--theme-muted);font-size:14px;cursor:pointer;">取消</button>
+            <button id="letterSend" style="flex:1;padding:10px;border-radius:10px;border:none;background:var(--theme-primary);color:#fff;font-size:14px;cursor:pointer;">寄出</button>
+        </div>
+    </div>`;
+    
     document.body.appendChild(overlay);
     
     document.getElementById('letterCancel').onclick = function() { overlay.remove(); };
     document.getElementById('letterSend').onclick = async function() {
         var text = document.getElementById('letterTextarea').value.trim();
-       if (!text) {
-    var emptyOverlay = document.createElement('div');
-    emptyOverlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
-    emptyOverlay.innerHTML = '<div style="background:var(--theme-card);border-radius:16px;padding:24px;width:280px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.2);">' +
-        '<div style="font-size:16px;font-weight:600;color:var(--theme-text);margin-bottom:8px;">写点什么吧</div>' +
-        '<div style="font-size:14px;color:#666;margin-bottom:20px;">信件不能是空的</div>' +
-        '<button id="emptyOk" style="width:100%;padding:10px;border-radius:10px;border:none;background:var(--theme-primary);color:#fff;font-size:14px;cursor:pointer;">知道了</button>' +
-        '</div>';
-    document.body.appendChild(emptyOverlay);
-    document.getElementById('emptyOk').onclick = function() { emptyOverlay.remove(); };
-    return;
-}
-if (text.length > 300) {
-    var lenOverlay = document.createElement('div');
-    lenOverlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
-    lenOverlay.innerHTML = '<div style="background:var(--theme-card);border-radius:16px;padding:24px;width:280px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.2);">' +
-        '<div style="font-size:16px;font-weight:600;color:var(--theme-text);margin-bottom:8px;">字数超限</div>' +
-        '<div style="font-size:14px;color:#666;margin-bottom:20px;">最多写300字哦</div>' +
-        '<button id="lenOk" style="width:100%;padding:10px;border-radius:10px;border:none;background:var(--theme-primary);color:#fff;font-size:14px;cursor:pointer;">知道了</button>' +
-        '</div>';
-    document.body.appendChild(lenOverlay);
-    document.getElementById('lenOk').onclick = function() { lenOverlay.remove(); };
-    return;
-}
+        if (!text) {
+            showToast('信件不能是空的哦');
+            return;
+        }
 
         
         // 一天只能写一封
@@ -22323,6 +23147,7 @@ var newLetter = {
     read: true
 };
 await dbPut('mailLetters', newLetter);
+await kvSet('calendarSettings', 'lastSentLetterDate', String(Date.now()));
 // ===== 加在这里 =====
 addSysMsg('📨 你给秦彻寄了一封信', Date.now());
 // ===== 结束 =====
@@ -22348,29 +23173,94 @@ console.log('💾 写入后 pending 条数:', (await dbGetAll('pendingReplies'))
         showToast(' 已寄出');
     };
 }
+
+// 插入标签的辅助函数
+function insertLetterTag(tag) {
+    var ta = document.getElementById('letterTextarea');
+    if (!ta) return;
+    
+    // 获取光标位置
+    var startPos = ta.selectionStart;
+    var endPos = ta.selectionEnd;
+    
+    // 如果光标前面不是换行，就自动加个换行，避免和前面的字粘连
+    var prefix = (startPos > 0 && ta.value[startPos - 1] !== '\n') ? '\n' : '';
+    var suffix = '\n';
+    
+    var textToInsert = prefix + tag + suffix;
+    
+    // 插入文本
+    ta.value = ta.value.substring(0, startPos) + textToInsert + ta.value.substring(endPos, ta.value.length);
+    
+    // 更新光标位置，让它落在标签的后面
+    ta.focus();
+    ta.selectionStart = ta.selectionEnd = startPos + textToInsert.length;
+}
+
 // ===== 打开信 =====
 async function openLetter(id) {
-var letters = await dbGetAll('mailLetters');
-var letter = letters.find(function(l) { return String(l.id) === String(id); });
-if (!letter) return;
+    var letters = await dbGetAll('mailLetters');
+    var letter = letters.find(function(l) { return String(l.id) === String(id); });
+    if (!letter) return;
 
-if (letter.direction === 'received' && !letter.read) {
-    letter.read = true;
-    await dbPut('mailLetters', letter);
-    updateMailboxUnread();
-}
+    if (letter.direction === 'received' && !letter.read) {
+        letter.read = true;
+        await dbPut('mailLetters', letter);
+        updateMailboxUnread();
+    }
     
     var isFromHim = letter.direction === 'received';
-    var toName = isFromHim ? '笑笑' : '秦彻';
-    var fromName = isFromHim ? '秦彻' : '笑笑';
+    
+    // 【核心判断】
+    // 如果是你写的信（sent），你需要自动补上称呼和落款。
+    // 如果是他回的信（received），新引擎已经自带了称呼和秦彻落款，直接渲染。
+    var contentHtml = '';
+    if (!isFromHim) {
+        var toName = '秦彻';
+        var fromName = (typeof S !== 'undefined' && S.myName) ? S.myName : '笑笑';
+        
+        contentHtml = 
+            '<div style="font-size:14px;color:var(--theme-text);margin-bottom:14px;padding-left:6px;">' + toName + '：</div>' +
+            '<div style="font-size:14px;line-height:2;color:#3a3c3f;padding-left:6px;white-space:pre-line;">' + letter.content + '</div>' +
+            '<div style="margin-top:20px;font-size:14px;color:var(--theme-text);text-align:right;padding-right:10px;line-height:2;">' + fromName + '</div>' +
+            '<div style="font-size:11px;color:#9a9da2;text-align:right;letter-spacing:.5px;">' + letter.dateStr + '</div>';
+    } else {
+        // 他写的信：先尝试精准拆解结尾，拆不出来就强制补一个落款
+        var contentLines = letter.content.split('\n');
+        var signName = '秦彻'; // 默认落款
+        var signDate = letter.dateStr || ''; // 默认取这封信的日期
+        
+        // 从最后往前找，去掉空白行
+        var lastIdx = contentLines.length - 1;
+        while(lastIdx >= 0 && contentLines[lastIdx].trim() === '') { lastIdx--; }
+        
+        // 如果是新信（带秦彻和日期），就抽出来；如果是老信，就不动
+        if (lastIdx >= 0) {
+            var lastLine = contentLines[lastIdx].trim();
+            if (/^\d{4}[\.\-\/]\d{1,2}[\.\-\/]\d{1,2}$/.test(lastLine)) {
+                signDate = lastLine;
+                lastIdx--;
+            }
+            if (lastIdx >= 0 && contentLines[lastIdx].trim() === '秦彻') {
+                signName = '秦彻';
+                lastIdx--;
+            }
+        }
+        
+        var mainContent = contentLines.slice(0, lastIdx + 1).join('\n').trim();
+        
+        // 渲染：正文 + 强制右对齐的落款
+        contentHtml = 
+            '<div style="font-size:14px;line-height:2;color:#3a3c3f;padding-left:6px;white-space:pre-line;">' + mainContent + '</div>' +
+            '<div style="margin-top:20px;font-size:14px;color:var(--theme-text);text-align:right;padding-right:10px;line-height:2;">秦彻</div>' +
+            '<div style="font-size:11px;color:#9a9da2;text-align:right;letter-spacing:.5px;padding-right:10px;">' + signDate + '</div>';
+    }
     
     document.getElementById('mailboxContent').innerHTML =
     '<div style="padding:16px;">' +
     '<div style="font-size:11px;color:#9a9da2;letter-spacing:2px;margin-bottom:8px;">' + (isFromHim ? '收 · 来自秦彻' : '寄 · 致秦彻') + '</div>' +
-    '<div class="letter-paper">' +
-    '<div style="font-size:14px;color:var(--theme-text);margin-bottom:14px;padding-left:6px;">' + toName + '：</div>' +
-    '<div style="font-size:14px;line-height:2;color:#3a3c3f;padding-left:6px;white-space:pre-line;">见字如晤。\n' + letter.content + '</div>' +
-    '<div style="margin-top:20px;font-size:11px;color:#9a9da2;text-align:right;letter-spacing:.5px;">' + letter.dateStr + '　' + fromName + '</div>' +
+    '<div class="letter-paper" style="position:relative;">' +
+    contentHtml +
     '<div class="postmark">树心<br>邮筒</div>' +
     '</div>' +
     '<div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">' +
@@ -22435,6 +23325,86 @@ function randHours(min, max) {
     return (min + Math.random() * (max - min)) * 3600 * 1000; // 正式：小时级
 }
 
+// ===== 检查并触发主动来信（破冰信） =====
+async function checkProactiveLetter() {
+    // 如果今天已经主动发过了，就不发了（每天最多一封主动信）
+    var today = new Date().toDateString();
+    var lastProactive = await kvGet('calendarSettings', 'lastProactiveLetterDate', '');
+    if (lastProactive === today) return;
+
+    // 检查你上次催他（或者你上次寄信）的时间
+    var lastActive = parseInt(await kvGet('calendarSettings', 'lastActiveMailDate', '0')) || 0;
+    var lastSent = parseInt(await kvGet('calendarSettings', 'lastSentLetterDate', '0')) || 0;
+    
+    // 取两个时间中最新的那个
+    var lastContact = Math.max(lastActive, lastSent);
+    
+    // 如果从来没联系过，或者距离上次联系超过 1 天（24小时）
+    var now = Date.now();
+    if (lastContact === 0 || (now - lastContact) > 24 * 3600 * 1000) {
+        
+        console.log('📮 触发主动来信机制');
+        
+        var cfg = getMailboxStructureConfig();
+        var letterContent = '';
+
+        // 走新逻辑或老逻辑
+        if (cfg.enabled) {
+            letterContent = await buildLetterReply(true); // 传 true，代表主动来信
+        } else {
+            // 兜底：如果没开结构编排，随便抽两句
+            var rawGroups = await kvGet('calendarSettings', 'mailGroups', '[]');
+            var groups = [];
+            try {
+                if (Array.isArray(rawGroups)) {
+                    groups = rawGroups;
+                } else if (typeof rawGroups === 'string') {
+                    // 尝试解析 JSON，如果失败，说明是逗号分隔的文本
+                    if (rawGroups.trim().startsWith('[')) {
+                        groups = JSON.parse(rawGroups);
+                    } else if (rawGroups.trim() !== '') {
+                        groups = rawGroups.split(',').map(s => s.trim()).filter(Boolean);
+                    }
+                }
+            } catch(e) {
+                console.warn('解析 mailGroups 失败，使用空数组', e);
+                groups = [];
+            }
+            
+            var cards = await dbGetAll('wordcards');
+            var pool = cards.filter(c => groups.includes(c.groupName) && c.content);
+            
+            if (pool.length === 0) {
+                // 如果连组都没有，或者抽不到卡，给个默认的保底情话
+                letterContent = '最近在想你，不知道你过得好不好。';
+            } else {
+                var selected = pool.slice(0, 3);
+                letterContent = selected.map(c => c.content).join('\n');
+            }
+        }
+
+        if (letterContent) {
+            var nowDate = new Date();
+            var dateStr = nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate();
+            
+            await dbPut('mailLetters', {
+                id: Date.now() + Math.random() * 1000,
+                direction: 'received',
+                content: letterContent,
+                dateStr: dateStr,
+                timestamp: Date.now(),
+                read: false
+            });
+
+            addSysMsg('🕊️ 秦彻主动给你写了一封信', Date.now());
+            await kvSet('calendarSettings', 'lastProactiveLetterDate', today);
+            
+            if (typeof showToast === 'function') showToast('🕊️ 收到了一封主动来信');
+        }
+    }
+}
+
+
 // ===== 检查回信 =====
 var _mailReplyingLock = false;
 
@@ -22449,7 +23419,23 @@ async function checkMailReply() {
 var pending = await dbGetAll('pendingReplies');
 if (pending.length === 0) return;
 
-        var groups = await kvGet('calendarSettings', 'mailGroups', '[]');
+        var rawGroups = await kvGet('calendarSettings', 'mailGroups', '[]');
+var groups = [];
+try {
+    if (Array.isArray(rawGroups)) {
+        groups = rawGroups;
+    } else if (typeof rawGroups === 'string') {
+        if (rawGroups.trim().startsWith('[')) {
+            groups = JSON.parse(rawGroups);
+        } else if (rawGroups.trim() !== '') {
+            groups = rawGroups.split(',').map(s => s.trim()).filter(Boolean);
+        }
+    }
+} catch(e) {
+    console.warn('解析 mailGroups 失败:', e);
+    groups = [];
+}
+
         if (typeof groups === 'string') {
             try { groups = JSON.parse(groups); } catch(e) { groups = []; }
         }
@@ -22469,38 +23455,49 @@ if (pending.length === 0) return;
             var p = pending[i];
             if (Date.now() >= p.replyAt) {
                 // ===== 读取用户设置的条数 =====
-                var minCount = parseInt(localStorage.getItem('mail_cardMin') || '1');
-                var maxCount = parseInt(localStorage.getItem('mail_cardMax') || '4');
-                if (minCount < 1) minCount = 1;
-                if (maxCount < minCount) maxCount = minCount;
-                if (maxCount > 30) maxCount = 30;
-                var count = Math.min(Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount, pool.length);
+                // === 生成回信正文 ===
+                var body = '';
+                var cfg = getMailboxStructureConfig();
 
-                var seenContent = {};
-                var dedupedPool = [];
-                pool.forEach(function(c) {
-                    var key = _normalizeCardKey(c.content);
-                    if (!key) return;
-                    if (!seenContent[key]) {
-                        seenContent[key] = true;
-                        dedupedPool.push(c);
+                if (cfg.enabled) {
+                    // 【新逻辑】：如果开关打开，走结构编排
+                    body = await buildLetterReply(false); // false 代表正常回信
+                } else {
+                    // 【老逻辑】：如果开关关闭，保留你原来的纯随机抽卡
+                    var minCount = parseInt(localStorage.getItem('mail_cardMin') || '1');
+                    var maxCount = parseInt(localStorage.getItem('mail_cardMax') || '4');
+                    if (minCount < 1) minCount = 1;
+                    if (maxCount < minCount) maxCount = minCount;
+                    if (maxCount > 30) maxCount = 30;
+                    var count = Math.min(Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount, pool.length);
+
+                    var seenContent = {};
+                    var dedupedPool = [];
+                    pool.forEach(function(c) {
+                        var key = _normalizeCardKey(c.content);
+                        if (!key) return;
+                        if (!seenContent[key]) {
+                            seenContent[key] = true;
+                            dedupedPool.push(c);
+                        }
+                    });
+
+                    var shuffled = dedupedPool.slice().sort(function() { return Math.random() - 0.5; });
+                    var selected = shuffled.slice(0, count);
+
+                    var delProb = parseInt(localStorage.getItem('mail_cardDeleteProb') || '50');
+                    if (selected.length > 1 && Math.random() * 100 < delProb) {
+                        selected.splice(Math.floor(Math.random() * selected.length), 1);
                     }
-                });
 
-                var shuffled = dedupedPool.slice().sort(function() { return Math.random() - 0.5; });
-                var selected = shuffled.slice(0, count);
+                    var repeatProb = parseInt(localStorage.getItem('mail_cardRepeatProb') || '30');
+                    if (selected.length > 0 && Math.random() * 100 < repeatProb) {
+                        selected.push(selected[Math.floor(Math.random() * selected.length)]);
+                    }
 
-                var delProb = parseInt(localStorage.getItem('mail_cardDeleteProb') || '50');
-                if (selected.length > 1 && Math.random() * 100 < delProb) {
-                    selected.splice(Math.floor(Math.random() * selected.length), 1);
+                    body = selected.map(function(c) { return c.content; }).join('\n');
                 }
-
-                var repeatProb = parseInt(localStorage.getItem('mail_cardRepeatProb') || '30');
-                if (selected.length > 0 && Math.random() * 100 < repeatProb) {
-                    selected.push(selected[Math.floor(Math.random() * selected.length)]);
-                }
-
-                var body = selected.map(function(c) { return c.content; }).join('\n');
+                // === 正文生成结束 ===
 
                 var now = new Date();
                 var dateStr = now.getFullYear() + '.' + (now.getMonth()+1) + '.' + now.getDate();
@@ -23748,8 +24745,11 @@ async function renderModuleSettings() {
   h += '</div>';
   h += renderGroupPicker('mail-group-checkbox', mailGroups);
   h += '<div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;">';
-  h += '<button onclick="openCardCountSetting(\'mail\')" style="flex:1;padding:10px 16px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:13px;cursor:pointer;white-space:nowrap;">拼字卡条数设置</button>';
-  h += '<button onclick="saveMailGroups()" style="flex:2;padding:10px 16px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:13px;cursor:pointer;">保存信箱分组</button>';
+  // 把原本的拼字卡和保存按钮保留，可以稍微缩小一点空间
+  h += '<button onclick="openCardCountSetting(\'mail\')" style="flex:1;padding:10px 12px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:12px;cursor:pointer;white-space:nowrap;">拼卡条数</button>';
+  h += '<button onclick="saveMailGroups()" style="flex:1;padding:10px 12px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:12px;cursor:pointer;">保存分组</button>';
+  // 👇 新增这个入口按钮
+  h += '<button onclick="openMailboxStructureEditor()" style="flex:1.5;padding:10px 12px;border-radius:12px;background:var(--theme-card);border:1px solid var(--theme-primary);color:var(--theme-primary);font-size:12px;cursor:pointer;font-weight:bold;">回信结构编排</button>';
   h += '</div></div>';
 
   // ===== 他想说的分组 =====
@@ -23969,6 +24969,316 @@ function saveCardCountSetting() {
     showToast('✅ 已保存：' + min + '~' + max + ' 条，重复 ' + repeat + '%，删除 ' + del + '%');
 }
 
+function openMailboxStructureEditor() {
+    var cfg = getMailboxStructureConfig();
+    
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+    
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:var(--theme-card);border-radius:16px;padding:20px;width:100%;max-width:400px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2);color:var(--theme-text);';
+    
+    // 获取当前模板的辅助函数
+    function getCurTpl() {
+        return cfg.templates[cfg.activeTemplateId] || Object.values(cfg.templates)[0];
+    }
+
+    // 生成 HTML 结构
+    function renderEditorHtml() {
+        var isEnabled = cfg.enabled;
+        var tplOptions = '';
+        for (var tid in cfg.templates) {
+            tplOptions += '<option value="' + tid + '" ' + (tid === cfg.activeTemplateId ? 'selected' : '') + '>' + cfg.templates[tid].name + '</option>';
+        }
+        var curTpl = getCurTpl();
+
+        var html = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--theme-border);">
+                <div>
+                    <div style="font-size:15px;font-weight:bold;">启用分区编排回信</div>
+                    <div style="font-size:11px;color:var(--theme-muted);margin-top:4px;">关闭则使用原随机抽卡逻辑</div>
+                </div>
+                <div id="structureToggle" style="width:44px;height:24px;border-radius:12px;background:${isEnabled ? 'var(--theme-primary)' : '#ccc'};position:relative;cursor:pointer;transition:0.2s;" onclick="toggleStructureSwitch(this)">
+                    <div style="position:absolute;top:2px;left:${isEnabled ? '22px' : '2px'};width:20px;height:20px;border-radius:50%;background:#fff;transition:0.2s;"></div>
+                </div>
+            </div>
+            
+            <div style="display:flex;gap:8px;margin-bottom:12px;">
+                <select id="tplSelector" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--theme-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:13px;" onchange="switchTemplate(this.value)">
+                    ${tplOptions}
+                </select>
+                <button onclick="addNewTemplate()" style="padding:8px 12px;border-radius:8px;border:1px dashed var(--theme-primary);background:transparent;color:var(--theme-primary);font-size:12px;cursor:pointer;white-space:nowrap;">+ 新建模板</button>
+                <button onclick="deleteTemplate()" style="padding:8px 12px;border-radius:8px;border:1px solid #e05252;background:transparent;color:#e05252;font-size:12px;cursor:pointer;">删除</button>
+            </div>
+
+            <div style="font-size:12px;color:var(--theme-muted);margin-bottom:12px;">固定称呼：开头抽取「笑笑想听的称呼」组，结尾固定为「秦彻」。</div>
+            
+            <div style="flex:1;overflow-y:auto;padding-right:4px;display:flex;flex-direction:column;gap:10px;" id="structureList">
+                ${(curTpl.structure || []).map((sec, i) => `
+                    <div style="border:1px solid var(--theme-border);border-radius:12px;padding:12px;background:var(--theme-bg);">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-weight:bold;font-size:14px;">
+                            <span>${sec.name}</span>
+                            <span style="color:#e05252;cursor:pointer;font-size:12px;font-weight:normal;" onclick="removeStructureSection(${i})">删除</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;">
+                            抽取 <input type="number" value="${sec.min}" style="width:40px;padding:4px;border:1px solid var(--theme-border);border-radius:6px;text-align:center;background:var(--theme-input-bg);color:var(--theme-text);" onchange="updateSecCount(${i}, 'min', this.value)"> 
+                            ~ <input type="number" value="${sec.max}" style="width:40px;padding:4px;border:1px solid var(--theme-border);border-radius:6px;text-align:center;background:var(--theme-input-bg);color:var(--theme-text);" onchange="updateSecCount(${i}, 'max', this.value)"> 条
+                        </div>
+                        <div style="font-size:12px;color:var(--theme-muted);margin-bottom:4px;">目标分组：</div>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                            ${(sec.groups || []).map(g => `<span style="background:var(--theme-card);border:1px solid var(--theme-border);padding:2px 8px;border-radius:10px;font-size:11px;">${g}</span>`).join('')}
+                            <span style="background:transparent;border:1px dashed var(--theme-primary);color:var(--theme-primary);padding:2px 8px;border-radius:10px;font-size:11px;cursor:pointer;" onclick="openGroupPicker(${i})">+ 添加</span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div style="display:flex;gap:10px;margin-top:16px;">
+                <button onclick="addNewStructureSection()" style="flex:1;padding:10px;border-radius:12px;border:1px dashed var(--theme-border);background:var(--theme-card);color:var(--theme-muted);font-size:13px;cursor:pointer;">+ 新增区块</button>
+                <button onclick="saveStructureAndClose(this)" style="flex:2;padding:10px;border-radius:12px;border:none;background:var(--theme-primary);color:#fff;font-size:13px;cursor:pointer;">保存并关闭</button>
+            </div>
+        `;
+        return html;
+    }
+
+    dialog.innerHTML = renderEditorHtml();
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    // --- 内部方法挂载到 window ---
+    window.toggleStructureSwitch = function(el) {
+        cfg.enabled = !cfg.enabled;
+        el.style.background = cfg.enabled ? 'var(--theme-primary)' : '#ccc';
+        el.querySelector('div').style.left = cfg.enabled ? '22px' : '2px';
+    };
+
+    window.removeStructureSection = function(index) {
+        getCurTpl().structure.splice(index, 1);
+        dialog.innerHTML = renderEditorHtml();
+    };
+
+    window.updateSecCount = function(index, type, val) {
+        getCurTpl().structure[index][type] = parseInt(val) || 1;
+    };
+
+    window.addNewStructureSection = function() {
+        storyPrompt('新增区块', '', '请输入区块名称（如：小约定）', function(name) {
+            if (!name || !name.trim()) return;
+            getCurTpl().structure.push({ id: 'sec_' + Date.now(), name: name.trim(), groups: [], min: 1, max: 1 });
+            dialog.innerHTML = renderEditorHtml();
+        });
+    };
+
+    window.saveStructureAndClose = function() {
+        saveMailboxStructureConfig(cfg);
+        showToast('✅ 回信结构已保存');
+        overlay.remove();
+    };
+
+    // 切换模板
+    window.switchTemplate = function(tid) {
+        cfg.activeTemplateId = tid;
+        dialog.innerHTML = renderEditorHtml();
+    };
+
+    // 新建模板
+    window.addNewTemplate = function() {
+        storyPrompt('新建模板', '', '请输入新模板名称（如：日常、吃醋）', function(name) {
+            if (!name || !name.trim()) return;
+            var newId = 'tpl_' + Date.now();
+            cfg.templates[newId] = {
+                name: name.trim(),
+                structure: JSON.parse(JSON.stringify(defaultMailboxStructure)) 
+            };
+            cfg.activeTemplateId = newId;
+            // 注意：因为 prompt 弹窗是异步的，回调执行时，原来的大弹窗可能还在，直接渲染即可
+            dialog.innerHTML = renderEditorHtml();
+        });
+    };
+
+    // 删除模板
+    window.deleteTemplate = function() {
+        if (Object.keys(cfg.templates).length <= 1) {
+            showToast('⚠️ 至少保留一个模板');
+            return;
+        }
+        var curTpl = getCurTpl();
+        
+        // 调用自定义确认弹窗
+        storyConfirm('确定要删除模板「' + curTpl.name + '」吗？删除后不可恢复。', function() {
+            delete cfg.templates[cfg.activeTemplateId];
+            cfg.activeTemplateId = Object.keys(cfg.templates)[0];
+            dialog.innerHTML = renderEditorHtml();
+        }, '删除模板');
+    };
+
+    // 选择分组弹窗（动态读取真实中文分组 + 统一UI风格 + 搜索）
+    window.openGroupPicker = async function(secIndex) {
+        var allGroups = await getMailboxAllGroupNames(); 
+        if (allGroups.length === 0) {
+            showToast('⚠️ 字卡库还没有分组');
+            return;
+        }
+        
+        var currentTpl = getCurTpl();
+        var currentGroups = currentTpl.structure[secIndex].groups || [];
+
+        var getListHtml = function(keyword) {
+            var kw = (keyword || '').toLowerCase();
+            var filtered = allGroups.filter(function(g) {
+                return g.toLowerCase().indexOf(kw) > -1;
+            });
+            if (filtered.length === 0) {
+                return '<div style="padding:20px;text-align:center;color:var(--dialog-muted);font-size:13px;">没有找到匹配的分组</div>';
+            }
+            return filtered.map(function(g) {
+                var isChecked = currentGroups.includes(g);
+                return '<label style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--theme-border);cursor:pointer;">' +
+                    '<input type="checkbox" class="picker-cb" value="' + g + '" ' + (isChecked ? 'checked' : '') + ' style="width:16px;height:16px;accent-color:var(--theme-primary);flex-shrink:0;">' +
+                    '<span style="font-size:14px;color:var(--dialog-text);flex:1;word-break:break-word;">' + g + '</span>' +
+                    '</label>';
+            }).join('');
+        };
+
+        createDialog({
+            title: '选择分组（可多选）',
+            width: '340px',
+            content: '<div style="margin-bottom:10px;">' +
+                    '<input type="text" id="pickerSearchInput" placeholder="🔍 搜索分组名称..." style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--input-border);background:var(--input-bg);color:var(--dialog-text);font-size:13px;outline:none;box-sizing:border-box;">' +
+                    '</div>' +
+                    '<div id="pickerListContainer" style="max-height:45vh;overflow-y:auto;border:1px solid var(--theme-border);border-radius:10px;padding:0 10px;">' + 
+                    getListHtml('') + 
+                    '</div>',
+            buttons: [
+                { text: '取消' },
+                { text: '确认添加', primary: true, onClick: function() {
+                    currentTpl.structure[secIndex].groups = currentGroups;
+                    
+                    setTimeout(function() {
+                        var overlays = document.querySelectorAll('div[style*="position: fixed"][style*="z-index: 99999"]');
+                        if (overlays.length > 0) {
+                            var outerDialog = overlays[0].querySelector('div');
+                            if (outerDialog && typeof renderEditorHtml === 'function') {
+                                outerDialog.innerHTML = renderEditorHtml();
+                            }
+                        }
+                    }, 100);
+                }}
+            ],
+            onOpen: function(dialog) {
+                var searchInput = dialog.querySelector('#pickerSearchInput');
+                var listContainer = dialog.querySelector('#pickerListContainer');
+
+                if (!searchInput || !listContainer) return;
+
+                searchInput.addEventListener('input', function() {
+                    var kw = this.value.trim();
+                    dialog.querySelectorAll('.picker-cb').forEach(function(cb) {
+                        if (cb.checked) {
+                            if (currentGroups.indexOf(cb.value) === -1) currentGroups.push(cb.value);
+                        } else {
+                            var idx = currentGroups.indexOf(cb.value);
+                            if (idx > -1) currentGroups.splice(idx, 1);
+                        }
+                    });
+                    listContainer.innerHTML = getListHtml(kw);
+                });
+
+                listContainer.addEventListener('change', function(e) {
+                    if (e.target && e.target.classList && e.target.classList.contains('picker-cb')) {
+                        var val = e.target.value;
+                        if (e.target.checked) {
+                            if (currentGroups.indexOf(val) === -1) currentGroups.push(val);
+                        } else {
+                            var idx = currentGroups.indexOf(val);
+                            if (idx > -1) currentGroups.splice(idx, 1);
+                        }
+                    }
+                });
+            }
+        });
+    };
+} // ← 注意这里：openMailboxStructureEditor 必须在这里闭合！
+
+// ============ 书信回信拼装引擎（最终紧凑排版版） ============
+async function buildLetterReply(isProactive = false) {
+    var cfg = getMailboxStructureConfig();
+    
+    // ★ 修复：从模版里提取结构
+    var activeTpl = cfg.templates[cfg.activeTemplateId] || Object.values(cfg.templates)[0];
+    var structure = activeTpl ? activeTpl.structure : [];
+    if (structure.length === 0) return '（暂无回信结构，请去管理面板配置）';
+
+    var allCards = await dbGetAll('wordcards');
+    var validCards = allCards.filter(function(c) {
+        if (!c.content) return false;
+        var text = String(c.content).trim();
+        if (text === '' || text === '__GROUP_PLACEHOLDER__' || text.includes('PLACEHOLDER')) return false;
+        return true;
+    });
+    
+    var nicknamePool = validCards.filter(function(c) {
+        if (c.groupName !== '笑笑想听的称呼') return false;
+        var text = c.content.replace(/[。！？~…,\.\s]+$/, '');
+        return text.length >= 2 && text.length <= 8;
+    });
+    
+    var rawNick = (typeof S !== 'undefined' && S.myName) ? S.myName : '笑笑';
+    if (nicknamePool.length > 0) {
+        rawNick = nicknamePool[Math.floor(Math.random() * nicknamePool.length)].content;
+    }
+    
+    var cleanNick = rawNick.replace(/[。！？~…,\.\s：:]+$/, '');
+    var titleStr = cleanNick + '：';
+    var letterText = titleStr + '\n见字如晤。\n';
+
+    var usedContents = new Set();
+
+    for (var i = 0; i < structure.length; i++) {
+        var sec = structure[i];
+        var groups = sec.groups || [];
+        if (groups.length === 0) continue;
+
+        var currentGroups = groups;
+        if (i === 0) {
+            if (isProactive) {
+                currentGroups = groups.filter(g => g.includes('久别') || g.includes('missing') || g.includes('牵挂'));
+            } else {
+                currentGroups = groups.filter(g => g.includes('读信') || g.includes('感受'));
+            }
+            if (currentGroups.length === 0) currentGroups = groups; 
+        }
+
+        var pool = validCards.filter(function(c) {
+            return currentGroups.includes(c.groupName) || currentGroups.includes(c.groupId);
+        });
+
+        if (pool.length === 0) continue;
+
+        pool = pool.filter(function(c) { return !usedContents.has(c.content); });
+        if (pool.length === 0) continue;
+
+        pool = pool.sort(function() { return Math.random() - 0.5; });
+        var min = sec.min || 1;
+        var max = sec.max || 1;
+        var count = Math.floor(Math.random() * (max - min + 1)) + min;
+        
+        var selected = pool.slice(0, count);
+        selected.forEach(c => usedContents.add(c.content));
+
+        var secText = selected.map(c => c.content).join(' '); 
+        
+        if (secText) {
+            letterText += secText + '\n';
+        }
+    }
+
+    // 结尾签名
+    letterText += '\n秦彻';
+    return letterText;
+}
+
 // ============ 数据管理 ============
 function openDataManage(){showPage('dataManagePage');renderDataManage();}
 async function renderDataManage() {
@@ -24144,6 +25454,19 @@ async function doImportSelected(d, isNewFormat, ids) {
     } catch(e) {
         console.warn('导入后刷新失败:', e);
     }
+// ★★★ 新增：强制刷新模版和话题模式的内存状态 ★★★
+    try {
+        if (typeof getMailboxStructureConfig === 'function') {
+            // 虽然页面马上要刷新了，但这里调用一下能确保内存 cfg 更新
+            var tempCfg = getMailboxStructureConfig(); 
+        }
+        var savedMode = localStorage.getItem('currentTopicModeId');
+        if (savedMode && typeof TOPIC_MODES !== 'undefined' && TOPIC_MODES.some(function(m) { return m.id === savedMode; })) {
+            currentTopicModeId = savedMode;
+        }
+    } catch(e) {}
+    // ★★★ 新增结束 ★★★
+
 
     // 导入后强制刷新 UI 状态
     try {
@@ -24229,6 +25552,41 @@ async function exportChatByDate() {
 
     localStorage.setItem('lastBackupTime', Date.now());
 }
+
+// ===== 拼字卡三大模式默认配置 =====
+var DEFAULT_CHAT_TEMPLATES = {
+    'short': [ // ⚡ 简短
+        { name: '纯单句', structure: [{ tags: ['独立', '短句'], min: 1, max: 1 }] },
+        { name: '动作加单句', structure: [{ tags: ['动作', '表情'], min: 1, max: 1 }, { tags: ['独立', '短句'], min: 1, max: 1 }] }
+    ],
+    'mix': [ // 🐦 混合
+        { name: '日常混搭', structure: [{ tags: ['短句'], min: 1, max: 1 }, { tags: ['核心'], min: 1, max: 1 }] },
+        { name: '带点表情', structure: [{ tags: ['表情', '动作'], min: 1, max: 1 }, { tags: ['短句'], min: 1, max: 1 }, { tags: ['核心', '独立'], min: 1, max: 1 }] }
+    ],
+    'deep': [ // 💖 走心
+        { name: '走心长句', structure: [{ tags: ['短句'], min: 1, max: 1 }, { tags: ['核心'], min: 1, max: 2 }, { tags: ['心里话'], min: 1, max: 1 }, { tags: ['结尾'], min: 0, max: 1 }] },
+        { name: '纯心里话', structure: [{ tags: ['心里话'], min: 1, max: 2 }, { tags: ['结尾'], min: 1, max: 1 }] }
+    ]
+};
+
+// 获取当前所有的模板池（优先读用户自定义的，没自定义就读默认的）
+function getAllChatTemplates() {
+    var saved = localStorage.getItem('chatTemplatesCustom');
+    if (saved) {
+        try { return JSON.parse(saved); } catch(e) {}
+    }
+    return JSON.parse(JSON.stringify(DEFAULT_CHAT_TEMPLATES)); // 深拷贝防污染
+}
+
+// 获取当前模式下的随机模板
+function getRandomChatTemplate(modeId) {
+    var allTpls = getAllChatTemplates();
+    var pool = allTpls[modeId] || allTpls['mix'];
+    return pool[Math.floor(Math.random() * pool.length)];
+}
+
+
+
 // ============ 聊天设置 ============
 function openChatSettings(){
     const cs = S.chatSettings;
@@ -24283,12 +25641,68 @@ function openChatSettings(){
 '<div style="font-size:11px;color:var(--theme-muted);padding:0 0 8px;line-height:1.5;">关闭后，话题模式的「表情浓度」不再生效，消息末尾不会附加 08 素材。</div>' +
 '</div>' +    
 '<div class="settings-section"><h4>拼字卡</h4>' +
+'<div class="settings-row"><span style="color:var(--theme-text);">启用模块化智能拼卡</span><div class="toggle-switch ' + (localStorage.getItem('chatStructureEnabled') === 'true' ? 'on' : '') + '" onclick="toggleChatStructure(this)"></div></div>' +
+'<button onclick="openChatTemplateEditor()" style="width:100%;margin-top:8px;padding:10px;border-radius:12px;background:var(--theme-card);border:1px solid var(--theme-primary);color:var(--theme-primary);font-size:13px;cursor:pointer;">⚙️ 配置拼卡模板</button>' +
+
+// 👇 新增的这一行：用 id="oldCardSettings" 包裹，并根据开关状态设置初始变灰属性
+'<div id="oldCardSettings" style="transition:all 0.3s; opacity:' + (localStorage.getItem('chatStructureEnabled') === 'true' ? '0.4' : '1') + '; pointer-events:' + (localStorage.getItem('chatStructureEnabled') === 'true' ? 'none' : 'auto') + ';">' +
+
 '<div class="settings-row"><span style="color:var(--theme-text);">拼字卡模式</span><div class="toggle-switch ' + (cs.cardCombo !== false ? 'on' : '') + '" onclick="toggleChatSetting(\'cardCombo\',this)"></div></div>' +
 '<div style="font-size:11px;color:var(--theme-muted);padding:0 0 8px;line-height:1.5;">开启后，每条回复有一定概率进入拼字卡模式；关闭则永远单发。</div>' +
 probRow('拼字卡概率', 'cardComboProb', cs.cardComboProb !== undefined ? cs.cardComboProb : 30) +'<div class="settings-row"><span style="color:var(--theme-text);">拼几条</span><input type="number" id="setCardMin" value="' + (cs.cardMin||1) + '" style="width:45px;text-align:center;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);border-radius:6px;padding:4px;"> ~ <input type="number" id="setCardMax" value="' + (cs.cardMax||4) + '" style="width:45px;text-align:center;border:1px solid var(--theme-input-border);background:var(--theme-input-bg);color:var(--theme-text);border-radius:6px;padding:4px;"></div>' +
 probRow('重复概率', 'cardRepeatProb', cs.cardRepeatProb) +
 probRow('删除概率', 'cardDeleteProb', cs.cardDeleteProb) +
+
+// 👇 新增的这一行：闭合 id="oldCardSettings"
 '</div>' +
+
+'</div>' +
+
+// 在 openChatSettings 的字符串拼接里加上这段：
+
+'<div class="settings-section" style="border-radius:16px; overflow:hidden; border:1px solid var(--theme-border); margin-bottom:12px;">' +
+    '<div onclick="toggleMinimaxSettings(this)" style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:var(--theme-card);cursor:pointer;">' +
+        '<div style="font-size:14px;font-weight:600;color:var(--theme-text);">🎙️ 语音消息与 AI 工具</div>' +
+        '<div style="font-size:12px;color:var(--theme-muted);display:flex;align-items:center;gap:4px;">' +
+            '<span class="minimax-arrow" style="transition:transform 0.2s;">▾</span>' +
+        '</div>' +
+    '</div>' +
+    
+    '<div class="minimax-content" style="display:none; padding:16px; background:var(--theme-bg); border-top:1px solid var(--theme-border);">' +
+        
+        // 1. 纯语音卡混入率（与AI无关）
+        '<div style="margin-bottom:20px; padding-bottom:16px; border-bottom:1px dashed var(--theme-border);">' +
+            '<div style="font-size:14px;color:var(--theme-text);font-weight:500;margin-bottom:4px;">🗣️ 语音卡混入比例</div>' +
+            '<div style="font-size:11px;color:var(--theme-muted);margin-bottom:8px;">秦彻在聊天中直接发送语音卡的概率（从已开启的语音卡中抽取）</div>' +
+            '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">' +
+                '<span style="font-size:12px;color:var(--theme-primary);font-weight:bold;">' + (cs.voiceProb || 30) + '%</span>' +
+            '</div>' +
+            '<input type="range" min="0" max="100" value="' + (cs.voiceProb || 30) + '" onchange="S.chatSettings.voiceProb=parseInt(this.value);saveChatSettings();this.previousElementSibling.querySelector(\'span\').textContent=this.value+\'%\';" style="width:100%;accent-color:var(--theme-primary);">' +
+        '</div>' +
+
+        // 2. AI 配置区
+        '<div style="font-size:14px;color:var(--theme-text);font-weight:500;margin-bottom:4px;">✨ AI 文本转语音 (MiniMax)</div>' +
+        '<div style="font-size:11px;color:var(--theme-muted);margin-bottom:12px;">用于将文字转换为专属语音，并保存为语音卡。不参与日常聊天拼字。</div>' +
+        
+        '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">' +
+            '<div style="display:flex;align-items:center;gap:10px;">' +
+                '<span style="font-size:13px;color:var(--theme-text);width:60px;">API Key</span>' +
+                '<input type="text" value="' + (localStorage.getItem('minimaxApiKey') || '') + '" oninput="localStorage.setItem(\'minimaxApiKey\', this.value)" placeholder="粘贴 Key" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:13px;outline:none;">' +
+            '</div>' +
+            '<div style="display:flex;align-items:center;gap:10px;">' +
+                '<span style="font-size:13px;color:var(--theme-text);width:60px;">Group ID</span>' +
+                '<input type="text" value="' + (localStorage.getItem('minimaxGroupId') || '') + '" oninput="localStorage.setItem(\'minimaxGroupId\', this.value)" placeholder="团队 ID" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:13px;outline:none;">' +
+            '</div>' +
+            '<div style="display:flex;align-items:center;gap:10px;">' +
+                '<span style="font-size:13px;color:var(--theme-text);width:60px;">Voice ID</span>' +
+                '<input type="text" value="' + (localStorage.getItem('minimaxVoiceId') || '') + '" oninput="localStorage.setItem(\'minimaxVoiceId\', this.value)" placeholder="专属音色 ID" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:13px;outline:none;">' +
+            '</div>' +
+        '</div>' +
+        
+        '<button onclick="testMinimaxVoice()" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-card);color:var(--theme-text);font-size:13px;cursor:pointer;">测试连接并试听</button>' +
+    '</div>' +
+'</div>' +
+
 
 '<div class="settings-section"><h4>🔮 AI 塔罗解读</h4>' +
 '<div class="settings-row"><span style="color:var(--theme-text);">启用 AI 解读</span><div class="toggle-switch ' + (localStorage.getItem('tarotAiEnabled') === 'true' ? 'on' : '') + '" onclick="toggleTarotAi(this)"></div></div>' +
@@ -24343,6 +25757,20 @@ probRow('触发概率', 'taMoodProb', cs.taMoodProb || 15) +
     '<button style="width:100%;padding:12px;border-radius:12px;background:var(--theme-primary);color:#fff;border:none;font-size:15px;cursor:pointer;" onclick="saveAllChatSettings()">💾 保存聊天设置</button>' +
 '<button style="width:100%;padding:10px;margin-top:6px;border-radius:12px;background:var(--btn-secondary);color:var(--btn-secondary-text);border:1px solid var(--btn-secondary-border);cursor:pointer;" onclick="closeChatSettings()">关闭</button>'
     document.getElementById('chatSettingsOverlay').classList.add('show');
+}
+
+function toggleChatStructure(el) {
+    var on = el.classList.toggle('on');
+    localStorage.setItem('chatStructureEnabled', on ? 'true' : 'false');
+    
+    // 👇 控制旧版设置的亮灭
+    var oldSettings = document.getElementById('oldCardSettings');
+    if (oldSettings) {
+        oldSettings.style.opacity = on ? '0.4' : '1';
+        oldSettings.style.pointerEvents = on ? 'none' : 'auto';
+    }
+    
+    showToast(on ? '✅ 已开启智能拼卡' : '↺ 已关闭，恢复默认随机');
 }
 
 function openChatDateExport(){
@@ -25200,7 +26628,8 @@ var csDefaults = {
     autoSendCount: 1,
     moodEnabled: true, moodProb: 20, moodCooldown: 5,
     taMoodEnabled: true, taMoodProb: 15, taMoodCooldown: 5,
-    contextStrength: 0.5
+    contextStrength: 0.5,
+    voiceProb: 30
 };
 
 for (var k in csDefaults) {
@@ -25441,7 +26870,10 @@ if (lastBackup) {
 }
 
 checkMailReply();
-setInterval(checkMailReply, 10 * 60 * 1000); // 每10分钟检查
+checkProactiveLetter(); // 启动时检查一次主动来信
+
+setInterval(checkMailReply, 10 * 60 * 1000); // 每10分钟检查回信
+setInterval(checkProactiveLetter, 60 * 60 * 1000); // 每1小时检查一次主动来信
 
 // 检查今日留言（内部自带日期拦截，非常安全）
 await checkQinDailyMessage();
@@ -25495,6 +26927,44 @@ document.addEventListener('visibilitychange', function() {
 
 // 初始化倾心之约数据
 await initStoryData();
+
+// 初始化内置语音卡
+await initVoiceCards();
+
+async function initVoiceCards() {
+    var exist = await dbGetAll('voiceCards');
+    if (exist.length > 0) return; // 已经初始化过了，不重复生成
+
+    if (typeof VOICE_DATA === 'undefined' || !VOICE_DATA.groups) return;
+
+    var insertCount = 0;
+    // 映射耳语传音的分类到语音卡分类
+    var catMap = { '称呼': '亲昵', '亲昵': '亲昵', '心绪': '日常' };
+
+    for (var g of VOICE_DATA.groups) {
+        var cat = catMap[g.name] || g.name;
+        for (var kw of g.keywords) {
+            if (!kw.audios || kw.audios.length === 0) continue;
+            
+            // 为每个音频路径生成一条记录
+            for (var i = 0; i < kw.audios.length; i++) {
+                var text = kw.texts && kw.texts.length > i ? kw.texts[i] : kw.text;
+                await dbPut('voiceCards', {
+                    id: 'builtin_' + Date.now() + Math.random(),
+                    text: text,
+                    audioUrl: kw.audios[i], // 内置的存路径，不走 Base64
+                    source: 'builtin',
+                    category: cat,
+                    tags: ['内置', '独立'],
+                    enabled: true,
+                    timestamp: Date.now()
+                });
+                insertCount++;
+            }
+        }
+    }
+    console.log('✅ 已初始化内置语音卡:', insertCount, '条');
+}
 
 updateHome();
 scheduleStatusUpdate(); 
@@ -25656,6 +27126,19 @@ window.exportChat = exportChat;
 window.exportAll = exportAll;
 window.clearChat = clearChat;
 window.openChatSettings = openChatSettings;
+window.toggleMinimaxSettings = function(el) {
+    var content = el.nextElementSibling;
+    var arrow = el.querySelector('.minimax-arrow');
+    var isHidden = content.style.display === 'none' || content.style.display === '';
+    
+    if (isHidden) {
+        content.style.display = 'block';
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
+    } else {
+        content.style.display = 'none';
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+    }
+};
 window.closeChatSettings = closeChatSettings;
 window.saveAllChatSettings = saveAllChatSettings;
 window.saveTopQuoteFromPanel = saveTopQuoteFromPanel;
@@ -26042,10 +27525,407 @@ window.doClearAllText = doClearAllText;
 window.openTopicManager = openTopicManager;
 window.addTopic = addTopic;
 window.deleteTopic = deleteTopic;
+window.openMailboxStructureEditor = openMailboxStructureEditor;
+window.buildLetterReply = buildLetterReply;
+window.checkProactiveLetter = checkProactiveLetter;
+window.insertLetterTag = insertLetterTag;
+window.toggleChatStructure = toggleChatStructure;
+window.quickInsertTag = quickInsertTag;
+window.editCardContent = editCardContent;
+window.openBatchTagMenu = openBatchTagMenu;
+window.toggleBatchTag = toggleBatchTag;
+window.renderVoiceTab = renderVoiceTab;
+window.buildVoiceCardHTML = buildVoiceCardHTML;
+window.testSendVoice = async function() {
+    var voiceCards = await dbGetAll('voiceCards');
+    var validVoices = voiceCards.filter(function(v) { return v.enabled !== false; });
+    
+    if (validVoices.length === 0) { showToast('⚠️ 没有语音卡'); return; }
 
+    var pick = validVoices[Math.floor(Math.random() * validVoices.length)];
+    var audioSrc = pick.audioData || pick.audioUrl;
+    var realDuration = await getAudioDuration(audioSrc); // ★ 读取时长
+    
+    var voiceMsg = {
+        sender: 'other',
+        type: 'voice',
+        content: pick.text,
+        audioData: pick.audioData || null,
+        audioUrl: pick.audioUrl || null,
+        duration: realDuration, // ★ 真实时长
+        timestamp: Date.now()
+    };
+    
+    var vId = await dbPut('messages', voiceMsg);
+    voiceMsg.id = vId;
+    renderMsg(voiceMsg);
+    scrollBottom();
+    showToast('✅ 测试语音已发送');
+};
+
+// 获取音频真实时长（返回整数秒）
+window.getAudioDuration = function(audioSrc) {
+    return new Promise(function(resolve) {
+        if (!audioSrc) { resolve(3); return; } // 没有音频默认 3 秒
+        
+        var tempAudio = new Audio(audioSrc);
+        // 预加载元数据
+        tempAudio.addEventListener('loadedmetadata', function() {
+            // 四舍五入，且最少为 1 秒
+            var dur = Math.max(1, Math.round(tempAudio.duration));
+            resolve(isNaN(dur) ? 3 : dur);
+        });
+        tempAudio.addEventListener('error', function() {
+            resolve(3); // 读取失败给个保底
+        });
+    });
+};
+
+// 拾起为语音卡
+window.handlePickUpVoiceCard = async function(m) {
+    var text = m.content || '';
+    if (!text) { showToast('⚠️ 这条消息没有文字，无法拾起'); return; }
+
+    var audioData = m.audioData || null;
+    var audioUrl = m.audioUrl || null;
+    
+    var needsAi = (!audioData && !audioUrl);
+    if (needsAi && !localStorage.getItem('minimaxApiKey')) {
+        showToast('⚠️ 纯文字生成语音需要先配置 API Key'); 
+        return;
+    }
+
+    var dialogRef = null;
+    createDialog({
+        title: '🎙️ 拾起为语音卡',
+        content: '<div style="text-align:left;">' +
+                '<div style="font-size:12px;color:var(--theme-muted);margin-bottom:4px;">文字内容</div>' +
+                '<div style="font-size:14px;background:var(--theme-bg);padding:10px;border-radius:10px;margin-bottom:12px;line-height:1.5;">' + text + '</div>' +
+                (needsAi ? '<div style="font-size:11px;color:#e05252;margin-bottom:12px;">⚠️ 纯文字，保存时将调用 AI</div>' : '') +
+                '<div style="font-size:12px;color:var(--theme-muted);margin-bottom:4px;">分类</div>' +
+                '<input type="text" id="pickVoiceCat" value="拾起" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:14px;outline:none;box-sizing:border-box;margin-bottom:12px;">' +
+                '<div style="font-size:12px;color:var(--theme-muted);margin-bottom:4px;">标签（逗号分隔）</div>' +
+                '<input type="text" id="pickVoiceTags" value="独立, 拾起" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-input-bg);color:var(--theme-text);font-size:14px;outline:none;box-sizing:border-box;">' +
+                '</div>',
+        buttons: [
+            { text: '取消' },
+            { text: '确认拾起', primary: true, onClick: async function() {
+                var cat = dialogRef.querySelector('#pickVoiceCat').value.trim() || '拾起';
+                var tags = dialogRef.querySelector('#pickVoiceTags').value.split(/[，,]/).map(function(t){return t.trim()}).filter(Boolean);
+                
+                var finalAudioData = audioData;
+                var finalAudioUrl = audioUrl;
+                var source = m.audioData ? 'ai' : 'builtin';
+
+                if (needsAi) {
+                    var btn = dialogRef.querySelector('[data-role="confirm"]');
+                    if (btn) { btn.disabled = true; btn.textContent = '生成中...'; }
+                    showToast('⏳ 正在生成专属语音，请稍候...');
+                    
+                    var base64Audio = await generateMinimaxAudio(text);
+                    if (!base64Audio) {
+                        showToast('❌ AI 生成失败，请检查 Key 或网络');
+                        if (btn) { btn.disabled = false; btn.textContent = '确认拾起'; }
+                        return;
+                    }
+                    finalAudioData = base64Audio;
+                    source = 'ai';
+                }
+
+                var realDuration = await getAudioDuration(finalAudioData || finalAudioUrl);
+
+                await dbPut('voiceCards', {
+                    id: 'vc_' + Date.now(), 
+                    text: text, 
+                    category: cat, 
+                    tags: tags,
+                    audioData: finalAudioData, 
+                    audioUrl: finalAudioUrl, 
+                    source: source,
+                    enabled: true, 
+                    duration: realDuration, 
+                    timestamp: Date.now()
+                });
+                
+                showToast('✅ 已拾起至语音卡库');
+                dialogRef.closest('div[style*=fixed]').remove();
+                if (document.getElementById('voiceTabContent')) renderVoiceTab();
+            }}
+        ],
+        onOpen: function(d) { dialogRef = d; }
+    });
+};
+
+window.handlePickUpText = async function(m) {
+    try {
+        var content = m.content;
+        if (m.type === 'emoji' || m.type === 'image') { showToast('⚠️ 暂不支持拾起表情/图片'); return; }
+        
+        var allCards = await dbGetAll('wordcards');
+        
+        // 1. 检查卡片是否已经存在
+        if (allCards.some(function(c) { return c.content === content && c.groupName === '拾起'; })) {
+            showToast('✨ 这张字卡已经在你的拾起库中啦');
+            return;
+        }
+
+        // 2. 固定使用一个唯一的 groupId
+        var groupName = '拾起';
+        var fixedGroupId = 'group_pickup_fixed'; 
+
+        // 3. 检查是否存在这个固定的分组占位符
+        var hasGroup = allCards.some(function(c) { return c.groupId === fixedGroupId && c.content === '__GROUP_PLACEHOLDER__'; });
+        if (!hasGroup) {
+            // 清理掉以前可能误生成的空“拾起”占位符
+            var toDelete = allCards.filter(function(c) { return c.groupName === groupName && c.content === '__GROUP_PLACEHOLDER__'; });
+            for (var i = 0; i < toDelete.length; i++) {
+                await dbDelete('wordcards', toDelete[i].id);
+            }
+
+            // 创建唯一的分组占位符
+            await dbPut('wordcards', {
+                id: Date.now() + Math.random() * 1000,
+                groupId: fixedGroupId,
+                groupName: groupName,
+                categoryId: '99', // 放回未分类
+                content: '__GROUP_PLACEHOLDER__',
+                timestamp: Date.now()
+            });
+        }
+
+        // 4. 存入字卡
+        await dbPut('wordcards', {
+            id: Date.now() + Math.random() * 1000,
+            groupId: fixedGroupId,
+            groupName: groupName,
+            categoryId: '99', // 和上面保持一致
+            content: content,
+            triggerWords: [],
+            tags: ['拾起'],
+            weight: 2,
+            timestamp: Date.now()
+        });
+
+        showToast('✨ 已拾起，存入字卡库');
+    } catch(e) {
+        console.warn(e);
+        showToast('❌ 拾起失败');
+    }
+};
+
+// 打开/关闭气囊菜单
+window.toggleModeBubbleMenu = function() {
+    var menu = document.getElementById('modeBubbleMenu');
+    if (menu.style.display === 'none') {
+        menu.style.display = 'block';
+    } else {
+        menu.style.display = 'none';
+    }
+};
+
+// 设置模式
+window.setChatBubbleMode = function(modeId) {
+    localStorage.setItem('chatBubbleMode', modeId);
+    
+    // 更新文字
+    var textEl = document.getElementById('modeBubbleText');
+    if (modeId === 'short') textEl.textContent = '⚡ 简短';
+    else if (modeId === 'mix') textEl.textContent = '🐦 混合';
+    else if (modeId === 'deep') textEl.textContent = '💖 走心';
+    
+    // 关闭菜单
+    document.getElementById('modeBubbleMenu').style.display = 'none';
+    showToast('已切换至：' + textEl.textContent);
+};
+
+// 检查是否显示气囊
+window.checkChatModeBubbleVisibility = function() {
+    var bubble = document.getElementById('chatModeBubble');
+    if (!bubble) return;
+    
+    var isEnabled = localStorage.getItem('chatStructureEnabled') === 'true';
+    var isTarot = (typeof currentTopicModeId !== 'undefined' && currentTopicModeId === 'tarot');
+    
+    // 如果开了智能拼卡，且不是塔罗模式，就显示
+    if (isEnabled && !isTarot) {
+        bubble.style.display = 'block';
+        
+        // 初始化文字
+        var currentMode = localStorage.getItem('chatBubbleMode') || 'mix';
+        var textEl = document.getElementById('modeBubbleText');
+        if (currentMode === 'short') textEl.textContent = '⚡ 简短';
+        else if (currentMode === 'mix') textEl.textContent = '🐦 混合';
+        else if (currentMode === 'deep') textEl.textContent = '💖 走心';
+    } else {
+        bubble.style.display = 'none';
+    }
+};
+
+window.openChatTemplateEditor = function() {
+    var allTpls = getAllChatTemplates();
+    var currentEditMode = 'short'; // 默认先显示简短
+
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+    
+    var dialog = document.createElement('div');
+    dialog.style.cssText = 'background:var(--theme-card);border-radius:16px;padding:20px;width:100%;max-width:420px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2);color:var(--theme-text);';
+
+    function renderEditor() {
+        var tplList = allTpls[currentEditMode] || [];
+        
+        var html = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <span style="font-size:16px;font-weight:bold;">⚙️ 拼卡模板设置</span>
+                <span onclick="this.closest('div[style*=fixed]').remove()" style="cursor:pointer;font-size:18px;color:var(--theme-muted);">✕</span>
+            </div>
+            
+            <!-- 模式切换 Tab -->
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+                <button onclick="switchEditMode('short')" style="flex:1;padding:8px;border-radius:10px;border:1px solid ${currentEditMode === 'short' ? 'var(--theme-primary)' : 'var(--theme-border)'};background:${currentEditMode === 'short' ? 'var(--theme-primary)' : 'var(--theme-card)'};color:${currentEditMode === 'short' ? '#fff' : 'var(--theme-muted)'};font-size:12px;cursor:pointer;">⚡ 简短</button>
+                <button onclick="switchEditMode('mix')" style="flex:1;padding:8px;border-radius:10px;border:1px solid ${currentEditMode === 'mix' ? 'var(--theme-primary)' : 'var(--theme-border)'};background:${currentEditMode === 'mix' ? 'var(--theme-primary)' : 'var(--theme-card)'};color:${currentEditMode === 'mix' ? '#fff' : 'var(--theme-muted)'};font-size:12px;cursor:pointer;">🐦 混合</button>
+                <button onclick="switchEditMode('deep')" style="flex:1;padding:8px;border-radius:10px;border:1px solid ${currentEditMode === 'deep' ? 'var(--theme-primary)' : 'var(--theme-border)'};background:${currentEditMode === 'deep' ? 'var(--theme-primary)' : 'var(--theme-card)'};color:${currentEditMode === 'deep' ? '#fff' : 'var(--theme-muted)'};font-size:12px;cursor:pointer;">💖 走心</button>
+            </div>
+
+            <!-- 模板列表 -->
+            <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+                ${tplList.map(function(tpl, tplIdx) {
+                    return `
+                    <div style="border:1px solid var(--theme-border);border-radius:12px;padding:12px;background:var(--theme-bg);">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                            <input type="text" value="${tpl.name}" onchange="updateTplName(${tplIdx}, this.value)" style="font-weight:bold;font-size:14px;background:transparent;border:none;color:var(--theme-text);outline:none;width:70%;">
+                            <span onclick="deleteTemplate(${tplIdx})" style="color:#e05252;font-size:12px;cursor:pointer;">删除模板</span>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:8px;">
+                            ${tpl.structure.map(function(block, blockIdx) {
+                                return `
+                                <div style="background:var(--theme-card);padding:8px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;font-size:12px;">
+                                    <div style="flex:1;">抽 <b>${block.tags.join(' / ')}</b></div>
+                                    <div style="display:flex;align-items:center;gap:4px;">
+                                        <input type="number" value="${block.min}" onchange="updateBlockCount(${tplIdx}, ${blockIdx}, 'min', this.value)" style="width:30px;padding:2px;text-align:center;border:1px solid var(--theme-border);border-radius:4px;background:var(--theme-input-bg);color:var(--theme-text);"> ~ 
+                                        <input type="number" value="${block.max}" onchange="updateBlockCount(${tplIdx}, ${blockIdx}, 'max', this.value)" style="width:30px;padding:2px;text-align:center;border:1px solid var(--theme-border);border-radius:4px;background:var(--theme-input-bg);color:var(--theme-text);"> 条
+                                        <span onclick="removeBlock(${tplIdx}, ${blockIdx})" style="color:#e05252;margin-left:8px;cursor:pointer;">✕</span>
+                                    </div>
+                                </div>`;
+                            }).join('')}
+                            <button onclick="addBlock(${tplIdx})" style="padding:4px;border-radius:6px;border:1px dashed var(--theme-primary);background:transparent;color:var(--theme-primary);font-size:11px;cursor:pointer;">+ 添加标签区块</button>
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>
+            
+            <div style="display:flex;gap:10px;">
+                <button onclick="addNewTemplate()" style="flex:1;padding:10px;border-radius:12px;border:1px dashed var(--theme-border);background:var(--theme-card);color:var(--theme-muted);font-size:13px;cursor:pointer;">+ 新增模板</button>
+                <button onclick="saveChatTemplates(this)" style="flex:2;padding:10px;border-radius:12px;border:none;background:var(--theme-primary);color:#fff;font-size:13px;cursor:pointer;">保存所有配置</button>
+            </div>
+        `;
+        dialog.innerHTML = html;
+    }
+
+    // 内部操作函数
+    window.switchEditMode = function(m) { currentEditMode = m; renderEditor(); };
+    
+    window.updateTplName = function(tplIdx, val) { allTpls[currentEditMode][tplIdx].name = val; };
+    window.updateBlockCount = function(tplIdx, blockIdx, type, val) { allTpls[currentEditMode][tplIdx].structure[blockIdx][type] = parseInt(val) || 0; };
+    window.deleteTemplate = function(tplIdx) { 
+        if(confirm('确定删除此模板？')) { allTpls[currentEditMode].splice(tplIdx, 1); renderEditor(); }
+    };
+    window.removeBlock = function(tplIdx, blockIdx) { allTpls[currentEditMode][tplIdx].structure.splice(blockIdx, 1); renderEditor(); };
+    window.addBlock = function(tplIdx) {
+        // 定义所有可用的标签
+        var allTags = ['动作', '表情', '短句', '核心', '独立', '结尾', '心里话'];
+        var selectedTags = []; // 暂存选中的标签
+
+        var tagOverlay = document.createElement('div');
+        tagOverlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;';
+        
+        var tagDialog = document.createElement('div');
+        tagDialog.style.cssText = 'background:var(--theme-card);border-radius:16px;width:100%;max-width:320px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,0.2);';
+        
+        // 生成可点击的标签按钮
+        var tagsHtml = allTags.map(function(t) {
+            return `<div onclick="toggleTagSelect(this, '${t}')" style="padding:8px 14px;border-radius:12px;border:1.5px solid var(--theme-border);background:var(--theme-bg);color:var(--theme-text);font-size:13px;cursor:pointer;text-align:center;transition:all 0.2s;">${t}</div>`;
+        }).join('');
+
+        tagDialog.innerHTML = `
+            <div style="font-size:15px;font-weight:bold;margin-bottom:16px;text-align:center;color:var(--theme-text);">选择要抽取的标签</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;" id="tagSelectGrid">
+                ${tagsHtml}
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button onclick="this.closest('div[style*=fixed]').remove()" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--theme-border);background:var(--theme-card);color:var(--theme-muted);font-size:14px;cursor:pointer;">取消</button>
+                <button onclick="confirmAddBlock(${tplIdx}, this)" style="flex:1;padding:10px;border-radius:10px;border:none;background:var(--theme-primary);color:#fff;font-size:14px;cursor:pointer;">确认添加</button>
+            </div>
+        `;
+
+        // 标签点击切换状态
+        window.toggleTagSelect = function(el, tag) {
+            if (selectedTags.includes(tag)) {
+                selectedTags = selectedTags.filter(function(t) { return t !== tag; });
+                el.style.borderColor = 'var(--theme-border)';
+                el.style.background = 'var(--theme-bg)';
+                el.style.color = 'var(--theme-text)';
+            } else {
+                selectedTags.push(tag);
+                el.style.borderColor = 'var(--theme-primary)';
+                el.style.background = 'var(--theme-primary)';
+                el.style.color = '#fff';
+            }
+        };
+
+        // 确认添加
+        window.confirmAddBlock = function(idx, btn) {
+            if (selectedTags.length === 0) {
+                showToast('⚠️ 请至少选择一个标签');
+                return;
+            }
+            allTpls[currentEditMode][idx].structure.push({ tags: selectedTags, min: 1, max: 1 });
+            btn.closest('div[style*=fixed]').remove();
+            renderEditor();
+        };
+
+        tagOverlay.appendChild(tagDialog);
+        document.body.appendChild(tagOverlay);
+    };
+
+    window.addNewTemplate = function() {
+        storyPrompt('新增模板', '', '输入新模板名称（如：纯动作）', function(name) {
+            if (!name || !name.trim()) return;
+            allTpls[currentEditMode].push({ 
+                name: name.trim(), 
+                structure: [{ tags: ['核心'], min: 1, max: 1 }] 
+            });
+            renderEditor();
+        });
+    };
+
+    window.saveChatTemplates = function(btn) {
+        localStorage.setItem('chatTemplatesCustom', JSON.stringify(allTpls));
+        showToast('✅ 模板已保存');
+        btn.closest('div[style*=fixed]').remove();
+    };
+
+    renderEditor();
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+};
 
 init();
 })();
+
+// 点击空白处隐藏拼卡模式气囊菜单
+document.addEventListener('click', function(e) {
+    var menu = document.getElementById('modeBubbleMenu');
+    var trigger = document.getElementById('modeBubbleTrigger');
+    // 如果菜单存在且处于展开状态
+    if (menu && menu.style.display === 'block') {
+        // 如果点击的地方既不是菜单内部，也不是触发按钮
+        if (!menu.contains(e.target) && !trigger.contains(e.target)) {
+            menu.style.display = 'none';
+        }
+    }
+});
 
 </script>
 <div id="lockInputPanel">
