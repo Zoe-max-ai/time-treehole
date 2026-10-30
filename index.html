@@ -1891,15 +1891,16 @@ body.theme-shuimo .home-page-inner .status span:last-child {
 </div>
 
 <!-- 拼卡模式悬浮气囊 -->
-<div id="chatModeBubble" style="display:none; position:absolute; right:16px; bottom:70px; z-index:100;">
-    <div id="modeBubbleTrigger" onclick="toggleModeBubbleMenu()" style="background:var(--theme-card); border:1px solid var(--theme-border); padding:6px 12px; border-radius:20px; font-size:12px; color:var(--theme-text); cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.1); display:flex; align-items:center; gap:6px;">
-        <span id="modeBubbleText">🐦 混合</span>
+<div id="chatModeBubble" style="display:none; position:absolute; left:12px; bottom:55px; z-index:100;">
+    <!-- 触发器（半透明毛玻璃） -->
+<div id="modeBubbleTrigger" onclick="toggleModeBubbleMenu()" style="background: linear-gradient(rgba(255,255,255,0.35), rgba(255,255,255,0.35)) !important; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.5); padding: 4px 12px; border-radius: 16px; font-size: 12px; color: var(--theme-text); cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; align-items: center; transition: all 0.2s;">
+        <span id="modeBubbleText" style="letter-spacing:1px; font-weight:500;">混合</span>
     </div>
     <!-- 展开的菜单 -->
-    <div id="modeBubbleMenu" style="display:none; position:absolute; bottom:36px; right:0; background:var(--theme-card); border:1px solid var(--theme-border); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.15); overflow:hidden; min-width:100px;">
-        <div onclick="setChatBubbleMode('short')" style="padding:10px 16px; font-size:13px; cursor:pointer; color:var(--theme-text); border-bottom:1px solid var(--theme-border);">⚡ 简短</div>
-        <div onclick="setChatBubbleMode('mix')" style="padding:10px 16px; font-size:13px; cursor:pointer; color:var(--theme-text); border-bottom:1px solid var(--theme-border);">🐦 混合</div>
-        <div onclick="setChatBubbleMode('deep')" style="padding:10px 16px; font-size:13px; cursor:pointer; color:var(--theme-text);">💖 走心</div>
+    <div id="modeBubbleMenu" style="display:none; position:absolute; bottom:34px; left:0; background:var(--theme-card); border:1px solid var(--theme-border); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.15); overflow:hidden; min-width:80px; text-align:center;">
+        <div onclick="setChatBubbleMode('short')" style="padding:10px 16px; font-size:13px; cursor:pointer; color:var(--theme-text); border-bottom:1px solid var(--theme-border);">简短</div>
+        <div onclick="setChatBubbleMode('mix')" style="padding:10px 16px; font-size:13px; cursor:pointer; color:var(--theme-text); border-bottom:1px solid var(--theme-border);">混合</div>
+        <div onclick="setChatBubbleMode('deep')" style="padding:10px 16px; font-size:13px; cursor:pointer; color:var(--theme-text);">走心</div>
     </div>
 </div>
 
@@ -10925,6 +10926,8 @@ var STORAGE_REGISTRY = [
     { id: 'customBubbleEnabled',   label: '🎈 气泡开关',     type: 'ls', key: 'customBubbleEnabled',   group: '设置' },
     { id: 'customBubble',          label: '🎨 自定义气泡',   type: 'ls', key: 'customBubble',          group: '设置' },
     { id: 'homeLightText',         label: '🎨 首页文字色',   type: 'ls', key: 'homeLightText',         group: '设置' },
+    { id: 'keepAliveEnabled',       label: '🔋 后台保活开关', type: 'ls', key: 'keepAliveEnabled',       group: '设置' },
+
     
     // ★ 核心模版和结构配置 ★
     { id: 'mailboxStructureConfig', label: '⚙️ 回信结构模版', type: 'ls', key: 'mailboxStructureConfig', group: '设置' },
@@ -11837,9 +11840,9 @@ var summary = (data && data.summary) ? data.summary : '';
 
     b.appendChild(quoteEl);
     b.appendChild(contentEl);
-} else {
-    b.textContent = m.content;
-}
+    } else {
+        b.textContent = m.content;
+    }
     w.appendChild(av);
     w.appendChild(b);
     if (w._emojiImg) w.appendChild(w._emojiImg);
@@ -13967,43 +13970,30 @@ async function composeChatMessageByStructure(triggerText) {
         currentPool.sort(function() { return Math.random() - 0.5; });
         var picked = currentPool.slice(0, count);
         
-        // 4. 智能拼接规则（核心）
+        // 4. 极简拼接规则
         picked.forEach(function(text) {
-            var isActionOrExpression = block.tags.includes('动作') || block.tags.includes('表情');
             var isInnerThought = block.tags.includes('心里话');
-            var isStandalone = block.tags.includes('独立');
 
-            if (isActionOrExpression) {
-                // 动作和表情：单独一行，放在前面
-                finalText += text + '\n';
-            } else if (isInnerThought) {
-                // 心里话：前后换行，用星号包裹（或者用括号，你可以自己定）
-                if (finalText && !finalText.endsWith('\n')) finalText += '\n';
-                finalText += '*' + text + '*\n'; 
-            } else if (isStandalone) {
-                // 独立句：前后换行，自带句号
-                if (finalText && !finalText.endsWith('\n')) finalText += '\n';
-                finalText += text;
-                if (!text.match(/[。！？…]$/)) finalText += '。';
-                finalText += '\n';
+            if (isInnerThought) {
+                // 心里话：直接接在句子后面，加上星号（如果你连星号都不想要，可以把 * 删了）
+                finalText += '*' + text + '*'; 
             } else {
-                // 普通短句/核心：如果前面有字且没换行，加逗号
-                if (finalText && !finalText.endsWith('\n') && !finalText.endsWith('，') && !finalText.endsWith('。')) {
-                    finalText += '，';
-                }
+                // 动作、表情、短句、核心：全部直接硬接！
+                // 因为你的字卡本身带了完整的标点，所以直接相连就是最通顺的。
                 finalText += text;
             }
         });
-    });
+        });
 
-    // 5. 收尾：清理多余换行，确保最后一句有标点
+    // 收尾：清理多余换行（这部分现在在 forEach 外面了）
     if (finalText) {
         finalText = finalText.trim();
-        if (!finalText.match(/[。！？…*]$/)) {
-            finalText += '。';
+        if (finalText.endsWith('<br>')) {
+            finalText = finalText.slice(0, -4); // 删掉最后的 <br>
         }
     }
-    return finalText;
+    
+    return finalText; // 别忘了最后要把 finalText 返回出去！
 }
 
 // ============ 拼字卡回复 ============
@@ -20239,6 +20229,16 @@ if (customEnabled) {
 
     h += '</div>';
 
+    // 后台保活开关
+    h += '<div class="settings-section" style="margin-bottom:12px;">';
+    h += '  <h4 style="margin-bottom:4px;">🔋 伪装后台保活</h4>';
+    h += '  <div style="font-size:11px;color:var(--theme-muted);margin-bottom:8px;line-height:1.5;">开启后循环播放极低音量的静音音频，防止手机切后台或锁屏时网页被系统杀掉，保证秦彻的自动回复和信件准时送达。</div>';
+    h += '  <div class="settings-row" style="border-bottom:none;padding:0;">';
+    h += '    <span style="color:var(--theme-text);font-size:13px;">保持后台运行</span>';
+    h += '    <div class="toggle-switch ' + (localStorage.getItem('keepAliveEnabled') === 'true' ? 'on' : '') + '" onclick="toggleKeepAlive(this)"></div>';
+    h += '  </div>';
+    h += '</div>';
+
 
     // ===== 数据备份 =====
     h += '<div style="height:12px;"></div>';
@@ -22989,15 +22989,22 @@ var html = '<div style="padding:16px;">' +
     })() : '') +
     
     // 筛选按钮
-    '<div style="display:flex;gap:6px;margin-bottom:12px;">' +
-    '<button onclick="setMailFilter(\'all\')" style="flex:1;padding:8px;border-radius:16px;border:1px solid var(--theme-primary);background:' + (filter==='all' ? 'var(--theme-primary)' : 'var(--theme-card)') + ';color:' + (filter==='all' ? 'var(--theme-on-primary)' : 'var(--theme-muted)') + ';font-size:12px;cursor:pointer;">全部</button>' +
-    '<button onclick="setMailFilter(\'sent\')" style="flex:1;padding:8px;border-radius:16px;border:1px solid var(--theme-primary);background:' + (filter==='sent' ? 'var(--theme-primary)' : 'var(--theme-card)') + ';color:' + (filter==='sent' ? 'var(--theme-on-primary)' : 'var(--theme-muted)') + ';font-size:12px;cursor:pointer;">寄出</button>' +
-    '<button onclick="setMailFilter(\'received\')" style="flex:1;padding:8px;border-radius:16px;border:1px solid var(--theme-primary);background:' + (filter==='received' ? 'var(--theme-primary)' : 'var(--theme-card)') + ';color:' + (filter==='received' ? 'var(--theme-on-primary)' : 'var(--theme-muted)') + ';font-size:12px;cursor:pointer;">收到</button>' +
+    '<div style="display:flex;gap:4px;margin-bottom:12px;">' +    
+    '<button onclick="setMailFilter(\'proactive\')" style="flex:1;padding:8px 2px;border-radius:12px;border:1px solid var(--theme-primary);background:' + (filter==='proactive' ? 'var(--theme-primary)' : 'var(--theme-card)') + ';color:' + (filter==='proactive' ? 'var(--theme-on-primary)' : 'var(--theme-muted)') + ';font-size:11px;cursor:pointer;">他的来信</button>' +     
+    '<button onclick="setMailFilter(\'sent\')" style="flex:1;padding:8px 2px;border-radius:12px;border:1px solid var(--theme-primary);background:' + (filter==='sent' ? 'var(--theme-primary)' : 'var(--theme-card)') + ';color:' + (filter==='sent' ? 'var(--theme-on-primary)' : 'var(--theme-muted)') + ';font-size:11px;cursor:pointer;">我的写信</button>' +
+    '<button onclick="setMailFilter(\'reply\')" style="flex:1;padding:8px 2px;border-radius:12px;border:1px solid var(--theme-primary);background:' + (filter==='reply' ? 'var(--theme-primary)' : 'var(--theme-card)') + ';color:' + (filter==='reply' ? 'var(--theme-on-primary)' : 'var(--theme-muted)') + ';font-size:11px;cursor:pointer;">他的回信</button>' +
     '</div>';
-    
+   
     var filteredLetters = letters;
-    if (filter === 'sent') filteredLetters = letters.filter(function(l) { return l.direction === 'sent'; });
-    if (filter === 'received') filteredLetters = letters.filter(function(l) { return l.direction === 'received'; });
+    if (filter === 'sent') {
+        filteredLetters = letters.filter(function(l) { return l.direction === 'sent'; });
+    } else if (filter === 'proactive') {
+        // 主来信：方向是收到，且 isProactive 为 true
+        filteredLetters = letters.filter(function(l) { return l.direction === 'received' && l.isProactive === true; });
+    } else if (filter === 'reply') {
+        // 回信：方向是收到，且不是主动来信（没有 isProactive 标记）
+        filteredLetters = letters.filter(function(l) { return l.direction === 'received' && l.isProactive !== true; });
+    }
     
    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 10px;">' +
 '<div style="font-size:13px;color:var(--theme-muted);letter-spacing:1px;">信件</div>' +
@@ -23278,33 +23285,35 @@ async function deleteMailLetter(id) {
 }
 // ===== 加速回信 =====
 async function accelerateReply() {
-var pending = await dbGetAll('pendingReplies');
+    var pending = await dbGetAll('pendingReplies');
 
-if (pending.length > 0) {
-    if (mailState.accelerated) { showToast('冷却中，明天再来'); return; }
-    if (Date.now() < mailState.cooldownUntil) { showToast('冷却中'); return; }
-    
-    var newReplyAt = Date.now() + randHours(2, 4);
-    for (var _i = 0; _i < pending.length; _i++) {
-        pending[_i].replyAt = newReplyAt;
-        pending[_i].accelerated = true;
-        await dbPut('pendingReplies', pending[_i]);
-    }
-    
-    mailState.accelerated = true;
-    mailState.cooldownUntil = Date.now() + 24 * 3600 * 1000;
-    mailState.status = 'waiting';
-    mailState.replyAt = newReplyAt;
-    await kvSet('mailState', 'mailState', mailState);
-
+    // 情况一：队列里有信（你给他写了信，他在正常回信路上）
+    if (pending.length > 0) {
+        if (mailState.accelerated) { showToast('冷却中，明天再来'); return; }
+        if (Date.now() < mailState.cooldownUntil) { showToast('冷却中'); return; }
+        
+        var newReplyAt = Date.now() + randHours(2, 4);
+        for (var _i = 0; _i < pending.length; _i++) {
+            pending[_i].replyAt = newReplyAt;
+            pending[_i].accelerated = true;
+            await dbPut('pendingReplies', pending[_i]);
+        }
+        
+        mailState.accelerated = true;
+        mailState.cooldownUntil = Date.now() + 24 * 3600 * 1000;
+        mailState.status = 'waiting';
+        mailState.replyAt = newReplyAt;
+        await kvSet('mailState', 'mailState', mailState);
         
         renderMailboxMain();
         showToast('他提笔回信了');
         return;
     }
     
-    var lastTrigger = parseInt(await kvGet('calendarSettings', 'lastActiveMailDate', '0')) || 0;
+    // 情况二：队列里没信（你没写信，但你想“催”他）
     var today = new Date().toDateString();
+    var lastTrigger = parseInt(await kvGet('calendarSettings', 'lastActiveMailDate', '0')) || 0;
+    
     if (lastTrigger && new Date(lastTrigger).toDateString() === today) {
         showToast('今天已经期待过了，明天再来');
         return;
@@ -23318,90 +23327,222 @@ if (pending.length > 0) {
     }
     
     await kvSet('calendarSettings', 'lastActiveMailDate', String(Date.now()));
+    showToast('他感受到了你的期待...');
+
+    // ★ 补上之前丢失的三个核心变量 ★
+    var cfg = getMailboxStructureConfig();
+    var structure = cfg.structure || [];
+    var allCards = await dbGetAll('wordcards');
+    var validCards = allCards.filter(function(c) { return c.content && c.content !== '__GROUP_PLACEHOLDER__'; });
+
+    // ================= 开始结构拼装 =================
+    var cfg = getMailboxStructureConfig();
+    var activeTpl = cfg.templates[cfg.activeTemplateId] || Object.values(cfg.templates)[0];
+    var structure = activeTpl ? activeTpl.structure : [];
+
+    var validCards = await dbGetAll('wordcards');
+    validCards = validCards.filter(function(c) { return c.content && c.content !== '__GROUP_PLACEHOLDER__'; });
+
+    var letterBody = '笑笑：\n见字如晤。\n'; 
+    var usedContents = new Set();
+    var hasContent = false;
+
+    if (cfg.enabled && structure.length > 0) {
+        for (var i = 0; i < structure.length; i++) {
+            var sec = structure[i];
+            var groups = sec.groups || [];
+            if (groups.length === 0) continue;
+
+            var pool = validCards.filter(function(c) {
+                return groups.includes(c.groupName) || groups.includes(c.groupId);
+            });
+
+            // 去重
+            pool = pool.filter(function(c) { return !usedContents.has(c.content); });
+            if (pool.length === 0) continue;
+
+            pool = pool.sort(function() { return Math.random() - 0.5; });
+            var min = sec.min || 1;
+            var max = sec.max || 1;
+            var count = Math.floor(Math.random() * (max - min + 1)) + min;
+            
+            var selected = pool.slice(0, count);
+            selected.forEach(function(c) { usedContents.add(c.content); });
+            var secText = selected.map(function(c) { return c.content; }).join(' ');
+            
+            if (secText) {
+                letterBody += secText + '\n';
+                hasContent = true; 
+            }
+        }
+    }
+
+    // 兜底
+    if (!hasContent) {
+        var fallbackPool = validCards.filter(function(c) {
+            return c.content && c.content.length > 2 && c.groupName !== '主动来信·久无音信'; 
+        });
+        if (fallbackPool.length > 0) {
+            var fbShuffled = fallbackPool.sort(function() { return Math.random() - 0.5; });
+            var fbSelected = fbShuffled.slice(0, 2);
+            letterBody += fbSelected.map(function(c) { return c.content; }).join('\n') + '\n';
+        }
+    }
+    // ================= 拼装结束 =================
+   
+
+    var nowDate = new Date();
+    var dateStr = nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate();
     
-    showToast('他会在明天想起你');
+    await dbPut('mailLetters', {
+        id: Date.now() + Math.random() * 1000,
+        direction: 'received',
+        content: letterBody.trim() + '\n\n秦彻',
+        dateStr: dateStr,
+        timestamp: Date.now(),
+        read: false,
+        isProactive: false // 重点：这里是 false，它会出现在【他的回信】里
+    });
+
+    addSysMsg('🕊️ 秦彻给你写了一封信', Date.now());
+    
+    if (typeof renderMailboxMain === 'function') renderMailboxMain();
+    showToast('✅ 收到一封信，去信箱看看吧');
 }
+
 function randHours(min, max) {
-    return (min + Math.random() * (max - min)) * 3600 * 1000; // 正式：小时级
+    return (min + Math.random() * (max - min)) * 3600 * 1000; // 修复了拼写错误
 }
 
 // ===== 检查并触发主动来信（破冰信） =====
 async function checkProactiveLetter() {
-    // 如果今天已经主动发过了，就不发了（每天最多一封主动信）
-    var today = new Date().toDateString();
-    var lastProactive = await kvGet('calendarSettings', 'lastProactiveLetterDate', '');
-    if (lastProactive === today) return;
-
-    // 检查你上次催他（或者你上次寄信）的时间
-    var lastActive = parseInt(await kvGet('calendarSettings', 'lastActiveMailDate', '0')) || 0;
-    var lastSent = parseInt(await kvGet('calendarSettings', 'lastSentLetterDate', '0')) || 0;
-    
-    // 取两个时间中最新的那个
-    var lastContact = Math.max(lastActive, lastSent);
-    
-    // 如果从来没联系过，或者距离上次联系超过 1 天（24小时）
+    // 1. 获取上次主动来信的时间戳（防止每天狂发）
+    var lastProactiveTs = parseInt(await kvGet('calendarSettings', 'lastProactiveLetterDateTs', '0')) || 0;
     var now = Date.now();
-    if (lastContact === 0 || (now - lastContact) > 24 * 3600 * 1000) {
-        
-        console.log('📮 触发主动来信机制');
-        
-        var cfg = getMailboxStructureConfig();
-        var letterContent = '';
 
-        // 走新逻辑或老逻辑
-        if (cfg.enabled) {
-            letterContent = await buildLetterReply(true); // 传 true，代表主动来信
-        } else {
-            // 兜底：如果没开结构编排，随便抽两句
-            var rawGroups = await kvGet('calendarSettings', 'mailGroups', '[]');
-            var groups = [];
-            try {
-                if (Array.isArray(rawGroups)) {
-                    groups = rawGroups;
-                } else if (typeof rawGroups === 'string') {
-                    // 尝试解析 JSON，如果失败，说明是逗号分隔的文本
-                    if (rawGroups.trim().startsWith('[')) {
-                        groups = JSON.parse(rawGroups);
-                    } else if (rawGroups.trim() !== '') {
-                        groups = rawGroups.split(',').map(s => s.trim()).filter(Boolean);
-                    }
-                }
-            } catch(e) {
-                console.warn('解析 mailGroups 失败，使用空数组', e);
-                groups = [];
-            }
-            
-            var cards = await dbGetAll('wordcards');
-            var pool = cards.filter(c => groups.includes(c.groupName) && c.content);
-            
-            if (pool.length === 0) {
-                // 如果连组都没有，或者抽不到卡，给个默认的保底情话
-                letterContent = '最近在想你，不知道你过得好不好。';
-            } else {
-                var selected = pool.slice(0, 3);
-                letterContent = selected.map(c => c.content).join('\n');
-            }
+    // ★ 保底冷却：距离上次主动来信必须超过 3 天（防止连发）
+    if (now - lastProactiveTs < 72 * 3600 * 1000) {
+        return; 
+    }
+
+    // 2. 获取聊天和写信的活跃时间
+    // 聊天时间（从数据库里拿最后一条消息的时间，或者用你原来的记录）
+    var allMsgs = await dbGetAll('messages');
+    var lastChatTs = allMsgs.length > 0 ? allMsgs[allMsgs.length - 1].timestamp : 0;
+    
+    // 写信时间（你上次点击“写一封”并寄出的时间）
+    var lastSentTs = parseInt(await kvGet('calendarSettings', 'lastSentLetterDate', '0')) || 0;
+
+    // 3. 判断触发条件
+    var triggerReason = '';
+    
+    // 条件一：超过 3 天没聊天（72小时）
+    if (lastChatTs > 0 && (now - lastChatTs > 72 * 3600 * 1000)) {
+        triggerReason = 'chat';
+    } 
+    // 条件二：超过 7 天没给他写信（168小时）
+    else if (lastSentTs > 0 && (now - lastSentTs > 168 * 3600 * 1000)) {
+        triggerReason = 'letter';
+    }
+    // 如果从来没聊过天也没写过信，也触发一次
+    else if (lastChatTs === 0 && lastSentTs === 0) {
+        triggerReason = 'initial';
+    }
+
+    if (triggerReason === '') return; // 不满足条件，退出
+
+    console.log('📮 触发主动来信，原因:', triggerReason);
+
+    // 4. 获取结构配置，准备生成正文
+    var activeTpl = cfg.templates[cfg.activeTemplateId] || Object.values(cfg.templates)[0];
+    var structure = activeTpl ? activeTpl.structure : [];
+    
+    // 如果没开结构编排，或者没配置结构，就退回到纯随机抽卡
+    if (!cfg.enabled || structure.length === 0) {
+        var allCards = await dbGetAll('wordcards');
+        var targetCards = allCards.filter(function(c) {
+            return c.groupName === '主动来信·久无音信' && c.content && c.content !== '__GROUP_PLACEHOLDER__';
+        });
+        if (targetCards.length === 0) return;
+        var letterBody = targetCards.sort(function() { return Math.random() - 0.5; }).slice(0, 3).map(function(c) { return c.content; }).join('\n');
+    } else {
+        // ★ 走结构编排逻辑
+        var allCards = await dbGetAll('wordcards');
+        var validCards = allCards.filter(function(c) { return c.content && c.content !== '__GROUP_PLACEHOLDER__'; });
+        
+        // 准备开头称呼
+        var nicknamePool = validCards.filter(function(c) {
+            if (c.groupName !== '笑笑想听的称呼') return false;
+            var text = c.content.replace(/[。！？~…,\.\s]+$/, '');
+            return text.length >= 2 && text.length <= 8;
+        });
+        var rawNick = (typeof S !== 'undefined' && S.myName) ? S.myName : '笑笑';
+        if (nicknamePool.length > 0) {
+            rawNick = nicknamePool[Math.floor(Math.random() * nicknamePool.length)].content;
         }
+        var cleanNick = rawNick.replace(/[。！？~…,\.\s：:]+$/, '');
+        
+        var letterBody = cleanNick + '：\n\n见字如晤。\n';
+        var usedContents = new Set();
 
-        if (letterContent) {
-            var nowDate = new Date();
-            var dateStr = nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate();
+        for (var i = 0; i < structure.length; i++) {
+            var sec = structure[i];
+            var groups = sec.groups || [];
+            if (groups.length === 0) continue;
+
+            var currentGroups = groups;
             
-            await dbPut('mailLetters', {
-                id: Date.now() + Math.random() * 1000,
-                direction: 'received',
-                content: letterContent,
-                dateStr: dateStr,
-                timestamp: Date.now(),
-                read: false
+            // ★ 核心灵魂：如果这是第一个区块（开头感受），强行去抽「主动来信·久无音信」！
+            if (i === 0) {
+                currentGroups = ['主动来信·久无音信']; // 强制覆盖为破冰专属组
+            }
+
+            var pool = validCards.filter(function(c) {
+                return currentGroups.includes(c.groupName) || currentGroups.includes(c.groupId);
             });
 
-            addSysMsg('🕊️ 秦彻主动给你写了一封信', Date.now());
-            await kvSet('calendarSettings', 'lastProactiveLetterDate', today);
+            if (pool.length === 0) continue;
+            pool = pool.filter(function(c) { return !usedContents.has(c.content); });
+            if (pool.length === 0) continue;
+
+            pool = pool.sort(function() { return Math.random() - 0.5; });
+            var min = sec.min || 1;
+            var max = sec.max || 1;
+            var count = Math.floor(Math.random() * (max - min + 1)) + min;
             
-            if (typeof showToast === 'function') showToast('🕊️ 收到了一封主动来信');
+            var selected = pool.slice(0, count);
+            selected.forEach(function(c) { usedContents.add(c.content); });
+
+            var secText = selected.map(function(c) { return c.content; }).join(' ');
+            if (secText) {
+                letterBody += secText + '\n';
+            }
         }
     }
+
+    // 5. 存入数据库
+    var nowDate = new Date();
+    var dateStr = nowDate.getFullYear() + '.' + (nowDate.getMonth()+1) + '.' + nowDate.getDate();
+
+    // 注意这里结尾加上“秦彻”，如果结构里已经包含了，可以视情况删掉这行
+    var finalContent = letterBody.trim() + '\n\n秦彻'; 
+
+    await dbPut('mailLetters', {
+        id: Date.now() + Math.random() * 1000,
+        direction: 'received',
+        content: finalContent,
+        dateStr: dateStr,
+        timestamp: now,
+        read: false,
+        isProactive: true // 标记为主动来信
+    });
+
+    addSysMsg('🕊️ 秦彻主动给你写了一封信', now);
+    
+    // 6. 更新触发时间戳
+    await kvSet('calendarSettings', 'lastProactiveLetterDateTs', String(now));
+    
+    if (typeof showToast === 'function') showToast('🕊️ 收到了一封主动来信');
 }
 
 
@@ -23458,6 +23599,9 @@ try {
                 // === 生成回信正文 ===
                 var body = '';
                 var cfg = getMailboxStructureConfig();
+    // ★ 修复：从当前模板中获取真实的结构
+    var activeTpl = cfg.templates[cfg.activeTemplateId] || Object.values(cfg.templates)[0];
+    var structure = activeTpl ? activeTpl.structure : [];
 
                 if (cfg.enabled) {
                     // 【新逻辑】：如果开关打开，走结构编排
@@ -25555,15 +25699,15 @@ async function exportChatByDate() {
 
 // ===== 拼字卡三大模式默认配置 =====
 var DEFAULT_CHAT_TEMPLATES = {
-    'short': [ // ⚡ 简短
+    'short': [ // 简短
         { name: '纯单句', structure: [{ tags: ['独立', '短句'], min: 1, max: 1 }] },
         { name: '动作加单句', structure: [{ tags: ['动作', '表情'], min: 1, max: 1 }, { tags: ['独立', '短句'], min: 1, max: 1 }] }
     ],
-    'mix': [ // 🐦 混合
+    'mix': [ // 混合
         { name: '日常混搭', structure: [{ tags: ['短句'], min: 1, max: 1 }, { tags: ['核心'], min: 1, max: 1 }] },
         { name: '带点表情', structure: [{ tags: ['表情', '动作'], min: 1, max: 1 }, { tags: ['短句'], min: 1, max: 1 }, { tags: ['核心', '独立'], min: 1, max: 1 }] }
     ],
-    'deep': [ // 💖 走心
+    'deep': [ // 走心
         { name: '走心长句', structure: [{ tags: ['短句'], min: 1, max: 1 }, { tags: ['核心'], min: 1, max: 2 }, { tags: ['心里话'], min: 1, max: 1 }, { tags: ['结尾'], min: 0, max: 1 }] },
         { name: '纯心里话', structure: [{ tags: ['心里话'], min: 1, max: 2 }, { tags: ['结尾'], min: 1, max: 1 }] }
     ]
@@ -26553,6 +26697,100 @@ async function doPatQin(text) {
 function openProfile(){document.getElementById('pfAvatar').src=getAvatar('contact');document.getElementById('pfName').textContent=S.contactName;document.getElementById('pfStatus').textContent=S.contactStatus;document.getElementById('pfMood').textContent=S.contactMood||'';document.getElementById('profileOverlay').classList.add('show');}
 function closeProfile(){document.getElementById('profileOverlay').classList.remove('show');}
 
+// ===== 伪装后台保活（Web Audio API 终极版） =====
+var keepAliveAudioCtx = null;
+var keepAliveOscillator = null;
+
+window.toggleKeepAlive = function(el) {
+    var isEnabled = el.classList.toggle('on');
+    localStorage.setItem('keepAliveEnabled', isEnabled ? 'true' : 'false');
+    
+    if (isEnabled) {
+        try {
+            if (!keepAliveAudioCtx) {
+                // 创建音频上下文
+                var AudioContext = window.AudioContext || window.webkitAudioContext;
+                keepAliveAudioCtx = new AudioContext();
+            }
+            
+            // 如果音频上下文被挂起（比如切了后台），恢复它
+            if (keepAliveAudioCtx.state === 'suspended') {
+                keepAliveAudioCtx.resume();
+            }
+
+            // 创建一个振荡器（用来发声）
+            if (!keepAliveOscillator) {
+                keepAliveOscillator = keepAliveAudioCtx.createOscillator();
+                var gainNode = keepAliveAudioCtx.createGain();
+                
+                // 设置极其微弱的音量（0.001），人耳完全听不见，但系统会认为在播放
+                gainNode.gain.value = 0.001; 
+                
+                // 把它连到扬声器
+                keepAliveOscillator.connect(gainNode);
+                gainNode.connect(keepAliveAudioCtx.destination);
+                keepAliveOscillator.start();
+            }
+            showToast('🔋 后台保活已开启');
+        } catch(e) {
+            console.log('保活开启失败:', e);
+            showToast('⚠️ 开启失败，浏览器不支持');
+            el.classList.remove('on');
+        }
+    } else {
+        // 关闭保活
+        if (keepAliveOscillator) {
+            keepAliveOscillator.stop();
+            keepAliveOscillator.disconnect();
+            keepAliveOscillator = null;
+        }
+        if (keepAliveAudioCtx && keepAliveAudioCtx.state === 'running') {
+            keepAliveAudioCtx.suspend();
+        }
+        showToast('💤 后台保活已关闭');
+    }
+};
+
+// 页面刷新恢复逻辑
+// 页面刷新时的“静默唤醒”逻辑
+window.addEventListener('load', function() {
+    if (localStorage.getItem('keepAliveEnabled') === 'true') {
+        setTimeout(function() {
+            try {
+                var AudioContext = window.AudioContext || window.webkitAudioContext;
+                keepAliveAudioCtx = new AudioContext();
+                keepAliveOscillator = keepAliveAudioCtx.createOscillator();
+                var gainNode = keepAliveAudioCtx.createGain();
+                gainNode.gain.value = 0.001;
+                keepAliveOscillator.connect(gainNode);
+                gainNode.connect(keepAliveAudioCtx.destination);
+                keepAliveOscillator.start();
+                
+                // 如果发现被浏览器冻结了，就挂一个一次性点击事件
+                if (keepAliveAudioCtx.state === 'suspended') {
+                    console.log('🔒 保活被浏览器拦截，等待用户首次点击屏幕解锁...');
+                    var unlockAudio = function() {
+                        if (keepAliveAudioCtx && keepAliveAudioCtx.state === 'suspended') {
+                            keepAliveAudioCtx.resume().then(function() {
+                                console.log('🔋 保活状态已解锁并恢复');
+                            });
+                        }
+                        // 解除监听，只执行一次
+                        document.removeEventListener('touchstart', unlockAudio);
+                        document.removeEventListener('click', unlockAudio);
+                    };
+                    document.addEventListener('touchstart', unlockAudio, { once: true });
+                    document.addEventListener('click', unlockAudio, { once: true });
+                } else {
+                    console.log('🔋 保活状态已静默恢复');
+                }
+            } catch(e) {
+                console.log('⚠️ 静默恢复保活失败');
+            }
+        }, 1000);
+    }
+});
+
 // ============ 初始化 ============
 // 初始化数据库
 async function init() {
@@ -27536,6 +27774,7 @@ window.openBatchTagMenu = openBatchTagMenu;
 window.toggleBatchTag = toggleBatchTag;
 window.renderVoiceTab = renderVoiceTab;
 window.buildVoiceCardHTML = buildVoiceCardHTML;
+window.toggleKeepAlive = toggleKeepAlive;
 window.testSendVoice = async function() {
     var voiceCards = await dbGetAll('voiceCards');
     var validVoices = voiceCards.filter(function(v) { return v.enabled !== false; });
@@ -27729,9 +27968,9 @@ window.setChatBubbleMode = function(modeId) {
     
     // 更新文字
     var textEl = document.getElementById('modeBubbleText');
-    if (modeId === 'short') textEl.textContent = '⚡ 简短';
-    else if (modeId === 'mix') textEl.textContent = '🐦 混合';
-    else if (modeId === 'deep') textEl.textContent = '💖 走心';
+    if (modeId === 'short') textEl.textContent = '简短';
+    else if (modeId === 'mix') textEl.textContent = '混合';
+    else if (modeId === 'deep') textEl.textContent = '走心';
     
     // 关闭菜单
     document.getElementById('modeBubbleMenu').style.display = 'none';
@@ -27753,9 +27992,9 @@ window.checkChatModeBubbleVisibility = function() {
         // 初始化文字
         var currentMode = localStorage.getItem('chatBubbleMode') || 'mix';
         var textEl = document.getElementById('modeBubbleText');
-        if (currentMode === 'short') textEl.textContent = '⚡ 简短';
-        else if (currentMode === 'mix') textEl.textContent = '🐦 混合';
-        else if (currentMode === 'deep') textEl.textContent = '💖 走心';
+        if (currentMode === 'short') textEl.textContent = '简短';
+        else if (currentMode === 'mix') textEl.textContent = '混合';
+        else if (currentMode === 'deep') textEl.textContent = '走心';
     } else {
         bubble.style.display = 'none';
     }
@@ -27783,9 +28022,9 @@ window.openChatTemplateEditor = function() {
             
             <!-- 模式切换 Tab -->
             <div style="display:flex;gap:8px;margin-bottom:16px;">
-                <button onclick="switchEditMode('short')" style="flex:1;padding:8px;border-radius:10px;border:1px solid ${currentEditMode === 'short' ? 'var(--theme-primary)' : 'var(--theme-border)'};background:${currentEditMode === 'short' ? 'var(--theme-primary)' : 'var(--theme-card)'};color:${currentEditMode === 'short' ? '#fff' : 'var(--theme-muted)'};font-size:12px;cursor:pointer;">⚡ 简短</button>
-                <button onclick="switchEditMode('mix')" style="flex:1;padding:8px;border-radius:10px;border:1px solid ${currentEditMode === 'mix' ? 'var(--theme-primary)' : 'var(--theme-border)'};background:${currentEditMode === 'mix' ? 'var(--theme-primary)' : 'var(--theme-card)'};color:${currentEditMode === 'mix' ? '#fff' : 'var(--theme-muted)'};font-size:12px;cursor:pointer;">🐦 混合</button>
-                <button onclick="switchEditMode('deep')" style="flex:1;padding:8px;border-radius:10px;border:1px solid ${currentEditMode === 'deep' ? 'var(--theme-primary)' : 'var(--theme-border)'};background:${currentEditMode === 'deep' ? 'var(--theme-primary)' : 'var(--theme-card)'};color:${currentEditMode === 'deep' ? '#fff' : 'var(--theme-muted)'};font-size:12px;cursor:pointer;">💖 走心</button>
+                <button onclick="switchEditMode('short')" style="flex:1;padding:8px;border-radius:10px;border:1px solid ${currentEditMode === 'short' ? 'var(--theme-primary)' : 'var(--theme-border)'};background:${currentEditMode === 'short' ? 'var(--theme-primary)' : 'var(--theme-card)'};color:${currentEditMode === 'short' ? '#fff' : 'var(--theme-muted)'};font-size:12px;cursor:pointer;">简短</button>
+                <button onclick="switchEditMode('mix')" style="flex:1;padding:8px;border-radius:10px;border:1px solid ${currentEditMode === 'mix' ? 'var(--theme-primary)' : 'var(--theme-border)'};background:${currentEditMode === 'mix' ? 'var(--theme-primary)' : 'var(--theme-card)'};color:${currentEditMode === 'mix' ? '#fff' : 'var(--theme-muted)'};font-size:12px;cursor:pointer;">混合</button>
+                <button onclick="switchEditMode('deep')" style="flex:1;padding:8px;border-radius:10px;border:1px solid ${currentEditMode === 'deep' ? 'var(--theme-primary)' : 'var(--theme-border)'};background:${currentEditMode === 'deep' ? 'var(--theme-primary)' : 'var(--theme-card)'};color:${currentEditMode === 'deep' ? '#fff' : 'var(--theme-muted)'};font-size:12px;cursor:pointer;">走心</button>
             </div>
 
             <!-- 模板列表 -->
