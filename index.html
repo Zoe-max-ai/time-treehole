@@ -1531,7 +1531,7 @@ body.theme-shuimo .home-page-inner .status span:last-child {
     width: 20px;
     height: 20px;
     pointer-events: none;
-    stroke: #fff;
+    stroke: currentColor;
 }
 
 .quick-emoji-panel {
@@ -1890,32 +1890,49 @@ body.theme-shuimo .home-page-inner .status span:last-child {
     <button class="tarot-bar-chip" data-spread="dual" onclick="setTarotSpread('dual')">三牌·对照</button>
 </div>
 
-<!-- 拼卡模式悬浮气囊 -->
-<div id="chatModeBubble" style="display:none; position:absolute; left:12px; bottom:55px; z-index:100;">
-    <!-- 触发器（半透明毛玻璃） -->
-<div id="modeBubbleTrigger" onclick="toggleModeBubbleMenu()" style="background: linear-gradient(rgba(255,255,255,0.35), rgba(255,255,255,0.35)) !important; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.5); padding: 4px 12px; border-radius: 16px; font-size: 12px; color: var(--theme-text); cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; align-items: center; transition: all 0.2s;">
-        <span id="modeBubbleText" style="letter-spacing:1px; font-weight:500;">混合</span>
-    </div>
-    <!-- 展开的菜单 -->
-    <div id="modeBubbleMenu" style="display:none; position:absolute; bottom:34px; left:0; background:var(--theme-card); border:1px solid var(--theme-border); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.15); overflow:hidden; min-width:80px; text-align:center;">
+
+
+    <!-- 展开的菜单（改成从下往上弹） -->
+    <div id="modeBubbleMenu" style="display:none; position:fixed; bottom:70px; left:10px; background:var(--theme-card); border:1px solid var(--theme-border); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.15); overflow:hidden; min-width:80px; text-align:center; z-index:9999;">
         <div onclick="setChatBubbleMode('short')" style="padding:10px 16px; font-size:13px; cursor:pointer; color:var(--theme-text); border-bottom:1px solid var(--theme-border);">简短</div>
         <div onclick="setChatBubbleMode('mix')" style="padding:10px 16px; font-size:13px; cursor:pointer; color:var(--theme-text); border-bottom:1px solid var(--theme-border);">混合</div>
         <div onclick="setChatBubbleMode('deep')" style="padding:10px 16px; font-size:13px; cursor:pointer; color:var(--theme-text);">走心</div>
     </div>
-</div>
 
-<div class="bottombar" style="position:relative;">
-    <button class="quick-emoji-btn" id="btnQuickEmoji" onclick="toggleQuickEmojiPanel()" aria-label="表情">
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="9"/>
-        <path d="M8.5 14.5s1.3 1.8 3.5 1.8 3.5-1.8 3.5-1.8"/>
-        <line x1="9" y1="9.5" x2="9.01" y2="9.5"/>
-        <line x1="15" y1="9.5" x2="15.01" y2="9.5"/>
-    </svg>
-</button>
-    <button class="icon-btn" id="btnMore" onclick="toggleMorePanel()" style="font-size:22px;">＋</button>
-    <input type="text" id="messageInput" placeholder="说点什么..." onkeydown="if(event.key==='Enter'){sendMessage();}">
-    <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+<div class="bottombar" style="position:relative; display:flex; align-items:center; gap:6px; padding:8px 15px;">
+    <!-- 1. 表情按钮 -->
+    <button class="quick-emoji-btn" id="btnQuickEmoji" onclick="toggleQuickEmojiPanel()" aria-label="表情" style="background:transparent; border:none; width:28px; height:28px; display:flex; align-items:center; justify-content:center; color:var(--theme-text); padding:0; flex-shrink:0;">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/><path d="M8.5 14.5s1.3 1.8 3.5 1.8 3.5-1.8 3.5-1.8"/><line x1="9" y1="9.5" x2="9.01" y2="9.5"/><line x1="15" y1="9.5" x2="15.01" y2="9.5"/>
+        </svg>
+    </button>
+
+    <!-- 2. +号按钮 -->
+    <button class="icon-btn" id="btnMore" onclick="toggleMorePanel()" style="background:transparent; border:none; width:28px; height:28px; display:flex; align-items:center; justify-content:center; color:var(--theme-text); padding:0; flex-shrink:0;">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+    </button>
+
+    <!-- 3. 输入框包裹层 -->
+    <div style="flex:1; display:flex; align-items:center; background:var(--theme-input-bg); border:1px solid var(--theme-input-border); border-radius:20px; padding:0 14px; min-width:0;">
+        
+        <!-- 模式图标 -->
+        <div id="modeIconContainer" onclick="cycleChatBubbleMode()" style="display:none; cursor:pointer; margin-right:8px; color:var(--theme-text); flex-shrink:0;">
+            <svg id="modeBubbleIcon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
+            </svg>
+        </div>
+
+        <input type="text" id="messageInput" placeholder="说点什么..." onkeydown="if(event.key==='Enter'){sendMessage();}" style="flex:1; min-width:0; padding:10px 0; border:none; background:transparent; color:var(--theme-text); font-size:14px; outline:none;">
+    </div>
+
+    <!-- 4. 发送按钮 -->
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()" style="background:transparent; border:none; width:28px; height:28px; display:flex; align-items:center; justify-content:center; color:var(--theme-primary); padding:0; flex-shrink:0;">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(45deg);">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+    </button>
 </div>
 
     <div class="emoji-panel" id="emojiPanel"><div class="emoji-tabs"><button class="emoji-tab active" onclick="switchEmojiTab('emoji')">😊 表情包</button><button class="emoji-tab" onclick="switchEmojiTab('pat')">👋 拍一拍</button></div><div class="tab-content" id="emojiTabContent"></div></div>
@@ -11205,6 +11222,8 @@ async function openChatPage(){
         });
     }
     }
+    // 确保进入聊天页时，检查一次图标显示
+    if (typeof checkChatModeBubbleVisibility === 'function') checkChatModeBubbleVisibility();
 }
 
 
@@ -25914,6 +25933,11 @@ function toggleChatStructure(el) {
         oldSettings.style.pointerEvents = on ? 'none' : 'auto';
     }
     
+    // ★★★ 加上这一行：点开关的瞬间，立刻刷新输入框里图标的显示/隐藏 ★★★
+    if (typeof checkChatModeBubbleVisibility === 'function') {
+        checkChatModeBubbleVisibility();
+    }
+    
     showToast(on ? '✅ 已开启智能拼卡' : '↺ 已关闭，恢复默认随机');
 }
 
@@ -26697,99 +26721,71 @@ async function doPatQin(text) {
 function openProfile(){document.getElementById('pfAvatar').src=getAvatar('contact');document.getElementById('pfName').textContent=S.contactName;document.getElementById('pfStatus').textContent=S.contactStatus;document.getElementById('pfMood').textContent=S.contactMood||'';document.getElementById('profileOverlay').classList.add('show');}
 function closeProfile(){document.getElementById('profileOverlay').classList.remove('show');}
 
-// ===== 伪装后台保活（Web Audio API 终极版） =====
-var keepAliveAudioCtx = null;
-var keepAliveOscillator = null;
+// ===== 真实音频后台保活（干净版） =====
+var keepAliveAudio = null;
 
+// 初始化音频对象（只在第一次调用时创建）
+function initKeepAliveAudio() {
+    if (!keepAliveAudio) {
+        keepAliveAudio = new Audio('houtai.mp3'); // 同级目录直接写文件名
+        keepAliveAudio.loop = true;               // 开启循环
+        keepAliveAudio.preload = 'auto';          // 预加载
+        keepAliveAudio.volume = 1;            
+    }
+    return keepAliveAudio;
+}
+
+// 开关控制函数（绑定到你的按钮上）
 window.toggleKeepAlive = function(el) {
     var isEnabled = el.classList.toggle('on');
     localStorage.setItem('keepAliveEnabled', isEnabled ? 'true' : 'false');
     
     if (isEnabled) {
-        try {
-            if (!keepAliveAudioCtx) {
-                // 创建音频上下文
-                var AudioContext = window.AudioContext || window.webkitAudioContext;
-                keepAliveAudioCtx = new AudioContext();
-            }
-            
-            // 如果音频上下文被挂起（比如切了后台），恢复它
-            if (keepAliveAudioCtx.state === 'suspended') {
-                keepAliveAudioCtx.resume();
-            }
-
-            // 创建一个振荡器（用来发声）
-            if (!keepAliveOscillator) {
-                keepAliveOscillator = keepAliveAudioCtx.createOscillator();
-                var gainNode = keepAliveAudioCtx.createGain();
-                
-                // 设置极其微弱的音量（0.001），人耳完全听不见，但系统会认为在播放
-                gainNode.gain.value = 0.001; 
-                
-                // 把它连到扬声器
-                keepAliveOscillator.connect(gainNode);
-                gainNode.connect(keepAliveAudioCtx.destination);
-                keepAliveOscillator.start();
-            }
+        var audio = initKeepAliveAudio();
+        audio.play().then(function() {
             showToast('🔋 后台保活已开启');
-        } catch(e) {
-            console.log('保活开启失败:', e);
-            showToast('⚠️ 开启失败，浏览器不支持');
+        }).catch(function(e) {
+            console.log('保活播放失败:', e);
+            showToast('⚠️ 浏览器拦截，请再点一下页面');
+            // 如果被拦截，先回退状态
             el.classList.remove('on');
-        }
+            localStorage.setItem('keepAliveEnabled', 'false');
+        });
     } else {
-        // 关闭保活
-        if (keepAliveOscillator) {
-            keepAliveOscillator.stop();
-            keepAliveOscillator.disconnect();
-            keepAliveOscillator = null;
-        }
-        if (keepAliveAudioCtx && keepAliveAudioCtx.state === 'running') {
-            keepAliveAudioCtx.suspend();
+        if (keepAliveAudio) {
+            keepAliveAudio.pause();
+            keepAliveAudio.currentTime = 0;
         }
         showToast('💤 后台保活已关闭');
     }
 };
 
-// 页面刷新恢复逻辑
-// 页面刷新时的“静默唤醒”逻辑
+// 页面刷新时恢复保活状态
 window.addEventListener('load', function() {
     if (localStorage.getItem('keepAliveEnabled') === 'true') {
-        setTimeout(function() {
-            try {
-                var AudioContext = window.AudioContext || window.webkitAudioContext;
-                keepAliveAudioCtx = new AudioContext();
-                keepAliveOscillator = keepAliveAudioCtx.createOscillator();
-                var gainNode = keepAliveAudioCtx.createGain();
-                gainNode.gain.value = 0.001;
-                keepAliveOscillator.connect(gainNode);
-                gainNode.connect(keepAliveAudioCtx.destination);
-                keepAliveOscillator.start();
-                
-                // 如果发现被浏览器冻结了，就挂一个一次性点击事件
-                if (keepAliveAudioCtx.state === 'suspended') {
-                    console.log('🔒 保活被浏览器拦截，等待用户首次点击屏幕解锁...');
-                    var unlockAudio = function() {
-                        if (keepAliveAudioCtx && keepAliveAudioCtx.state === 'suspended') {
-                            keepAliveAudioCtx.resume().then(function() {
-                                console.log('🔋 保活状态已解锁并恢复');
-                            });
-                        }
-                        // 解除监听，只执行一次
-                        document.removeEventListener('touchstart', unlockAudio);
-                        document.removeEventListener('click', unlockAudio);
-                    };
-                    document.addEventListener('touchstart', unlockAudio, { once: true });
-                    document.addEventListener('click', unlockAudio, { once: true });
-                } else {
-                    console.log('🔋 保活状态已静默恢复');
-                }
-            } catch(e) {
-                console.log('⚠️ 静默恢复保活失败');
-            }
-        }, 1000);
+        var audio = initKeepAliveAudio();
+        
+        // 尝试直接播放
+        audio.play().then(function() {
+            console.log('🔋 保活状态已静默恢复');
+        }).catch(function() {
+            // 如果被浏览器拦截（通常是 iOS），就等用户第一次点击屏幕
+            console.log('🔒 保活被拦截，等待用户点击解锁...');
+            var unlockAudio = function() {
+                audio.play().then(function() {
+                    console.log('🔋 保活已解锁并恢复');
+                }).catch(function(){});
+                // 解除监听
+                document.removeEventListener('touchstart', unlockAudio);
+                document.removeEventListener('click', unlockAudio);
+            };
+            document.addEventListener('touchstart', unlockAudio, { once: true });
+            document.addEventListener('click', unlockAudio, { once: true });
+        });
     }
 });
+
+
 
 // ============ 初始化 ============
 // 初始化数据库
@@ -27775,6 +27771,7 @@ window.toggleBatchTag = toggleBatchTag;
 window.renderVoiceTab = renderVoiceTab;
 window.buildVoiceCardHTML = buildVoiceCardHTML;
 window.toggleKeepAlive = toggleKeepAlive;
+window.cycleChatBubbleMode = cycleChatBubbleMode;
 window.testSendVoice = async function() {
     var voiceCards = await dbGetAll('voiceCards');
     var validVoices = voiceCards.filter(function(v) { return v.enabled !== false; });
@@ -27952,53 +27949,6 @@ window.handlePickUpText = async function(m) {
     }
 };
 
-// 打开/关闭气囊菜单
-window.toggleModeBubbleMenu = function() {
-    var menu = document.getElementById('modeBubbleMenu');
-    if (menu.style.display === 'none') {
-        menu.style.display = 'block';
-    } else {
-        menu.style.display = 'none';
-    }
-};
-
-// 设置模式
-window.setChatBubbleMode = function(modeId) {
-    localStorage.setItem('chatBubbleMode', modeId);
-    
-    // 更新文字
-    var textEl = document.getElementById('modeBubbleText');
-    if (modeId === 'short') textEl.textContent = '简短';
-    else if (modeId === 'mix') textEl.textContent = '混合';
-    else if (modeId === 'deep') textEl.textContent = '走心';
-    
-    // 关闭菜单
-    document.getElementById('modeBubbleMenu').style.display = 'none';
-    showToast('已切换至：' + textEl.textContent);
-};
-
-// 检查是否显示气囊
-window.checkChatModeBubbleVisibility = function() {
-    var bubble = document.getElementById('chatModeBubble');
-    if (!bubble) return;
-    
-    var isEnabled = localStorage.getItem('chatStructureEnabled') === 'true';
-    var isTarot = (typeof currentTopicModeId !== 'undefined' && currentTopicModeId === 'tarot');
-    
-    // 如果开了智能拼卡，且不是塔罗模式，就显示
-    if (isEnabled && !isTarot) {
-        bubble.style.display = 'block';
-        
-        // 初始化文字
-        var currentMode = localStorage.getItem('chatBubbleMode') || 'mix';
-        var textEl = document.getElementById('modeBubbleText');
-        if (currentMode === 'short') textEl.textContent = '简短';
-        else if (currentMode === 'mix') textEl.textContent = '混合';
-        else if (currentMode === 'deep') textEl.textContent = '走心';
-    } else {
-        bubble.style.display = 'none';
-    }
-};
 
 window.openChatTemplateEditor = function() {
     var allTpls = getAllChatTemplates();
@@ -28148,6 +28098,58 @@ window.openChatTemplateEditor = function() {
     renderEditor();
     overlay.appendChild(dialog);
     document.body.appendChild(overlay);
+};
+
+// ===== 拼卡模式切换核心逻辑 =====
+// 注意：这里直接用 function 声明，确保它在全局作用域能被 onclick 找到
+function cycleChatBubbleMode() {
+    // 1. 获取当前模式，默认是混合(mix)
+    var currentMode = localStorage.getItem('chatBubbleMode') || 'mix';
+    var nextMode = 'mix';
+    var toastMsg = '';
+
+    // 2. 循环切换逻辑
+    if (currentMode === 'short') {
+        nextMode = 'mix';
+        toastMsg = '混合模式';
+    } else if (currentMode === 'mix') {
+        nextMode = 'deep';
+        toastMsg = '走心模式';
+    } else if (currentMode === 'deep') {
+        nextMode = 'short';
+        toastMsg = '简短模式';
+    } else {
+        nextMode = 'short';
+        toastMsg = '简短模式';
+    }
+
+    // 3. 保存并提示
+    localStorage.setItem('chatBubbleMode', nextMode);
+    
+    // 让图标有个按下的回弹动画
+    var icon = document.getElementById('modeBubbleIcon');
+    if (icon) {
+        icon.style.transform = 'scale(0.7)';
+        setTimeout(function() { icon.style.transform = 'scale(1)'; }, 150);
+    }
+    
+    if (typeof showToast === 'function') {
+        showToast('已切换至：' + toastMsg);
+    }
+}
+
+window.checkChatModeBubbleVisibility = function() {
+    var modeContainer = document.getElementById('modeIconContainer');
+    if (!modeContainer) return;
+    
+    var isEnabled = localStorage.getItem('chatStructureEnabled') === 'true';
+    var isTarot = (typeof currentTopicModeId !== 'undefined' && currentTopicModeId === 'tarot');
+    
+    if (isEnabled && !isTarot) {
+        modeContainer.style.display = 'flex'; // 显示
+    } else {
+        modeContainer.style.display = 'none'; // 隐藏
+    }
 };
 
 init();
