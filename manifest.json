@@ -5,16 +5,12 @@
   "display": "standalone",
   "background_color": "#f8f8f8",
   "theme_color": "#ff6b81",
-  "icons": [
+    "icons": [
     {
-      "src": "images/qinche_1.jpg",
-      "sizes": "192x192",
-      "type": "image/jpeg"
-    },
-    {
-      "src": "images/qinche_1.jpg",
+      "src": "images/icon.png",
       "sizes": "512x512",
-      "type": "image/jpeg"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

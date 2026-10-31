@@ -21715,7 +21715,7 @@ window.answerCall = function() {
         '<div style="position:absolute;inset:0;background:rgba(0,0,0,' + (isVideoBg ? '0.3' : '0') + ');pointer-events:none;"></div>' +
         
         // 1. 顶部状态栏（左侧状态，右侧操作按钮）
-        '<div style="position:relative;display:flex;justify-content:space-between;align-items:center;padding:16px 14px;z-index:10;">' +
+        '<div style="position:relative;display:flex;justify-content:space-between;align-items:center;padding:calc(16px + env(safe-area-inset-top, 0px)) 14px 16px;z-index:10;">' +
             '<div style="padding:6px 14px;border-radius:20px;background:rgba(0,0,0,0.35);backdrop-filter:blur(10px);color:#fff;font-size:12px;">' +
                 S.contactName + ' · <span>' + (callSession.type === 'video' ? '视频通话中' : '语音通话中') + '</span>' +
                 ' <span id="callTimerInline" style="font-family:monospace;">00:00</span>' +
@@ -27183,13 +27183,19 @@ window.sendTreeholeNotify = function(title, body) {
     
     if (document.visibilityState === 'hidden') {
         try {
+            // iOS 的 PWA 有时需要 Service Worker 才能带 data，但普通的 Notification 也可以触发页面内跳转
             var notif = new Notification(title, {
                 body: body,
-                icon: getAvatar('contact'), // 用秦彻的头像作为通知图标
-                tag: 'treehole-msg'
+                icon: getAvatar('contact'),
+                tag: 'treehole-msg',
+                data: { url: './index.html#chat' } // ★ 携带一个暗号
             });
             notif.onclick = function() {
                 window.focus();
+                localStorage.setItem('need_goto_chat', 'true'); // ★ 存个标记
+                if (typeof openChatPage === 'function') {
+                    openChatPage();
+                }
                 notif.close();
             };
         } catch (e) {
@@ -27719,6 +27725,26 @@ async function initVoiceCards() {
         }
     }
     console.log('✅ 已初始化内置语音卡:', insertCount, '条');
+}
+
+// 页面初始化完毕，检查是否从通知点进来的
+setTimeout(function() {
+    // 如果 URL 里带了 #chat 这个暗号
+    if (window.location.hash === '#chat') {
+        if (typeof openChatPage === 'function') {
+            openChatPage(); // 直接打开聊天页
+            // 顺便把暗号擦掉，防止刷新时又跳一次
+            history.replaceState(null, null, window.location.pathname);
+        }
+    }
+}, 500); // 延迟半秒等数据加载完
+
+// 检查有没有从通知点进来的标记
+if (localStorage.getItem('need_goto_chat') === 'true') {
+    localStorage.removeItem('need_goto_chat');
+    setTimeout(function() {
+        if (typeof openChatPage === 'function') openChatPage();
+    }, 600);
 }
 
 updateHome();
