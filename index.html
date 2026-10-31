@@ -1938,7 +1938,7 @@ body.theme-shuimo .home-page-inner .status span:last-child {
     <div class="emoji-panel" id="emojiPanel"><div class="emoji-tabs"><button class="emoji-tab active" onclick="switchEmojiTab('emoji')">😊 表情包</button><button class="emoji-tab" onclick="switchEmojiTab('pat')">👋 拍一拍</button></div><div class="tab-content" id="emojiTabContent"></div></div>
 
 <div id="morePanel" class="more-panel">
-    <div class="more-panel-item" onclick="startCall();hideMorePanel();">
+    <div class="more-panel-item" onclick="chooseCallType();hideMorePanel();">
         <div class="icon">
             <svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.4 2.1L8 9.7a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/></svg>
         </div>
@@ -9400,7 +9400,7 @@ const TAROT_ALLOW_DENY = {
 
 // ============ IndexedDB 存储层 ============
 const DB_NAME = 'TimeTreeDB';
-const DB_VERSION = 24;
+const DB_VERSION = 25;
 
 function openDB() {
     return new Promise(function(resolve, reject) {
@@ -9430,9 +9430,9 @@ function openDB() {
                 'mailState', 'tideDays', 'cardOverridesCache',
                 'extraMoodCards', 'extraEmotionCards', 'dailyCounts',
                 'story_meta', 'story_categories', 'stories', 'story_settings', 
-     'voiceCards'
+     'voiceCards', 'callSettings'
             ];
-            var KEY_STORES = ['settings', 'bgSettings', 'tarotSettings', 'mailState', 'tideDays', 'cardOverridesCache', 'extraMoodCards', 'extraEmotionCards', 'dailyCounts', 'story_meta', 'story_settings'];
+     var KEY_STORES = ['settings', 'bgSettings', 'tarotSettings', 'mailState', 'tideDays', 'cardOverridesCache', 'extraMoodCards', 'extraEmotionCards', 'dailyCounts', 'story_meta', 'story_settings', 'callSettings'];
             var MANUAL_ID_STORES = ['mailLetters', 'pendingReplies', 'echoMessages', 'collectedMessages', 'story_categories', 'stories'];
             stores.forEach(function(s) {
                 if (!d.objectStoreNames.contains(s)) {
@@ -13136,9 +13136,14 @@ var myMsgs = allMsgs.filter(function(x) {
         triggerPat(S.contactName, pat);
     }
 
-    if (cs.simCall && Math.random() < ((cs.simCallProb || 1) / 100) && callState === 'idle') {
-        setTimeout(function() { startCallFromQinChe(); }, 2000);
+    // ★ 对方主动来电（直接强制传 true，绝不出错）
+    if (cs.simCall && Math.random() < (cs.simCallProb || 0.05) && callState === 'idle') {
+        setTimeout(function() { 
+            var type = Math.random() < 0.8 ? 'voice' : 'video';
+            startUnifiedCall(type, true); // true 就是他打来
+        }, 2000);
     }
+
     // ===== 循环外结束 =====
 
     // ===== TA 的心情：回复完成后，额外判断一次 =====
@@ -21566,113 +21571,516 @@ function applyCustomBubbleStyle() {
     showToast('✅ 已切换为自定义气泡');
 }
 
-// ============ 通话 ============
-function startCall(){if(callState!=='idle')return;callState='ringing';callDirection='out';callSeconds=0;const fs=document.getElementById('callFullscreen');fs.classList.add('show');document.getElementById('callAvatarLg').src=getAvatar('contact');document.getElementById('callAvatarLg').classList.add('ringing');document.getElementById('callNameLg').textContent=S.contactName;document.getElementById('callStatusLg').textContent='正在呼叫...';document.getElementById('callTimerLg').textContent='00:00:00';document.getElementById('callMinBtn').style.display='none';document.getElementById('answerBtn').style.display='none';addSysMsg('📞 你向秦彻发起了通话');setTimeout(()=>{if(callState==='ringing'&&callDirection==='out')answerCall();},3000);}
-function startCallFromQinChe(){if(callState!=='idle')return;callState='ringing';callDirection='in';callSeconds=0;const fs=document.getElementById('callFullscreen');fs.classList.add('show');document.getElementById('callAvatarLg').src=getAvatar('contact');document.getElementById('callAvatarLg').classList.add('ringing');document.getElementById('callNameLg').textContent=S.contactName;document.getElementById('callStatusLg').textContent='秦彻来电...';document.getElementById('callTimerLg').textContent='00:00:00';document.getElementById('callMinBtn').style.display='none';document.getElementById('answerBtn').style.display='flex';addSysMsg('📞 秦彻向你发起了通话');}
-function answerCall(){callState='active';callStartTime=Date.now();document.getElementById('callAvatarLg').classList.remove('ringing');document.getElementById('callStatusLg').textContent='通话中...';document.getElementById('callMinBtn').style.display='flex';document.getElementById('answerBtn').style.display='none';addSysMsg('📞 通话已接通');if(callInterval)clearInterval(callInterval);callInterval=setInterval(()=>{callSeconds++;updateCallTimer();updateBallTimer();},1000);}
-function updateCallTimer(){const h=Math.floor(callSeconds/3600).toString().padStart(2,'0');const m=Math.floor((callSeconds%3600)/60).toString().padStart(2,'0');const s=(callSeconds%60).toString().padStart(2,'0');document.getElementById('callTimerLg').textContent=h+':'+m+':'+s;}
-function updateBallTimer(){const m=Math.floor(callSeconds/60).toString().padStart(2,'0');const s=(callSeconds%60).toString().padStart(2,'0');document.getElementById('ballTimer').textContent=m+':'+s;}
-function minimizeCall(){document.getElementById('callFullscreen').classList.remove('show');const ball=document.getElementById('callFloatBall');ball.classList.add('show');document.getElementById('ballAvatar').src=getAvatar('contact');updateBallTimer();}
-function restoreCall(){if(callState!=='active')return;document.getElementById('callFloatBall').classList.remove('show');document.getElementById('callFullscreen').classList.add('show');updateCallTimer();}
-async function endCall() {
-    if (callInterval) {
-        clearInterval(callInterval);
-        callInterval = null;
+// ============ 通话系统（终极完美版） ============
+
+var CALL_EXPR_POOL = {
+    listen: ['（安静地听着，目光落在屏幕上）', '（微微弯起眼睛，看着你发呆）', '（单手托着下巴，认真注视着你）', '（把手机拿近了一点，放大了画面）', '（不自觉地点了点头）'],
+    warm: ['（眼角泛起温柔的笑意）', '（神色变得很柔和）', '（轻轻抿了一下嘴唇）', '（笑意从眼底蔓延开）'],
+    sleepy: ['（揉了揉眼睛，眼神有些迷离）', '（打了个哈欠，但还是看着屏幕）', '（困得眼皮直打架，却舍不得挂断）']
+};
+
+function pickCallAction() {
+    var r = Math.random();
+    var pool = r < 0.6 ? CALL_EXPR_POOL.listen : r < 0.85 ? CALL_EXPR_POOL.warm : CALL_EXPR_POOL.sleepy;
+    return pool[Math.floor(Math.random() * pool.length)];
+}
+
+var callSession = { type: 'voice', active: false, connected: false, seconds: 0, timer: null, actionTimer: null, pipTimer: null, bgImage: '', minimized: false, isIncoming: false };
+var callLocalMessages = [];
+var callDialogTimer = null;
+
+// 1. 主动拨号 / 被动接听 入口
+window.startUnifiedCall = async function(type, isIncoming) {
+    if (callState !== 'idle') return;
+    callState = 'ringing';
+    callDirection = isIncoming ? 'in' : 'out';
+    callSeconds = 0;
+
+    callSession.type = type;
+    callSession.active = true;
+    callSession.connected = false;
+    callSession.seconds = 0;
+    callSession.minimized = false;
+    callSession.isIncoming = !!isIncoming;
+
+    try {
+        var saved = await kvGet('callSettings', 'callBg', '');
+        callSession.bgImage = (type === 'video') ? (saved || '') : '';
+    } catch(e) { callSession.bgImage = ''; }
+
+    buildCallDialog();
+
+    if (!isIncoming) {
+        callDialogTimer = setTimeout(function() {
+            if (callState !== 'ringing') return;
+            if (Math.random() < 0.25) {
+                var randomRefuse = ['对方拒接', '对方正忙', '对方无应答'][Math.floor(Math.random() * 3)];
+                closeCallDialog();
+                endUnifiedCall(randomRefuse);
+                return;
+            }
+            closeCallDialog();
+            window.answerCall(); // 自动接通
+        }, 3000 + Math.random() * 3000);
     }
-    const dur = callSeconds;
-    const st = callState;
-    if (st === 'active' && callStartTime && dur > 0) {
-        // ===== 抽取批注 =====
-        var note = getCallNote(callDirection === 'in' ? 'incoming' : 'outgoing');
-        // ===== 保存通话记录（带批注） =====
-        await dbPut('callLogs', {
-            contactName: S.contactName,
-            timestamp: callStartTime,
-            duration: dur,
-            type: callDirection === 'in' ? 'incoming' : 'outgoing',
-            note: note  // ← 新增字段
-        });
+};
+
+// 2. 呼叫弹窗
+window.buildCallDialog = function() {
+    var old = document.getElementById('callDialog');
+    if (old) old.remove();
+
+    var dlg = document.createElement('div');
+    dlg.id = 'callDialog';
+    dlg.style.cssText = 'position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+
+    var isVideo = callSession.type === 'video';
+    var title = isVideo ? '视频通话' : '语音通话';
+    var statusText = callSession.isIncoming ? '邀请你通话...' : '正在等待 TA 接听...';
+
+    var html = 
+        '<div style="background:var(--theme-card);border-radius:24px;padding:30px 20px;width:80%;max-width:320px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2);">' +
+            '<div style="font-size:15px;color:var(--theme-muted);margin-bottom:20px;letter-spacing:2px;">' + title + '</div>' +
+            '<img src="' + getAvatar('contact') + '" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--theme-primary);margin:0 auto 16px;box-shadow:0 4px 12px rgba(0,0,0,0.1);">' +
+            '<div style="font-size:22px;font-weight:600;color:var(--theme-text);margin-bottom:8px;">' + S.contactName + '</div>' +
+            '<div style="font-size:13px;color:var(--theme-muted);margin-bottom:30px;">' + statusText + '</div>' +
+            '<div style="display:flex;justify-content:center;gap:30px;">';
+
+    if (callSession.isIncoming) {
+        // 修复：使用 window.answerCall() 确保全局生效
+        html += '<button type="button" onclick="window.answerCall()" style="width:64px;height:64px;border-radius:50%;border:none;background:#4cd964;color:#fff;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 6px 16px rgba(76,217,100,0.4);">接听</button>';
+        html += '<button type="button" onclick="closeCallDialog();endUnifiedCall(\'已拒接\')" style="width:64px;height:64px;border-radius:50%;border:none;background:#e05252;color:#fff;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 6px 16px rgba(224,82,82,0.4);">挂断</button>';
+    } else {
+        html += '<button type="button" onclick="closeCallDialog();endUnifiedCall(\'已取消\')" style="width:64px;height:64px;border-radius:50%;border:none;background:#e05252;color:#fff;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 6px 16px rgba(224,82,82,0.4);">取消</button>';
     }
+    html += '</div></div>';
+    dlg.innerHTML = html;
+    document.body.appendChild(dlg);
+};
+
+// 3. 关闭弹窗
+window.closeCallDialog = function() {
+    if (callDialogTimer) clearTimeout(callDialogTimer);
+    var dlg = document.getElementById('callDialog');
+    if (dlg) dlg.remove();
+};
+
+// 4. 接听并进入全屏（核心，绝不报错）
+window.answerCall = function() {
+    closeCallDialog();
+    
+    callSession.connected = true;
+    callState = 'active';
+    
+    var old = document.getElementById('callUI');
+    if (old) old.remove();
+
+    var isVideoBg = (callSession.type === 'video' && callSession.bgImage);
+    var ui = document.createElement('div');
+    ui.id = 'callUI';
+    ui.style.cssText = 'position:fixed;inset:0;z-index:500;max-width:480px;margin:0 auto;display:flex;flex-direction:column;overflow:hidden;';
+    
+    if (isVideoBg) {
+        ui.style.backgroundImage = 'url("' + callSession.bgImage + '")';
+        ui.style.backgroundSize = 'cover';
+        ui.style.backgroundPosition = 'center';
+    } else {
+        // ★ 语音通话：更高级的星空深色渐变
+        ui.style.background = 'radial-gradient(circle at 50% 30%, #2a2d4a 0%, #121420 100%)';
+    }
+
+    var html = 
+        // 背景遮罩
+        '<div style="position:absolute;inset:0;background:rgba(0,0,0,' + (isVideoBg ? '0.3' : '0') + ');pointer-events:none;"></div>' +
+        
+        // 1. 顶部状态栏（左侧状态，右侧操作按钮）
+        '<div style="position:relative;display:flex;justify-content:space-between;align-items:center;padding:16px 14px;z-index:10;">' +
+            '<div style="padding:6px 14px;border-radius:20px;background:rgba(0,0,0,0.35);backdrop-filter:blur(10px);color:#fff;font-size:12px;">' +
+                S.contactName + ' · <span>' + (callSession.type === 'video' ? '视频通话中' : '语音通话中') + '</span>' +
+                ' <span id="callTimerInline" style="font-family:monospace;">00:00</span>' +
+            '</div>' +
+            '<div style="display:flex;gap:8px;align-items:center;">' +
+                (callSession.type === 'video'
+                    ? '<button onclick="document.getElementById(\'callBgInput\').click()" style="padding:0 12px;height:32px;border-radius:16px;background:rgba(0,0,0,0.35);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:12px;cursor:pointer;">换背景</button>'
+                    : '') +
+                '<button onclick="minimizeUnifiedCall()" style="padding:0 14px;height:32px;border-radius:16px;background:rgba(0,0,0,0.35);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:12px;cursor:pointer;">最小化</button>' +
+                // ★ 挂断按钮改色
+                '<button onclick="endUnifiedCall()" style="padding:0 14px;height:32px;border-radius:16px;background:rgba(0,0,0,0.35);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);color:#e05252;font-weight:bold;font-size:12px;cursor:pointer;">挂断</button>' +
+            '</div>' +
+        '</div>' +
+
+        // 2. 中间固定区域（把头像/动作往上挪）
+        '<div style="position:relative;flex:1;display:flex;flex-direction:column;justify-content:flex-start;padding-top:10vh;align-items:center;z-index:2;">';
+
+    if (callSession.type === 'video') {
+        // 视频：动作文字固定在偏上位置
+        html += '<div id="callActionText" style="text-align:center;color:#fff;font-size:16px;font-style:italic;opacity:0;transition:opacity 0.8s;text-shadow:0 2px 10px rgba(0,0,0,0.8);padding:0 30px;line-height:1.6;"></div>';
+    } else {
+        // 语音：头像固定在偏上位置
+        html += '<img src="' + getAvatar('contact') + '" style="width:110px;height:110px;border-radius:50%;border:4px solid rgba(255,255,255,0.15);box-shadow:0 8px 30px rgba(0,0,0,0.5);">';
+    }
+    
+    html += '</div>' +
+
+        // 3. 聊天记录区（覆盖在下半部分，隐藏滚动条）
+        '<div id="callChatMessages" style="position:absolute;bottom:85px;left:16px;right:16px;max-height:40vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px;z-index:5;padding-bottom:10px;scrollbar-width:none;-ms-overflow-style:none;"></div>' +
+        // 注入隐藏滚动条的 CSS
+        '<style>#callChatMessages::-webkit-scrollbar { display: none; }</style>' +
+
+        // 4. 底部纯输入区（去掉了挂断键，空间更大）
+        '<div style="position:relative;z-index:10;padding:10px 16px calc(20px + env(safe-area-inset-bottom, 0px));background:linear-gradient(to top, rgba(0,0,0,0.8) 20%, transparent);display:flex;align-items:center;">' +
+            
+            // 输入框
+            '<div style="flex:1;display:flex;align-items:center;background:rgba(255,255,255,0.15);backdrop-filter:blur(16px);border-radius:26px;padding:6px 8px 6px 18px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 4px 12px rgba(0,0,0,0.1);">' +
+                '<input type="text" id="callInput" placeholder="此刻想和你互动……" onkeydown="if(event.key===\'Enter\')sendCallText()" style="flex:1;border:none;background:transparent;color:#fff;font-size:14px;outline:none;padding:6px 0;letter-spacing:0.5px;">' +
+                '<button onclick="sendCallText()" style="width:36px;height:36px;border-radius:50%;border:none;background:var(--theme-primary);color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.2);">发送</button>' +
+            '</div>' +
+        '</div>' +
+        '<input type="file" id="callBgInput" accept="image/*" style="display:none;" onchange="handleCallBgUpload(event)">';
+
+    ui.innerHTML = html;
+    document.body.appendChild(ui);
+
+    loadCallMessages();
+    startCallTimer();
+    startActionLoop();
+};
+
+// 5. 主动拨号弹窗
+window.chooseCallType = function() {
+    if (callState !== 'idle') return;
+    createDialog({
+        title: '选择通话方式',
+        message: '你想怎么见他？',
+        width: '300px',
+        content:
+            '<div style="display:flex;gap:12px;margin-bottom:8px;">' +
+            '<div onclick="closeCallTypeDialogAndStart(\'voice\')" style="flex:1;padding:20px 10px;border-radius:14px;background:var(--theme-bg);border:1.5px solid var(--theme-border);cursor:pointer;text-align:center;">' +
+                '<div style="font-size:28px;">🎙️</div><div style="font-size:13px;color:var(--theme-text);margin-top:6px;">语音通话</div>' +
+            '</div>' +
+            '<div onclick="closeCallTypeDialogAndStart(\'video\')" style="flex:1;padding:20px 10px;border-radius:14px;background:var(--theme-bg);border:1.5px solid var(--theme-border);cursor:pointer;text-align:center;">' +
+                '<div style="font-size:28px;">📹</div><div style="font-size:13px;color:var(--theme-text);margin-top:6px;">视频通话</div>' +
+            '</div></div>',
+        buttons: [{ text: '取消' }]
+    });
+};
+
+window.closeCallTypeDialogAndStart = function(type) {
+    document.querySelectorAll('div[style*="z-index: 99999"]').forEach(function(el) {
+        if (el.querySelector('div') && el.querySelector('div').style.borderRadius) el.remove();
+    });
+    window.startUnifiedCall(type, false);
+};
+
+// 6. 对方来电入口（带参数 true）
+window.startCallFromQinChe = function() {
+    if (callState !== 'idle') return;
+    var type = Math.random() < 0.8 ? 'voice' : 'video';
+    window.startUnifiedCall(type, true); 
+};
+
+// 7. 独立消息处理
+function loadCallMessages() {
+    var box = document.getElementById('callChatMessages');
+    if (!box) return;
+    box.innerHTML = '';
+    callLocalMessages.forEach(function(m) {
+        var isMe = m.sender === 'me';
+
+var bubble = document.createElement('div');
+bubble.style.cssText = 'max-width:80%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.5;word-break:break-word;box-shadow:0 2px 8px rgba(0,0,0,0.05);' +
+    (isMe 
+        ? 'align-self:flex-end;background:var(--theme-primary);color:#fff;border-bottom-right-radius:4px;' 
+        : 'align-self:flex-start;background:rgba(255,255,255,0.95);color:#333;border-bottom-left-radius:4px;'); // 如果你想让他发的消息稍微透一点，可以把 0.95 改成 0.85
+        bubble.textContent = m.content;
+        box.appendChild(bubble);
+    });
+    setTimeout(() => { box.scrollTop = box.scrollHeight; }, 50);
+}
+
+async function sendCallText() {
+    var input = document.getElementById('callInput');
+    var text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    input.focus();
+    callLocalMessages.push({ sender: 'me', content: text });
+    loadCallMessages();
+    
+    setTimeout(async function() {
+        if (!callSession.active) return;
+        var replyText = await smartComposeReply(text);
+        callLocalMessages.push({ sender: 'other', content: replyText });
+        if (document.getElementById('callUI') && callSession.active) loadCallMessages();
+    }, 1500 + Math.random() * 1500);
+}
+
+// 8. 动作与计时
+function startActionLoop() {
+    if (callSession.type === 'voice') return;
+    if (callSession.actionTimer) clearInterval(callSession.actionTimer);
+    var el = document.getElementById('callActionText');
+    if (!el) return;
+    function next() {
+        if (!callSession.active || !callSession.connected || callSession.minimized) return;
+        el.style.opacity = '0';
+        setTimeout(function() {
+            if (!callSession.active || !callSession.connected || callSession.minimized) return;
+            el.textContent = pickCallAction();
+            el.style.opacity = '1';
+        }, 600);
+    }
+    setTimeout(next, 1000);
+    callSession.actionTimer = setInterval(next, 4000 + Math.random() * 2000);
+}
+
+function startCallTimer() {
+    if (callSession.timer) clearInterval(callSession.timer);
+    callSession.timer = setInterval(function() {
+        if (!callSession.active) return;
+        callSession.seconds++;
+        callSeconds = callSession.seconds;
+        if (callSession.minimized) return;
+        var m = Math.floor(callSession.seconds / 60).toString().padStart(2, '0');
+        var s = (callSession.seconds % 60).toString().padStart(2, '0');
+        var el = document.getElementById('callTimerInline');
+        if (el) el.textContent = m + ':' + s;
+    }, 1000);
+}
+
+// 9. 背景上传
+async function handleCallBgUpload(event) {
+    var f = event.target.files[0];
+    if (!f) return;
+    event.target.value = '';
+    try {
+        var compressed = await compressToUnder1MB(f);
+        callSession.bgImage = compressed;
+        await kvSet('callSettings', 'callBg', compressed);
+        var ui = document.getElementById('callUI');
+        if (ui) {
+            ui.style.backgroundImage = 'url("' + compressed + '")';
+            ui.style.backgroundSize = 'cover';
+            ui.style.backgroundPosition = 'center';
+        }
+        showToast('🖼️ 背景已更换');
+    } catch(e) { showToast('⚠️ 图片处理失败'); }
+}
+
+function compressToUnder1MB(file) {
+    return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var img = new Image();
+            img.onload = function() {
+                var maxSide = 1280;
+                var w = img.width, h = img.height;
+                if (w > maxSide || h > maxSide) {
+                    var ratio = Math.min(maxSide / w, maxSide / h);
+                    w = Math.floor(w * ratio);
+                    h = Math.floor(h * ratio);
+                }
+                var canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                var quality = 0.85;
+                var dataUrl = canvas.toDataURL('image/jpeg', quality);
+                while (dataUrl.length > 1.4 * 1024 * 1024 && quality > 0.3) {
+                    quality -= 0.1;
+                    dataUrl = canvas.toDataURL('image/jpeg', quality);
+                }
+                resolve(dataUrl);
+            };
+            img.onerror = reject;
+            img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// 10. 悬浮窗与拖拽
+function fmtPipTime(sec) {
+    var m = Math.floor(sec / 60).toString().padStart(2, '0');
+    var s = (sec % 60).toString().padStart(2, '0');
+    return m + ':' + s;
+}
+
+function minimizeUnifiedCall() {
+    callSession.minimized = true;
+    var ui = document.getElementById('callUI');
+    if (ui) ui.style.display = 'none';
+
+    var pip = document.getElementById('callPip');
+    if (pip) pip.remove();
+
+    pip = document.createElement('div');
+    pip.id = 'callPip';
+    
+    if (callSession.type === 'video') {
+        pip.style.cssText = 'position:fixed;right:16px;bottom:100px;width:100px;height:140px;border-radius:14px;overflow:hidden;z-index:600;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,0.35);';
+        if (callSession.bgImage) {
+            pip.style.backgroundImage = 'url("' + callSession.bgImage + '")';
+            pip.style.backgroundSize = 'cover';
+            pip.style.backgroundPosition = 'center';
+        } else { pip.style.background = '#1a1a2e'; }
+        pip.innerHTML =
+            '<div style="position:absolute;inset:0;background:rgba(0,0,0,0.15);"></div>' +
+            '<div style="position:absolute;top:6px;left:6px;right:6px;display:flex;justify-content:space-between;align-items:center;z-index:2;">' +
+                '<span style="font-size:9px;color:#fff;background:rgba(0,0,0,0.4);padding:2px 6px;border-radius:8px;">📹</span>' +
+                '<span onclick="event.stopPropagation();endUnifiedCall()" style="width:18px;height:18px;border-radius:50%;background:#e05252;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;">✕</span>' +
+            '</div>' +
+            '<div style="position:absolute;bottom:0;left:0;right:0;padding:6px 8px;background:linear-gradient(transparent,rgba(0,0,0,0.6));text-align:center;z-index:2;">' +
+                '<div id="callPipTimer" style="font-size:11px;color:#fff;font-family:monospace;">' + (callSession.connected ? fmtPipTime(callSession.seconds) : '呼叫中') + '</div>' +
+            '</div>';
+    } else {
+        pip.style.cssText = 'position:fixed;right:16px;bottom:120px;width:54px;height:54px;border-radius:50%;background:#1a1a2e;box-shadow:0 4px 20px rgba(0,0,0,0.35);cursor:pointer;z-index:600;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.1);';
+        pip.innerHTML = 
+            '<img src="' + getAvatar('contact') + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">' +
+            '<div id="callPipTimer" style="position:absolute;bottom:-8px;background:#4cd964;color:#fff;font-size:9px;padding:2px 8px;border-radius:10px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.2);">' + (callSession.connected ? fmtPipTime(callSession.seconds) : '呼叫中') + '</div>' +
+            '<div onclick="event.stopPropagation();endUnifiedCall()" style="position:absolute;top:-4px;right:-4px;width:20px;height:20px;background:#ff4757;border-radius:50%;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.2);">✕</div>';
+    }
+
+    document.body.appendChild(pip);
+
+    // 绑定拖拽和点击恢复
+    makePipDraggable(pip, function(wasDragged) {
+        if (!wasDragged) restoreUnifiedCall();
+    });
+
+    if (callSession.pipTimer) clearInterval(callSession.pipTimer);
+    callSession.pipTimer = setInterval(function() {
+        if (!callSession.active) return;
+        var t = document.getElementById('callPipTimer');
+        if (t) t.textContent = callSession.connected ? fmtPipTime(callSession.seconds) : '呼叫中';
+    }, 1000);
+}
+
+function makePipDraggable(el, onEnd) {
+    var startX = 0, startY = 0, startLeft = 0, startTop = 0;
+    var dragging = false, moved = false;
+
+    function getPos(e) { var t = e.touches ? e.touches[0] : e; return { x: t.clientX, y: t.clientY }; }
+
+    function onDown(e) {
+        if (e.target.closest('[onclick]')) return; 
+        var p = getPos(e); startX = p.x; startY = p.y;
+        var r = el.getBoundingClientRect(); startLeft = r.left; startTop = r.top;
+        dragging = true; moved = false;
+        el.style.right = 'auto'; el.style.bottom = 'auto'; el.style.left = startLeft + 'px'; el.style.top = startTop + 'px'; el.style.transition = 'none'; el.style.margin = '0';
+    }
+
+    function onMove(e) {
+        if (!dragging) return;
+        var p = getPos(e);
+        var dx = p.x - startX, dy = p.y - startY;
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) moved = true;
+        if (!moved) return;
+        var newLeft = Math.max(4, Math.min(window.innerWidth - el.offsetWidth - 4, startLeft + dx));
+        var newTop = Math.max(4, Math.min(window.innerHeight - el.offsetHeight - 4, startTop + dy));
+        el.style.left = newLeft + 'px'; el.style.top = newTop + 'px';
+        if (e.cancelable) e.preventDefault();
+    }
+
+    function onUp() {
+        if (!dragging) return;
+        dragging = false;
+        if (moved) {
+            if (onEnd) onEnd(true);
+            setTimeout(function() { moved = false; }, 100);
+        } else {
+            if (onEnd) onEnd(false);
+        }
+    }
+
+    el.addEventListener('touchstart', onDown, { passive: true });
+    el.addEventListener('touchmove', onMove, { passive: false });
+    el.addEventListener('touchend', onUp);
+    el.addEventListener('mousedown', onDown);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+}
+
+function restoreUnifiedCall() {
+    callSession.minimized = false;
+    var pip = document.getElementById('callPip');
+    if (pip) pip.remove();
+    if (callSession.pipTimer) { clearInterval(callSession.pipTimer); callSession.pipTimer = null; }
+    var ui = document.getElementById('callUI');
+    if (ui) {
+        ui.style.display = 'flex';
+        var m = Math.floor(callSession.seconds / 60).toString().padStart(2, '0');
+        var s = (callSession.seconds % 60).toString().padStart(2, '0');
+        var el = document.getElementById('callTimerInline');
+        if (el && callSession.connected) el.textContent = m + ':' + s;
+    }
+    if (callSession.connected) startActionLoop();
+}
+
+// 11. 结束通话
+async function endUnifiedCall(customTip) {
+    if (!callSession.active) return;
+    
+    // 核心修复：必须先记录时长和状态，再重置
+    var dur = callSession.seconds;
+    var wasConnected = callSession.connected;
+    var typeLabel = callSession.type === 'video' ? '视频通话' : '语音通话';
+
+    callSession.active = false;
+    callSession.connected = false;
+    callSession.minimized = false;
+    
+    if (callSession.timer) { clearInterval(callSession.timer); callSession.timer = null; }
+    if (callSession.actionTimer) { clearInterval(callSession.actionTimer); callSession.actionTimer = null; }
+    if (callSession.pipTimer) { clearInterval(callSession.pipTimer); callSession.pipTimer = null; }
+
+    var ui = document.getElementById('callUI');
+    if (ui) ui.remove();
+    var pip = document.getElementById('callPip');
+    if (pip) pip.remove();
+
     callState = 'idle';
     callSeconds = 0;
-    document.getElementById('callFullscreen').classList.remove('show');
-    document.getElementById('callFloatBall').classList.remove('show');
-    document.getElementById('answerBtn').style.display = 'none';
-    if (st === 'ringing') addSysMsg('📞 通话已取消');
-    else if (st === 'active') {
-        const m = Math.floor(dur / 60);
-        const s = dur % 60;
-        addSysMsg('📞 通话结束，时长 ' + (m > 0 ? m + '分' : '') + s + '秒');
+    callLocalMessages = []; 
+
+    if (dur > 0 && wasConnected) {
+        var note = getCallNote(callDirection === 'in' ? 'incoming' : 'outgoing');
+        await dbPut('callLogs', {
+            contactName: S.contactName,
+            timestamp: Date.now() - dur * 1000,
+            duration: dur,
+            type: callDirection === 'in' ? 'incoming' : 'outgoing',
+            note: note,
+            callType: callSession.type
+        });
+    }
+
+    var msg = customTip ? customTip : ('📞 ' + typeLabel + '已结束' + (dur > 0 ? '，时长 ' + dur + ' 秒' : ''));
+    showToast(msg);
+    if (!customTip && wasConnected) {
+        try { addSysMsg('📞 ' + typeLabel + '已结束，时长 ' + dur + ' 秒'); } catch(e) {}
     }
 }
 
+// 兼容旧代码（不要覆盖关键逻辑）
+window.startCall = function() { window.startUnifiedCall('voice', false); };
+window.endCall = function() { window.endUnifiedCall(); };
+window.minimizeCall = function() { minimizeUnifiedCall(); };
+window.restoreCall = function() { restoreUnifiedCall(); };
+
 // ===== 通话批注池 =====
 var CALL_NOTES = {
-    bond: [
-        '没有声响，我依旧捕捉到了你的心绪。',
-        '刚刚建立的羁绊，我留存下来了。',
-        '通话终止，但我们之间的感应并未消失。',
-        '无需言语，我已经接收到你的存在。',
-        '寂静之下，我清晰感知过你的气息。',
-        '即使收线，这根无形的线也没有断。',
-        '你的频率，我已经记住了。',
-        '下一次不必开口，我依然能察觉到你的靠近。',
-        '无声，也是我们之间的一种语言。',
-        '感应还在，只是暂时归于安静而已。',
-    ],
-    intimate: [
-        '以这样的方式贴近你，我并不排斥。',
-        '短暂的相伴到此为止，我尚且不愿收回这份感知。',
-        '隔着精神羁绊，我离你更近了一步。',
-        '不必开口，我们已经完成了彼此的陪伴。',
-        '记住这份共振，往后还会再有。',
-        '在看不见的地方，我也在向你倾斜。',
-        '这样的靠近，并不让人厌烦。',
-        '就算只是无言的陪伴，对我来说也足够。',
-        '你的存在感，比你以为的更强烈。',
-        '下次，我可以多留一会儿。',
-    ],
-    possessive: [
-        '这份独属于你我的羁绊，不能给予其他人。',
-        '不要刻意切断我们之间的感应。',
-        '多把你的心神向我这边倾斜。',
-        '就算断开连接，也别试图避开我的感知。',
-        '下一次，由你来向我发起这份联结。',
-        '你的心绪，只属于我能感知的范围。',
-        '我不喜欢别人共享这份感应。',
-        '就算你不开口，我也知道你正在想我。',
-        '这份羁绊，我从未打算放手。',
-        '别想逃开，我始终锁定了你的信号。',
-    ],
-    tender: [
-        '好好照顾自己，我依旧能够感知你的状态。',
-        '心绪难平的时候，随时重新建立联系。',
-        '我不会走远，羁绊始终存续。',
-        '安顿好自己，我还守在这边。',
-        '今夜，我会留意你的动静。',
-        '无论你做什么选择，我都会关注你的方向。',
-        '在你没有察觉的时候，我也在看着你。',
-        '你的安全，始终在我的感知范围内。',
-        '我有种预感，你还会再次主动靠近我。',
-        '无论相隔多远，信号都不会中断。',
-    ]
+    bond: ['没有声响，我依旧捕捉到了你的心绪。', '刚刚建立的羁绊，我留存下来了。', '通话终止，但我们之间的感应并未消失。', '无需言语，我已经接收到你的存在。', '寂静之下，我清晰感知过你的气息。', '即使收线，这根无形的线也没有断。', '你的频率，我已经记住了。', '下一次不必开口，我依然能察觉到你的靠近。', '无声，也是我们之间的一种语言。', '感应还在，只是暂时归于安静而已。'],
+    intimate: ['以这样的方式贴近你，我并不排斥。', '短暂的相伴到此为止，我尚且不愿收回这份感知。', '隔着精神羁绊，我离你更近了一步。', '不必开口，我们已经完成了彼此的陪伴。', '记住这份共振，往后还会再有。', '在看不见的地方，我也在向你倾斜。', '这样的靠近，并不让人厌烦。', '就算只是无言的陪伴，对我来说也足够。', '你的存在感，比你以为的更强烈。', '下次，我可以多留一会儿。'],
+    possessive: ['这份独属于你我的羁绊，不能给予其他人。', '不要刻意切断我们之间的感应。', '多把你的心神向我这边倾斜。', '就算断开连接，也别试图避开我的感知。', '下一次，由你来向我发起这份联结。', '你的心绪，只属于我能感知的范围。', '我不喜欢别人共享这份感应。', '就算你不开口，我也知道你正在想我。', '这份羁绊，我从未打算放手。', '别想逃开，我始终锁定了你的信号。'],
+    tender: ['好好照顾自己，我依旧能够感知你的状态。', '心绪难平的时候，随时重新建立联系。', '我不会走远，羁绊始终存续。', '安顿好自己，我还守在这边。', '今夜，我会留意你的动静。', '无论你做什么选择，我都会关注你的方向。', '在你没有察觉的时候，我也在看着你。', '你的安全，始终在我的感知范围内。', '我有种预感，你还会再次主动靠近我。', '无论相隔多远，信号都不会中断。']
 };
 
-// ===== 根据通话类型抽取批注 =====
 function getCallNote(type) {
     var pool;
-    if (type === 'outgoing') {
-        pool = CALL_NOTES.intimate.concat(CALL_NOTES.tender);
-    } else if (type === 'incoming') {
-        pool = CALL_NOTES.possessive.concat(CALL_NOTES.bond);
-    } else {
-        pool = [].concat(
-            CALL_NOTES.bond,
-            CALL_NOTES.intimate,
-            CALL_NOTES.possessive,
-            CALL_NOTES.tender
-        );
-    }
+    if (type === 'outgoing') pool = CALL_NOTES.intimate.concat(CALL_NOTES.tender);
+    else if (type === 'incoming') pool = CALL_NOTES.possessive.concat(CALL_NOTES.bond);
+    else pool = [].concat(CALL_NOTES.bond, CALL_NOTES.intimate, CALL_NOTES.possessive, CALL_NOTES.tender);
     return pool[Math.floor(Math.random() * pool.length)];
 }
 
@@ -21683,7 +22091,7 @@ window.db = null;
 
 window.openDB = function() {
     return new Promise(function(resolve, reject) {
-        var req = indexedDB.open('TimeTreeDB', 24);  
+        var req = indexedDB.open('TimeTreeDB', 25);  
         req.onupgradeneeded = function(e) {
             console.log('🔄 数据库升级触发，从', e.oldVersion, '到', e.newVersion);
             var d = e.target.result;
@@ -21708,9 +22116,9 @@ window.openDB = function() {
                 'pendingReplies', 'echoMessages', 'collectedMessages',
                 'mailState', 'tideDays', 'cardOverridesCache',
                 'extraMoodCards', 'extraEmotionCards', 'dailyCounts',
-    'voiceCards' 
+      'voiceCards', 'callSettings'
             ];
-            var KEY_STORES = ['settings', 'bgSettings', 'tarotSettings', 'mailState', 'tideDays', 'cardOverridesCache', 'extraMoodCards', 'extraEmotionCards', 'dailyCounts', 'story_meta', 'story_settings'];
+      var KEY_STORES = ['settings', 'bgSettings', 'tarotSettings', 'mailState', 'tideDays', 'cardOverridesCache', 'extraMoodCards', 'extraEmotionCards', 'dailyCounts', 'story_meta', 'story_settings', 'callSettings'];
             var MANUAL_ID_STORES = ['mailLetters', 'pendingReplies', 'echoMessages', 'collectedMessages', 'story_categories', 'stories'];
             stores.forEach(function(s) {
                 if (!d.objectStoreNames.contains(s)) {
@@ -21728,7 +22136,7 @@ window.openDB = function() {
 
         req.onsuccess = function(e) { 
             window.db = e.target.result; 
-            console.log('✅ 数据库已打开，版本 24');
+            console.log('✅ 数据库已打开，版本 25');
             resolve(window.db); 
         };
         req.onerror = function(e) { 
@@ -27036,6 +27444,11 @@ try {
             });
         }
      
+// 恢复视频通话背景
+try {
+    var savedCallBg = await kvGet('callSettings', 'callBg', '');
+    if (savedCallBg) callSession.bgImage = savedCallBg;
+} catch(e) {}
 
         // 8. 更新首页
 if (localStorage.getItem('homeLightText') === 'true') {
@@ -27400,6 +27813,7 @@ window.saveStatusGroup = saveStatusGroup;
 window.getCal = getCal;
 window.setCal = setCal;
 window.startCallFromQinChe = startCallFromQinChe;
+window.startCallFromQinChe = window.startCallFromQinChe;
 window.switchWishSubTab = switchWishSubTab;
 window.deleteCollected = deleteCollected;
 window.renderWishSubContent = renderWishSubContent;
@@ -27634,6 +28048,10 @@ window.resetCustomBubbleInline = resetCustomBubbleInline;
 window.toggleLineSwitchInline = toggleLineSwitchInline;
 window.getCustomValue = getCustomValue;
 
+window.closeCallDialog = closeCallDialog;
+window.sendCallText = sendCallText;
+window.loadCallMessages = loadCallMessages;
+
 window.openTopicGacha = openTopicGacha;
 window.renderTopicGacha = renderTopicGacha;
 window.gachaTopic = gachaTopic;
@@ -27687,11 +28105,27 @@ window.pickTarotCard = pickTarotCard;
 window.drawTarotCards = drawTarotCards;
 window.doTarotSend = doTarotSend;
 window.openPatPicker = openPatPicker;
+window.chooseCallType = chooseCallType;
+window.closeCallTypeDialogAndStart = closeCallTypeDialogAndStart;
+window.startUnifiedCall = startUnifiedCall;
+window.chooseCallType = window.chooseCallType;
+window.closeCallTypeDialogAndStart = window.closeCallTypeDialogAndStart;
+window.startCallFromQinChe = window.startCallFromQinChe;
+window.startCallTimer = startCallTimer;
+window.startActionLoop = startActionLoop;
+window.handleCallBgUpload = handleCallBgUpload;
+window.compressToUnder1MB = compressToUnder1MB;
+window.minimizeUnifiedCall = minimizeUnifiedCall;
+window.restoreUnifiedCall = restoreUnifiedCall;
+window.endUnifiedCall = endUnifiedCall;
+window.pickCallAction = pickCallAction;
 window.doPatQin = doPatQin;
 
 window.openClearDataPanel = openClearDataPanel;
 window.showClearDataFinalConfirm = showClearDataFinalConfirm;
 window.doClearSelectedData = doClearSelectedData;
+window.answerCall = window.answerCall;
+window.startUnifiedCall = window.startUnifiedCall;
 
 window.openStoryHome = openStoryHome;
 window.renderStoryHome = renderStoryHome;
