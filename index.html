@@ -13028,6 +13028,10 @@ var myMsgs = allMsgs.filter(function(x) {
             m.id = id;
             renderMsg(m);
             scrollBottom();
+            // ★ 触发系统通知
+            if (typeof window.sendTreeholeNotify === 'function') {
+                window.sendTreeholeNotify(S.contactName, c);
+            }
 
             // ===== 秦彻随机收藏 =====
             var collectMax = parseInt(cs.qinCollectDailyMax);
@@ -20253,12 +20257,21 @@ if (customEnabled) {
 
     h += '</div>';
 
-    // 后台保活开关
+    // 后台保活与通知开关
     h += '<div class="settings-section" style="margin-bottom:12px;">';
-    h += '  <h4 style="margin-bottom:4px;">🔋 伪装后台保活</h4>';
-    h += '  <div style="font-size:11px;color:var(--theme-muted);margin-bottom:8px;line-height:1.5;">开启后循环播放极低音量的静音音频，防止手机切后台或锁屏时网页被系统杀掉，保证秦彻的自动回复和信件准时送达。</div>';
+    h += '  <h4 style="margin-bottom:4px;">🔋 后台保活与通知</h4>';
+    h += '  <div style="font-size:11px;color:var(--theme-muted);margin-bottom:8px;line-height:1.5;">开启后台保活后，循环播放极低音量音频防止被系统杀后台。开启系统通知后，切出网页时秦彻发消息会弹出手机横幅。</div>';
+    
+    // 通知权限按钮
+    var notifyEnabled = localStorage.getItem('treehole_notify_on') === 'true' && Notification.permission === 'granted';
+    h += '  <div class="settings-row" style="border-bottom:1px dashed var(--theme-border);padding-bottom:8px;margin-bottom:8px;">';
+    h += '    <span style="color:var(--theme-text);font-size:13px;">系统消息通知</span>';
+    h += '    <button onclick="requestNotifyPermission()" style="padding:6px 14px;border-radius:12px;background:' + (notifyEnabled ? 'var(--theme-input-bg)' : 'var(--theme-primary)') + ';color:' + (notifyEnabled ? 'var(--theme-muted)' : '#fff') + ';border:1px solid var(--theme-primary);font-size:12px;cursor:pointer;">' + (notifyEnabled ? '已授权' : '去授权') + '</button>';
+    h += '  </div>';
+
+    // 保活开关
     h += '  <div class="settings-row" style="border-bottom:none;padding:0;">';
-    h += '    <span style="color:var(--theme-text);font-size:13px;">保持后台运行</span>';
+    h += '    <span style="color:var(--theme-text);font-size:13px;">保持后台运行 (播放音频)</span>';
     h += '    <div class="toggle-switch ' + (localStorage.getItem('keepAliveEnabled') === 'true' ? 'on' : '') + '" onclick="toggleKeepAlive(this)"></div>';
     h += '  </div>';
     h += '</div>';
@@ -27129,21 +27142,86 @@ async function doPatQin(text) {
 function openProfile(){document.getElementById('pfAvatar').src=getAvatar('contact');document.getElementById('pfName').textContent=S.contactName;document.getElementById('pfStatus').textContent=S.contactStatus;document.getElementById('pfMood').textContent=S.contactMood||'';document.getElementById('profileOverlay').classList.add('show');}
 function closeProfile(){document.getElementById('profileOverlay').classList.remove('show');}
 
-// ===== 真实音频后台保活（干净版） =====
-var keepAliveAudio = null;
+// ===== 树洞系统通知逻辑 =====
 
-// 初始化音频对象（只在第一次调用时创建）
-function initKeepAliveAudio() {
-    if (!keepAliveAudio) {
-        keepAliveAudio = new Audio('houtai.mp3'); // 同级目录直接写文件名
-        keepAliveAudio.loop = true;               // 开启循环
-        keepAliveAudio.preload = 'auto';          // 预加载
-        keepAliveAudio.volume = 1;            
+// 申请通知权限
+window.requestNotifyPermission = function() {
+    if (!("Notification" in window)) {
+        showToast("⚠️ 当前浏览器不支持系统通知");
+        return;
     }
+    Notification.requestPermission().then(function(permission) {
+        if (permission === "granted") {
+            showToast("✅ 系统通知已开启");
+            localStorage.setItem('treehole_notify_on', 'true');
+            // 顺便帮你把保活也开了
+            if (localStorage.getItem('keepAliveEnabled') !== 'true') {
+                var audio = initKeepAliveAudio();
+                audio.play().catch(function(){});
+                localStorage.setItem('keepAliveEnabled', 'true');
+                if(typeof renderOurUniverse === 'function') renderOurUniverse();
+            }
+        } else {
+            showToast("❌ 通知被拒绝，请在手机设置中开启");
+            localStorage.setItem('treehole_notify_on', 'false');
+        }
+    });
+};
+
+// 发送通知（只在页面隐藏/切后台时触发）
+window.sendTreeholeNotify = function(title, body) {
+    if (localStorage.getItem('treehole_notify_on') !== 'true') return;
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    
+    if (document.visibilityState === 'hidden') {
+        try {
+            var notif = new Notification(title, {
+                body: body,
+                icon: getAvatar('contact'), // 用秦彻的头像作为通知图标
+                tag: 'treehole-msg'
+            });
+            notif.onclick = function() {
+                window.focus();
+                notif.close();
+            };
+        } catch (e) {
+            console.warn('通知发送失败:', e);
+        }
+    }
+};
+
+
+// ===== iOS & 安卓 终极保活与通知模块 =====
+var keepAliveAudio = null;
+var audioContext = null;
+var audioSource = null;
+
+// 初始化音频对象
+function initKeepAliveAudio() {
+    if (keepAliveAudio) return keepAliveAudio;
+
+    // 这里依然用你的 houtai.mp3，但我们需要让 iOS 觉得我们在听歌
+    keepAliveAudio = new Audio('houtai.mp3');
+    keepAliveAudio.loop = true;
+    keepAliveAudio.preload = 'auto';
+    keepAliveAudio.volume = 0.01; // 极小音量，以防真的吵到你
+    
+    // iOS 关键黑科技：建立媒体会话，让系统认为这是一个播放器
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: '秦彻的树洞',
+            artist: '正在后台守候',
+            album: '聊天室',
+            artwork: [{ src: getAvatar('contact'), sizes: '512x512', type: 'image/png' }]
+        });
+        // 阻止锁屏界面的暂停按钮真的暂停音频
+        navigator.mediaSession.setActionHandler('pause', function() {});
+    }
+
     return keepAliveAudio;
 }
 
-// 开关控制函数（绑定到你的按钮上）
+// 开关控制函数
 window.toggleKeepAlive = function(el) {
     var isEnabled = el.classList.toggle('on');
     localStorage.setItem('keepAliveEnabled', isEnabled ? 'true' : 'false');
@@ -27152,10 +27230,10 @@ window.toggleKeepAlive = function(el) {
         var audio = initKeepAliveAudio();
         audio.play().then(function() {
             showToast('🔋 后台保活已开启');
+            if (audioContext) audioContext.resume();
         }).catch(function(e) {
             console.log('保活播放失败:', e);
-            showToast('⚠️ 浏览器拦截，请再点一下页面');
-            // 如果被拦截，先回退状态
+            showToast('⚠️ 浏览器拦截，请再点一下屏幕');
             el.classList.remove('on');
             localStorage.setItem('keepAliveEnabled', 'false');
         });
@@ -27168,31 +27246,53 @@ window.toggleKeepAlive = function(el) {
     }
 };
 
-// 页面刷新时恢复保活状态
+// 页面刷新或恢复前台时
 window.addEventListener('load', function() {
     if (localStorage.getItem('keepAliveEnabled') === 'true') {
         var audio = initKeepAliveAudio();
+        var playFunc = function() {
+            audio.play().then(function(){
+                // 解锁后顺便启动 WebAudio 双重保险
+                startWebAudioKeepAlive();
+            }).catch(function(){});
+        };
         
-        // 尝试直接播放
-        audio.play().then(function() {
-            console.log('🔋 保活状态已静默恢复');
-        }).catch(function() {
-            // 如果被浏览器拦截（通常是 iOS），就等用户第一次点击屏幕
-            console.log('🔒 保活被拦截，等待用户点击解锁...');
-            var unlockAudio = function() {
-                audio.play().then(function() {
-                    console.log('🔋 保活已解锁并恢复');
-                }).catch(function(){});
-                // 解除监听
-                document.removeEventListener('touchstart', unlockAudio);
-                document.removeEventListener('click', unlockAudio);
-            };
-            document.addEventListener('touchstart', unlockAudio, { once: true });
-            document.addEventListener('click', unlockAudio, { once: true });
-        });
+        playFunc();
+        
+        // iOS 必须等用户点击屏幕才能发声
+        var unlock = function() {
+            playFunc();
+            document.removeEventListener('touchstart', unlock);
+            document.removeEventListener('click', unlock);
+        };
+        document.addEventListener('touchstart', unlock);
+        document.addEventListener('click', unlock);
     }
 });
 
+// WebAudio 终极防休眠（给 iOS 挂上双重保险）
+function startWebAudioKeepAlive() {
+    if (audioContext) return;
+    try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        audioContext = new AC();
+        audioSource = audioContext.createBufferSource();
+        
+        // 生成一段极低频的不可闻声波
+        var buffer = audioContext.createBuffer(1, 44100, 44100);
+        var data = buffer.getChannelData(0);
+        for (var i = 0; i < 44100; i++) {
+            data[i] = Math.sin(i * 0.1) * 0.001; // 极低振幅
+        }
+        audioSource.buffer = buffer;
+        audioSource.loop = true;
+        audioSource.connect(audioContext.destination);
+        audioSource.start(0);
+        console.log('🔋 WebAudio 保活已启动');
+    } catch(e) {
+        console.log('WebAudio 不支持', e);
+    }
+}
 
 
 // ============ 初始化 ============
